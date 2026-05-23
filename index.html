@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0e141d">
+  <title>Sofia Control Panel</title>
+  
+  <style>
+    :root {
+      --bg: #0a0f19;
+      --card: #0e141d;
+      --accent: #4ea1ff;
+    }
+    * { box-sizing: border-box; margin:0; padding:0; }
+    body {
+      background: var(--bg);
+      color: #cfd6e4;
+      font-family: system-ui, sans-serif;
+      padding-bottom: 85px;
+    }
+    nav {
+      background: #0e141d;
+      padding: 15px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid #1f2a3a;
+      text-align: center;
+    }
+    h1 { font-size: 21px; }
+
+    .tab { display: none; padding: 15px; }
+    .tab.active { display: block; }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #0e141d;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0 8px;
+      border-top: 1px solid #1f2a3a;
+      z-index: 200;
+    }
+    .bottom-nav button {
+      background: none;
+      border: none;
+      color: #8aa0b5;
+      font-size: 12px;
+      padding: 6px;
+    }
+    .bottom-nav button.active { color: var(--accent); }
+
+    .task-card {
+      background: var(--card);
+      margin: 12px 0;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid #1f2a3a;
+    }
+    .status {
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+    .PAUSED { background: #ef4444; }
+    .PROCESS { background: #eab308; color: black; }
+    .DONE { background: #22c55e; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <h1>Sofia Control Panel</h1>
+</nav>
+
+<!-- DASHBOARD -->
+<div class="tab active" id="tab1">
+  <h2>🚀 Missões Ativas</h2>
+  <div id="dashboard"></div>
+</div>
+
+<!-- NOVA MISSÃO -->
+<div class="tab" id="tab2">
+  <h2>➕ Nova Missão</h2>
+  <textarea id="missionDesc" rows="8" placeholder="Descreva a missão para o agente executar..."></textarea>
+  <button onclick="enviarMissao()" style="width:100%; padding:16px; margin-top:15px; background:var(--accent); border:none; border-radius:10px; font-size:16px;">Enviar para Agente</button>
+</div>
+
+<!-- AGENTES -->
+<div class="tab" id="tab3">
+  <h2>🤖 Meus Agentes (18)</h2>
+  <p>Lista de agentes será carregada aqui...</p>
+</div>
+
+<!-- Bottom Navigation -->
+<div class="bottom-nav">
+  <button class="active" onclick="showTab(1)">📊 Dashboard</button>
+  <button onclick="showTab(2)">➕ Nova</button>
+  <button onclick="showTab(3)">🤖 Agentes</button>
+</div>
+
+<script>
+  function showTab(n) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab' + n).classList.add('active');
+
+    document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.bottom-nav button')[n-1].classList.add('active');
+  }
+
+  // Simulação inicial
+  function loadDashboard() {
+    const html = `
+      <div class="task-card">
+        <div style="display:flex;justify-content:space-between;">
+          <strong>#87 - Otimizar AppAndroidSWE</strong>
+          <span class="status PAUSED">PAUSED</span>
+        </div>
+        <small>Manus #04 • há 8 min</small>
+        <div style="margin-top:12px; padding:12px; background:#450a0a; border-radius:8px;">
+          <strong>Dúvida:</strong><br>
+          Devo usar Bottom Navigation ou manter Tabs no topo?
+        </div>
+        <button onclick="responder()" style="margin-top:12px; width:100%; padding:14px; background:#22c55e; border:none; border-radius:8px;">Responder Dúvida</button>
+      </div>
+    `;
+    document.getElementById('dashboard').innerHTML = html;
+  }
+
+  function responder() {
+    const resp = prompt("Digite sua resposta para o agente:");
+    if (resp) alert("✅ Resposta enviada! O agente deve continuar em breve.");
+  }
+
+  function enviarMissao() {
+    const desc = document.getElementById('missionDesc').value.trim();
+    if (desc) {
+      alert("Missão enviada com sucesso para um agente!");
+      document.getElementById('missionDesc').value = '';
+      showTab(1); // volta pro dashboard
+    } else {
+      alert("Digite a descrição da missão.");
+    }
+  }
+
+  // Inicializa
+  loadDashboard();
+</script>
+
+</body>
+</html>
