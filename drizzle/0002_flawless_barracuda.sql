@@ -1,0 +1,13 @@
+ALTER TABLE `activityLogs` ADD CONSTRAINT `activityLogs_agentId_agents_id_fk` FOREIGN KEY (`agentId`) REFERENCES `agents`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `activityLogs` ADD CONSTRAINT `activityLogs_taskId_tasks_id_fk` FOREIGN KEY (`taskId`) REFERENCES `tasks`(`id`) ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `activityLogs` ADD CONSTRAINT `activityLogs_eventTypeId_activityEventTypes_id_fk` FOREIGN KEY (`eventTypeId`) REFERENCES `activityEventTypes`(`id`) ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `agents` ADD CONSTRAINT `agents_ownerId_users_id_fk` FOREIGN KEY (`ownerId`) REFERENCES `users`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `contextReports` ADD CONSTRAINT `contextReports_ownerId_users_id_fk` FOREIGN KEY (`ownerId`) REFERENCES `users`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `messages` ADD CONSTRAINT `messages_taskId_tasks_id_fk` FOREIGN KEY (`taskId`) REFERENCES `tasks`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `messages` ADD CONSTRAINT `messages_senderId_users_id_fk` FOREIGN KEY (`senderId`) REFERENCES `users`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `messages` ADD CONSTRAINT `messages_parentMessageId_messages_id_fk` FOREIGN KEY (`parentMessageId`) REFERENCES `messages`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `messages` ADD CONSTRAINT `messages_typeId_messageTypes_id_fk` FOREIGN KEY (`typeId`) REFERENCES `messageTypes`(`id`) ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `tasks` ADD CONSTRAINT `tasks_agentId_agents_id_fk` FOREIGN KEY (`agentId`) REFERENCES `agents`(`id`) ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `tasks` ADD CONSTRAINT `tasks_createdBy_users_id_fk` FOREIGN KEY (`createdBy`) REFERENCES `users`(`id`) ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `tasks` ADD CONSTRAINT `tasks_statusId_taskStatuses_id_fk` FOREIGN KEY (`statusId`) REFERENCES `taskStatuses`(`id`) ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `tasks` ADD CONSTRAINT `tasks_priorityId_taskPriorities_id_fk` FOREIGN KEY (`priorityId`) REFERENCES `taskPriorities`(`id`) ON DELETE restrict ON UPDATE no action;

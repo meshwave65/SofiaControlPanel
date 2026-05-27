@@ -1,5 +1,27 @@
 {
   "version": "7",
   "dialect": "mysql",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1779846317404,
+      "tag": "0000_glorious_dragon_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1779846504991,
+      "tag": "0001_tense_captain_america",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1779846695066,
+      "tag": "0002_flawless_barracuda",
+      "breakpoints": true
+    }
+  ]
 }
