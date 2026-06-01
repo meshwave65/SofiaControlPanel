@@ -250,8 +250,9 @@
     state: {
       activeTab: 'dashboard',
       missions: [
-        { id: 87, title: 'Otimizar AppAndroidSWE', status: 'PAUSED', agent: 'Manus #04', time: 'há 8 min', detail: 'Dúvida: Devo usar Bottom Navigation ou manter Tabs no topo?' },
-        { id: 88, title: 'Migração de Banco de Dados', status: 'PROGRESS', agent: 'Manus #01', time: 'há 2 min', detail: 'Sincronizando tabelas de usuários...' }
+        { id: 87, title: 'Otimizar AppAndroidSWE', status: 'PAUSED', agent: 'Manus #04', time: 'há 8 min', detail: 'Dúvida: Devo usar Bottom Navigation ou manter Tabs no topo?', type: 'UI/UX' },
+        { id: 88, title: 'Migração de Banco de Dados', status: 'PROGRESS', agent: 'Manus #01', time: 'há 2 min', detail: 'Sincronizando tabelas de usuários...', type: 'Backend' },
+        { id: 89, title: 'Auditoria de Segurança', status: 'STAGED', agent: 'Aguardando...', time: 'agora', detail: 'Análise de vulnerabilidades nos endpoints da API.', type: 'Security' }
       ],
       agents: [
         { name: 'Manus #01', type: 'DevOps', status: 'Online' },
@@ -284,14 +285,21 @@
       if (this.state.activeTab === 'dashboard') {
         const list = document.getElementById('mission-list');
         list.innerHTML = this.state.missions.map(m => `
-          <div class="task-card">
+          <div class="task-card" onclick="app.viewMissionDetail(${m.id})">
             <div class="card-header">
-              <span class="card-title">#${m.id} - ${m.title}</span>
+              <div>
+                <div style="font-size: 10px; color: var(--accent); font-weight: 700; margin-bottom: 4px;">${m.type}</div>
+                <span class="card-title">#${m.id} - ${m.title}</span>
+              </div>
               <span class="status-badge status-${m.status.toLowerCase()}">${m.status}</span>
             </div>
             <div class="card-meta">${m.agent} • ${m.time}</div>
             <div class="card-content">
               ${m.detail}
+            </div>
+            <div style="margin-top: 15px; display: flex; gap: 8px;">
+               <button class="btn-action" style="background: var(--border); color: #fff; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; flex: 1;">Ver Logs</button>
+               <button class="btn-action" style="background: var(--accent); color: #000; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; flex: 1; font-weight: 600;">Intervir</button>
             </div>
           </div>
         `).join('');
@@ -315,10 +323,24 @@
     submitMission() {
       const val = document.getElementById('missionInput').value;
       if (val) {
+        const newId = this.state.missions.length > 0 ? Math.max(...this.state.missions.map(m => m.id)) + 1 : 1;
+        this.state.missions.unshift({
+          id: newId,
+          title: val.split('\n')[0].substring(0, 30) + '...',
+          status: 'STAGED',
+          agent: 'Aguardando...',
+          time: 'agora',
+          detail: val,
+          type: 'General'
+        });
         alert('Missão enviada para a rede SOFIA!');
         document.getElementById('missionInput').value = '';
         this.setTab('dashboard');
       }
+    },
+
+    viewMissionDetail(id) {
+      console.log('Viewing mission:', id);
     }
   };
 
