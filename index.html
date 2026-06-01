@@ -11,145 +11,318 @@
       --bg: #0a0f19;
       --card: #0e141d;
       --accent: #4ea1ff;
+      --text: #cfd6e4;
+      --text-muted: #8aa0b5;
+      --border: #1f2a3a;
+      --success: #22c55e;
+      --warning: #eab308;
+      --danger: #ef4444;
     }
+    
     * { box-sizing: border-box; margin:0; padding:0; }
+    
     body {
       background: var(--bg);
-      color: #cfd6e4;
-      font-family: system-ui, sans-serif;
-      padding-bottom: 85px;
+      color: var(--text);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      padding-bottom: 90px;
+      line-height: 1.5;
     }
+    
     nav {
-      background: #0e141d;
-      padding: 15px;
+      background: var(--card);
+      padding: 16px;
       position: sticky;
       top: 0;
       z-index: 100;
-      border-bottom: 1px solid #1f2a3a;
-      text-align: center;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
-    h1 { font-size: 21px; }
+    
+    h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.5px; }
 
-    .tab { display: none; padding: 15px; }
+    .container { max-width: 600px; margin: 0 auto; }
+
+    .tab { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
     .tab.active { display: block; }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
     .bottom-nav {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      background: #0e141d;
+      background: var(--card);
       display: flex;
       justify-content: space-around;
-      padding: 10px 0 8px;
-      border-top: 1px solid #1f2a3a;
+      padding: 12px 0 10px;
+      border-top: 1px solid var(--border);
       z-index: 200;
+      backdrop-filter: blur(10px);
     }
-    .bottom-nav button {
+    
+    .nav-item {
       background: none;
       border: none;
-      color: #8aa0b5;
-      font-size: 12px;
-      padding: 6px;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 500;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      transition: color 0.2s;
+      flex: 1;
     }
-    .bottom-nav button.active { color: var(--accent); }
+    
+    .nav-item.active { color: var(--accent); }
+    
+    .nav-icon {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
     .task-card {
       background: var(--card);
-      margin: 12px 0;
-      padding: 16px;
-      border-radius: 12px;
-      border: 1px solid #1f2a3a;
+      margin-bottom: 16px;
+      padding: 18px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      transition: transform 0.2s;
     }
-    .status {
-      padding: 6px 14px;
-      border-radius: 30px;
-      font-size: 13px;
+    
+    .task-card:active { transform: scale(0.98); }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    
+    .card-title { font-weight: 600; font-size: 15px; color: #fff; }
+    
+    .status-badge {
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    
+    .status-paused { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+    .status-progress { background: rgba(234, 179, 8, 0.15); color: var(--warning); }
+    .status-done { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+    
+    .card-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; }
+    
+    .card-content {
+      background: rgba(255,255,255,0.03);
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      border-left: 3px solid var(--accent);
+    }
+
+    textarea {
+      width: 100%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 15px;
+      resize: none;
+      margin-bottom: 20px;
+    }
+    
+    textarea:focus { outline: 2px solid var(--accent); border-color: transparent; }
+
+    .btn-primary {
+      width: 100%;
+      padding: 18px;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 16px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    
+    .btn-primary:active { opacity: 0.8; }
+
+    .agent-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: var(--card);
+      border-radius: 12px;
+      margin-bottom: 8px;
+      border: 1px solid var(--border);
+    }
+    
+    .agent-avatar {
+      width: 40px;
+      height: 40px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #000;
       font-weight: bold;
     }
-    .PAUSED { background: #ef4444; }
-    .PROCESS { background: #eab308; color: black; }
-    .DONE { background: #22c55e; }
   </style>
 </head>
 <body>
 
 <nav>
-  <h1>Sofia Control Panel</h1>
+  <h1>SOFIA CONTROL</h1>
 </nav>
 
-<!-- DASHBOARD -->
-<div class="tab active" id="tab1">
-  <h2>🚀 Missões Ativas</h2>
-  <div id="dashboard"></div>
-</div>
+<div class="container">
+  <!-- DASHBOARD -->
+  <div class="tab active" id="dashboard-tab">
+    <div class="section-title">
+      <span>🚀 Missões Ativas</span>
+      <span style="font-size: 14px; color: var(--accent);">Ver todas</span>
+    </div>
+    <div id="mission-list">
+      <!-- Injetado via JS -->
+    </div>
+  </div>
 
-<!-- NOVA MISSÃO -->
-<div class="tab" id="tab2">
-  <h2>➕ Nova Missão</h2>
-  <textarea id="missionDesc" rows="8" placeholder="Descreva a missão para o agente executar..."></textarea>
-  <button onclick="enviarMissao()" style="width:100%; padding:16px; margin-top:15px; background:var(--accent); border:none; border-radius:10px; font-size:16px;">Enviar para Agente</button>
-</div>
+  <!-- NOVA MISSÃO -->
+  <div class="tab" id="new-mission-tab">
+    <div class="section-title">➕ Nova Missão</div>
+    <textarea id="missionInput" rows="10" placeholder="Descreva os objetivos para os agentes..."></textarea>
+    <button class="btn-primary" onclick="app.submitMission()">Lançar Missão</button>
+  </div>
 
-<!-- AGENTES -->
-<div class="tab" id="tab3">
-  <h2>🤖 Meus Agentes (18)</h2>
-  <p>Lista de agentes será carregada aqui...</p>
+  <!-- AGENTES -->
+  <div class="tab" id="agents-tab">
+    <div class="section-title">🤖 Agentes Online (18)</div>
+    <div id="agent-list">
+      <!-- Injetado via JS -->
+    </div>
+  </div>
 </div>
 
 <!-- Bottom Navigation -->
 <div class="bottom-nav">
-  <button class="active" onclick="showTab(1)">📊 Dashboard</button>
-  <button onclick="showTab(2)">➕ Nova</button>
-  <button onclick="showTab(3)">🤖 Agentes</button>
+  <button class="nav-item active" onclick="app.setTab('dashboard')">
+    <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+    Dashboard
+  </button>
+  <button class="nav-item" onclick="app.setTab('new-mission')">
+    <svg class="nav-icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+    Nova
+  </button>
+  <button class="nav-item" onclick="app.setTab('agents')">
+    <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+    Agentes
+  </button>
 </div>
 
 <script>
-  function showTab(n) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('tab' + n).classList.add('active');
+  const app = {
+    state: {
+      activeTab: 'dashboard',
+      missions: [
+        { id: 87, title: 'Otimizar AppAndroidSWE', status: 'PAUSED', agent: 'Manus #04', time: 'há 8 min', detail: 'Dúvida: Devo usar Bottom Navigation ou manter Tabs no topo?' },
+        { id: 88, title: 'Migração de Banco de Dados', status: 'PROGRESS', agent: 'Manus #01', time: 'há 2 min', detail: 'Sincronizando tabelas de usuários...' }
+      ],
+      agents: [
+        { name: 'Manus #01', type: 'DevOps', status: 'Online' },
+        { name: 'Manus #02', type: 'Frontend', status: 'Online' },
+        { name: 'Manus #04', type: 'Android', status: 'Online' }
+      ]
+    },
 
-    document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.bottom-nav button')[n-1].classList.add('active');
-  }
+    init() {
+      this.render();
+    },
 
-  // Simulação inicial
-  function loadDashboard() {
-    const html = `
-      <div class="task-card">
-        <div style="display:flex;justify-content:space-between;">
-          <strong>#87 - Otimizar AppAndroidSWE</strong>
-          <span class="status PAUSED">PAUSED</span>
-        </div>
-        <small>Manus #04 • há 8 min</small>
-        <div style="margin-top:12px; padding:12px; background:#450a0a; border-radius:8px;">
-          <strong>Dúvida:</strong><br>
-          Devo usar Bottom Navigation ou manter Tabs no topo?
-        </div>
-        <button onclick="responder()" style="margin-top:12px; width:100%; padding:14px; background:#22c55e; border:none; border-radius:8px;">Responder Dúvida</button>
-      </div>
-    `;
-    document.getElementById('dashboard').innerHTML = html;
-  }
+    setTab(tabId) {
+      this.state.activeTab = tabId;
+      this.render();
+    },
 
-  function responder() {
-    const resp = prompt("Digite sua resposta para o agente:");
-    if (resp) alert("✅ Resposta enviada! O agente deve continuar em breve.");
-  }
+    render() {
+      // Tabs
+      document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+      document.getElementById(`${this.state.activeTab}-tab`).classList.add('active');
 
-  function enviarMissao() {
-    const desc = document.getElementById('missionDesc').value.trim();
-    if (desc) {
-      alert("Missão enviada com sucesso para um agente!");
-      document.getElementById('missionDesc').value = '';
-      showTab(1); // volta pro dashboard
-    } else {
-      alert("Digite a descrição da missão.");
+      // Nav
+      document.querySelectorAll('.nav-item').forEach((el, idx) => {
+        const tabs = ['dashboard', 'new-mission', 'agents'];
+        el.classList.toggle('active', tabs[idx] === this.state.activeTab);
+      });
+
+      // Mission List
+      if (this.state.activeTab === 'dashboard') {
+        const list = document.getElementById('mission-list');
+        list.innerHTML = this.state.missions.map(m => `
+          <div class="task-card">
+            <div class="card-header">
+              <span class="card-title">#${m.id} - ${m.title}</span>
+              <span class="status-badge status-${m.status.toLowerCase()}">${m.status}</span>
+            </div>
+            <div class="card-meta">${m.agent} • ${m.time}</div>
+            <div class="card-content">
+              ${m.detail}
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Agent List
+      if (this.state.activeTab === 'agents') {
+        const list = document.getElementById('agent-list');
+        list.innerHTML = this.state.agents.map(a => `
+          <div class="agent-item">
+            <div class="agent-avatar">${a.name.split('#')[1] || 'A'}</div>
+            <div>
+              <div style="font-weight:600">${a.name}</div>
+              <div style="font-size:12px; color:var(--text-muted)">${a.type} • ${a.status}</div>
+            </div>
+          </div>
+        `).join('');
+      }
+    },
+
+    submitMission() {
+      const val = document.getElementById('missionInput').value;
+      if (val) {
+        alert('Missão enviada para a rede SOFIA!');
+        document.getElementById('missionInput').value = '';
+        this.setTab('dashboard');
+      }
     }
-  }
+  };
 
-  // Inicializa
-  loadDashboard();
+  app.init();
 </script>
 
 </body>
