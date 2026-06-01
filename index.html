@@ -247,23 +247,74 @@
 </div>
 
 <script>
+  const API_BASE = 'https://sofia-api.meshwave.com.br/api/v1';
+
   const app = {
     state: {
       activeTab: 'dashboard',
-      missions: [
-        { id: 87, title: 'Otimizar AppAndroidSWE', status: 'PAUSED', agent: 'Manus #04', time: 'há 8 min', detail: 'Dúvida: Devo usar Bottom Navigation ou manter Tabs no topo?', type: 'UI/UX' },
-        { id: 88, title: 'Migração de Banco de Dados', status: 'PROGRESS', agent: 'Manus #01', time: 'há 2 min', detail: 'Sincronizando tabelas de usuários...', type: 'Backend' },
-        { id: 89, title: 'Auditoria de Segurança', status: 'STAGED', agent: 'Aguardando...', time: 'agora', detail: 'Análise de vulnerabilidades nos endpoints da API.', type: 'Security' }
-      ],
-      agents: [
-        { name: 'Manus #01', type: 'DevOps', status: 'Online' },
-        { name: 'Manus #02', type: 'Frontend', status: 'Online' },
-        { name: 'Manus #04', type: 'Android', status: 'Online' }
-      ]
+      missions: [],
+      agents: [],
+      isLoading: false
     },
 
-    init() {
+    async init() {
+      await this.fetchData();
       this.render();
+      // Auto-refresh a cada 30 segundos
+      setInterval(() => this.fetchData(), 30000);
+    },
+
+    async fetchData() {
+      this.state.isLoading = true;
+      try {
+        const response = await fetch(`${API_BASE}/tasks/`);
+        const data = await response.json();
+        
+        // Filtra apenas as missões (parent_task_id === null)
+        this.state.missions = data.filter(t => t.parent_task_id === null).map(t => ({
+          id: t.task_id,
+          title: t.title_entry?.title || 'Sem título',
+          status: this.mapStatus(t.status_id),
+          agent: t.persona_id ? `Agente #${t.persona_id}` : 'Aguardando...',
+          time: this.formatTime(t.updated_at),
+          detail: t.blocks?.[0]?.content || 'Nenhum detalhe disponível',
+          type: 'Missão'
+        }));
+      } catch (error) {
+        console.error('Erro ao buscar dados:', error);
+      } finally {
+        this.state.isLoading = false;
+        this.render();
+      }
+    },
+
+    mapStatus(statusId) {
+      const map = {
+        100: 'STAGED',
+        110: 'PROGRESS',
+        120: 'PAUSED',
+        130: 'DONE',
+        200: 'FAIL',
+        9: 'RESPONDIDA',
+        1: 'STAGED',
+        2: 'PROGRESS',
+        3: 'DONE',
+        4: 'PAUSED',
+        5: 'FAIL'
+      };
+      return map[statusId] || 'UNKNOWN';
+    },
+
+    formatTime(dateStr) {
+      const date = new Date(dateStr);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMin = Math.round(diffMs / 60000);
+      if (diffMin < 1) return 'agora';
+      if (diffMin < 60) return `há ${diffMin} min`;
+      const diffHours = Math.round(diffMin / 60);
+      if (diffHours < 24) return `há ${diffHours} h`;
+      return date.toLocaleDateString();
     },
 
     setTab(tabId) {
@@ -321,22 +372,48 @@
       }
     },
 
-    submitMission() {
+    async submitMission() {
       const val = document.getElementById('missionInput').value;
-      if (val) {
-        const newId = this.state.missions.length > 0 ? Math.max(...this.state.missions.map(m => m.id)) + 1 : 1;
-        this.state.missions.unshift({
-          id: newId,
-          title: val.split('\n')[0].substring(0, 30) + '...',
-          status: 'STAGED',
-          agent: 'Aguardando...',
-          time: 'agora',
-          detail: val,
-          type: 'General'
+      if (!val) return alert('Digite a descrição da missão.');
+      
+      this.state.isLoading = true;
+      try {
+        // 1. Cria a tarefa
+        const taskRes = await fetch(`${API_BASE}/tasks/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status_id: 100, priority_id: 3 })
         });
+        const task = await taskRes.json();
+
+        // 2. Define o título
+        await fetch(`${API_BASE}/tasks/${task.task_id}/title`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: val.split('\n')[0].substring(0, 50) })
+        });
+
+        // 3. Adiciona o bloco inicial
+        await fetch(`${API_BASE}/tasks/${task.task_id}/blocks`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            sequence: 1, 
+            author_id: 'User', 
+            block_type: 'DetailedDescription', 
+            content: val 
+          })
+        });
+
         alert('Missão enviada para a rede SOFIA!');
         document.getElementById('missionInput').value = '';
+        await this.fetchData();
         this.setTab('dashboard');
+      } catch (error) {
+        console.error('Erro ao enviar missão:', error);
+        alert('Erro ao enviar missão.');
+      } finally {
+        this.state.isLoading = false;
       }
     },
 
