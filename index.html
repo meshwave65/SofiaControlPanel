@@ -445,27 +445,36 @@
         });
         
         if (!res.ok) {
-          const errData = await res.json();
-          throw new Error(errData.detail || 'Falha ao criar tarefa');
+          const errText = await res.text();
+          console.error('API Error Response:', errText);
+          let errMsg = 'Falha ao criar tarefa';
+          try {
+            const errData = JSON.parse(errText);
+            errMsg = errData.detail || errMsg;
+          } catch(e) {}
+          throw new Error(errMsg);
         }
         const task = await res.json();
+        console.log('Task created:', task);
         
         // 2. Definir o Título (opcional mas recomendado para missões)
-        await fetch(`${API_BASE}/tasks/${task.task_id}/title`, {
+        const titleRes = await fetch(`${API_BASE}/tasks/${task.task_id}/title`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ title: val.split('\n')[0].substring(0, 50) })
         });
+        console.log('Title response status:', titleRes.status);
         
         // 3. Atualizar o Status para 100 (STAGED) se for uma Missão
         // Isso separa as missões das tarefas comuns (status 1)
-        await fetch(`${API_BASE}/tasks/${task.task_id}`, {
+        const patchRes = await fetch(`${API_BASE}/tasks/${task.task_id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ status_id: 100 })
         });
+        console.log('Status update response status:', patchRes.status);
 
-        alert('Missão lançada com sucesso no Banco de Dados!');
+        alert('Missão lançada com sucesso no Banco de Dados! ID: ' + task.task_id);
         document.getElementById('missionInput').value = '';
         await this.fetchData();
         this.setTab('dashboard');
