@@ -402,9 +402,10 @@
               <span class="subtask-indicator">📦 ${m.subtaskCount} subtarefa(s) vinculada(s)</span>
             ` : ''}
 
-            <div style="margin-top: 15px; display: flex; gap: 8px;">
-               <button onclick="app.viewDetail(${m.id})" style="background: var(--border); color: #fff; border: none; padding: 10px; border-radius: 8px; font-size: 12px; flex: 1; cursor:pointer;">Ver Detalhes</button>
-               <button onclick="app.intervene(${m.id})" style="background: var(--accent); color: #000; border: none; padding: 10px; border-radius: 8px; font-size: 12px; flex: 1; font-weight: 600; cursor:pointer;">Intervir</button>
+            <div style="margin-top: 15px; display: flex; gap: 8px; flex-wrap: wrap;">
+               <button onclick="app.viewDetail(${m.id})" style="background: var(--border); color: #fff; border: none; padding: 10px; border-radius: 8px; font-size: 12px; flex: 1; min-width: 100px; cursor:pointer;">Ver Detalhes</button>
+               <button onclick="app.changeStatus(${m.id}, '${m.status}')" style="background: var(--card); color: var(--accent); border: 1px solid var(--accent); padding: 10px; border-radius: 8px; font-size: 12px; flex: 1; min-width: 100px; cursor:pointer;">Mudar Status</button>
+               <button onclick="app.intervene(${m.id})" style="background: var(--accent); color: #000; border: none; padding: 10px; border-radius: 8px; font-size: 12px; width: 100%; font-weight: 600; cursor:pointer; margin-top: 4px;">Intervir</button>
             </div>
           </div>
         `).join('');
@@ -520,6 +521,47 @@
         await this.fetchData();
       } catch (e) {
         alert("Erro ao enviar intervenção.");
+      } finally {
+        this.setLoading(false);
+      }
+    },
+
+    async changeStatus(id, currentStatus) {
+      const statusOptions = {
+        'STAGED': 100,
+        'PROGRESS': 110,
+        'PAUSED': 120,
+        'DONE': 130,
+        'FAIL': 200,
+        'RESPONDIDA': 9
+      };
+      
+      const optionsText = Object.keys(statusOptions).join(', ');
+      const newStatusName = prompt(`Status atual: ${currentStatus}\nEscolha o novo status (${optionsText}):`);
+      
+      if (!newStatusName) return;
+      
+      const newStatusId = statusOptions[newStatusName.toUpperCase()];
+      
+      if (newStatusId === undefined) {
+        alert('Status inválido. Use um dos seguintes: ' + optionsText);
+        return;
+      }
+      
+      this.setLoading(true);
+      try {
+        const res = await fetch(`${API_BASE}/tasks/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status_id: newStatusId })
+        });
+        
+        if (!res.ok) throw new Error('Erro na API');
+        
+        alert(`Status da missão #${id} alterado para ${newStatusName.toUpperCase()}`);
+        await this.fetchData();
+      } catch (e) {
+        alert('Erro ao alterar status.');
       } finally {
         this.setLoading(false);
       }
