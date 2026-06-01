@@ -403,51 +403,43 @@
       
       this.setLoading(true);
       try {
-        // 1. Criar a Task com Status 100 (STAGED)
+        // 1. Criar a Task conforme o Schema TaskCreate (espera apenas description e client_request_uuid opcional)
+        // O status_id é definido automaticamente como PENDING_STATUS_ID (1) no service
         const res = await fetch(`${API_BASE}/tasks/`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
-            status_id: 100, 
-            priority_id: 3,
-            description: val // Enviando descrição no corpo se a API suportar
+            description: val 
           })
         });
         
-        if (!res.ok) throw new Error('Falha ao criar tarefa');
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.detail || 'Falha ao criar tarefa');
+        }
         const task = await res.json();
         
-        // 2. Definir o Título
+        // 2. Definir o Título (opcional mas recomendado para missões)
         await fetch(`${API_BASE}/tasks/${task.task_id}/title`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ title: val.split('\n')[0].substring(0, 50) })
         });
         
-        // 3. Adicionar Bloco de Conteúdo (se a criação inicial não o fez)
-        // Verificando se já existe bloco
-        const blocksRes = await fetch(`${API_BASE}/tasks/${task.task_id}/blocks`);
-        const existingBlocks = await blocksRes.json();
-        
-        if (existingBlocks.length === 0) {
-          await fetch(`${API_BASE}/tasks/${task.task_id}/blocks`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              sequence: 1, 
-              author_id: 'User', 
-              block_type: 'DetailedDescription', 
-              content: val 
-            })
-          });
-        }
+        // 3. Atualizar o Status para 100 (STAGED) se for uma Missão
+        // Isso separa as missões das tarefas comuns (status 1)
+        await fetch(`${API_BASE}/tasks/${task.task_id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status_id: 100 })
+        });
 
         alert('Missão lançada com sucesso no Banco de Dados!');
         document.getElementById('missionInput').value = '';
         await this.fetchData();
         this.setTab('dashboard');
       } catch (e) {
-        console.error(e);
+        console.error('Submit Mission Error:', e);
         alert('Erro ao lançar missão: ' + e.message);
       } finally {
         this.setLoading(false);
