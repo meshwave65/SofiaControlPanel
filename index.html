@@ -473,15 +473,20 @@
           console.warn('Erro ao definir título, mas a tarefa foi criada:', e);
         }
         
-        // 3. Atualizar o Status para 100 (STAGED) se for uma Missão
+        // 3. Atualizar o Status para STAGED se for uma Missão
         // Isso separa as missões das tarefas comuns (status 1)
         try {
           const patchRes = await fetch(`${API_BASE}/tasks/${task.task_id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status_id: 100 })
+            body: JSON.stringify({ status: 'STAGED' })
           });
-          console.log('Status update response status:', patchRes.status);
+          if (!patchRes.ok) {
+            const err = await patchRes.text();
+            console.warn('Erro ao atualizar status:', err);
+          } else {
+            console.log('Status atualizado para STAGED com sucesso');
+          }
         } catch (e) {
           console.warn('Erro ao atualizar status para STAGED:', e);
         }
@@ -549,22 +554,22 @@
 
     async changeStatus(id, currentStatus) {
       const statusOptions = {
-        'STAGED': 100,
-        'PROGRESS': 110,
-        'PAUSED': 120,
-        'DONE': 130,
-        'FAIL': 200,
-        'RESPONDIDA': 9
+        'STAGED': 'STAGED',
+        'PROGRESS': 'PROGRESS',
+        'PAUSED': 'PAUSED',
+        'DONE': 'DONE',
+        'FAIL': 'FAIL',
+        'RESPONDIDA': 'RESPONDIDA'
       };
       
       const optionsText = Object.keys(statusOptions).join(', ');
-      const newStatusName = prompt(`Status atual: ${currentStatus}\nEscolha o novo status (${optionsText}):`);
+      const newStatusName = prompt(`Status atual: ${currentStatus}\nEscolha o novo status (${optionsText})`);
       
       if (!newStatusName) return;
       
-      const newStatusId = statusOptions[newStatusName.toUpperCase()];
+      const newStatusValue = statusOptions[newStatusName.toUpperCase()];
       
-      if (newStatusId === undefined) {
+      if (newStatusValue === undefined) {
         alert('Status inválido. Use um dos seguintes: ' + optionsText);
         return;
       }
@@ -574,15 +579,18 @@
         const res = await fetch(`${API_BASE}/tasks/${id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status_id: newStatusId })
+          body: JSON.stringify({ status: newStatusValue })
         });
         
-        if (!res.ok) throw new Error('Erro na API');
+        if (!res.ok) {
+          const err = await res.text();
+          throw new Error(`Erro na API: ${err}`);
+        }
         
         alert(`Status da missão #${id} alterado para ${newStatusName.toUpperCase()}`);
         await this.fetchData();
       } catch (e) {
-        alert('Erro ao alterar status.');
+        alert('Erro ao alterar status: ' + e.message);
       } finally {
         this.setLoading(false);
       }
