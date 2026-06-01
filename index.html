@@ -327,11 +327,11 @@
           
           return {
             id: t.task_id,
-            title: t.title_entry?.title || 'Missão sem título',
+            title: t.title || t.title_entry?.title || 'Missão #' + t.task_id,
             status: this.mapStatus(t.status_id),
             agent: t.persona_id ? `Agente #${t.persona_id}` : 'Sistema',
             time: this.formatTime(t.updated_at),
-            detail: t.blocks?.[0]?.content || 'Aguardando processamento...',
+            detail: (t.blocks && t.blocks.length > 0) ? t.blocks[0].content : (t.description || 'Aguardando processamento...'),
             type: 'MISSÃO',
             subtaskCount: subtasks.length,
             subtasks: subtasks.map(st => ({
@@ -447,7 +447,7 @@
         if (!res.ok) {
           const errText = await res.text();
           console.error('API Error Response:', errText);
-          let errMsg = 'Falha ao criar tarefa';
+          let errMsg = 'Erro na API (' + res.status + ')';
           try {
             const errData = JSON.parse(errText);
             errMsg = errData.detail || errMsg;
