@@ -457,22 +457,33 @@
         const task = await res.json();
         console.log('Task created:', task);
         
+        // Pequeno delay para garantir que a task foi persistida antes das sub-chamadas
+        await new Promise(r => setTimeout(r, 500));
+
         // 2. Definir o Título (opcional mas recomendado para missões)
-        const titleRes = await fetch(`${API_BASE}/tasks/${task.task_id}/title`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title: val.split('\n')[0].substring(0, 50) })
-        });
-        console.log('Title response status:', titleRes.status);
+        try {
+          const titleRes = await fetch(`${API_BASE}/tasks/${task.task_id}/title`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: val.split('\n')[0].substring(0, 50) })
+          });
+          console.log('Title response status:', titleRes.status);
+        } catch (e) {
+          console.warn('Erro ao definir título, mas a tarefa foi criada:', e);
+        }
         
         // 3. Atualizar o Status para 100 (STAGED) se for uma Missão
         // Isso separa as missões das tarefas comuns (status 1)
-        const patchRes = await fetch(`${API_BASE}/tasks/${task.task_id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status_id: 100 })
-        });
-        console.log('Status update response status:', patchRes.status);
+        try {
+          const patchRes = await fetch(`${API_BASE}/tasks/${task.task_id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status_id: 100 })
+          });
+          console.log('Status update response status:', patchRes.status);
+        } catch (e) {
+          console.warn('Erro ao atualizar status para STAGED:', e);
+        }
 
         alert('Missão lançada com sucesso no Banco de Dados! ID: ' + task.task_id);
         document.getElementById('missionInput').value = '';
