@@ -196,9 +196,25 @@
       color: #000;
       font-weight: bold;
     }
+
+    .loading-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(10, 15, 25, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      display: none;
+    }
+    .loading-overlay.active { display: flex; }
   </style>
 </head>
 <body>
+
+<div id="loading" class="loading-overlay">
+  <div style="color: var(--accent); font-weight: bold;">Carregando...</div>
+</div>
 
 <nav>
   <h1>SOFIA CONTROL</h1>
@@ -209,7 +225,7 @@
   <div class="tab active" id="dashboard-tab">
     <div class="section-title">
       <span>🚀 Missões Ativas</span>
-      <span style="font-size: 14px; color: var(--accent);">Ver todas</span>
+      <span style="font-size: 14px; color: var(--accent); cursor: pointer;" onclick="app.fetchData()">Atualizar</span>
     </div>
     <div id="mission-list">
       <!-- Injetado via JS -->
@@ -225,7 +241,7 @@
 
   <!-- AGENTES -->
   <div class="tab" id="agents-tab">
-    <div class="section-title">🤖 Agentes Online (18)</div>
+    <div class="section-title">🤖 Agentes Online</div>
     <div id="agent-list">
       <!-- Injetado via JS -->
     </div>
@@ -262,60 +278,52 @@
     async init() {
       await this.fetchData();
       this.render();
-      // Auto-refresh a cada 30 segundos
       setInterval(() => this.fetchData(), 30000);
     },
 
+    setLoading(loading) {
+      this.state.isLoading = loading;
+      document.getElementById('loading').classList.toggle('active', loading);
+    },
+
     async fetchData() {
-      this.state.isLoading = true;
+      this.setLoading(true);
       try {
         const response = await fetch(`${API_BASE}/tasks/`);
         const data = await response.json();
         
-        // Filtra apenas as missões (parent_task_id === null)
+        // Filtra missões mestres (parent_task_id null)
         this.state.missions = data.filter(t => t.parent_task_id === null).map(t => ({
           id: t.task_id,
-          title: t.title_entry?.title || 'Sem título',
+          title: t.title_entry?.title || 'Missão sem título',
           status: this.mapStatus(t.status_id),
-          agent: t.persona_id ? `Agente #${t.persona_id}` : 'Aguardando...',
+          agent: t.persona_id ? `Agente #${t.persona_id}` : 'Sistema',
           time: this.formatTime(t.updated_at),
-          detail: t.blocks?.[0]?.content || 'Nenhum detalhe disponível',
-          type: 'Missão'
+          detail: t.blocks?.[0]?.content || 'Aguardando processamento...',
+          type: 'MISSÃO'
         }));
       } catch (error) {
-        console.error('Erro ao buscar dados:', error);
+        console.error('API Error:', error);
       } finally {
-        this.state.isLoading = false;
+        this.setLoading(false);
         this.render();
       }
     },
 
     mapStatus(statusId) {
       const map = {
-        100: 'STAGED',
-        110: 'PROGRESS',
-        120: 'PAUSED',
-        130: 'DONE',
-        200: 'FAIL',
-        9: 'RESPONDIDA',
-        1: 'STAGED',
-        2: 'PROGRESS',
-        3: 'DONE',
-        4: 'PAUSED',
-        5: 'FAIL'
+        100: 'STAGED', 110: 'PROGRESS', 120: 'PAUSED', 130: 'DONE', 200: 'FAIL', 9: 'RESPONDIDA',
+        1: 'STAGED', 2: 'PROGRESS', 3: 'DONE', 4: 'PAUSED', 5: 'FAIL'
       };
       return map[statusId] || 'UNKNOWN';
     },
 
     formatTime(dateStr) {
+      if (!dateStr) return '---';
       const date = new Date(dateStr);
-      const now = new Date();
-      const diffMs = now - date;
-      const diffMin = Math.round(diffMs / 60000);
-      if (diffMin < 1) return 'agora';
-      if (diffMin < 60) return `há ${diffMin} min`;
-      const diffHours = Math.round(diffMin / 60);
-      if (diffHours < 24) return `há ${diffHours} h`;
+      const diff = Math.round((new Date() - date) / 60000);
+      if (diff < 1) return 'agora';
+      if (diff < 60) return `há ${diff} min`;
       return date.toLocaleDateString();
     },
 
@@ -325,21 +333,22 @@
     },
 
     render() {
-      // Tabs
       document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
       document.getElementById(`${this.state.activeTab}-tab`).classList.add('active');
 
-      // Nav
       document.querySelectorAll('.nav-item').forEach((el, idx) => {
         const tabs = ['dashboard', 'new-mission', 'agents'];
         el.classList.toggle('active', tabs[idx] === this.state.activeTab);
       });
 
-      // Mission List
       if (this.state.activeTab === 'dashboard') {
         const list = document.getElementById('mission-list');
+        if (this.state.missions.length === 0) {
+          list.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted)">Nenhuma missão encontrada.</div>';
+          return;
+        }
         list.innerHTML = this.state.missions.map(m => `
-          <div class="task-card" onclick="app.viewMissionDetail(${m.id})">
+          <div class="task-card">
             <div class="card-header">
               <div>
                 <div style="font-size: 10px; color: var(--accent); font-weight: 700; margin-bottom: 4px;">${m.type}</div>
@@ -348,26 +357,10 @@
               <span class="status-badge status-${m.status.toLowerCase()}">${m.status}</span>
             </div>
             <div class="card-meta">${m.agent} • ${m.time}</div>
-            <div class="card-content">
-              ${m.detail}
-            </div>
+            <div class="card-content">${m.detail.substring(0, 150)}${m.detail.length > 150 ? '...' : ''}</div>
             <div style="margin-top: 15px; display: flex; gap: 8px;">
-               <button class="btn-action" style="background: var(--border); color: #fff; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; flex: 1;">Ver Logs</button>
-               <button class="btn-action" style="background: var(--accent); color: #000; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; flex: 1; font-weight: 600;">Intervir</button>
-            </div>
-          </div>
-        `).join('');
-      }
-
-      // Agent List
-      if (this.state.activeTab === 'agents') {
-        const list = document.getElementById('agent-list');
-        list.innerHTML = this.state.agents.map(a => `
-          <div class="agent-item">
-            <div class="agent-avatar">${a.name.split('#')[1] || 'A'}</div>
-            <div>
-              <div style="font-weight:600">${a.name}</div>
-              <div style="font-size:12px; color:var(--text-muted)">${a.type} • ${a.status}</div>
+               <button onclick="app.viewDetail(${m.id})" style="background: var(--border); color: #fff; border: none; padding: 10px; border-radius: 8px; font-size: 12px; flex: 1; cursor:pointer;">Ver Detalhes</button>
+               <button onclick="app.intervene(${m.id})" style="background: var(--accent); color: #000; border: none; padding: 10px; border-radius: 8px; font-size: 12px; flex: 1; font-weight: 600; cursor:pointer;">Intervir</button>
             </div>
           </div>
         `).join('');
@@ -375,77 +368,62 @@
     },
 
     async submitMission() {
-      const val = document.getElementById('missionInput').value;
-      if (!val) return alert('Digite a descrição da missão.');
+      const val = document.getElementById('missionInput').value.trim();
+      if (!val) return alert('Descreva a missão.');
       
-      this.state.isLoading = true;
+      this.setLoading(true);
       try {
-        // 1. Cria a tarefa
-        const taskRes = await fetch(`${API_BASE}/tasks/`, {
+        const res = await fetch(`${API_BASE}/tasks/`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ status_id: 100, priority_id: 3 })
         });
-        const task = await taskRes.json();
-
-        // 2. Define o título
+        const task = await res.json();
+        
         await fetch(`${API_BASE}/tasks/${task.task_id}/title`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ title: val.split('\n')[0].substring(0, 50) })
         });
 
-        // 3. Adiciona o bloco inicial
         await fetch(`${API_BASE}/tasks/${task.task_id}/blocks`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            sequence: 1, 
-            author_id: 'User', 
-            block_type: 'DetailedDescription', 
-            content: val 
-          })
+          body: JSON.stringify({ sequence: 1, author_id: 'User', block_type: 'DetailedDescription', content: val })
         });
 
-        alert('Missão enviada para a rede SOFIA!');
+        alert('Missão lançada com sucesso!');
         document.getElementById('missionInput').value = '';
         await this.fetchData();
         this.setTab('dashboard');
-      } catch (error) {
-        console.error('Erro ao enviar missão:', error);
-        alert('Erro ao enviar missão.');
+      } catch (e) {
+        alert('Erro ao lançar missão.');
       } finally {
-        this.state.isLoading = false;
+        this.setLoading(false);
       }
     },
 
-    async viewMissionDetail(id) {
-      this.state.isLoading = true;
+    async viewDetail(id) {
+      this.setLoading(true);
       try {
-        const response = await fetch(`${API_BASE}/tasks/${id}/blocks`);
-        const blocks = await response.json();
-        const content = blocks.map(b => `<p><strong>${b.author_id}:</strong> ${b.content}</p>`).join('');
-        alert(`Detalhes da Missão #${id}:\n\n${content}`);
-      } catch (error) {
-        console.error('Erro ao buscar blocos:', error);
+        const res = await fetch(`${API_BASE}/tasks/${id}/blocks`);
+        const blocks = await res.json();
+        const text = blocks.map(b => `[${b.author_id}]: ${b.content}`).join('\n\n');
+        alert(`Histórico da Missão #${id}:\n\n${text}`);
+      } catch (e) {
+        alert('Erro ao carregar detalhes.');
       } finally {
-        this.state.isLoading = false;
+        this.setLoading(false);
       }
+    },
+
+    intervene(id) {
+      const msg = prompt("Digite sua instrução para o agente:");
+      if (msg) alert("Instrução enviada! (Integração com MessageManager em breve)");
     }
   };
 
   app.init();
-
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js').then(reg => {
-        console.log('SW registered:', reg);
-      }).catch(err => {
-        console.log('SW registration failed:', err);
-      });
-    });
-  }
 </script>
-
 </body>
 </html>
