@@ -217,6 +217,49 @@ export const appRouter = router({
         return db.updateContextReportGitHub(input.id, input.gitHubUrl);
       }),
   }),
+
+  // ============================================
+  // EXTERNAL AGENTS ENDPOINTS
+  // ============================================
+  externalAgents: router({
+    listStaged: publicProcedure
+      .input(z.object({ agentId: z.number() }))
+      .query(async ({ input }) => {
+        return db.getTasksByStatus(1);
+      }),
+
+    createQuestion: publicProcedure
+      .input(z.object({
+        taskId: z.number(),
+        agentId: z.number(),
+        content: z.string().min(1),
+      }))
+      .mutation(async ({ input }) => {
+        return db.createMessage({
+          taskId: input.taskId,
+          senderId: input.agentId,
+          typeId: 1,
+          content: input.content,
+        });
+      }),
+
+    getAnswers: publicProcedure
+      .input(z.object({ parentMessageId: z.number() }))
+      .query(async ({ input }) => {
+        return db.getMessagesByParentId(input.parentMessageId);
+      }),
+
+    logActivity: publicProcedure
+      .input(z.object({
+        agentId: z.number(),
+        taskId: z.number().optional(),
+        eventTypeId: z.number(),
+        details: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return db.createActivityLog(input);
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
