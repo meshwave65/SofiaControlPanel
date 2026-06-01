@@ -328,7 +328,7 @@
           return {
             id: t.task_id,
             title: t.title || t.title_entry?.title || 'Missão #' + t.task_id,
-            status: this.mapStatus(t.status_id),
+            status: this.mapStatus(t.status || t.status_id),
             agent: t.persona_id ? `Agente #${t.persona_id}` : 'Sistema',
             time: this.formatTime(t.updated_at),
             detail: (t.blocks && t.blocks.length > 0) ? t.blocks[0].content : (t.description || 'Aguardando processamento...'),
@@ -337,7 +337,7 @@
             subtasks: subtasks.map(st => ({
               id: st.task_id,
               title: st.title_entry?.title || 'Subtarefa',
-              status: this.mapStatus(st.status_id)
+              status: this.mapStatus(st.status || st.status_id)
             }))
           };
         });
@@ -351,6 +351,7 @@
 
     mapStatus(statusId) {
       const map = {
+        'STAGED': 'STAGED', 'PROGRESS': 'PROGRESS', 'PAUSED': 'PAUSED', 'DONE': 'DONE', 'FAIL': 'FAIL', 'RESPONDIDA': 'RESPONDIDA',
         100: 'STAGED', 110: 'PROGRESS', 120: 'PAUSED', 130: 'DONE', 200: 'FAIL', 9: 'RESPONDIDA',
         1: 'STAGED', 2: 'PROGRESS', 3: 'DONE', 4: 'PAUSED', 5: 'FAIL'
       };
