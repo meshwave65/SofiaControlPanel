@@ -419,8 +419,18 @@
       }
     },
 
-    viewMissionDetail(id) {
-      console.log('Viewing mission:', id);
+    async viewMissionDetail(id) {
+      this.state.isLoading = true;
+      try {
+        const response = await fetch(`${API_BASE}/tasks/${id}/blocks`);
+        const blocks = await response.json();
+        const content = blocks.map(b => `<p><strong>${b.author_id}:</strong> ${b.content}</p>`).join('');
+        alert(`Detalhes da Missão #${id}:\n\n${content}`);
+      } catch (error) {
+        console.error('Erro ao buscar blocos:', error);
+      } finally {
+        this.state.isLoading = false;
+      }
     }
   };
 
