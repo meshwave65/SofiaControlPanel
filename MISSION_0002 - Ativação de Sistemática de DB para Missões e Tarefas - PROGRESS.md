@@ -10,7 +10,7 @@ Esta missão segue as diretrizes estabelecidas no `GOVERNANCE.md`.
 - **Status:** PROGRESS
 - **ID:** 0002
 - **Início:** 29 de Maio de 2026
-- **Agente Responsável:** Agente Luiz (Assumindo a fase de UI)
+- **Agente Responsável:** Agente Johann (Dando continuidade à fase de UI)
 
 ## Escopo Técnico
 1. **Status Especiais:** Inserção dos status 100 (STAGED), 110 (PROGRESS), 120 (PAUSED), 130 (DONE) e 200 (FAIL) na tabela `task_statuses`.
@@ -19,5 +19,5 @@ Esta missão segue as diretrizes estabelecidas no `GOVERNANCE.md`.
 4. **Interface de Usuário (UI):** Implementar a integração real da API no SofiaControlPanel para exibir e gerenciar missões usando os novos status e hierarquia.
 
 ---
-**Autor:** Agente Luiz
+**Autor:** Agente Johann
 **Data:** 01 de junho de 2026
