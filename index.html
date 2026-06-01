@@ -305,6 +305,20 @@
         
         // Mapeia todas as tarefas para facilitar o acesso
         const allTasks = data;
+
+        // Extrair agentes únicos das tarefas
+        const agentMap = new Map();
+        allTasks.forEach(t => {
+          if (t.persona_id) {
+            agentMap.set(t.persona_id, {
+              id: t.persona_id,
+              name: `Agente #${t.persona_id}`,
+              status: 'Ativo',
+              lastSeen: t.updated_at
+            });
+          }
+        });
+        this.state.agents = Array.from(agentMap.values());
         
         // Filtra missões mestres (parent_task_id null)
         this.state.missions = allTasks.filter(t => t.parent_task_id === null).map(t => {
@@ -392,6 +406,22 @@
                <button onclick="app.viewDetail(${m.id})" style="background: var(--border); color: #fff; border: none; padding: 10px; border-radius: 8px; font-size: 12px; flex: 1; cursor:pointer;">Ver Detalhes</button>
                <button onclick="app.intervene(${m.id})" style="background: var(--accent); color: #000; border: none; padding: 10px; border-radius: 8px; font-size: 12px; flex: 1; font-weight: 600; cursor:pointer;">Intervir</button>
             </div>
+          </div>
+        `).join('');
+      } else if (this.state.activeTab === 'agents') {
+        const list = document.getElementById('agent-list');
+        if (this.state.agents.length === 0) {
+          list.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted)">Nenhum agente detectado no sistema.</div>';
+          return;
+        }
+        list.innerHTML = this.state.agents.map(a => `
+          <div class="agent-item">
+            <div class="agent-avatar">${a.id}</div>
+            <div style="flex: 1;">
+              <div style="font-weight: 600;">${a.name}</div>
+              <div style="font-size: 12px; color: var(--text-muted);">Visto pela última vez: ${this.formatTime(a.lastSeen)}</div>
+            </div>
+            <div style="font-size: 10px; color: var(--success); font-weight: 700;">● ${a.status}</div>
           </div>
         `).join('');
       }
