@@ -1,7 +1,7 @@
 # Missão 0001: Evolução da Interface Sofia Control Panel
 
 **ID:** 0001
-**Status:** PROGRESS
+**Status:** DONE
 **Objetivo:** Implementar melhorias na interface do Sofia Control Panel, adicionando funcionalidades reais e componentes reativos baseados na auditoria anterior.
 
 ## Descrição
