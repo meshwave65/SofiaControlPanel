@@ -1,26 +1,27 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Send, Trash2 } from "lucide-react";
+import { Loader2, Send, Trash2, Reply, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 
 /**
  * Página de Mensagens
- * Interface de chat/threads com polling automático e notificações
+ * Interface de chat com suporte real a threads, agrupamento por parentMessageId
+ * e polling automático para notificações
  */
 export default function Messages() {
   const { user, loading: authLoading } = useAuth();
   const [selectedTaskId, setSelectedTaskId] = useState<string>("");
   const [messageContent, setMessageContent] = useState("");
   const [messageTypeId, setMessageTypeId] = useState<string>("1");
-  const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
+  const [replyingTo, setReplyingTo] = useState<number | null>(null);
+  const [expandedThreads, setExpandedThreads] = useState<Set<number>>(new Set());
 
   // Queries
   const tasksQuery = trpc.tasks.listAll.useQuery(undefined, { enabled: !!user });
@@ -38,6 +39,31 @@ export default function Messages() {
   const tasks = tasksQuery.data || [];
   const messageTypes = messageTypesQuery.data || [];
   const messages = messagesQuery.data || [];
+
+  // Agrupar mensagens por thread (parentMessageId)
+  const groupedMessages = useMemo(() => {
+    const groups: Record<number, any[]> = {};
+    const threads: any[] = [];
+
+    messages.forEach((msg) => {
+      if (!msg.parentMessageId) {
+        // Mensagem raiz
+        threads.push(msg);
+        groups[msg.id] = [];
+      }
+    });
+
+    messages.forEach((msg) => {
+      if (msg.parentMessageId) {
+        if (!groups[msg.parentMessageId]) {
+          groups[msg.parentMessageId] = [];
+        }
+        groups[msg.parentMessageId].push(msg);
+      }
+    });
+
+    return { threads, groups };
+  }, [messages]);
 
   // Auto-mark unread messages as read
   useEffect(() => {
@@ -59,9 +85,11 @@ export default function Messages() {
         taskId: parseInt(selectedTaskId),
         typeId: parseInt(messageTypeId),
         content: messageContent,
+        parentMessageId: replyingTo || undefined,
       });
 
       setMessageContent("");
+      setReplyingTo(null);
       messagesQuery.refetch();
       toast.success("Mensagem enviada");
     } catch (error) {
@@ -81,7 +109,27 @@ export default function Messages() {
     }
   };
 
+  const toggleThreadExpanded = (messageId: number) => {
+    const newExpanded = new Set(expandedThreads);
+    if (newExpanded.has(messageId)) {
+      newExpanded.delete(messageId);
+    } else {
+      newExpanded.add(messageId);
+    }
+    setExpandedThreads(newExpanded);
+  };
+
   if (authLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="w-8 h-8 animate-spin text-accent" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (tasksQuery.isLoading) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-96">
@@ -97,7 +145,7 @@ export default function Messages() {
         {/* Header */}
         <div className="technical-header">
           <h1 className="text-3xl font-bold text-foreground">Mensagens e Comunicação</h1>
-          <p className="text-muted-foreground">Chat em tempo real com threads de tarefas</p>
+          <p className="text-muted-foreground">Chat com threads e polling automático</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -146,46 +194,124 @@ export default function Messages() {
                 <div className="flex items-center justify-center h-96 text-muted-foreground">
                   <p>Selecione uma tarefa na lista ao lado</p>
                 </div>
+              ) : messagesQuery.isLoading ? (
+                <div className="flex items-center justify-center h-96">
+                  <Loader2 className="w-8 h-8 animate-spin text-accent" />
+                </div>
               ) : (
                 <div className="space-y-4">
-                  {/* Mensagens */}
+                  {/* Mensagens com Threads */}
                   <div className="h-96 overflow-y-auto space-y-3 border border-accent/20 rounded-sm p-4 bg-background">
-                    {messages.length === 0 ? (
+                    {groupedMessages.threads.length === 0 ? (
                       <p className="text-center text-muted-foreground py-8">Nenhuma mensagem nesta tarefa</p>
                     ) : (
-                      messages.map((msg) => (
-                        <div
-                          key={msg.id}
-                          className={`message-bubble flex justify-between items-start gap-3 ${
-                            msg.senderId === user?.id ? "bg-accent/10 ml-8" : "mr-8"
-                          }`}
-                        >
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium text-accent mb-1">
-                              {msg.senderId === user?.id ? "Você" : `User #${msg.senderId}`}
-                            </p>
-                            <p className="text-sm text-foreground break-words">{msg.content}</p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {new Date(msg.createdAt).toLocaleTimeString()}
-                            </p>
+                      groupedMessages.threads.map((msg) => {
+                        const replies = groupedMessages.groups[msg.id] || [];
+                        const isExpanded = expandedThreads.has(msg.id);
+
+                        return (
+                          <div key={msg.id} className="space-y-2 border-l-2 border-accent/30 pl-3">
+                            {/* Mensagem Raiz */}
+                            <div className="message-bubble flex justify-between items-start gap-3 bg-accent/5">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-medium text-accent mb-1">
+                                  {msg.senderId === user?.id ? "Você" : `User #${msg.senderId}`}
+                                </p>
+                                <p className="text-sm text-foreground break-words">{msg.content}</p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {new Date(msg.createdAt).toLocaleTimeString()}
+                                </p>
+                              </div>
+                              <div className="flex gap-1 flex-shrink-0">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => setReplyingTo(msg.id)}
+                                  className="text-accent hover:bg-accent/10"
+                                >
+                                  <Reply className="w-3 h-3" />
+                                </Button>
+                                {msg.senderId === user?.id && (
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => handleDeleteMessage(msg.id)}
+                                    className="text-destructive hover:bg-destructive/10"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Replies */}
+                            {replies.length > 0 && (
+                              <div className="space-y-2">
+                                <button
+                                  onClick={() => toggleThreadExpanded(msg.id)}
+                                  className="text-xs text-accent hover:underline flex items-center gap-1"
+                                >
+                                  {isExpanded ? (
+                                    <ChevronUp className="w-3 h-3" />
+                                  ) : (
+                                    <ChevronDown className="w-3 h-3" />
+                                  )}
+                                  {replies.length} resposta{replies.length !== 1 ? "s" : ""}
+                                </button>
+
+                                {isExpanded && (
+                                  <div className="space-y-2 ml-4 border-l border-accent/20 pl-2">
+                                    {replies.map((reply) => (
+                                      <div key={reply.id} className="message-bubble flex justify-between items-start gap-3 bg-accent/10">
+                                        <div className="flex-1 min-w-0">
+                                          <p className="text-xs font-medium text-accent mb-1">
+                                            {reply.senderId === user?.id ? "Você" : `User #${reply.senderId}`}
+                                          </p>
+                                          <p className="text-sm text-foreground break-words">{reply.content}</p>
+                                          <p className="text-xs text-muted-foreground mt-1">
+                                            {new Date(reply.createdAt).toLocaleTimeString()}
+                                          </p>
+                                        </div>
+                                        {reply.senderId === user?.id && (
+                                          <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => handleDeleteMessage(reply.id)}
+                                            className="text-destructive hover:bg-destructive/10 flex-shrink-0"
+                                          >
+                                            <Trash2 className="w-3 h-3" />
+                                          </Button>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
-                          {msg.senderId === user?.id && (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => handleDeleteMessage(msg.id)}
-                              className="text-destructive hover:bg-destructive/10 flex-shrink-0"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
-                          )}
-                        </div>
-                      ))
+                        );
+                      })
                     )}
                   </div>
 
                   {/* Formulário de Envio */}
                   <div className="grid-separator" />
+
+                  {replyingTo && (
+                    <div className="p-2 bg-accent/10 border border-accent/30 rounded-sm text-sm">
+                      <p className="text-foreground">
+                        Respondendo a mensagem #{replyingTo}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setReplyingTo(null)}
+                          className="ml-2 text-xs"
+                        >
+                          Cancelar
+                        </Button>
+                      </p>
+                    </div>
+                  )}
 
                   <div className="space-y-3">
                     <div>
@@ -235,7 +361,7 @@ export default function Messages() {
                       ) : (
                         <Send className="w-4 h-4" />
                       )}
-                      Enviar (Ctrl+Enter)
+                      Enviar {replyingTo ? "(como resposta)" : ""} (Ctrl+Enter)
                     </Button>
                   </div>
                 </div>
@@ -248,16 +374,22 @@ export default function Messages() {
         {selectedTaskId && (
           <Card className="cad-card">
             <CardContent className="pt-6">
-              <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="grid grid-cols-4 gap-4 text-center">
                 <div>
                   <p className="text-2xl font-bold text-accent">{messages.length}</p>
-                  <p className="text-xs text-muted-foreground">Total de Mensagens</p>
+                  <p className="text-xs text-muted-foreground">Total</p>
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-green-500">
+                    {groupedMessages.threads.length}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Threads</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-blue-500">
                     {messages.filter((m) => m.senderId === user?.id).length}
                   </p>
-                  <p className="text-xs text-muted-foreground">Suas Mensagens</p>
+                  <p className="text-xs text-muted-foreground">Suas</p>
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-yellow-500">
