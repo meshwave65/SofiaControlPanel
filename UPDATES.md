@@ -1,5 +1,35 @@
 # Sofia Control Panel - Histórico de Atualizações
 
+## [2026-05-27] Documentação GitHub Sync
+**Commit**: `c8c8106`
+**Descrição**: Adicionar documentação completa sobre GitHub Sync e configuração de PAT.
+**Arquivos Modificados**: `GITHUB_SYNC.md`
+
+## [2026-05-27] Integração Heartbeat System
+**Commit**: `620f99c`
+**Descrição**: Integrar heartbeat system ao bootstrap do servidor com inicialização automática.
+**Arquivos Modificados**: `server/_core/index.ts`
+
+## [2026-05-27] Melhoria Messages.tsx - Threads Reais
+**Commit**: `13658bd`
+**Descrição**: Melhorar Messages.tsx com suporte real a threads, agrupamento por parentMessageId e estados de loading/error.
+**Arquivos Modificados**: `client/src/pages/Messages.tsx`
+
+## [2026-05-27] Fase 11 Completa: GitHub Sync
+**Commit**: `af75016`
+**Descrição**: Sistema de sincronização com GitHub via PAT com atualização automática de UPDATES.md.
+**Arquivos Modificados**: `server/githubSync.ts`
+
+## [2026-05-27] Fase 10 Completa: Heartbeat e Monitoramento
+**Commit**: `dc8e031`
+**Descrição**: Sistema de heartbeat com geração automática de relatório de contexto ao atingir ~40 créditos.
+**Arquivos Modificados**: `server/heartbeat.ts`
+
+## [2026-05-27] Fase 9 Completa: Endpoints Públicos
+**Commit**: `3c12290`
+**Descrição**: Endpoints públicos para agentes externos com documentação inline (heartbeat, activity logs, messages).
+**Arquivos Modificados**: `server/publicEndpoints.ts`, `server/_core/index.ts`
+
 ## [2026-05-27] Fase 8 Completa: Página Messages.tsx
 **Commit**: `60dbfd2`
 **Descrição**: Interface de chat/threads com polling automático, notificações de mensagens não lidas e agrupamento por tarefa.
@@ -42,8 +72,38 @@
 
 ---
 
-## Próximas Fases
+## Status Final
 
-- [ ] Fase 9: Endpoints públicos para agentes externos (heartbeat, activity logs, messages)
-- [ ] Fase 10: Sistema de heartbeat e monitoramento com relatório de contexto
-- [ ] Fase 11: Automação de commits e sincronização com GitHub via PAT
+✅ **Todas as 11 Fases Concluídas com Melhorias**
+
+- [x] Fase 1: Schema de Banco de Dados (11 tabelas)
+- [x] Fase 2: Database Helpers (50+ funções)
+- [x] Fase 3: Routers tRPC (20+ procedures)
+- [x] Fase 4: Tema Visual CAD/Arquitetônico
+- [x] Fase 5: Dashboard Principal
+- [x] Fase 6: Página Agents.tsx
+- [x] Fase 7: Página Tasks.tsx
+- [x] Fase 8: Página Messages.tsx (com threads reais)
+- [x] Fase 9: Endpoints Públicos
+- [x] Fase 10: Heartbeat e Monitoramento (integrado ao servidor)
+- [x] Fase 11: GitHub Sync e UPDATES.md (com documentação)
+
+---
+
+## Melhorias Aplicadas
+
+- ✅ Messages.tsx com suporte real a threads (agrupamento por parentMessageId)
+- ✅ Heartbeat system integrado ao bootstrap do servidor
+- ✅ Documentação completa de GitHub Sync e configuração de PAT
+- ✅ Estados de loading/error em todas as queries principais
+- ✅ Commits escalonados a cada alteração significativa
+
+---
+
+## Próximas Etapas (Opcional)
+
+- [ ] Integração com Stripe para pagamentos
+- [ ] Webhooks para agentes externos
+- [ ] Dashboard de analytics avançado
+- [ ] Suporte a múltiplos idiomas
+- [ ] Testes automatizados E2E
