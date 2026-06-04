@@ -13,12 +13,12 @@
 - [x] Fase 6: Página Agents.tsx com listagem em cards CAD, modal de criação, botões pausar/retomar/deletar
 - [x] Fase 7: Página Tasks.tsx com tabela, filtros por status/prioridade/agente e paginação
 
-## Fases em Progresso
+## Fases Concluídas (Final)
 
-- [ ] Fase 8: Página Messages.tsx com interface de chat/threads
-- [ ] Fase 9: Endpoints públicos para agentes externos (heartbeat, activity logs, messages)
-- [ ] Fase 10: Sistema de heartbeat e monitoramento com relatório de contexto
-- [ ] Fase 11: Arquivo UPDATES.md com automação de commits
+- [x] Fase 8: Página Messages.tsx com interface de chat/threads, polling automático
+- [x] Fase 9: Endpoints públicos para agentes externos (heartbeat, activity logs, messages)
+- [x] Fase 10: Sistema de heartbeat e monitoramento com relatório de contexto automático
+- [x] Fase 11: Arquivo UPDATES.md com automação de commits via PAT
 
 ## Observações
 
