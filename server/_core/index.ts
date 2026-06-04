@@ -9,6 +9,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import publicEndpoints from "../publicEndpoints";
+import { startHeartbeatSystem, stopHeartbeatSystem } from "../heartbeat";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -63,6 +64,19 @@ async function startServer() {
 
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
+    
+    // Iniciar sistema de heartbeat e monitoramento
+    startHeartbeatSystem();
+    
+    // Parar heartbeat ao encerrar o servidor
+    process.on("SIGTERM", () => {
+      console.log("[Server] SIGTERM recebido, encerrando...");
+      stopHeartbeatSystem();
+      server.close(() => {
+        console.log("[Server] Servidor encerrado");
+        process.exit(0);
+      });
+    });
   });
 }
 
