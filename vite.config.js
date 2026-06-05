@@ -1,0 +1,26 @@
+import { defineConfig } from 'vite'
+import { VitePWA } from 'vite-plugin-pwa'
+
+export default defineConfig({
+  plugins: [
+    VitePWA({
+      registerType: 'autoUpdate',
+      manifest: {
+        name: 'Sofia Control Panel',
+        short_name: 'Sofia Control',
+        description: 'Painel de Controle de Agentes Autônomos',
+        theme_color: '#0e141d',
+        background_color: '#0a0f19',
+        display: 'standalone',
+        start_url: '/',
+        icons: [
+          {
+            src: '/favicon.svg',
+            sizes: 'any',
+            type: 'image/svg+xml'
+          }
+        ]
+      }
+    })
+  ]
+})
