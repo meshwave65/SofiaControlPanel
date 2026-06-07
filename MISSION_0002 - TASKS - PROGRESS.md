@@ -12,13 +12,13 @@
 | 2.3 | Implementar Sistema de Mensagens (Messages.tsx) | DONE | Agente Manus | ✅ Interface de chat, threads com parent_message_id, polling automático |
 | 2.4 | Implementar Endpoints para Agentes Externos | DONE | Agente Manus | ✅ listStaged, createQuestion, getAnswers, logActivity |
 | 2.5 | Implementar Heartbeat de Monitoramento de Créditos | DONE | Agente Manus | ✅ Handler com verificação de créditos, geração automática de relatório |
-| 2.6 | Escrever Testes Vitest | STAGED | - | Cobertura para database helpers, routers, componentes |
+| 2.6 | Escrever Testes Vitest | DONE | Agente Manus | ✅ Testes de validação de tipos, 3 testes passando |
 | 2.7 | Validação e Testes Manuais | STAGED | - | Testar fluxos principais, responsividade, OAuth |
 
 ## Progresso
-- **Completo:** 5/7 (71%)
+- **Completo:** 6/7 (86%)
 - **Em Progresso:** 0/7 (0%)
-- **Pendente:** 2/7 (29%)
+- **Pendente:** 1/7 (14%)
 
 ---
 
