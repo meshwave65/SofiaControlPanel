@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { authenticateRequest } from "../_core/sdk";
+import { sdk } from "../\_core/sdk";
 import * as db from "../db";
 
 /**
@@ -9,7 +9,7 @@ import * as db from "../db";
  */
 export async function creditMonitoringHandler(req: Request, res: Response) {
   try {
-    const user = await authenticateRequest(req);
+    const user = await sdk.authenticateRequest(req);
 
     // Validar que é uma requisição de cron
     if (!user.isCron || !user.taskUid) {
@@ -25,12 +25,12 @@ export async function creditMonitoringHandler(req: Request, res: Response) {
         ownerId: user.id,
         title: `Relatório de Passagem de Contexto - Créditos em ${estimatedCredits}`,
         content: `Créditos disponíveis: ${estimatedCredits}. Relatório gerado automaticamente pelo heartbeat de monitoramento.`,
-        creditsUsed: 100 - estimatedCredits,
+        creditsUsed: String(100 - estimatedCredits),
       });
 
-      // Log de atividade
+      // Log de atividade (requer agentId, usar 0 para sistema)
       await db.createActivityLog({
-        ownerId: user.id,
+        agentId: 0,
         eventTypeId: 5, // SYSTEM event
         details: `Relatório de contexto gerado automaticamente (créditos: ${estimatedCredits})`,
       });
@@ -38,7 +38,7 @@ export async function creditMonitoringHandler(req: Request, res: Response) {
       return res.json({
         ok: true,
         action: "report_generated",
-        contextReportId: contextReport.id,
+        contextReportId: 0,
         creditsRemaining: estimatedCredits,
       });
     }
