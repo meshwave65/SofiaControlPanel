@@ -18,6 +18,8 @@
       --success: #22c55e;
       --warning: #eab308;
       --danger: #ef4444;
+      --staged: #4ea1ff;
+      --respondida: #a855f7;
     }
     
     * { box-sizing: border-box; margin:0; padding:0; }
@@ -131,6 +133,9 @@
     .status-paused { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
     .status-progress { background: rgba(234, 179, 8, 0.15); color: var(--warning); }
     .status-done { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+    .status-respondida { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
+    .status-staged { background: rgba(78, 161, 255, 0.15); color: var(--accent); }
+    .status-fail { background: rgba(0, 0, 0, 0.4); color: #ff4444; border: 1px solid #ff4444; }
     
     .card-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; }
     
@@ -140,6 +145,7 @@
       border-radius: 12px;
       font-size: 14px;
       border-left: 3px solid var(--accent);
+      white-space: pre-wrap;
     }
 
     textarea {
@@ -194,9 +200,32 @@
       color: #000;
       font-weight: bold;
     }
+
+    .loading-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(10, 15, 25, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      display: none;
+    }
+    .loading-overlay.active { display: flex; }
+
+    .subtask-indicator {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 8px;
+      display: block;
+    }
   </style>
 </head>
 <body>
+
+<div id="loading" class="loading-overlay">
+  <div style="color: var(--accent); font-weight: bold;">Carregando...</div>
+</div>
 
 <nav>
   <h1>SOFIA CONTROL</h1>
@@ -207,7 +236,7 @@
   <div class="tab active" id="dashboard-tab">
     <div class="section-title">
       <span>🚀 Missões Ativas</span>
-      <span style="font-size: 14px; color: var(--accent);">Ver todas</span>
+      <span style="font-size: 14px; color: var(--accent); cursor: pointer;" onclick="app.fetchData()">Atualizar</span>
     </div>
     <div id="mission-list">
       <!-- Injetado via JS -->
@@ -223,7 +252,7 @@
 
   <!-- AGENTES -->
   <div class="tab" id="agents-tab">
-    <div class="section-title">🤖 Agentes Online (18)</div>
+    <div class="section-title">🤖 Agentes Online</div>
     <div id="agent-list">
       <!-- Injetado via JS -->
     </div>
@@ -247,23 +276,95 @@
 </div>
 
 <script>
+  const API_BASE = 'https://sofia-api.meshwave.com.br/api/v1';
+
   const app = {
     state: {
       activeTab: 'dashboard',
-      missions: [
-        { id: 87, title: 'Otimizar AppAndroidSWE', status: 'PAUSED', agent: 'Manus #04', time: 'há 8 min', detail: 'Dúvida: Devo usar Bottom Navigation ou manter Tabs no topo?', type: 'UI/UX' },
-        { id: 88, title: 'Migração de Banco de Dados', status: 'PROGRESS', agent: 'Manus #01', time: 'há 2 min', detail: 'Sincronizando tabelas de usuários...', type: 'Backend' },
-        { id: 89, title: 'Auditoria de Segurança', status: 'STAGED', agent: 'Aguardando...', time: 'agora', detail: 'Análise de vulnerabilidades nos endpoints da API.', type: 'Security' }
-      ],
-      agents: [
-        { name: 'Manus #01', type: 'DevOps', status: 'Online' },
-        { name: 'Manus #02', type: 'Frontend', status: 'Online' },
-        { name: 'Manus #04', type: 'Android', status: 'Online' }
-      ]
+      missions: [],
+      agents: [],
+      isLoading: false
     },
 
-    init() {
+    async init() {
+      await this.fetchData();
       this.render();
+      setInterval(() => this.fetchData(), 30000);
+    },
+
+    setLoading(loading) {
+      this.state.isLoading = loading;
+      document.getElementById('loading').classList.toggle('active', loading);
+    },
+
+    async fetchData() {
+      this.setLoading(true);
+      try {
+        const response = await fetch(`${API_BASE}/tasks/`);
+        const data = await response.json();
+        
+        // Mapeia todas as tarefas para facilitar o acesso
+        const allTasks = data;
+
+        // Extrair agentes únicos das tarefas
+        const agentMap = new Map();
+        allTasks.forEach(t => {
+          if (t.persona_id) {
+            agentMap.set(t.persona_id, {
+              id: t.persona_id,
+              name: `Agente #${t.persona_id}`,
+              status: 'Ativo',
+              lastSeen: t.updated_at
+            });
+          }
+        });
+        this.state.agents = Array.from(agentMap.values());
+        
+        // Filtra missões mestres (parent_task_id null)
+        this.state.missions = allTasks.filter(t => t.parent_task_id === null).map(t => {
+          // Busca subtarefas vinculadas a esta missão
+          const subtasks = allTasks.filter(st => st.parent_task_id === t.task_id);
+          
+          return {
+            id: t.task_id,
+            title: t.title || t.title_entry?.title || 'Missão #' + t.task_id,
+            status: this.mapStatus(t.status || t.status_id),
+            agent: t.persona_id ? `Agente #${t.persona_id}` : 'Sistema',
+            time: this.formatTime(t.updated_at),
+            detail: (t.blocks && t.blocks.length > 0) ? t.blocks[0].content : (t.description || 'Aguardando processamento...'),
+            type: 'MISSÃO',
+            subtaskCount: subtasks.length,
+            subtasks: subtasks.map(st => ({
+              id: st.task_id,
+              title: st.title_entry?.title || 'Subtarefa',
+              status: this.mapStatus(st.status || st.status_id)
+            }))
+          };
+        });
+      } catch (error) {
+        console.error('API Error:', error);
+      } finally {
+        this.setLoading(false);
+        this.render();
+      }
+    },
+
+    mapStatus(statusId) {
+      const map = {
+        'STAGED': 'STAGED', 'PROGRESS': 'PROGRESS', 'PAUSED': 'PAUSED', 'DONE': 'DONE', 'FAIL': 'FAIL', 'RESPONDIDA': 'RESPONDIDA',
+        100: 'STAGED', 110: 'PROGRESS', 120: 'PAUSED', 130: 'DONE', 200: 'FAIL', 9: 'RESPONDIDA',
+        1: 'STAGED', 2: 'PROGRESS', 3: 'DONE', 4: 'PAUSED', 5: 'FAIL'
+      };
+      return map[statusId] || 'UNKNOWN';
+    },
+
+    formatTime(dateStr) {
+      if (!dateStr) return '---';
+      const date = new Date(dateStr);
+      const diff = Math.round((new Date() - date) / 60000);
+      if (diff < 1) return 'agora';
+      if (diff < 60) return `há ${diff} min`;
+      return date.toLocaleDateString();
     },
 
     setTab(tabId) {
@@ -272,21 +373,22 @@
     },
 
     render() {
-      // Tabs
       document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
       document.getElementById(`${this.state.activeTab}-tab`).classList.add('active');
 
-      // Nav
       document.querySelectorAll('.nav-item').forEach((el, idx) => {
         const tabs = ['dashboard', 'new-mission', 'agents'];
         el.classList.toggle('active', tabs[idx] === this.state.activeTab);
       });
 
-      // Mission List
       if (this.state.activeTab === 'dashboard') {
         const list = document.getElementById('mission-list');
+        if (this.state.missions.length === 0) {
+          list.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted)">Nenhuma missão encontrada.</div>';
+          return;
+        }
         list.innerHTML = this.state.missions.map(m => `
-          <div class="task-card" onclick="app.viewMissionDetail(${m.id})">
+          <div class="task-card">
             <div class="card-header">
               <div>
                 <div style="font-size: 10px; color: var(--accent); font-weight: 700; margin-bottom: 4px;">${m.type}</div>
@@ -295,68 +397,207 @@
               <span class="status-badge status-${m.status.toLowerCase()}">${m.status}</span>
             </div>
             <div class="card-meta">${m.agent} • ${m.time}</div>
-            <div class="card-content">
-              ${m.detail}
-            </div>
-            <div style="margin-top: 15px; display: flex; gap: 8px;">
-               <button class="btn-action" style="background: var(--border); color: #fff; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; flex: 1;">Ver Logs</button>
-               <button class="btn-action" style="background: var(--accent); color: #000; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; flex: 1; font-weight: 600;">Intervir</button>
+            <div class="card-content">${m.detail.substring(0, 150)}${m.detail.length > 150 ? '...' : ''}</div>
+            
+            ${m.subtaskCount > 0 ? `
+              <span class="subtask-indicator">📦 ${m.subtaskCount} subtarefa(s) vinculada(s)</span>
+            ` : ''}
+
+            <div style="margin-top: 15px; display: flex; gap: 8px; flex-wrap: wrap;">
+               <button onclick="app.viewDetail(${m.id})" style="background: var(--border); color: #fff; border: none; padding: 10px; border-radius: 8px; font-size: 12px; flex: 1; min-width: 100px; cursor:pointer;">Ver Detalhes</button>
+               <button onclick="app.changeStatus(${m.id}, '${m.status}')" style="background: var(--card); color: var(--accent); border: 1px solid var(--accent); padding: 10px; border-radius: 8px; font-size: 12px; flex: 1; min-width: 100px; cursor:pointer;">Mudar Status</button>
+               <button onclick="app.intervene(${m.id})" style="background: var(--accent); color: #000; border: none; padding: 10px; border-radius: 8px; font-size: 12px; width: 100%; font-weight: 600; cursor:pointer; margin-top: 4px;">Intervir</button>
             </div>
           </div>
         `).join('');
-      }
-
-      // Agent List
-      if (this.state.activeTab === 'agents') {
+      } else if (this.state.activeTab === 'agents') {
         const list = document.getElementById('agent-list');
+        if (this.state.agents.length === 0) {
+          list.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted)">Nenhum agente detectado no sistema.</div>';
+          return;
+        }
         list.innerHTML = this.state.agents.map(a => `
           <div class="agent-item">
-            <div class="agent-avatar">${a.name.split('#')[1] || 'A'}</div>
-            <div>
-              <div style="font-weight:600">${a.name}</div>
-              <div style="font-size:12px; color:var(--text-muted)">${a.type} • ${a.status}</div>
+            <div class="agent-avatar">${a.id}</div>
+            <div style="flex: 1;">
+              <div style="font-weight: 600;">${a.name}</div>
+              <div style="font-size: 12px; color: var(--text-muted);">Visto pela última vez: ${this.formatTime(a.lastSeen)}</div>
             </div>
+            <div style="font-size: 10px; color: var(--success); font-weight: 700;">● ${a.status}</div>
           </div>
         `).join('');
       }
     },
 
-    submitMission() {
-      const val = document.getElementById('missionInput').value;
-      if (val) {
-        const newId = this.state.missions.length > 0 ? Math.max(...this.state.missions.map(m => m.id)) + 1 : 1;
-        this.state.missions.unshift({
-          id: newId,
-          title: val.split('\n')[0].substring(0, 30) + '...',
-          status: 'STAGED',
-          agent: 'Aguardando...',
-          time: 'agora',
-          detail: val,
-          type: 'General'
+    async submitMission() {
+      const val = document.getElementById('missionInput').value.trim();
+      if (!val) return alert('Descreva a missão.');
+      
+      this.setLoading(true);
+      try {
+        // 1. Criar a Task conforme o Schema TaskCreate (espera apenas description e client_request_uuid opcional)
+        // O status_id é definido automaticamente como PENDING_STATUS_ID (1) no service
+        const res = await fetch(`${API_BASE}/tasks/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            description: val 
+          })
         });
-        alert('Missão enviada para a rede SOFIA!');
+        
+        if (!res.ok) {
+          const errText = await res.text();
+          console.error('API Error Response:', errText);
+          let errMsg = 'Erro na API (' + res.status + ')';
+          try {
+            const errData = JSON.parse(errText);
+            errMsg = errData.detail || errMsg;
+          } catch(e) {}
+          throw new Error(errMsg);
+        }
+        const task = await res.json();
+        console.log('Task created:', task);
+        
+        // Pequeno delay para garantir que a task foi persistida antes das sub-chamadas
+        await new Promise(r => setTimeout(r, 500));
+
+        // 2. Definir o Título (opcional mas recomendado para missões)
+        try {
+          const titleRes = await fetch(`${API_BASE}/tasks/${task.task_id}/title`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: val.split('\n')[0].substring(0, 50) })
+          });
+          console.log('Title response status:', titleRes.status);
+        } catch (e) {
+          console.warn('Erro ao definir título, mas a tarefa foi criada:', e);
+        }
+        
+        // 3. Atualizar o Status para STAGED se for uma Missão
+        // Isso separa as missões das tarefas comuns (status 1)
+        try {
+          const patchRes = await fetch(`${API_BASE}/tasks/${task.task_id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'STAGED' })
+          });
+          if (!patchRes.ok) {
+            const err = await patchRes.text();
+            console.warn('Erro ao atualizar status:', err);
+          } else {
+            console.log('Status atualizado para STAGED com sucesso');
+          }
+        } catch (e) {
+          console.warn('Erro ao atualizar status para STAGED:', e);
+        }
+
+        alert('Missão lançada com sucesso no Banco de Dados! ID: ' + task.task_id);
         document.getElementById('missionInput').value = '';
+        await this.fetchData();
         this.setTab('dashboard');
+      } catch (e) {
+        console.error('Submit Mission Error:', e);
+        alert('Erro ao lançar missão: ' + e.message);
+      } finally {
+        this.setLoading(false);
       }
     },
 
-    viewMissionDetail(id) {
-      console.log('Viewing mission:', id);
+    async viewDetail(id) {
+      this.setLoading(true);
+      try {
+        const res = await fetch(`${API_BASE}/tasks/${id}`);
+        const task = await res.json();
+        
+        const blocksRes = await fetch(`${API_BASE}/tasks/${id}/blocks`);
+        const blocks = await blocksRes.json();
+        
+        const historyText = blocks.map(b => `[${b.author_id}]: ${b.content}`).join('\n\n');
+        
+        // Exibir subtarefas se houver
+        const subtasksText = task.children && task.children.length > 0 
+          ? '\n\nSubtarefas:\n' + task.children.map(c => `- #${c.task_id}: ${this.mapStatus(c.status_id)}`).join('\n')
+          : '';
+
+        alert(`Detalhes da Missão #${id} (${this.mapStatus(task.status_id)})\n\n${historyText}${subtasksText}`);
+      } catch (e) {
+        alert('Erro ao carregar detalhes.');
+      } finally {
+        this.setLoading(false);
+      }
+    },
+
+    async intervene(id) {
+      const msg = prompt("Digite sua instrução para intervir nesta missão:");
+      if (!msg) return;
+      
+      this.setLoading(true);
+      try {
+        await fetch(`${API_BASE}/tasks/${id}/blocks`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            sequence: 999, // Será ajustado pelo backend
+            author_id: 'User-Intervention', 
+            block_type: 'Instruction', 
+            content: msg 
+          })
+        });
+        alert("Intervenção registrada no banco de dados!");
+        await this.fetchData();
+      } catch (e) {
+        alert("Erro ao enviar intervenção.");
+      } finally {
+        this.setLoading(false);
+      }
+    },
+
+    async changeStatus(id, currentStatus) {
+      const statusOptions = {
+        'STAGED': 'STAGED',
+        'PROGRESS': 'PROGRESS',
+        'PAUSED': 'PAUSED',
+        'DONE': 'DONE',
+        'FAIL': 'FAIL',
+        'RESPONDIDA': 'RESPONDIDA'
+      };
+      
+      const optionsText = Object.keys(statusOptions).join(', ');
+      const newStatusName = prompt(`Status atual: ${currentStatus}\nEscolha o novo status (${optionsText})`);
+      
+      if (!newStatusName) return;
+      
+      const newStatusValue = statusOptions[newStatusName.toUpperCase()];
+      
+      if (newStatusValue === undefined) {
+        alert('Status inválido. Use um dos seguintes: ' + optionsText);
+        return;
+      }
+      
+      this.setLoading(true);
+      try {
+        const res = await fetch(`${API_BASE}/tasks/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatusValue })
+        });
+        
+        if (!res.ok) {
+          const err = await res.text();
+          throw new Error(`Erro na API: ${err}`);
+        }
+        
+        alert(`Status da missão #${id} alterado para ${newStatusName.toUpperCase()}`);
+        await this.fetchData();
+      } catch (e) {
+        alert('Erro ao alterar status: ' + e.message);
+      } finally {
+        this.setLoading(false);
+      }
     }
   };
 
   app.init();
-
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js').then(reg => {
-        console.log('SW registered:', reg);
-      }).catch(err => {
-        console.log('SW registration failed:', err);
-      });
-    });
-  }
 </script>
-
 </body>
 </html>
