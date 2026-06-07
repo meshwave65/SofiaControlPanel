@@ -334,7 +334,7 @@ adminProcedure           // Requer role: admin ou owner (create, update, delete)
 
 ### GitHub
 - **URL**: https://github.com/meshwave65/SofiaControlPanel
-- **PAT**: `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`
+- **PAT**: [REDACTED - Use o PAT fornecido separadamente]
   - Permissões: repo, workflow, admin:repo_hook
   - Status: ✅ Válida
 
@@ -514,7 +514,7 @@ git push origin main
 
 ### Arquivo: PAT do Repositório
 ```
-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
+[REDACTED - Use o PAT fornecido separadamente]
 ```
 
 ### Arquivo: URL do Repositório
