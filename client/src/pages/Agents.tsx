@@ -16,6 +16,9 @@ const createAgentSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   description: z.string().optional(),
   version: z.string().optional(),
+  manusAccount: z.string().optional(),
+  manusPassword: z.string().optional(),
+  manusToken: z.string().optional(),
 });
 
 type CreateAgentInput = z.infer<typeof createAgentSchema>;
@@ -59,6 +62,9 @@ export default function Agents() {
       name: "",
       description: "",
       version: "1.0.0",
+      manusAccount: "",
+      manusPassword: "",
+      manusToken: "",
     },
   });
 
@@ -136,8 +142,50 @@ export default function Agents() {
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
-                    Criar Agente
+                  <div className="border-t border-foreground/10 pt-4 mt-4">
+                    <h4 className="text-sm font-semibold mb-3 text-accent">Credenciais Manus</h4>
+                    <FormField
+                      control={form.control}
+                      name="manusAccount"
+                      render={({ field }) => (
+                        <FormItem className="mb-3">
+                          <FormLabel>Conta Manus (Email)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="email@manus.im" {...field} className="bg-input border-foreground/30" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="manusPassword"
+                      render={({ field }) => (
+                        <FormItem className="mb-3">
+                          <FormLabel>Senha</FormLabel>
+                          <FormControl>
+                            <Input type="password" placeholder="••••••••" {...field} className="bg-input border-foreground/30" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="manusToken"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Token (Opcional)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Token de acesso" {...field} className="bg-input border-foreground/30" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <Button type="submit" className="w-full bg-accent text-accent-foreground hover:bg-accent/90 mt-6">
+                    Criar Agente com Credenciais
                   </Button>
                 </form>
               </Form>

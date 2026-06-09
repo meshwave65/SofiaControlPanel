@@ -31,6 +31,9 @@ export const appRouter = router({
         name: z.string().min(1),
         description: z.string().optional(),
         version: z.string().optional(),
+        manusAccount: z.string().optional(),
+        manusPassword: z.string().optional(),
+        manusToken: z.string().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         return db.createAgent({
@@ -38,6 +41,9 @@ export const appRouter = router({
           name: input.name,
           description: input.description,
           version: input.version,
+          manusAccount: input.manusAccount,
+          manusPassword: input.manusPassword,
+          manusToken: input.manusToken,
         });
       }),
 
@@ -68,8 +74,11 @@ export const appRouter = router({
   // ============================================
   tasks: router({
     list: protectedProcedure.query(async ({ ctx }) => {
-      // TODO: Implementar filtros por status, prioridade, agente
-      return db.getRecentActivityLogs(100);
+      return db.getAllTasks(ctx.user.id);
+    }),
+
+    listAll: protectedProcedure.query(async ({ ctx }) => {
+      return db.getAllTasks(ctx.user.id);
     }),
 
     create: protectedProcedure
@@ -79,6 +88,7 @@ export const appRouter = router({
         description: z.string().optional(),
         statusId: z.number(),
         priorityId: z.number(),
+        parentTaskId: z.number().optional(),
         dueDate: z.date().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
@@ -89,6 +99,7 @@ export const appRouter = router({
           description: input.description,
           statusId: input.statusId,
           priorityId: input.priorityId,
+          parentTaskId: input.parentTaskId,
           dueDate: input.dueDate,
         });
       }),
