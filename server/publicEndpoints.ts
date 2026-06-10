@@ -58,9 +58,12 @@ router.post("/heartbeat", async (req, res) => {
     const eventType = await db.getOrCreateActivityEventType("heartbeat");
     await db.createActivityLog({
       agentId,
-      eventTypeId: eventType.id,
-      description: `Agente enviou heartbeat com status: ${status || "online"}`,
-      metadata: JSON.stringify({ status: status || "online", timestamp: new Date().toISOString() }),
+      eventTypeId: event.id,
+      details: JSON.stringify({ 
+        description: `Agente enviou heartbeat com status: ${status || "online"}`,
+        status: status || "online", 
+        timestamp: new Date().toISOString() 
+      }),
     });
 
     res.json({
@@ -128,8 +131,7 @@ router.post("/activity", async (req, res) => {
       agentId,
       taskId: taskId || undefined,
       eventTypeId: event.id,
-      description,
-      metadata: metadata ? JSON.stringify(metadata) : undefined,
+      details: JSON.stringify({ description, ...metadata }),
     });
 
     res.json({

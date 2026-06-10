@@ -9,8 +9,9 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { creditMonitoringHandler } from "../handlers/creditMonitoringHandler";
+import publicRouter from "../publicEndpoints";
 
-function isPortAvailable(port: number): Promise<boolean> {
+async function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
     const server = net.createServer();
     server.listen(port, () => {
@@ -39,6 +40,9 @@ async function startServer() {
   registerOAuthRoutes(app);
   // Scheduled/Heartbeat endpoints (must be before tRPC)
   app.post("/api/scheduled/creditMonitoring", creditMonitoringHandler);
+  
+  // Public API for external agents
+  app.use("/api/public", publicRouter);
 
   // tRPC API
   app.use(
