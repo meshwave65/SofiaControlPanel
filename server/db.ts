@@ -304,3 +304,54 @@ export async function getOrCreateActivityEventType(name: string) {
   const result = await db.insert(activityEventTypes).values({ name });
   return { id: result[0].insertId, name };
 }
+
+// ============================================
+// BATCH HELPERS
+// ============================================
+
+export async function getAllAgents() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(agents).orderBy(desc(agents.createdAt));
+}
+
+export async function getAllTasks() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(tasks).orderBy(desc(tasks.createdAt));
+}
+
+// ============================================
+// SCHEDULED TASKS HELPERS
+// ============================================
+
+export async function createScheduledTask(data: { agentId: number; taskId: number; nextRun: Date; frequency?: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Note: scheduledTasks table não foi criada no schema
+  // Esta é uma função placeholder para evitar erros de compilação
+  console.log("[DB] createScheduledTask called but table not implemented:", data);
+  return { success: false };
+}
+
+export async function getActiveScheduledTasks() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Note: scheduledTasks table não foi criada no schema
+  // Esta é uma função placeholder para evitar erros de compilação
+  return [];
+}
+
+export async function updateScheduledTaskNextRun(id: number, nextRun: Date) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Note: scheduledTasks table não foi criada no schema
+  // Esta é uma função placeholder para evitar erros de compilação
+  console.log("[DB] updateScheduledTaskNextRun called but table not implemented:", { id, nextRun });
+  return { success: false };
+}

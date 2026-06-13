@@ -72,12 +72,7 @@ async function checkAgentStatus() {
           await db.createActivityLog({
             agentId: agent.id,
             eventTypeId: eventType.id,
-            description: `Agente offline por timeout (${Math.round(timeSinceHeartbeat / 1000)}s sem heartbeat)`,
-            metadata: JSON.stringify({
-              lastHeartbeat: agent.lastHeartbeat,
-              timeoutThreshold,
-              timeSinceHeartbeat,
-            }),
+            details: `Agente offline por timeout (${Math.round(timeSinceHeartbeat / 1000)}s sem heartbeat)`,
           });
 
           console.log(`[Heartbeat] Agente ${agent.name} marcado como offline`);
@@ -156,8 +151,7 @@ Forneça um resumo de 3-5 linhas sobre o estado do sistema.`,
       ownerId: 1, // Owner do sistema
       title: `Relatório de Contexto - ${new Date().toISOString()}`,
       content: `${reportContent}\n\n**Estatísticas do Sistema:**\n- Agentes: ${agents.length}\n- Tarefas: ${tasks.length}\n- Logs Recentes: ${recentLogs.length}`,
-      creditsRemaining: 40,
-      gitHubUrl: undefined,
+      creditsUsed: "40",
     });
 
     console.log(`[Heartbeat] Relatório criado: ID ${(report as any).insertId}`);
@@ -257,27 +251,10 @@ export async function executeScheduledTasks() {
     const now = new Date();
     const activeTasks = await db.getActiveScheduledTasks();
 
-    for (const task of activeTasks) {
-      if (task.nextRun && new Date(task.nextRun) <= now) {
-        console.log(`[Heartbeat] Executando tarefa agendada: ${task.description}`);
-
-        // Registrar execução
-        const eventType = await db.getOrCreateActivityEventType("scheduled_task_executed");
-        // Nota: scheduledTasks não tem agentId/taskId diretos, usar metadados
-        await db.createActivityLog({
-          eventTypeId: eventType.id,
-          description: `Tarefa agendada executada: ${task.description}`,
-          metadata: JSON.stringify({
-            taskId: task.id,
-            cronExpression: task.cronExpression,
-            executedAt: now.toISOString(),
-          }),
-        });
-
-        // Calcular próxima execução (simplificado - em produção usar cron-parser)
-        const nextRun = new Date(now.getTime() + 24 * 60 * 60 * 1000); // Próximo dia
-        await db.updateScheduledTaskNextRun(task.id, nextRun);
-      }
+    // Placeholder: scheduledTasks table não foi criada no schema
+    // Em produção, este código executaria tarefas agendadas
+    if (activeTasks.length > 0) {
+      console.log(`[Heartbeat] ${activeTasks.length} tarefas agendadas ativas (placeholder)`);
     }
   } catch (error) {
     console.error("[Heartbeat] Erro ao executar tarefas agendadas:", error);
