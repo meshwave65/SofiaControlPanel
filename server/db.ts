@@ -91,7 +91,15 @@ export async function getUserByOpenId(openId: string) {
 // AGENTS HELPERS
 // ============================================
 
-export async function createAgent(data: { ownerId: number; name: string; description?: string; version?: string }) {
+export async function createAgent(data: { 
+  ownerId: number; 
+  name: string; 
+  description?: string; 
+  version?: string;
+  manusAccount?: string;
+  manusPassword?: string;
+  manusToken?: string;
+}) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
@@ -100,6 +108,9 @@ export async function createAgent(data: { ownerId: number; name: string; descrip
     name: data.name,
     description: data.description,
     version: data.version,
+    manusAccount: data.manusAccount,
+    manusPassword: data.manusPassword,
+    manusToken: data.manusToken,
     status: "offline",
   });
   
@@ -139,7 +150,17 @@ export async function updateAgentHeartbeat(id: number) {
 // TASKS HELPERS
 // ============================================
 
-export async function createTask(data: { agentId?: number; createdBy: number; title: string; description?: string; statusId: number; priorityId: number; dueDate?: Date }) {
+export async function createTask(data: { 
+  agentId?: number; 
+  createdBy: number; 
+  title: string; 
+  description?: string; 
+  statusId: number; 
+  priorityId: number; 
+  parentTaskId?: number;
+  dueDate?: Date;
+  completedAt?: Date;
+}) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
@@ -230,6 +251,13 @@ export async function getRecentActivityLogs(limit: number = 50) {
   if (!db) return [];
   
   return db.select().from(activityLogs).orderBy(desc(activityLogs.createdAt)).limit(limit);
+}
+
+export async function getAllTasks(ownerId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(tasks).where(eq(tasks.createdBy, ownerId)).orderBy(desc(tasks.createdAt));
 }
 
 // ============================================

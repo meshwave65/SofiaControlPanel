@@ -32,7 +32,7 @@ export default function Tasks() {
   const [filterPriority, setFilterPriority] = useState<string>("all");
 
   // Queries
-  const tasksQuery = trpc.tasks.list.useQuery(undefined, {
+  const tasksQuery = trpc.tasks.listAll.useQuery(undefined, {
     enabled: isAuthenticated,
   });
 
@@ -98,7 +98,7 @@ export default function Tasks() {
           <div>
             <h1 className="text-4xl font-bold mb-2">Gerenciamento de Tarefas</h1>
             <p className="text-muted-foreground">
-              Total de tarefas: <span className="text-accent font-semibold">0</span>
+              Total de tarefas: <span className="text-accent font-semibold">{tasksQuery.isLoading ? "..." : tasksQuery.data?.length || 0}</span>
             </p>
           </div>
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -244,14 +244,54 @@ export default function Tasks() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  <TableRow className="border-b border-foreground/10">
-                    <TableCell className="text-muted-foreground">-</TableCell>
-                    <TableCell className="text-muted-foreground">Nenhuma tarefa criada</TableCell>
-                    <TableCell className="text-muted-foreground">-</TableCell>
-                    <TableCell className="text-muted-foreground">-</TableCell>
-                    <TableCell className="text-muted-foreground">-</TableCell>
-                    <TableCell className="text-muted-foreground">-</TableCell>
-                  </TableRow>
+                  {tasksQuery.isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                        Carregando tarefas...
+                      </TableCell>
+                    </TableRow>
+                  ) : tasksQuery.data && tasksQuery.data.length > 0 ? (
+                    tasksQuery.data.map((task) => (
+                      <TableRow key={task.id} className="border-b border-foreground/10 hover:bg-foreground/5 transition-colors">
+                        <TableCell className="font-mono text-accent">#{task.id}</TableCell>
+                        <TableCell>
+                          <div className="font-semibold">{task.title}</div>
+                          {task.description && <div className="text-xs text-muted-foreground truncate max-w-xs">{task.description}</div>}
+                        </TableCell>
+                        <TableCell>{task.agentId ? `Agente #${task.agentId}` : "Não atribuído"}</TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-1 rounded text-xs font-bold ${
+                            task.statusId === 130 ? "bg-green-500/20 text-green-500" :
+                            task.statusId === 110 ? "bg-blue-500/20 text-blue-500" :
+                            task.statusId === 200 ? "bg-red-500/20 text-red-500" :
+                            "bg-accent/20 text-accent"
+                          }`}>
+                            {task.statusId === 100 ? "STAGED" : 
+                             task.statusId === 110 ? "PROGRESS" :
+                             task.statusId === 120 ? "PAUSED" :
+                             task.statusId === 130 ? "DONE" :
+                             task.statusId === 200 ? "FAIL" : `Status ${task.statusId}`}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          {task.priorityId === 1 ? "Baixa" : 
+                           task.priorityId === 2 ? "Média" : 
+                           task.priorityId === 3 ? "Alta" : "Crítica"}
+                        </TableCell>
+                        <TableCell>
+                          <Button variant="ghost" size="sm" className="text-accent hover:text-accent/80">
+                            Detalhes
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow className="border-b border-foreground/10">
+                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                        Nenhuma tarefa criada
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </div>

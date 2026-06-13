@@ -39,6 +39,9 @@ export const agents = mysqlTable(
     description: text("description"),
     status: mysqlEnum("status", ["online", "offline", "idle", "paused"]).default("offline").notNull(),
     version: varchar("version", { length: 64 }),
+    manusAccount: varchar("manusAccount", { length: 255 }),
+    manusPassword: varchar("manusPassword", { length: 255 }),
+    manusToken: text("manusToken"),
     lastHeartbeat: timestamp("lastHeartbeat"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -91,7 +94,9 @@ export const tasks = mysqlTable(
     description: text("description"),
     statusId: int("statusId").notNull(),
     priorityId: int("priorityId").notNull(),
+    parentTaskId: int("parentTaskId"),
     dueDate: timestamp("dueDate"),
+    completedAt: timestamp("completedAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },
@@ -115,6 +120,10 @@ export const tasks = mysqlTable(
       columns: [table.priorityId],
       foreignColumns: [taskPriorities.id],
     }).onDelete("restrict"),
+    parentTaskIdFk: foreignKey({
+      columns: [table.parentTaskId],
+      foreignColumns: [table.id],
+    }).onDelete("cascade"),
   })
 );
 
