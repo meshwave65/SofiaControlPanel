@@ -1,0 +1,8 @@
+# Tarefas: Missão 0006
+
+| ID | Tarefa | Status | Instância |
+| :--- | :--- | :--- | :--- |
+| 6.1 | Redesenhar formulário de criação de agentes com validação avançada | PROGRESS | Agente Manus |
+| 6.2 | Implementar cards de agentes com estatísticas e controles rápidos | STAGED | - |
+| 6.3 | Criar modal de detalhes e logs específicos por agente | STAGED | - |
+| 6.4 | Integrar feedback visual (loaders, toasts, animações) | STAGED | - |
