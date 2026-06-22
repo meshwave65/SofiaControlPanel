@@ -1,7 +1,7 @@
 # Missão 0006: Desenvolvimento da UI Avançada de Agentes
 
 **ID:** 0006
-**Status:** PROGRESS
+**Status:** DONE
 **Objetivo:** Criar uma interface avançada e intuitiva para a criação, configuração e monitoramento de agentes de controle.
 
 ## Descrição
