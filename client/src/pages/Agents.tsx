@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { trpc } from "@/lib/trpc";
-import { Plus, Pause, Play, X, Zap, Shield, Activity, Settings, Cpu, Terminal } from "lucide-react";
+import { Plus, Pause, Play, X, Zap, Shield, Activity, Settings, Cpu, Terminal, Info, History, Server, HardDrive } from "lucide-react";
 import { toast } from "sonner";
 
 const createAgentSchema = z.object({
@@ -45,6 +45,14 @@ export default function Agents() {
       toast.error(`Erro ao criar agente: ${error.message}`);
     },
   });
+
+  const [selectedAgent, setSelectedAgent] = useState<any>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+  const logsQuery = trpc.activityLogs.getByAgent.useQuery(
+    { agentId: selectedAgent?.id || 0 },
+    { enabled: !!selectedAgent && isDetailsOpen }
+  );
 
   const updateStatusMutation = trpc.agents.updateStatus.useMutation({
     onSuccess: () => {
@@ -322,8 +330,12 @@ export default function Agents() {
                       size="sm"
                       variant="outline"
                       className="w-9 h-9 p-0 flex items-center justify-center hover:bg-accent hover:text-accent-foreground"
+                      onClick={() => {
+                        setSelectedAgent(agent);
+                        setIsDetailsOpen(true);
+                      }}
                     >
-                      <Settings className="w-4 h-4" />
+                      <Info className="w-4 h-4" />
                     </Button>
                     <Button
                       size="sm"
@@ -356,6 +368,111 @@ export default function Agents() {
           )}
         </div>
       </div>
+
+      {/* Modal de Detalhes do Agente */}
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        <DialogContent className="bg-card border-2 border-foreground/20 max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold flex items-center gap-2 uppercase italic tracking-tighter">
+              <Server className="w-6 h-6 text-accent" />
+              Terminal de Diagnóstico: {selectedAgent?.name}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+            {/* Coluna de Informações */}
+            <div className="space-y-4">
+              <div className="bg-foreground/5 p-4 rounded-lg border border-foreground/10">
+                <h4 className="text-xs font-bold uppercase text-accent mb-3 flex items-center gap-2">
+                  <Info className="w-3 h-3" /> Especificações
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Versão:</span>
+                    <span className="font-mono">v{selectedAgent?.version}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Status:</span>
+                    <span className={`font-bold uppercase text-[10px] px-2 py-0.5 rounded ${selectedAgent?.status === 'online' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
+                      {selectedAgent?.status}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">ID Interno:</span>
+                    <span className="font-mono">#{selectedAgent?.id.toString().padStart(4, '0')}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-foreground/5 p-4 rounded-lg border border-foreground/10">
+                <h4 className="text-xs font-bold uppercase text-accent mb-3 flex items-center gap-2">
+                  <HardDrive className="w-3 h-3" /> Recursos
+                </h4>
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[10px] uppercase font-bold">
+                      <span>Carga de Processamento</span>
+                      <span>{selectedAgent?.status === 'online' ? '12%' : '0%'}</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-foreground/10 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-accent transition-all duration-1000" 
+                        style={{ width: selectedAgent?.status === 'online' ? '12%' : '0%' }}
+                      ></div>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[10px] uppercase font-bold">
+                      <span>Alocação de Memória</span>
+                      <span>{selectedAgent?.status === 'online' ? '45%' : '0%'}</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-foreground/10 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-accent transition-all duration-1000" 
+                        style={{ width: selectedAgent?.status === 'online' ? '45%' : '0%' }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Coluna de Logs/Atividade */}
+            <div className="md:col-span-2 space-y-4">
+              <div className="bg-black/40 p-4 rounded-lg border border-foreground/10 font-mono text-[11px] h-[400px] flex flex-col">
+                <h4 className="text-xs font-bold uppercase text-accent mb-3 flex items-center gap-2 font-sans">
+                  <History className="w-3 h-3" /> Console de Atividade em Tempo Real
+                </h4>
+                <div className="flex-1 overflow-y-auto space-y-2 custom-scrollbar pr-2">
+                  {logsQuery.isLoading ? (
+                    <p className="text-muted-foreground animate-pulse">Estabelecendo conexão com o kernel...</p>
+                  ) : logsQuery.data && logsQuery.data.length > 0 ? (
+                    logsQuery.data.map((log: any) => (
+                      <div key={log.id} className="border-l-2 border-accent/30 pl-3 py-1 hover:bg-accent/5 transition-colors">
+                        <span className="text-accent/60">[{new Date(log.createdAt).toLocaleTimeString()}]</span>
+                        <span className="text-foreground ml-2">{log.details || 'Evento de sistema registrado'}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <>
+                      <div className="text-green-500/50">[{new Date().toLocaleTimeString()}] SISTEMA INICIALIZADO...</div>
+                      <div className="text-green-500/50">[{new Date().toLocaleTimeString()}] AGUARDANDO COMANDOS DA CENTRAL...</div>
+                      <div className="text-muted-foreground italic mt-4">Nenhum log persistente encontrado para esta unidade.</div>
+                    </>
+                  )}
+                </div>
+                <div className="mt-4 pt-3 border-t border-foreground/10 flex gap-2">
+                  <Input 
+                    placeholder="Enviar comando direto..." 
+                    className="h-8 bg-transparent border-accent/30 text-[10px] focus-visible:ring-accent"
+                  />
+                  <Button size="sm" className="h-8 px-3 bg-accent text-accent-foreground text-[10px] font-bold">EXECUTAR</Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
