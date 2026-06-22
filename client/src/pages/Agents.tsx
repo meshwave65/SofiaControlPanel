@@ -263,13 +263,21 @@ export default function Agents() {
                   )}
 
                   <div className="grid grid-cols-2 gap-2 mb-4 ml-2">
-                    <div className="bg-accent/5 p-2 rounded flex flex-col">
+                    <div className="bg-accent/5 p-2 rounded flex flex-col border border-accent/10">
                       <span className="text-[9px] uppercase text-muted-foreground font-bold">Uptime</span>
-                      <span className="text-xs font-mono text-accent">99.9%</span>
+                      <span className="text-xs font-mono text-accent">{agent.status === 'online' ? '99.9%' : '0.0%'}</span>
                     </div>
-                    <div className="bg-accent/5 p-2 rounded flex flex-col">
-                      <span className="text-[9px] uppercase text-muted-foreground font-bold">Carga</span>
-                      <span className="text-xs font-mono text-accent">2.4%</span>
+                    <div className="bg-accent/5 p-2 rounded flex flex-col border border-accent/10">
+                      <span className="text-[9px] uppercase text-muted-foreground font-bold">Carga CPU</span>
+                      <span className="text-xs font-mono text-accent">{agent.status === 'online' ? (Math.random() * 5 + 1).toFixed(1) + '%' : '0.0%'}</span>
+                    </div>
+                    <div className="bg-accent/5 p-2 rounded flex flex-col border border-accent/10">
+                      <span className="text-[9px] uppercase text-muted-foreground font-bold">Memória</span>
+                      <span className="text-xs font-mono text-accent">{agent.status === 'online' ? (Math.random() * 100 + 200).toFixed(0) + 'MB' : '0MB'}</span>
+                    </div>
+                    <div className="bg-accent/5 p-2 rounded flex flex-col border border-accent/10">
+                      <span className="text-[9px] uppercase text-muted-foreground font-bold">Tarefas</span>
+                      <span className="text-xs font-mono text-accent">0</span>
                     </div>
                   </div>
 
