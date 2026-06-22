@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { trpc } from "@/lib/trpc";
-import { Plus, Pause, Play, X, Zap, Shield, Activity, Settings, Cpu, Terminal, Info, History, Server, HardDrive } from "lucide-react";
+import { Plus, Pause, Play, X, Zap, Shield, Activity, Settings, Cpu, Terminal, Info, History, Server, HardDrive, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
 const createAgentSchema = z.object({
@@ -216,7 +216,14 @@ export default function Agents() {
                       className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 h-12 text-lg font-bold"
                       disabled={createAgentMutation.isPending}
                     >
-                      {createAgentMutation.isPending ? "Inicializando Kernel..." : "Ativar Unidade de Controle"}
+                      {createAgentMutation.isPending ? (
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          <span>Inicializando Kernel...</span>
+                        </div>
+                      ) : (
+                        "Ativar Unidade de Controle"
+                      )}
                     </Button>
                     <Button 
                       type="button" 
@@ -445,7 +452,10 @@ export default function Agents() {
                 </h4>
                 <div className="flex-1 overflow-y-auto space-y-2 custom-scrollbar pr-2">
                   {logsQuery.isLoading ? (
-                    <p className="text-muted-foreground animate-pulse">Estabelecendo conexão com o kernel...</p>
+                    <div className="flex flex-col items-center justify-center h-full gap-2">
+                      <Loader2 className="w-6 h-6 text-accent animate-spin" />
+                      <p className="text-muted-foreground animate-pulse font-sans">Estabelecendo conexão segura com o kernel...</p>
+                    </div>
                   ) : logsQuery.data && logsQuery.data.length > 0 ? (
                     logsQuery.data.map((log: any) => (
                       <div key={log.id} className="border-l-2 border-accent/30 pl-3 py-1 hover:bg-accent/5 transition-colors">
