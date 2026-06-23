@@ -64,21 +64,24 @@ export default function Tasks() {
   });
 
   // Form
-  const form = useForm<CreateTaskInput>({
+  const form = useForm({
     resolver: zodResolver(createTaskSchema),
     defaultValues: {
       title: "",
       description: "",
       statusId: 1,
       priorityId: 1,
+      agentId: undefined,
+      dueDate: "",
     },
   });
 
-  const onSubmit = (data: CreateTaskInput) => {
+  const onSubmit = (data: any) => {
     createTaskMutation.mutate({
       ...data,
       statusId: parseInt(data.statusId.toString()),
       priorityId: parseInt(data.priorityId.toString()),
+      dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
     });
   };
 

@@ -54,7 +54,7 @@ export function stopHeartbeatSystem() {
  */
 async function checkAgentStatus() {
   try {
-    const agents = await db.getAllAgents();
+    const agents = await db.getAllAgentsGlobal();
     const now = new Date();
     const timeoutThreshold = 5 * 60 * 1000; // 5 minutos
 
@@ -110,8 +110,8 @@ async function generateContextReport() {
     console.log("[Heartbeat] Gerando relatório de contexto...");
 
     // Coletar dados do sistema
-    const agents = await db.getAllAgents();
-    const tasks = await db.getAllTasks();
+    const agents = await db.getAllAgentsGlobal();
+    const tasks = await db.getAllTasksGlobal();
     const recentLogs = await db.getRecentActivityLogs(50);
 
     // Gerar resumo com LLM
@@ -227,11 +227,8 @@ export async function scheduleTask(
 ) {
   try {
     const scheduled = await db.createScheduledTask({
-      name: description,
-      description,
-      cronExpression,
-      handler: `agent_${agentId}_task_${taskId}`,
-      isActive: true,
+      agentId,
+      taskId,
       nextRun: new Date(),
     });
 

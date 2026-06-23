@@ -65,7 +65,7 @@ export default function Agents() {
   });
 
   // Form
-  const form = useForm<CreateAgentInput>({
+  const form = useForm({
     resolver: zodResolver(createAgentSchema),
     defaultValues: {
       name: "",
@@ -74,6 +74,7 @@ export default function Agents() {
       manusAccount: "",
       manusPassword: "",
       manusToken: "",
+      capabilities: [],
     },
   });
 

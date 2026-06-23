@@ -127,7 +127,7 @@ router.post("/activity", async (req, res) => {
       agentId,
       taskId: taskId || undefined,
       eventTypeId: event.id,
-      details: description,
+      details: description || metadata ? JSON.stringify(metadata) : undefined,
     });
 
     res.json({
