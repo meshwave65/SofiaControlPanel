@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { trpc } from "@/lib/trpc";
-import { Plus, Pause, Play, X, Zap, Shield, Activity, Settings, Cpu, Terminal, Info, History, Server, HardDrive, Loader2, CheckCircle2, AlertCircle, ListTodo, ExternalLink } from "lucide-react";
+import { Plus, Pause, Play, X, Zap, Shield, Activity, Settings, Cpu, Terminal, Info, History, Server, HardDrive, Loader2, CheckCircle2, AlertCircle, ListTodo, ExternalLink } from "lucide-center";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
