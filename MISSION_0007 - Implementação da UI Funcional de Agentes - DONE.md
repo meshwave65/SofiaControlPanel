@@ -1,7 +1,7 @@
 # Missão 0007: Implementação da UI Funcional de Agentes
 
 **ID:** 0007
-**Status:** PROGRESS
+**Status:** DONE
 **Objetivo:** Implementar a UI funcional de criação e gerenciamento de agentes, garantindo que as alterações sejam persistidas no GitHub remoto.
 
 ## Descrição
