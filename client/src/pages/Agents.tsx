@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { trpc } from "@/lib/trpc";
-import { Plus, Pause, Play, X, Zap, Shield, Activity, Settings, Cpu, Terminal, Info, History, Server, HardDrive, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Plus, Pause, Play, X, Zap, Shield, Activity, Settings, Cpu, Terminal, Info, History, Server, HardDrive, Loader2, CheckCircle2, AlertCircle, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 const createAgentSchema = z.object({
@@ -79,6 +79,7 @@ export default function Agents() {
   });
 
   const onSubmit = (data: CreateAgentInput) => {
+    console.log("Submitting agent data:", data);
     createAgentMutation.mutate(data);
   };
 
