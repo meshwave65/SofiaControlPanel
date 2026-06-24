@@ -337,14 +337,14 @@ export async function getOrCreateActivityEventType(name: string) {
 // BATCH HELPERS
 // ============================================
 
-export async function getAllAgentsGlobal() {
+export async function getAllAgents() {
   const db = await getDb();
   if (!db) return [];
   
   return db.select().from(agents).orderBy(desc(agents.createdAt));
 }
 
-export async function getAllTasksGlobal() {
+export async function getAllTasksAdmin() {
   const db = await getDb();
   if (!db) return [];
   
