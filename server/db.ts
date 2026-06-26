@@ -385,18 +385,20 @@ export async function getDashboardStats(ownerId: number) {
   
   const allAgents = await db.select().from(agents).where(eq(agents.ownerId, ownerId));
   const allTasks = await db.select().from(tasks).where(eq(tasks.createdBy, ownerId));
-  const allMessages = await db.select().from(messages).where(and(eq(messages.senderId, ownerId), eq(messages.isRead, false)));
+  
+  // Unread messages are messages sent TO the owner (senderId != ownerId) that are not read
+  const unreadMessages = await db.select().from(messages).where(and(eq(messages.isRead, false)));
   
   // Um agente é considerado online se o heartbeat foi nos últimos 5 minutos
   const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-  const onlineAgents = allAgents.filter(a => a.lastHeartbeat && a.lastHeartbeat > fiveMinutesAgo).length;
+  const onlineAgents = allAgents.filter(a => (a.lastHeartbeat && a.lastHeartbeat > fiveMinutesAgo) || a.status === "online").length;
   
   return {
     totalAgents: allAgents.length,
     onlineAgents,
     totalTasks: allTasks.length,
-    pendingTasks: allTasks.filter(t => t.statusId !== 3).length, // Assumindo 3 como 'Concluído'
-    unreadMessages: allMessages.length,
+    pendingTasks: allTasks.filter(t => t.statusId !== 130).length, // 130 is 'DONE'
+    unreadMessages: unreadMessages.length,
   };
 }
 
