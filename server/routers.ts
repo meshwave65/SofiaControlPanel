@@ -67,6 +67,27 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         return db.updateAgentHeartbeat(input.id);
       }),
+
+    update: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().min(1).optional(),
+        description: z.string().optional(),
+        version: z.string().optional(),
+        manusAccount: z.string().optional(),
+        manusPassword: z.string().optional(),
+        manusToken: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        return db.updateAgent(id, data);
+      }),
+
+    delete: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return db.deleteAgent(input.id);
+      }),
   }),
 
   // ============================================
@@ -227,6 +248,21 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         return db.updateContextReportGitHub(input.id, input.gitHubUrl);
       }),
+  }),
+
+  // ============================================
+  // STATS & LOOKUPS
+  // ============================================
+  stats: router({
+    getDashboard: protectedProcedure.query(async ({ ctx }) => {
+      return db.getDashboardStats(ctx.user.id);
+    }),
+  }),
+
+  lookups: router({
+    listAll: protectedProcedure.query(async () => {
+      return db.getLookups();
+    }),
   }),
 
   // ============================================

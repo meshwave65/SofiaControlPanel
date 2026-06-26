@@ -10,7 +10,8 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { creditMonitoringHandler } from "../handlers/creditMonitoringHandler";
 import publicRouter from "../publicEndpoints";
-
+import { startHeartbeatSystem } from "../heartbeat";
+	
 async function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
     const server = net.createServer();
@@ -68,6 +69,8 @@ async function startServer() {
 
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
+    // Inicia o sistema de monitoramento em background
+    startHeartbeatSystem().catch(err => console.error("[Heartbeat] Falha ao iniciar:", err));
   });
 }
 

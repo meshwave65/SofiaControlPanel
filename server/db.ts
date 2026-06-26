@@ -1,6 +1,6 @@
 import { eq, and, desc, isNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, agents, tasks, messages, activityLogs, contextReports, taskStatuses, taskPriorities, messageTypes, activityEventTypes } from "../drizzle/schema";
+import { InsertUser, InsertAgent, users, agents, tasks, messages, activityLogs, contextReports, taskStatuses, taskPriorities, messageTypes, activityEventTypes } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -144,6 +144,20 @@ export async function updateAgentHeartbeat(id: number) {
   if (!db) throw new Error("Database not available");
   
   return db.update(agents).set({ lastHeartbeat: new Date(), updatedAt: new Date() }).where(eq(agents.id, id));
+}
+
+export async function updateAgent(id: number, data: Partial<InsertAgent>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.update(agents).set({ ...data, updatedAt: new Date() }).where(eq(agents.id, id));
+}
+
+export async function deleteAgent(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.delete(agents).where(eq(agents.id, id));
 }
 
 // ============================================
@@ -344,11 +358,60 @@ export async function getAllAgents() {
   return db.select().from(agents).orderBy(desc(agents.createdAt));
 }
 
+export async function getAllAgentsGlobal() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(agents);
+}
+
 export async function getAllTasksAdmin() {
   const db = await getDb();
   if (!db) return [];
   
   return db.select().from(tasks).orderBy(desc(tasks.createdAt));
+}
+
+export async function getAllTasksGlobal() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(tasks);
+}
+
+export async function getDashboardStats(ownerId: number) {
+  const db = await getDb();
+  if (!db) return { totalAgents: 0, onlineAgents: 0, totalTasks: 0, pendingTasks: 0, unreadMessages: 0 };
+  
+  const allAgents = await db.select().from(agents).where(eq(agents.ownerId, ownerId));
+  const allTasks = await db.select().from(tasks).where(eq(tasks.createdBy, ownerId));
+  const allMessages = await db.select().from(messages).where(and(eq(messages.senderId, ownerId), eq(messages.isRead, false)));
+  
+  // Um agente é considerado online se o heartbeat foi nos últimos 5 minutos
+  const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+  const onlineAgents = allAgents.filter(a => a.lastHeartbeat && a.lastHeartbeat > fiveMinutesAgo).length;
+  
+  return {
+    totalAgents: allAgents.length,
+    onlineAgents,
+    totalTasks: allTasks.length,
+    pendingTasks: allTasks.filter(t => t.statusId !== 3).length, // Assumindo 3 como 'Concluído'
+    unreadMessages: allMessages.length,
+  };
+}
+
+export async function getLookups() {
+  const db = await getDb();
+  if (!db) return { statuses: [], priorities: [], messageTypes: [], eventTypes: [] };
+  
+  const [statuses, priorities, mTypes, eTypes] = await Promise.all([
+    db.select().from(taskStatuses),
+    db.select().from(taskPriorities),
+    db.select().from(messageTypes),
+    db.select().from(activityEventTypes),
+  ]);
+  
+  return { statuses, priorities, messageTypes: mTypes, eventTypes: eTypes };
 }
 
 // ============================================

@@ -2,48 +2,37 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from "recharts";
-import { Users, CheckSquare, MessageSquare, Activity } from "lucide-react";
+import { Users, CheckSquare, MessageSquare, Activity, CreditCard } from "lucide-react";
 import { trpc } from "@/lib/trpc";
-import { useEffect, useState } from "react";
-
-// Mock data para demonstração (será substituído por dados reais)
-const mockActivityData = [
-  { time: "00:00", agents: 2, tasks: 5, messages: 3 },
-  { time: "04:00", agents: 3, tasks: 8, messages: 5 },
-  { time: "08:00", agents: 5, tasks: 12, messages: 8 },
-  { time: "12:00", agents: 4, tasks: 10, messages: 6 },
-  { time: "16:00", agents: 6, tasks: 15, messages: 10 },
-  { time: "20:00", agents: 3, tasks: 7, messages: 4 },
-];
+import { useLocation } from "wouter";
 
 export default function Home() {
   const { user, isAuthenticated } = useAuth();
-  const [metrics, setMetrics] = useState({
-    totalAgents: 0,
-    totalTasks: 0,
-    unreadMessages: 0,
-    recentActivity: 0,
-  });
+  const [, setLocation] = useLocation();
 
-  // Queries tRPC
-  const agentsQuery = trpc.agents.list.useQuery(undefined, {
+  // Queries tRPC com polling de 15s
+  const statsQuery = trpc.stats.getDashboard.useQuery(undefined, {
     enabled: isAuthenticated,
+    refetchInterval: 15000,
   });
 
   const activityQuery = trpc.activityLogs.getRecent.useQuery(
-    { limit: 50 },
-    { enabled: isAuthenticated }
+    { limit: 24 },
+    { 
+      enabled: isAuthenticated,
+      refetchInterval: 15000,
+    }
   );
 
-  // Calcular métricas
-  useEffect(() => {
-    if (agentsQuery.data) {
-      setMetrics((prev) => ({
-        ...prev,
-        totalAgents: agentsQuery.data?.length || 0,
-      }));
-    }
-  }, [agentsQuery.data]);
+  // Mock data para o gráfico baseado em dados reais se possível, ou mantendo mock para visual
+  const activityData = [
+    { time: "00:00", agents: 2, tasks: 5, messages: 3 },
+    { time: "04:00", agents: 3, tasks: 8, messages: 5 },
+    { time: "08:00", agents: 5, tasks: 12, messages: 8 },
+    { time: "12:00", agents: 4, tasks: 10, messages: 6 },
+    { time: "16:00", agents: 6, tasks: 15, messages: 10 },
+    { time: "20:00", agents: 3, tasks: 7, messages: 4 },
+  ];
 
   if (!isAuthenticated) {
     return (
@@ -63,15 +52,32 @@ export default function Home() {
     );
   }
 
+  const stats = statsQuery.data || {
+    totalAgents: 0,
+    onlineAgents: 0,
+    totalTasks: 0,
+    pendingTasks: 0,
+    unreadMessages: 0,
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
       <div className="technical-header px-6 py-8 border-b-2 border-foreground/30">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Bem-vindo, <span className="text-accent font-semibold">{user?.name || "Agente"}</span>
-          </p>
+        <div className="max-w-7xl mx-auto flex justify-between items-end">
+          <div>
+            <h1 className="text-4xl font-bold mb-2 uppercase tracking-tighter">Command Center</h1>
+            <p className="text-muted-foreground">
+              Operador: <span className="text-accent font-semibold">{user?.name || "Agente"}</span>
+            </p>
+          </div>
+          <div className="text-right">
+            <div className="flex items-center gap-2 text-accent mb-1 justify-end">
+              <CreditCard className="w-4 h-4" />
+              <span className="text-sm font-bold uppercase">Créditos Disponíveis</span>
+            </div>
+            <p className="text-2xl font-mono font-bold">1,250.00 <span className="text-xs text-muted-foreground">MANUS</span></p>
+          </div>
         </div>
       </div>
 
@@ -80,58 +86,58 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             {/* Total de Agentes */}
-            <Card className="cad-card">
+            <Card className="cad-card cursor-pointer hover:border-accent/50 transition-colors" onClick={() => setLocation("/agents")}>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Total de Agentes</p>
-                  <p className="text-3xl font-bold text-accent">
-                    {agentsQuery.isLoading ? "..." : metrics.totalAgents}
+                  <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1 font-bold">Agentes Ativos</p>
+                  <p className="text-3xl font-mono font-bold text-accent">
+                    {statsQuery.isLoading ? "---" : stats.totalAgents}
                   </p>
                 </div>
-                <Users className="w-12 h-12 text-accent/50" />
+                <Users className="w-10 h-10 text-accent/30" />
               </div>
               <div className="mt-4 flex items-center gap-2">
-                <div className="status-indicator online"></div>
-                <span className="text-xs text-muted-foreground">
-                  {Math.floor(metrics.totalAgents * 0.6)} online
+                <div className={`status-indicator ${stats.onlineAgents > 0 ? 'online' : 'offline'}`}></div>
+                <span className="text-xs font-mono text-muted-foreground uppercase">
+                  {stats.onlineAgents} Online / {stats.totalAgents - stats.onlineAgents} Offline
                 </span>
               </div>
             </Card>
 
             {/* Total de Tarefas */}
-            <Card className="cad-card">
+            <Card className="cad-card cursor-pointer hover:border-accent/50 transition-colors" onClick={() => setLocation("/tasks")}>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Tarefas Ativas</p>
-                  <p className="text-3xl font-bold text-accent">
-                    {metrics.totalTasks || "0"}
+                  <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1 font-bold">Tarefas Pendentes</p>
+                  <p className="text-3xl font-mono font-bold text-accent">
+                    {statsQuery.isLoading ? "---" : stats.pendingTasks}
                   </p>
                 </div>
-                <CheckSquare className="w-12 h-12 text-accent/50" />
+                <CheckSquare className="w-10 h-10 text-accent/30" />
               </div>
               <div className="mt-4 flex items-center gap-2">
                 <div className="status-indicator idle"></div>
-                <span className="text-xs text-muted-foreground">
-                  {Math.floor((metrics.totalTasks || 0) * 0.3)} em progresso
+                <span className="text-xs font-mono text-muted-foreground uppercase">
+                  Total de {stats.totalTasks} Registradas
                 </span>
               </div>
             </Card>
 
             {/* Mensagens Não Lidas */}
-            <Card className="cad-card">
+            <Card className="cad-card cursor-pointer hover:border-accent/50 transition-colors" onClick={() => setLocation("/messages")}>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Mensagens Não Lidas</p>
-                  <p className="text-3xl font-bold text-accent">
-                    {metrics.unreadMessages}
+                  <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1 font-bold">Mensagens</p>
+                  <p className="text-3xl font-mono font-bold text-accent">
+                    {statsQuery.isLoading ? "---" : stats.unreadMessages}
                   </p>
                 </div>
-                <MessageSquare className="w-12 h-12 text-accent/50" />
+                <MessageSquare className="w-10 h-10 text-accent/30" />
               </div>
               <div className="mt-4 flex items-center gap-2">
-                <div className="status-indicator paused"></div>
-                <span className="text-xs text-muted-foreground">
-                  Requer atenção
+                <div className={stats.unreadMessages > 0 ? "status-indicator paused" : "status-indicator online"}></div>
+                <span className="text-xs font-mono text-muted-foreground uppercase">
+                  {stats.unreadMessages > 0 ? "Requer Atenção" : "Sistema Limpo"}
                 </span>
               </div>
             </Card>
@@ -140,17 +146,17 @@ export default function Home() {
             <Card className="cad-card">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Atividade (24h)</p>
-                  <p className="text-3xl font-bold text-accent">
-                    {activityQuery.data?.length || "0"}
+                  <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1 font-bold">Logs (24h)</p>
+                  <p className="text-3xl font-mono font-bold text-accent">
+                    {activityQuery.isLoading ? "---" : activityQuery.data?.length || "0"}
                   </p>
                 </div>
-                <Activity className="w-12 h-12 text-accent/50" />
+                <Activity className="w-10 h-10 text-accent/30" />
               </div>
               <div className="mt-4 flex items-center gap-2">
                 <div className="status-indicator online"></div>
-                <span className="text-xs text-muted-foreground">
-                  Eventos registrados
+                <span className="text-xs font-mono text-muted-foreground uppercase">
+                  Monitoramento Ativo
                 </span>
               </div>
             </Card>
@@ -158,55 +164,57 @@ export default function Home() {
 
           {/* Gráficos */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Gráfico de Barras - Atividade por Hora */}
             <Card className="cad-card">
-              <h3 className="text-lg font-semibold mb-4 text-foreground">
-                Atividade por Hora
+              <h3 className="text-xs uppercase tracking-widest font-bold mb-6 text-foreground border-b border-foreground/10 pb-2">
+                Fluxo de Atividade do Sistema
               </h3>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={mockActivityData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(232, 240, 255, 0.1)" />
-                  <XAxis dataKey="time" stroke="rgba(232, 240, 255, 0.5)" />
-                  <YAxis stroke="rgba(232, 240, 255, 0.5)" />
+                <BarChart data={activityData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(232, 240, 255, 0.05)" />
+                  <XAxis dataKey="time" stroke="rgba(232, 240, 255, 0.3)" fontSize={10} />
+                  <YAxis stroke="rgba(232, 240, 255, 0.3)" fontSize={10} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "rgba(10, 22, 40, 0.9)",
-                      border: "1px solid rgba(232, 240, 255, 0.3)",
-                      borderRadius: "4px",
+                      backgroundColor: "rgba(10, 22, 40, 0.95)",
+                      border: "1px solid rgba(232, 240, 255, 0.2)",
+                      borderRadius: "0px",
+                      fontSize: "12px",
+                      fontFamily: "monospace",
                     }}
                   />
-                  <Legend />
+                  <Legend iconType="square" wrapperStyle={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px' }} />
                   <Bar dataKey="agents" fill="#06b6d4" name="Agentes" />
                   <Bar dataKey="tasks" fill="#1e40af" name="Tarefas" />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
 
-            {/* Gráfico de Linhas - Tendência */}
             <Card className="cad-card">
-              <h3 className="text-lg font-semibold mb-4 text-foreground">
-                Tendência de Mensagens
+              <h3 className="text-xs uppercase tracking-widest font-bold mb-6 text-foreground border-b border-foreground/10 pb-2">
+                Tendência de Comunicação
               </h3>
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={mockActivityData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(232, 240, 255, 0.1)" />
-                  <XAxis dataKey="time" stroke="rgba(232, 240, 255, 0.5)" />
-                  <YAxis stroke="rgba(232, 240, 255, 0.5)" />
+                <LineChart data={activityData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(232, 240, 255, 0.05)" />
+                  <XAxis dataKey="time" stroke="rgba(232, 240, 255, 0.3)" fontSize={10} />
+                  <YAxis stroke="rgba(232, 240, 255, 0.3)" fontSize={10} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "rgba(10, 22, 40, 0.9)",
-                      border: "1px solid rgba(232, 240, 255, 0.3)",
-                      borderRadius: "4px",
+                      backgroundColor: "rgba(10, 22, 40, 0.95)",
+                      border: "1px solid rgba(232, 240, 255, 0.2)",
+                      borderRadius: "0px",
+                      fontSize: "12px",
+                      fontFamily: "monospace",
                     }}
                   />
-                  <Legend />
+                  <Legend iconType="square" wrapperStyle={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px' }} />
                   <Line
-                    type="monotone"
+                    type="stepAfter"
                     dataKey="messages"
                     stroke="#06b6d4"
                     strokeWidth={2}
-                    dot={{ fill: "#06b6d4", r: 4 }}
-                    activeDot={{ r: 6 }}
+                    dot={{ fill: "#06b6d4", r: 3 }}
+                    activeDot={{ r: 5 }}
                     name="Mensagens"
                   />
                 </LineChart>
@@ -216,19 +224,35 @@ export default function Home() {
 
           {/* Ações Rápidas */}
           <div className="mt-8">
-            <h3 className="text-lg font-semibold mb-4 text-foreground">Ações Rápidas</h3>
+            <h3 className="text-xs uppercase tracking-widest font-bold mb-4 text-foreground">Protocolos de Acesso Rápido</h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Button variant="outline" className="cad-box border-2 h-12 font-semibold">
-                ➕ Novo Agente
+              <Button 
+                variant="outline" 
+                className="cad-box border-2 h-14 font-bold uppercase tracking-wider hover:bg-accent hover:text-accent-foreground transition-all"
+                onClick={() => setLocation("/agents")}
+              >
+                Gerenciar Agentes
               </Button>
-              <Button variant="outline" className="cad-box border-2 h-12 font-semibold">
-                ➕ Nova Tarefa
+              <Button 
+                variant="outline" 
+                className="cad-box border-2 h-14 font-bold uppercase tracking-wider hover:bg-accent hover:text-accent-foreground transition-all"
+                onClick={() => setLocation("/tasks")}
+              >
+                Lista de Missões
               </Button>
-              <Button variant="outline" className="cad-box border-2 h-12 font-semibold">
-                💬 Mensagens
+              <Button 
+                variant="outline" 
+                className="cad-box border-2 h-14 font-bold uppercase tracking-wider hover:bg-accent hover:text-accent-foreground transition-all"
+                onClick={() => setLocation("/messages")}
+              >
+                Terminal de Mensagens
               </Button>
-              <Button variant="outline" className="cad-box border-2 h-12 font-semibold">
-                📊 Relatórios
+              <Button 
+                variant="outline" 
+                className="cad-box border-2 h-14 font-bold uppercase tracking-wider hover:bg-accent hover:text-accent-foreground transition-all"
+                onClick={() => setLocation("/")}
+              >
+                Relatórios Operacionais
               </Button>
             </div>
           </div>
