@@ -44,14 +44,14 @@
 
 :root {
   /* CAD/Arquitetônico Theme - Industrial/High-Tech */
-  --primary: oklch(0.6 0.15 264); /* #1e40af */
+  --primary: oklch(0.6 0.15 264);
   --primary-foreground: oklch(0.95 0.01 65);
   --sidebar-primary: oklch(0.5 0.12 264);
   --sidebar-primary-foreground: oklch(0.95 0.01 65);
-  --radius: 0px; /* Sharp corners for CAD style */
-  --background: oklch(0.063 0.01 264); /* #0a1628 */
-  --foreground: oklch(0.88 0.02 200); /* #e8f0ff */
-  --card: oklch(0.08 0.01 264); /* #141f2e */
+  --radius: 0px;
+  --background: oklch(0.063 0.01 264);
+  --foreground: oklch(0.88 0.02 200);
+  --card: oklch(0.08 0.01 264);
   --card-foreground: oklch(0.88 0.02 200);
   --popover: oklch(0.08 0.01 264);
   --popover-foreground: oklch(0.88 0.02 200);
@@ -59,29 +59,39 @@
   --secondary-foreground: oklch(0.88 0.02 200);
   --muted: oklch(0.12 0.02 264);
   --muted-foreground: oklch(0.6 0.02 200);
-  --accent: oklch(0.7 0.2 200); /* Cyan-ish */
+  --accent: oklch(0.7 0.2 200);
   --accent-foreground: oklch(0.063 0.01 264);
   --destructive: oklch(0.5 0.2 25);
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.88 0.02 200 / 0.15);
   --input: oklch(0.08 0.01 264);
   --ring: oklch(0.7 0.2 200);
-  
   --chart-1: oklch(0.7 0.2 200);
   --chart-2: oklch(0.5 0.15 264);
+  
+  --accent-rgb: 6, 182, 212;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    font-family: 'JetBrains Mono', 'Inter', monospace;
+    font-family: 'JetBrains Mono', 'Courier New', monospace !important;
   }
   body {
     @apply bg-background text-foreground antialiased;
     background-image: 
-      linear-gradient(rgba(232, 240, 255, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(232, 240, 255, 0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
+      linear-gradient(rgba(232, 240, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232, 240, 255, 0.04) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'JetBrains Mono', 'Courier New', monospace !important;
+    font-weight: 900 !important;
+  }
+  
+  button, input, select, textarea {
+    font-family: 'JetBrains Mono', 'Courier New', monospace !important;
   }
 }
 
@@ -93,32 +103,32 @@
 
   .cad-card {
     @apply bg-card/80 border-2 border-foreground/10 rounded-none p-6 relative overflow-hidden;
-    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 10px 40px -15px rgba(0, 0, 0, 0.6);
   }
 
   .cad-card::before {
     content: '';
-    @apply absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-accent/30 to-transparent;
+    @apply absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-accent/40 to-transparent;
   }
 
   .status-indicator {
-    @apply inline-block w-2 h-2 rounded-none rotate-45;
+    @apply inline-block w-3 h-3 rounded-none;
   }
 
   .status-indicator.online {
-    @apply bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)];
+    @apply bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)];
   }
 
   .status-indicator.offline {
-    @apply bg-red-500/50;
+    @apply bg-red-500/60;
   }
 
   .status-indicator.idle {
-    @apply bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.6)];
+    @apply bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.8)];
   }
 
   .status-indicator.paused {
-    @apply bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.6)];
+    @apply bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.8)];
   }
 
   .technical-header {
@@ -127,6 +137,43 @@
 
   .technical-header::after {
     content: '';
-    @apply absolute -bottom-[2px] left-0 w-64 h-[2px] bg-accent;
+    @apply absolute -bottom-[2px] left-0 w-96 h-[3px] bg-gradient-to-r from-accent to-transparent;
   }
+}
+
+/* Force accent color on all interactive elements */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+a[href] {
+  @apply transition-all duration-200;
+}
+
+button:hover:not(:disabled),
+[role="button"]:hover:not([aria-disabled="true"]),
+a[href]:hover {
+  @apply text-accent;
+}
+
+/* Input styling */
+input, textarea, select {
+  @apply bg-foreground/5 border-foreground/20 text-foreground;
+}
+
+input:focus, textarea:focus, select:focus {
+  @apply border-accent bg-foreground/10 text-foreground;
+}
+
+/* Card styling */
+[class*="cad-card"] {
+  @apply shadow-lg;
+}
+
+/* Accent text styling */
+.text-accent {
+  @apply text-[#06b6d4];
+}
+
+/* Force monospace on specific elements */
+.font-mono {
+  font-family: 'JetBrains Mono', 'Courier New', monospace !important;
 }
