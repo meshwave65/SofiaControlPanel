@@ -3,84 +3,105 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Settings, Edit, Trash2, Cpu, Terminal, Activity, History, ListTodo, Shield, Zap, AlertCircle, Key, Mail } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import { Plus, Pause, Play, X, Zap, Shield, Activity, Settings, Cpu, Terminal, Info, History, Server, HardDrive, Loader2, CheckCircle2, AlertCircle, ListTodo, ExternalLink, Trash2, Edit, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 const agentSchema = z.object({
-  name: z.string().min(1, "Nome é obrigatório"),
+  name: z.string().min(1, "Nome é obrigatório").min(3, "Nome deve ter pelo menos 3 caracteres"),
   description: z.string().optional(),
-  version: z.string().default("1.0.0"),
+  version: z.string().default("1.0.0").regex(/^\d+\.\d+\.\d+$/, "Versão deve estar no formato X.Y.Z"),
   manusAccount: z.string().email("Email inválido").optional().or(z.literal("")),
-  manusPassword: z.string().optional().or(z.literal("")),
-  manusToken: z.string().optional().or(z.literal("")),
+  manusPassword: z.string().min(0).optional(),
+  manusToken: z.string().optional(),
 });
 
 type AgentInput = z.infer<typeof agentSchema>;
 
 export default function Agents() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState<any>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showToken, setShowToken] = useState(false);
 
-  // Mock data para agentes
-  const [agents, setAgents] = useState([
-    { 
-      id: 1, 
-      name: "Sofia-Alpha", 
-      description: "Unidade de análise estratégica primária", 
-      version: "1.2.4", 
-      status: "online", 
-      lastHeartbeat: new Date().toISOString(),
-      manusAccount: "sofia.alpha@manus.im",
-      manusPassword: "••••••••",
-      manusToken: "tk_sofia_alpha_prod_2024"
+  // Queries
+  const agentsQuery = trpc.agents.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+    refetchInterval: 10000,
+  });
+
+  const logsQuery = trpc.activityLogs.getByAgent.useQuery(
+    { agentId: selectedAgent?.id || 0 },
+    { enabled: !!selectedAgent && isDetailsOpen, refetchInterval: 5000 }
+  );
+
+  const tasksQuery = trpc.tasks.getByAgent.useQuery(
+    { agentId: selectedAgent?.id || 0 },
+    { enabled: !!selectedAgent && isDetailsOpen, refetchInterval: 10000 }
+  );
+
+  // Mutations
+  const createAgentMutation = trpc.agents.create.useMutation({
+    onSuccess: () => {
+      toast.success("✓ Unidade Sofia inicializada com sucesso!");
+      agentsQuery.refetch();
+      setIsOpen(false);
+      form.reset();
     },
-    { 
-      id: 2, 
-      name: "Sofia-Beta", 
-      description: "Processamento de dados em larga escala", 
-      version: "1.1.0", 
-      status: "online", 
-      lastHeartbeat: new Date().toISOString(),
-      manusAccount: "sofia.beta@manus.im",
-      manusPassword: "••••••••",
-      manusToken: "tk_sofia_beta_prod_2024"
+    onError: (error) => {
+      toast.error(`✗ Erro ao criar agente: ${error.message}`);
     },
-    { 
-      id: 3, 
-      name: "Sofia-Gamma", 
-      description: "Interface de comunicação e suporte", 
-      version: "1.0.5", 
-      status: "offline", 
-      lastHeartbeat: new Date(Date.now() - 3600000).toISOString(),
-      manusAccount: "sofia.gamma@manus.im",
-      manusPassword: "••••••••",
-      manusToken: "tk_sofia_gamma_prod_2024"
+  });
+
+  const updateAgentMutation = trpc.agents.update.useMutation({
+    onSuccess: () => {
+      toast.success("✓ Configurações da unidade atualizadas!");
+      agentsQuery.refetch();
+      setIsOpen(false);
+      setIsEditMode(false);
+      form.reset();
     },
-  ]);
+    onError: (error) => {
+      toast.error(`✗ Erro ao atualizar agente: ${error.message}`);
+    },
+  });
 
-  // Mock data para logs e tarefas
-  const mockLogs = [
-    { id: 1, action: "INITIALIZE", detail: "Sistema Sofia-Alpha carregado com sucesso", timestamp: new Date().toISOString() },
-    { id: 2, action: "PROCESS", detail: "Análise de mercado setor-G7 concluída", timestamp: new Date(Date.now() - 600000).toISOString() },
-    { id: 3, action: "HEARTBEAT", detail: "Sinal de vida recebido da unidade", timestamp: new Date(Date.now() - 300000).toISOString() },
-  ];
+  const deleteAgentMutation = trpc.agents.delete.useMutation({
+    onSuccess: () => {
+      toast.success("✓ Unidade desativada permanentemente!");
+      agentsQuery.refetch();
+      setIsDeleteConfirmOpen(false);
+      setIsDetailsOpen(false);
+    },
+    onError: (error) => {
+      toast.error(`✗ Erro ao excluir agente: ${error.message}`);
+    },
+  });
 
-  const mockTasks = [
-    { id: 1, title: "Análise de Portfólio Q3", status: "Em Progresso", priority: "Alta" },
-    { id: 2, title: "Scraping de Dados Competitivos", status: "Concluído", priority: "Média" },
-  ];
+  const updateStatusMutation = trpc.agents.updateStatus.useMutation({
+    onSuccess: () => {
+      toast.success("✓ Status atualizado!");
+      agentsQuery.refetch();
+    },
+    onError: (error) => {
+      toast.error(`✗ Erro ao atualizar status: ${error.message}`);
+    },
+  });
 
+  // Form
   const form = useForm<AgentInput>({
     resolver: zodResolver(agentSchema),
     defaultValues: {
@@ -95,25 +116,22 @@ export default function Agents() {
 
   const onSubmit = (data: AgentInput) => {
     if (isEditMode && selectedAgent) {
-      setAgents(agents.map(a => a.id === selectedAgent.id ? { ...a, ...data } : a));
-      toast.success("Agente atualizado com sucesso!");
+      updateAgentMutation.mutate({ id: selectedAgent.id, ...data });
     } else {
-      const newAgent = {
-        id: agents.length + 1,
-        ...data,
-        status: "online",
-        lastHeartbeat: new Date().toISOString()
-      };
-      setAgents([...agents, newAgent as any]);
-      toast.success("Agente criado com sucesso!");
+      createAgentMutation.mutate(data);
     }
-    setIsOpen(false);
-    form.reset();
   };
 
   const handleOpenCreate = () => {
     setIsEditMode(false);
-    form.reset({ name: "", description: "", version: "1.0.0", manusAccount: "", manusPassword: "", manusToken: "" });
+    form.reset({
+      name: "",
+      description: "",
+      version: "1.0.0",
+      manusAccount: "",
+      manusPassword: "",
+      manusToken: "",
+    });
     setIsOpen(true);
   };
 
@@ -131,11 +149,19 @@ export default function Agents() {
     setIsOpen(true);
   };
 
-  const handleDelete = () => {
-    setAgents(agents.filter(a => a.id !== selectedAgent.id));
-    toast.success("Agente excluído com sucesso!");
-    setIsDeleteConfirmOpen(false);
-    setIsDetailsOpen(false);
+  const calculateLastHeartbeat = (lastHeartbeat: string | null) => {
+    if (!lastHeartbeat) return "Nunca";
+    try {
+      return formatDistanceToNow(new Date(lastHeartbeat), { addSuffix: true, locale: ptBR });
+    } catch (e) {
+      return "Indisponível";
+    }
+  };
+
+  const isOnline = (agent: any) => {
+    if (!agent.lastHeartbeat) return false;
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    return new Date(agent.lastHeartbeat) > fiveMinutesAgo;
   };
 
   if (!isAuthenticated) {
@@ -149,99 +175,118 @@ export default function Agents() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <div className="technical-header px-8 py-10 border-b-4 border-accent bg-gradient-to-r from-background to-background/50">
+      <div className="technical-header px-6 py-8 border-b-2 border-foreground/30">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div>
-            <div className="flex items-center gap-4 mb-3">
-              <div className="w-4 h-4 bg-accent animate-pulse"></div>
-              <h1 className="text-5xl font-black uppercase tracking-tighter italic text-accent">UNIDADES SOFIA</h1>
-            </div>
-            <p className="text-muted-foreground font-mono text-xs uppercase tracking-[0.3em] font-bold">
-              SISTEMA DE CONTROLE CENTRAL // AGENTES ATIVOS: <span className="text-accent font-black text-sm">{agents.length}</span>
+            <h1 className="text-4xl font-bold mb-2 uppercase tracking-tighter italic">Unidades Sofia</h1>
+            <p className="text-muted-foreground font-mono text-xs">
+              SISTEMA DE CONTROLE CENTRAL // AGENTES ATIVOS: <span className="text-accent font-bold">{agentsQuery.data?.length || 0}</span> // OPERADOR: <span className="text-accent font-bold">{user?.name || "DESCONHECIDO"}</span>
             </p>
           </div>
           <Button 
             onClick={handleOpenCreate}
-            className="bg-accent text-accent-foreground hover:bg-accent/90 flex items-center gap-3 shadow-[0_0_20px_rgba(6,182,212,0.5)] font-black uppercase tracking-[0.2em] text-sm h-14 px-8 border-2 border-accent"
+            className="bg-accent text-accent-foreground hover:bg-accent/90 flex items-center gap-2 shadow-[0_0_15px_rgba(var(--accent-rgb),0.3)] font-bold uppercase tracking-widest text-xs h-11 px-6"
           >
-            <Plus className="w-5 h-5" /> Inicializar Unidade
+            <Plus className="w-4 h-4" /> Inicializar Nova Unidade
           </Button>
         </div>
       </div>
 
       {/* Grid de Agentes */}
-      <div className="px-8 py-12 bg-foreground/[0.01]">
+      <div className="px-6 py-8">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {agents.map((agent) => (
-              <Card key={agent.id} className="cad-card relative overflow-hidden group border-4 hover:border-accent transition-all duration-300 bg-card/80 backdrop-blur-sm p-8 shadow-2xl">
-                <div className={`absolute top-0 left-0 w-3 h-full ${agent.status === 'online' ? 'bg-green-500' : 'bg-red-500'} opacity-40 group-hover:opacity-100 transition-opacity`}></div>
-                
-                <div className="flex justify-between items-start mb-8">
-                  <div>
-                    <div className="flex items-center gap-3 mb-3">
-                      <Cpu className="w-6 h-6 text-accent" />
-                      <h3 className="text-3xl font-black text-foreground tracking-tighter uppercase italic">{agent.name}</h3>
-                      <span className="text-[10px] bg-accent/20 px-3 py-1 rounded-none font-mono border-2 border-accent font-black">V{agent.version}</span>
+          {agentsQuery.isLoading ? (
+            <div className="text-center py-20">
+              <Loader2 className="w-10 h-10 text-accent animate-spin mx-auto mb-4" />
+              <p className="text-muted-foreground animate-pulse font-mono uppercase text-xs tracking-widest">Escaneando rede de agentes...</p>
+            </div>
+          ) : agentsQuery.data && agentsQuery.data.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {agentsQuery.data.map((agent) => {
+                const online = isOnline(agent);
+                return (
+                  <Card key={agent.id} className="cad-card relative overflow-hidden group border-2 hover:border-accent/50 transition-all duration-300 bg-card/50 backdrop-blur-sm p-5">
+                    <div className={`absolute top-0 left-0 w-1.5 h-full ${online ? 'bg-green-500' : 'bg-accent'} opacity-50 group-hover:opacity-100 transition-opacity`}></div>
+                    
+                    <div className="flex justify-between items-start mb-5 pl-2">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-xl font-black text-foreground tracking-tighter uppercase italic">{agent.name}</h3>
+                          <span className="text-[9px] bg-foreground/10 px-1.5 py-0.5 rounded font-mono border border-foreground/20">v{agent.version || "1.0.0"}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-1.5">
+                          <div className={`w-2 h-2 rounded-full ${online ? 'bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-red-500'}`}></div>
+                          <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">{online ? 'Unidade Operacional' : 'Unidade Offline'}</span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <span className="text-[9px] font-mono opacity-40 bg-foreground/5 px-2 py-1 rounded">KERNEL-ID: {agent.id.toString().padStart(4, '0')}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3 mt-3">
-                      <div className={`w-3 h-3 rounded-none ${agent.status === 'online' ? 'bg-green-500 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.7)]' : 'bg-red-500'}`}></div>
-                      <span className="text-[11px] text-muted-foreground uppercase font-black tracking-widest">{agent.status === 'online' ? 'OPERACIONAL' : 'OFFLINE'}</span>
+
+                    {agent.description && (
+                      <div className="bg-foreground/5 p-3 rounded border border-foreground/10 mb-5 ml-2">
+                        <p className="text-[11px] text-foreground/70 leading-relaxed italic font-medium">"{agent.description}"</p>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-3 mb-5 ml-2">
+                      <div className="bg-accent/5 p-2.5 rounded flex flex-col border border-accent/10">
+                        <span className="text-[8px] uppercase text-muted-foreground font-bold tracking-tighter">Último Sinal</span>
+                        <span className="text-[10px] font-mono text-accent font-bold truncate">{calculateLastHeartbeat(agent.lastHeartbeat)}</span>
+                      </div>
+                      <div className="bg-accent/5 p-2.5 rounded flex flex-col border border-accent/10">
+                        <span className="text-[8px] uppercase text-muted-foreground font-bold tracking-tighter">Status Interno</span>
+                        <span className="text-sm font-mono text-accent font-bold uppercase">{agent.status}</span>
+                      </div>
                     </div>
-                  </div>
-                  <span className="text-[10px] font-mono opacity-50 bg-foreground/10 px-3 py-1 rounded-none font-bold border border-foreground/20">ID: {agent.id.toString().padStart(4, '0')}</span>
-                </div>
 
-                <div className="bg-accent/5 p-5 rounded-none border-2 border-accent/20 mb-8 min-h-[70px]">
-                  <p className="text-[12px] text-foreground/80 leading-relaxed italic font-bold">"{agent.description}"</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mb-8 bg-foreground/5 p-4 rounded-none border-2 border-foreground/10">
-                  <div className="flex flex-col">
-                    <span className="text-[9px] uppercase text-muted-foreground font-black tracking-[0.2em] mb-2">Conta Manus</span>
-                    <span className="text-[11px] font-mono text-accent font-black truncate">{agent.manusAccount}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-[9px] uppercase text-muted-foreground font-black tracking-[0.2em] mb-2">Token</span>
-                    <span className="text-[11px] font-mono text-accent font-black truncate">{agent.manusToken?.substring(0, 15)}...</span>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="flex-1 flex items-center justify-center gap-2 h-12 font-black uppercase text-[11px] tracking-[0.15em] border-2 hover:bg-accent hover:text-accent-foreground"
-                    onClick={() => {
-                      setSelectedAgent(agent);
-                      setIsDetailsOpen(true);
-                    }}
-                  >
-                    <Settings className="w-4 h-4" /> Painel
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="w-12 h-12 p-0 flex items-center justify-center border-2 border-foreground/30 hover:border-accent hover:text-accent hover:bg-accent/10"
-                    onClick={() => handleOpenEdit(agent)}
-                  >
-                    <Edit className="w-5 h-5" />
-                  </Button>
-                </div>
-              </Card>
-            ))}
-          </div>
+                    <div className="flex gap-2 ml-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1 flex items-center justify-center gap-2 h-10 font-black uppercase text-[10px] tracking-widest"
+                        onClick={() => {
+                          setSelectedAgent(agent);
+                          setIsDetailsOpen(true);
+                        }}
+                      >
+                        <Settings className="w-3 h-3" /> Painel
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-10 h-10 p-0 flex items-center justify-center border-2 border-foreground/20 hover:border-accent hover:text-accent"
+                        onClick={() => handleOpenEdit(agent)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          ) : (
+            <Card className="text-center py-20 border-2 border-dashed border-foreground/20 bg-card/30">
+              <Cpu className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
+              <h3 className="text-xl font-bold uppercase tracking-tighter mb-2">Nenhuma Unidade Detectada</h3>
+              <p className="text-muted-foreground mb-6 max-w-md mx-auto text-sm">Inicialize uma nova unidade de controle Sofia para começar a gerenciar missões e agentes autônomos.</p>
+              <Button onClick={handleOpenCreate} className="bg-accent text-accent-foreground font-bold uppercase tracking-widest">
+                <Plus className="w-4 h-4 mr-2" /> Ativar Primeira Unidade
+              </Button>
+            </Card>
+          )}
         </div>
       </div>
 
-      {/* Modal de Detalhes */}
+      {/* Modal de Detalhes e Controle */}
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-        <DialogContent className="bg-card border-4 border-accent max-w-5xl max-h-[90vh] overflow-hidden flex flex-col p-0">
-          <div className="technical-header px-8 py-8 border-b-4 border-accent bg-gradient-to-r from-foreground/10 to-transparent flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <div className={`w-4 h-4 rounded-none ${selectedAgent?.status === 'online' ? 'bg-green-500 shadow-[0_0_12px_rgba(34,197,94,0.7)]' : 'bg-red-500'}`}></div>
-              <h2 className="text-4xl font-black uppercase italic tracking-tighter flex items-center gap-3">
-                <Terminal className="w-8 h-8 text-accent" />
+        <DialogContent className="bg-card border-2 border-foreground/20 max-w-5xl max-h-[90vh] overflow-hidden flex flex-col p-0">
+          <div className="technical-header px-6 py-5 border-b-2 border-foreground/20 bg-foreground/5 flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <div className={`w-3 h-3 rounded-full ${isOnline(selectedAgent || {}) ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-red-500'}`}></div>
+              <h2 className="text-2xl font-black uppercase italic tracking-tighter flex items-center gap-2">
+                <Terminal className="w-6 h-6 text-accent" />
                 Terminal Sofia: {selectedAgent?.name}
               </h2>
             </div>
@@ -249,110 +294,131 @@ export default function Agents() {
               <Button 
                 variant="destructive" 
                 size="sm" 
-                className="h-11 text-[11px] font-black uppercase tracking-[0.15em] px-6 border-2 border-red-600"
+                className="h-8 text-[10px] font-bold uppercase"
                 onClick={() => setIsDeleteConfirmOpen(true)}
               >
-                <Trash2 className="w-4 h-4 mr-2" /> Deletar Unidade
+                <Trash2 className="w-3 h-3 mr-2" /> Deletar Unidade
               </Button>
-              <div className="flex flex-col items-end font-mono text-[10px] text-muted-foreground font-bold uppercase">
+              <div className="flex items-center gap-4 font-mono text-[10px] text-muted-foreground">
                 <span>STATUS: {selectedAgent?.status?.toUpperCase()}</span>
-                <span>KERNEL-ID: #{selectedAgent?.id?.toString().padStart(4, '0')}</span>
+                <span>ID: #{selectedAgent?.id?.toString().padStart(4, '0')}</span>
               </div>
             </div>
           </div>
 
           <Tabs defaultValue="overview" className="flex-1 flex flex-col overflow-hidden">
-            <div className="px-8 border-b-2 border-accent/30 bg-foreground/5">
-              <TabsList className="bg-transparent h-16 gap-8">
-                <TabsTrigger value="overview" className="data-[state=active]:bg-transparent data-[state=active]:text-accent data-[state=active]:border-b-4 data-[state=active]:border-accent rounded-none px-0 font-black uppercase text-[11px] tracking-[0.2em]">Visão Geral</TabsTrigger>
-                <TabsTrigger value="config" className="data-[state=active]:bg-transparent data-[state=active]:text-accent data-[state=active]:border-b-4 data-[state=active]:border-accent rounded-none px-0 font-black uppercase text-[11px] tracking-[0.2em]">Configuração Manus</TabsTrigger>
-                <TabsTrigger value="missions" className="data-[state=active]:bg-transparent data-[state=active]:text-accent data-[state=active]:border-b-4 data-[state=active]:border-accent rounded-none px-0 font-black uppercase text-[11px] tracking-[0.2em]">Missões Ativas</TabsTrigger>
-                <TabsTrigger value="logs" className="data-[state=active]:bg-transparent data-[state=active]:text-accent data-[state=active]:border-b-4 data-[state=active]:border-accent rounded-none px-0 font-black uppercase text-[11px] tracking-[0.2em]">Logs de Sistema</TabsTrigger>
+            <div className="px-6 border-b border-foreground/10 bg-foreground/5">
+              <TabsList className="bg-transparent h-12 gap-6">
+                <TabsTrigger value="overview" className="data-[state=active]:bg-transparent data-[state=active]:text-accent data-[state=active]:border-b-2 data-[state=active]:border-accent rounded-none px-0 font-bold uppercase text-[10px] tracking-widest">Visão Geral</TabsTrigger>
+                <TabsTrigger value="missions" className="data-[state=active]:bg-transparent data-[state=active]:text-accent data-[state=active]:border-b-2 data-[state=active]:border-accent rounded-none px-0 font-bold uppercase text-[10px] tracking-widest">Missões & Tarefas</TabsTrigger>
+                <TabsTrigger value="logs" className="data-[state=active]:bg-transparent data-[state=active]:text-accent data-[state=active]:border-b-2 data-[state=active]:border-accent rounded-none px-0 font-bold uppercase text-[10px] tracking-widest">Logs de Atividade</TabsTrigger>
+                <TabsTrigger value="config" className="data-[state=active]:bg-transparent data-[state=active]:text-accent data-[state=active]:border-b-2 data-[state=active]:border-accent rounded-none px-0 font-bold uppercase text-[10px] tracking-widest">Configuração Manus</TabsTrigger>
               </TabsList>
             </div>
 
-            <div className="flex-1 overflow-hidden p-8">
-              <ScrollArea className="h-full pr-4">
+            <div className="flex-1 overflow-hidden">
+              <ScrollArea className="h-full p-6">
                 <TabsContent value="overview" className="m-0 space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <Card className="cad-card p-6 border-2 bg-foreground/5">
-                      <div className="flex items-center gap-3 mb-4 text-accent">
-                        <Shield className="w-6 h-6" />
-                        <h4 className="text-[11px] font-black uppercase tracking-[0.2em]">Segurança de Rede</h4>
-                      </div>
-                      <p className="text-3xl font-mono font-black text-accent">CRIPTOGRAFADO</p>
-                      <p className="text-[10px] text-muted-foreground mt-3 uppercase font-bold">Protocolo TLS 1.3 Ativo</p>
+                    <Card className="p-4 bg-foreground/5 border-foreground/10 flex flex-col gap-1">
+                      <span className="text-[9px] uppercase text-muted-foreground font-bold">Último Heartbeat</span>
+                      <span className="text-xl font-mono text-accent font-black">{calculateLastHeartbeat(selectedAgent?.lastHeartbeat)}</span>
                     </Card>
-                    <Card className="cad-card p-6 border-2 bg-foreground/5">
-                      <div className="flex items-center gap-3 mb-4 text-accent">
-                        <Zap className="w-6 h-6" />
-                        <h4 className="text-[11px] font-black uppercase tracking-[0.2em]">Latência</h4>
-                      </div>
-                      <p className="text-3xl font-mono font-black text-accent">124ms</p>
-                      <p className="text-[10px] text-muted-foreground mt-3 uppercase font-bold">Via Manus Cloud</p>
+                    <Card className="p-4 bg-foreground/5 border-foreground/10 flex flex-col gap-1">
+                      <span className="text-[9px] uppercase text-muted-foreground font-bold">Tarefas Atribuídas</span>
+                      <span className="text-2xl font-mono text-accent font-black">{tasksQuery.data?.length || 0}</span>
                     </Card>
-                    <Card className="cad-card p-6 border-2 bg-foreground/5">
-                      <div className="flex items-center gap-3 mb-4 text-accent">
-                        <Activity className="w-6 h-6" />
-                        <h4 className="text-[11px] font-black uppercase tracking-[0.2em]">CPU</h4>
-                      </div>
-                      <p className="text-3xl font-mono font-black text-accent">12.5%</p>
-                      <p className="text-[10px] text-muted-foreground mt-3 uppercase font-bold">Otimizado</p>
+                    <Card className="p-4 bg-foreground/5 border-foreground/10 flex flex-col gap-1">
+                      <span className="text-[9px] uppercase text-muted-foreground font-bold">Status de Conexão</span>
+                      <span className="text-2xl font-mono text-accent font-black uppercase">{isOnline(selectedAgent || {}) ? 'Estável' : 'Perdida'}</span>
                     </Card>
                   </div>
-                </TabsContent>
 
-                <TabsContent value="config" className="m-0 space-y-6">
-                  <div className="bg-accent/10 border-4 border-accent p-6 rounded-none">
-                    <h4 className="text-[12px] font-black uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
-                      <Mail className="w-5 h-5 text-accent" /> Credenciais da Conta Manus
+                  <div className="space-y-4">
+                    <h4 className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
+                      <Activity className="w-4 h-4 text-accent" /> Telemetria do Sistema
                     </h4>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground mb-2 block">E-mail da Conta</label>
-                        <div className="bg-foreground/10 p-4 rounded-none border-2 border-accent/30 font-mono text-sm font-bold text-foreground">
-                          {selectedAgent?.manusAccount}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="p-4 border border-foreground/10 rounded bg-foreground/5">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-[10px] font-bold uppercase">Carga de Processamento</span>
+                          <span className="text-[10px] font-mono">42%</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-foreground/10 rounded-full overflow-hidden">
+                          <div className="h-full bg-accent w-[42%]"></div>
                         </div>
                       </div>
-                      <div>
-                        <label className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground mb-2 block">Token de Acesso</label>
-                        <div className="bg-foreground/10 p-4 rounded-none border-2 border-accent/30 font-mono text-sm font-bold text-accent">
-                          {selectedAgent?.manusToken}
+                      <div className="p-4 border border-foreground/10 rounded bg-foreground/5">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-[10px] font-bold uppercase">Uso de Memória</span>
+                          <span className="text-[10px] font-mono">2.4GB / 8GB</span>
                         </div>
-                      </div>
-                      <div className="bg-yellow-500/10 border-2 border-yellow-500/50 p-4 rounded-none">
-                        <p className="text-[10px] font-bold text-yellow-600 uppercase tracking-widest">⚠️ Credenciais Sincronizadas com Manus Cloud</p>
+                        <div className="h-1.5 w-full bg-foreground/10 rounded-full overflow-hidden">
+                          <div className="h-full bg-accent w-[30%]"></div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </TabsContent>
 
                 <TabsContent value="missions" className="m-0">
-                  <div className="space-y-4">
-                    {mockTasks.map(task => (
-                      <div key={task.id} className="bg-foreground/5 border-2 border-foreground/20 p-5 flex justify-between items-center group hover:border-accent/50 transition-all">
-                        <div className="flex items-center gap-4">
-                          <ListTodo className="w-5 h-5 text-accent" />
+                  {tasksQuery.isLoading ? (
+                    <div className="flex justify-center py-10"><Loader2 className="animate-spin text-accent" /></div>
+                  ) : tasksQuery.data && tasksQuery.data.length > 0 ? (
+                    <div className="space-y-3">
+                      {tasksQuery.data.map((task) => (
+                        <div key={task.id} className="p-4 border border-foreground/10 rounded bg-foreground/5 flex justify-between items-center">
                           <div>
-                            <p className="text-sm font-black uppercase tracking-tight">{task.title}</p>
-                            <p className="text-[10px] text-muted-foreground font-bold uppercase">Prioridade: {task.priority}</p>
+                            <h5 className="text-sm font-bold uppercase tracking-tight">{task.title}</h5>
+                            <p className="text-[10px] text-muted-foreground font-mono">ID: #{task.id.toString().padStart(5, '0')} // STATUS: {task.statusId}</p>
                           </div>
+                          <Button variant="outline" size="sm" className="h-7 text-[9px] font-bold uppercase">Detalhes</Button>
                         </div>
-                        <span className="text-[10px] font-mono bg-accent/10 text-accent px-4 py-2 rounded-none border-2 border-accent/30 font-black uppercase">{task.status}</span>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-10 text-muted-foreground font-mono text-xs uppercase">Nenhuma missão atribuída a esta unidade.</div>
+                  )}
                 </TabsContent>
 
                 <TabsContent value="logs" className="m-0">
-                  <div className="font-mono text-[11px] space-y-3 bg-foreground/5 p-4 rounded-none border-2 border-foreground/10">
-                    {mockLogs.map(log => (
-                      <div key={log.id} className="flex gap-4 p-3 border-b-2 border-foreground/10 hover:bg-foreground/10 transition-colors">
-                        <span className="text-muted-foreground font-bold">[{new Date(log.timestamp).toLocaleTimeString()}]</span>
-                        <span className="text-accent font-black uppercase">[{log.action}]</span>
-                        <span className="text-foreground/80 font-bold">{log.detail}</span>
+                  {logsQuery.isLoading ? (
+                    <div className="flex justify-center py-10"><Loader2 className="animate-spin text-accent" /></div>
+                  ) : logsQuery.data && logsQuery.data.length > 0 ? (
+                    <div className="space-y-2 font-mono text-[10px]">
+                      {logsQuery.data.map((log) => (
+                        <div key={log.id} className="p-2 border-l-2 border-accent bg-foreground/5 flex gap-4">
+                          <span className="text-muted-foreground">[{new Date(log.createdAt).toLocaleTimeString()}]</span>
+                          <span className="text-accent font-bold uppercase">EVENT_{log.eventTypeId}:</span>
+                          <span className="flex-1">{log.details || "Nenhum detalhe fornecido"}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-10 text-muted-foreground font-mono text-xs uppercase">Nenhum log de atividade registrado.</div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="config" className="m-0 space-y-6">
+                  <div className="p-6 border-2 border-dashed border-accent/20 bg-accent/5 rounded-lg">
+                    <div className="flex items-center gap-3 mb-4">
+                      <Shield className="w-6 h-6 text-accent" />
+                      <h4 className="text-sm font-black uppercase tracking-widest">Credenciais de Acesso Manus</h4>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-[9px] uppercase font-bold text-muted-foreground">Account ID</label>
+                        <div className="p-3 bg-card border border-foreground/10 font-mono text-xs rounded truncate">
+                          {selectedAgent?.manusAccount || "NÃO CONFIGURADO"}
+                        </div>
                       </div>
-                    ))}
+                      <div className="space-y-2">
+                        <label className="text-[9px] uppercase font-bold text-muted-foreground">Access Token</label>
+                        <div className="p-3 bg-card border border-foreground/10 font-mono text-xs rounded truncate">
+                          {selectedAgent?.manusToken ? "••••••••••••••••" : "NÃO CONFIGURADO"}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </TabsContent>
               </ScrollArea>
@@ -361,75 +427,106 @@ export default function Agents() {
         </DialogContent>
       </Dialog>
 
-      {/* Modal de Criação/Edição */}
+      {/* Modal de Criação/Edição - MELHORADO */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="bg-card border-4 border-accent max-w-3xl">
-          <DialogHeader className="border-b-2 border-accent pb-6 mb-6">
-            <DialogTitle className="text-4xl font-black uppercase italic tracking-tighter flex items-center gap-4">
-              <Cpu className="w-8 h-8 text-accent" />
-              {isEditMode ? "Configurar Unidade" : "Inicializar Unidade"}
+        <DialogContent className="bg-card border-2 border-foreground/20 max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="border-b border-foreground/10 pb-4 mb-4 sticky top-0 bg-card z-10">
+            <DialogTitle className="text-2xl font-black uppercase italic tracking-tighter flex items-center gap-2">
+              <Cpu className="w-6 h-6 text-accent" />
+              {isEditMode ? "Atualizar Configurações da Unidade Sofia" : "Inicializar Nova Unidade Sofia"}
             </DialogTitle>
+            <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest mt-2">
+              {isEditMode ? `Editando: ${selectedAgent?.name}` : "Configure os parâmetros da nova unidade"}
+            </p>
           </DialogHeader>
+
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <div className="grid grid-cols-2 gap-8">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 pb-6">
+              {/* Seção 1: Informações Básicas */}
+              <div className="space-y-4">
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-accent flex items-center gap-2">
+                  <Info className="w-4 h-4" /> Informações Básicas da Unidade
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-bold uppercase tracking-widest">Identificador da Unidade *</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Ex: SOFIA-01, AGENT-ALPHA" 
+                            {...field} 
+                            className="cad-box font-mono uppercase" 
+                            autoFocus
+                          />
+                        </FormControl>
+                        <FormMessage className="text-[10px]" />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="version"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-bold uppercase tracking-widest">Versão do Kernel *</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="1.0.0" 
+                            {...field} 
+                            className="cad-box font-mono" 
+                          />
+                        </FormControl>
+                        <FormMessage className="text-[10px]" />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <FormField
                   control={form.control}
-                  name="name"
+                  name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[11px] font-black uppercase tracking-[0.2em] mb-3 block">Identificador da Unidade</FormLabel>
+                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest">Diretriz Operacional (Descrição)</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ex: SOFIA-ALPHA" {...field} className="cad-box font-mono uppercase font-black text-sm h-12 border-2" />
+                        <Input 
+                          placeholder="Breve descrição do propósito desta unidade (ex: Análise de dados, Automação, etc...)" 
+                          {...field} 
+                          className="cad-box" 
+                        />
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="version"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-[11px] font-black uppercase tracking-[0.2em] mb-3 block">Versão de Kernel</FormLabel>
-                      <FormControl>
-                        <Input placeholder="1.0.0" {...field} className="cad-box font-mono font-black text-sm h-12 border-2" />
-                      </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-[10px]" />
                     </FormItem>
                   )}
                 />
               </div>
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[11px] font-black uppercase tracking-[0.2em] mb-3 block">Diretrizes Operacionais</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Descreva a função principal desta unidade..." {...field} className="cad-box font-bold text-sm h-12 border-2" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="border-t-2 border-accent pt-8 mt-8">
-                <h4 className="text-[12px] font-black uppercase tracking-[0.2em] text-accent mb-6 flex items-center gap-3">
-                  <Key className="w-5 h-5" /> Credenciais Manus
-                </h4>
-                <div className="grid grid-cols-1 gap-6 bg-accent/5 p-6 rounded-none border-2 border-accent/20">
+
+              {/* Seção 2: Integração Manus AI */}
+              <div className="space-y-4 p-4 border-2 border-dashed border-accent/30 bg-accent/5 rounded-lg">
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-accent flex items-center gap-2">
+                  <Shield className="w-4 h-4" /> Integração Manus AI (Opcional)
+                </h3>
+                <p className="text-[9px] text-muted-foreground font-mono">Configure as credenciais para conectar esta unidade à plataforma Manus AI e ativar recursos avançados.</p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
                     control={form.control}
                     name="manusAccount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[11px] font-black uppercase tracking-[0.2em] mb-3 block flex items-center gap-2">
-                          <Mail className="w-4 h-4 text-accent" /> E-mail Manus
-                        </FormLabel>
+                        <FormLabel className="text-[10px] font-bold uppercase tracking-widest">E-mail da Conta Manus</FormLabel>
                         <FormControl>
-                          <Input placeholder="agente@manus.im" {...field} className="cad-box font-mono font-black text-sm h-12 border-2" />
+                          <Input 
+                            type="email"
+                            placeholder="usuario@manus.im" 
+                            {...field} 
+                            className="cad-box font-mono" 
+                          />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-[10px]" />
                       </FormItem>
                     )}
                   />
@@ -438,67 +535,107 @@ export default function Agents() {
                     name="manusPassword"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[11px] font-black uppercase tracking-[0.2em] mb-3 block flex items-center gap-2">
-                          <Key className="w-4 h-4 text-accent" /> Chave de Acesso
-                        </FormLabel>
+                        <FormLabel className="text-[10px] font-bold uppercase tracking-widest">Senha da Conta</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="••••••••" {...field} className="cad-box font-bold text-sm h-12 border-2" />
+                          <div className="relative">
+                            <Input 
+                              type={showPassword ? "text" : "password"}
+                              placeholder="••••••••" 
+                              {...field} 
+                              className="cad-box font-mono pr-10" 
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-accent transition-colors"
+                            >
+                              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                          </div>
                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="manusToken"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-[11px] font-black uppercase tracking-[0.2em] mb-3 block flex items-center gap-2">
-                          <Shield className="w-4 h-4 text-accent" /> Token de Acesso (Opcional)
-                        </FormLabel>
-                        <FormControl>
-                          <Input placeholder="tk_sofia_prod_2024..." {...field} className="cad-box font-mono font-black text-sm h-12 border-2" />
-                        </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-[10px]" />
                       </FormItem>
                     )}
                   />
                 </div>
+
+                <FormField
+                  control={form.control}
+                  name="manusToken"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest">Token de Acesso API</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input 
+                            type={showToken ? "text" : "password"}
+                            placeholder="sk-..." 
+                            {...field} 
+                            className="cad-box font-mono pr-10" 
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowToken(!showToken)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-accent transition-colors"
+                          >
+                            {showToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      </FormControl>
+                      <FormMessage className="text-[10px]" />
+                    </FormItem>
+                  )}
+                />
               </div>
-              <DialogFooter className="gap-4 pt-8 border-t-2 border-accent">
-                <Button type="button" variant="outline" onClick={() => setIsOpen(false)} className="uppercase font-black text-[11px] tracking-[0.15em] h-12 px-8 border-2">
-                  Abortar
+
+              {/* Botões de Ação */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-foreground/10">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsOpen(false)} 
+                  className="uppercase font-bold text-[10px] tracking-widest h-11 px-6"
+                >
+                  Abortar Operação
                 </Button>
-                <Button type="submit" className="bg-accent text-accent-foreground font-black uppercase tracking-[0.15em] text-[11px] h-12 px-10 border-2 border-accent hover:bg-accent/90">
-                  {isEditMode ? "Sincronizar Protocolo" : "Confirmar Inicialização"}
+                <Button 
+                  type="submit" 
+                  disabled={createAgentMutation.isPending || updateAgentMutation.isPending}
+                  className="bg-accent text-accent-foreground font-bold uppercase tracking-widest text-[10px] h-11 px-8 shadow-[0_0_15px_rgba(var(--accent-rgb),0.3)]"
+                >
+                  {(createAgentMutation.isPending || updateAgentMutation.isPending) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                  {isEditMode ? "Confirmar Atualização" : "Confirmar Inicialização"}
                 </Button>
-              </DialogFooter>
+              </div>
             </form>
           </Form>
         </DialogContent>
       </Dialog>
 
-      {/* Confirmação de Deleção */}
+      {/* Modal de Confirmação de Exclusão */}
       <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
-        <DialogContent className="bg-card border-4 border-red-600 max-w-md">
+        <DialogContent className="bg-card border-2 border-destructive/50 max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-3xl font-black uppercase italic tracking-tighter text-red-500 flex items-center gap-3">
-              <AlertCircle className="w-8 h-8" />
-              Aviso de Exclusão
+            <DialogTitle className="text-xl font-black uppercase italic tracking-tighter text-destructive flex items-center gap-2">
+              <AlertCircle className="w-6 h-6" />
+              Confirmar Desativação Permanente
             </DialogTitle>
           </DialogHeader>
-          <div className="py-8">
-            <p className="text-sm font-bold leading-relaxed">
-              Você está prestes a desativar permanentemente a unidade <span className="text-red-500 font-black text-lg">{selectedAgent?.name}</span>. 
-              Esta ação é irreversível e todos os logs locais serão perdidos.
-            </p>
-          </div>
-          <DialogFooter className="gap-4">
-            <Button variant="outline" onClick={() => setIsDeleteConfirmOpen(false)} className="uppercase font-black text-[11px] tracking-[0.15em] border-2 h-11">
+          <p className="text-sm text-muted-foreground py-4">
+            Esta ação irá deletar permanentemente a unidade <span className="font-bold text-foreground">"{selectedAgent?.name}"</span> e todos os seus registros associados. Esta operação não pode ser desfeita.
+          </p>
+          <DialogFooter className="gap-3">
+            <Button variant="outline" onClick={() => setIsDeleteConfirmOpen(false)} className="uppercase font-bold text-[10px]">
               Cancelar
             </Button>
-            <Button variant="destructive" onClick={handleDelete} className="uppercase font-black text-[11px] tracking-[0.15em] bg-red-600 border-2 border-red-600 h-11">
-              Confirmar Desativação
+            <Button 
+              variant="destructive" 
+              onClick={() => deleteAgentMutation.mutate({ id: selectedAgent.id })}
+              disabled={deleteAgentMutation.isPending}
+              className="uppercase font-bold text-[10px]"
+            >
+              {deleteAgentMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Confirmar Exclusão
             </Button>
           </DialogFooter>
         </DialogContent>
