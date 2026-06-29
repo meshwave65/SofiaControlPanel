@@ -1,11 +1,13 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, MessageSquare, User, Cpu, Reply, X, Loader2, Badge, Terminal } from "lucide-react";
+import { Send, MessageSquare, User, Cpu, Reply, X, Loader2, Terminal } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useState } from "react";
 
 export default function Messages() {
   const { isAuthenticated, user } = useAuth();

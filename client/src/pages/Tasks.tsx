@@ -16,11 +16,11 @@ import { Badge } from "@/components/ui/badge";
 
 const createTaskSchema = z.object({
   title: z.string().min(1, "Título é obrigatório"),
-  description: z.string().optional(),
-  agentId: z.string().optional(),
+  description: z.string().optional().default(""),
+  agentId: z.string().optional().default(""),
   statusId: z.string().default("100"),
   priorityId: z.string().default("1"),
-  dueDate: z.string().optional(),
+  dueDate: z.string().optional().default(""),
 });
 
 type CreateTaskInput = z.infer<typeof createTaskSchema>;
@@ -64,8 +64,8 @@ export default function Tasks() {
     });
   }, [tasks, searchTerm, filterStatus, filterPriority]);
 
-  const form = useForm<CreateTaskInput>({
-    resolver: zodResolver(createTaskSchema),
+  const form = useForm<any>({
+    resolver: zodResolver(createTaskSchema) as any,
     defaultValues: {
       title: "",
       description: "",

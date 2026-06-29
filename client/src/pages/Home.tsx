@@ -169,8 +169,8 @@ export default function Home() {
               <ResponsiveContainer width="100%" height={320}>
                 <BarChart data={activityData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(232, 240, 255, 0.08)" />
-                  <XAxis dataKey="time" stroke="rgba(232, 240, 255, 0.4)" fontSize={11} fontBold="bold" />
-                  <YAxis stroke="rgba(232, 240, 255, 0.4)" fontSize={11} fontBold="bold" />
+                  <XAxis dataKey="time" stroke="rgba(232, 240, 255, 0.4)" fontSize={11}  />
+                  <YAxis stroke="rgba(232, 240, 255, 0.4)" fontSize={11}  />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "rgba(10, 22, 40, 0.95)",
@@ -199,8 +199,8 @@ export default function Home() {
               <ResponsiveContainer width="100%" height={320}>
                 <LineChart data={activityData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(232, 240, 255, 0.08)" />
-                  <XAxis dataKey="time" stroke="rgba(232, 240, 255, 0.4)" fontSize={11} fontBold="bold" />
-                  <YAxis stroke="rgba(232, 240, 255, 0.4)" fontSize={11} fontBold="bold" />
+                  <XAxis dataKey="time" stroke="rgba(232, 240, 255, 0.4)" fontSize={11}  />
+                  <YAxis stroke="rgba(232, 240, 255, 0.4)" fontSize={11}  />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "rgba(10, 22, 40, 0.95)",
