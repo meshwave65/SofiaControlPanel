@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Filter, Search, Calendar, AlertCircle, Cpu, CheckCircle2, Clock, PlayCircle, PauseCircle, XCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { useState, useMemo } from "react";
 
 const createTaskSchema = z.object({
   title: z.string().min(1, "Título é obrigatório"),
