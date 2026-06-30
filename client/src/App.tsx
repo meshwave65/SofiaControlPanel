@@ -7,6 +7,8 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import Agents from "./pages/Agents";
 import Tasks from "./pages/Tasks";
+import TaskDetail from "./pages/TaskDetail";
+import TaskCreate from "./pages/TaskCreate";
 import Messages from "./pages/Messages";
 
 function Router() {
@@ -16,6 +18,8 @@ function Router() {
       <Route path={"/"} component={Home} />
       <Route path={"/agents"} component={Agents} />
       <Route path={"/tasks"} component={Tasks} />
+      <Route path={"/tasks/create"} component={TaskCreate} />
+      <Route path={"/tasks/:id"} component={TaskDetail} />
       <Route path={"/messages"} component={Messages} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
@@ -28,7 +32,6 @@ function Router() {
 // - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
 //   to keep consistent foreground/background color across components
 // - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
-
 function App() {
   return (
     <ErrorBoundary>
