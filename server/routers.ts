@@ -23,7 +23,11 @@ export const appRouter = router({
   // ============================================
   agents: router({
     list: protectedProcedure.query(async ({ ctx }) => {
-      return db.getAgentsByOwnerId(ctx.user.id);
+      const agents = await db.getAgentsByOwnerId(ctx.user.id);
+      if (agents.length === 0) {
+        return db.getAllAgentsGlobal();
+      }
+      return agents;
     }),
 
     create: protectedProcedure
@@ -95,11 +99,19 @@ export const appRouter = router({
   // ============================================
   tasks: router({
     list: protectedProcedure.query(async ({ ctx }) => {
-      return db.getAllTasks(ctx.user.id);
+      const tasks = await db.getAllTasks(ctx.user.id);
+      if (tasks.length === 0) {
+        return db.getAllTasksGlobal();
+      }
+      return tasks;
     }),
 
     listAll: protectedProcedure.query(async ({ ctx }) => {
-      return db.getAllTasks(ctx.user.id);
+      const tasks = await db.getAllTasks(ctx.user.id);
+      if (tasks.length === 0) {
+        return db.getAllTasksGlobal();
+      }
+      return tasks;
     }),
 
     create: protectedProcedure

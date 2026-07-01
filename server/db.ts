@@ -382,7 +382,14 @@ export async function getAllTasksGlobal() {
   const db = await getDb();
   if (!db) return [];
   
-  return db.select().from(tasks);
+  return db.select().from(tasks).orderBy(desc(tasks.createdAt));
+}
+
+export async function getAllAgentsGlobal() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(agents).orderBy(desc(agents.createdAt));
 }
 
 export async function getDashboardStats(ownerId: number) {
