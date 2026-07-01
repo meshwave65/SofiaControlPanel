@@ -26,7 +26,7 @@ export const appRouter = router({
       return db.getAgentsByOwnerId(ctx.user.id);
     }),
 
-    create: adminProcedure
+    create: protectedProcedure
       .input(z.object({
         name: z.string().min(1),
         description: z.string().optional(),
