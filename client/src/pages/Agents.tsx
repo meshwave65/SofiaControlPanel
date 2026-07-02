@@ -115,10 +115,20 @@ export default function Agents() {
   });
 
   const onSubmit = (data: any) => {
+    console.log("[Agents] Submitting data:", data);
+    const payload = {
+      ...data,
+      description: data.description || "",
+      version: data.version || "1.0.0",
+      manusAccount: data.manusAccount || "",
+      manusPassword: data.manusPassword || "",
+      manusToken: data.manusToken || "",
+    };
+
     if (isEditMode && selectedAgent) {
-      updateAgentMutation.mutate({ id: selectedAgent.id, ...data });
+      updateAgentMutation.mutate({ id: selectedAgent.id, ...payload });
     } else {
-      createAgentMutation.mutate(data);
+      createAgentMutation.mutate(payload);
     }
   };
 
