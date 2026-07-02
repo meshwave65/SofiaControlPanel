@@ -77,17 +77,18 @@ export default function Tasks() {
     },
   });
 
-  const onSubmit = (data: CreateTaskInput) => {
-    const newTask = {
-      id: tasks.length + 1,
+  const onSubmit = (data: any) => {
+    console.log("[Tasks] Submitting task data:", data);
+    const statusId = parseInt(data.statusId?.toString() || "100");
+    const priorityId = parseInt(data.priorityId?.toString() || "1");
+    
+    createTaskMutation.mutate({
       ...data,
-      agentName: data.agentId ? "Sofia-Alpha" : "Não Atribuído", // Mock assignment
-      createdAt: new Date().toISOString(),
-    };
-    setTasks([newTask as any, ...tasks]);
-    toast.success("Missão inicializada com sucesso!");
-    setIsOpen(false);
-    form.reset();
+      statusId: isNaN(statusId) ? 100 : statusId,
+      priorityId: isNaN(priorityId) ? 1 : priorityId,
+      agentId: data.agentId ? parseInt(data.agentId.toString()) : undefined,
+      dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
+    });
   };
 
   if (!isAuthenticated) {
