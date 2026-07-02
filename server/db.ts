@@ -12,6 +12,10 @@ export async function getDb() {
       try {
         _db = drizzle(url);
         console.log("[Database] Connected successfully");
+        // Tenta rodar o seed de forma assíncrona para garantir dados básicos
+        setTimeout(() => {
+          import('./seed').catch(err => console.error("[Database] Seed error:", err));
+        }, 1000);
       } catch (error) {
         console.error("[Database] Failed to connect:", error);
         _db = null;
