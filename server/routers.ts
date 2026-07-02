@@ -4,6 +4,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, adminProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import * as db from "./db";
+import { SofiaOrchestrator } from "./sofiaOrchestrator";
 
 export const appRouter = router({
   system: systemRouter,
@@ -156,6 +157,20 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         return db.updateTaskStatus(input.id, input.statusId);
+      }),
+
+    factorize: protectedProcedure
+      .input(z.object({ taskId: z.number() }))
+      .mutation(async ({ input }) => {
+        const orchestrator = new SofiaOrchestrator();
+        return orchestrator.factorizeTask(input.taskId);
+      }),
+
+    consolidate: protectedProcedure
+      .input(z.object({ taskId: z.number() }))
+      .mutation(async ({ input }) => {
+        const orchestrator = new SofiaOrchestrator();
+        return orchestrator.consolidateResults(input.taskId);
       }),
   }),
 

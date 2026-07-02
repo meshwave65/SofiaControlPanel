@@ -346,4 +346,33 @@ router.get("/tasks/:agentId", async (req, res) => {
   }
 });
 
+/**
+ * GET /api/public/subtasks/:parentTaskId
+ * 
+ * Recupera todas as subtarefas de uma tarefa gênesis
+ */
+router.get("/subtasks/:parentTaskId", async (req, res) => {
+  try {
+    const parentTaskId = parseInt(req.params.parentTaskId);
+    if (isNaN(parentTaskId)) {
+      return res.status(400).json({
+        success: false,
+        message: "parentTaskId deve ser um número válido",
+      });
+    }
+    const tasks = await db.getTasksByParentId(parentTaskId);
+    res.json({
+      success: true,
+      tasks,
+      count: tasks.length,
+    });
+  } catch (error) {
+    console.error("[Public API] Get subtasks error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erro ao recuperar subtarefas",
+    });
+  }
+});
+
 export default router;

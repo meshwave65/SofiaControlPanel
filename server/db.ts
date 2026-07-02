@@ -194,6 +194,13 @@ export async function getTasksByAgentId(agentId: number) {
   return db.select().from(tasks).where(eq(tasks.agentId, agentId));
 }
 
+export async function getTasksByParentId(parentTaskId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(tasks).where(eq(tasks.parentTaskId, parentTaskId)).orderBy(desc(tasks.createdAt));
+}
+
 export async function getTasksByStatus(statusId: number) {
   const db = await getDb();
   if (!db) return [];
