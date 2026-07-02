@@ -14,7 +14,7 @@ Esta missão foca na prioridade zero: garantir que o usuário consiga cadastrar 
 4. Validar o fluxo completo: Cadastro de Agente -> Criação de Missão -> Persistência.
 
 ## Progresso
-- [ ] 1.0 Diagnóstico de Persistência
-- [ ] 2.0 Correção da UI de Agentes
-- [ ] 3.0 Correção da UI de Missões
+- [x] 1.0 Diagnóstico de Persistência
+- [x] 2.0 Correção da UI de Agentes
+- [x] 3.0 Correção da UI de Missões
 - [ ] 4.0 Validação Final e Commit
