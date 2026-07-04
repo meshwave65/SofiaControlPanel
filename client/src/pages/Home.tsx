@@ -52,7 +52,11 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground relative">
+      {/* DEPLOY VALIDATION WATERMARK */}
+      <div className="fixed top-0 left-0 w-full bg-red-600 text-white text-[10px] font-bold text-center py-1 z-[9999] uppercase tracking-widest animate-pulse pointer-events-none">
+        Deploy Verificado: Manus AI - Julho 2026 - Sofia Control Panel v1.2
+      </div>
       {/* Header */}
       <div className="technical-header px-8 py-10 border-b-4 border-accent bg-gradient-to-r from-background to-background/50">
         <div className="max-w-7xl mx-auto flex justify-between items-end">
