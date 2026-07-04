@@ -1,5 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import { trpc } from "@/lib/trpc";
 import { Card } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from "recharts";
 import { Users, CheckSquare, MessageSquare, Activity, CreditCard, ExternalLink, Zap, Shield, Cpu } from "lucide-react";
@@ -9,14 +10,16 @@ export default function Home() {
   const { user, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
 
-  // Mock data para estatísticas
+  const { data: agents = [] } = trpc.agents.list.useQuery(undefined, { enabled: isAuthenticated });
+  const { data: tasks = [] } = trpc.tasks.list.useQuery(undefined, { enabled: isAuthenticated });
+  
   const stats = {
-    totalAgents: 8,
-    onlineAgents: 5,
-    totalTasks: 24,
-    pendingTasks: 12,
-    unreadMessages: 3,
-    totalLogs: 156,
+    totalAgents: agents.length || 0,
+    onlineAgents: agents.filter((a: any) => a.status === 'online').length || 0,
+    totalTasks: tasks.length || 0,
+    pendingTasks: tasks.filter((t: any) => t.statusId === 100 || t.statusId === 110).length || 0,
+    unreadMessages: 0,
+    totalLogs: 0,
   };
 
   // Mock data para o gráfico

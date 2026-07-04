@@ -48,22 +48,36 @@ export default function Tasks() {
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterPriority, setFilterPriority] = useState<string>("all");
 
-  // Mock data para tarefas
-  const [tasks, setTasks] = useState([
-    { id: 1, title: "Análise de Portfólio Q3", description: "Avaliar ativos de tecnologia e saúde", agentId: 1, agentName: "Sofia-Alpha", statusId: "110", priorityId: "3", createdAt: new Date().toISOString() },
-    { id: 2, title: "Scraping de Dados Competitivos", description: "Extrair preços de 15 concorrentes", agentId: 2, agentName: "Sofia-Beta", statusId: "130", priorityId: "2", createdAt: new Date(Date.now() - 86400000).toISOString() },
-    { id: 3, title: "Monitoramento de Sentiment Analysis", description: "Analisar Twitter para menções à marca", agentId: 1, agentName: "Sofia-Alpha", statusId: "100", priorityId: "4", createdAt: new Date(Date.now() - 43200000).toISOString() },
-  ]);
+  // Queries
+  const tasksQuery = trpc.tasks.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+    refetchInterval: 10000,
+  });
+
+  const agentsQuery = trpc.agents.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  // Local Mock Storage for fallback
+  const [localTasks, setLocalTasks] = useState<any[]>([]);
+
+  // Merge local and remote tasks
+  const allTasks = useMemo(() => {
+    const remoteTasks = tasksQuery.data || [];
+    return [...remoteTasks, ...localTasks].filter(
+      (task, index, self) => index === self.findIndex((t) => t.id === task.id)
+    ).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [tasksQuery.data, localTasks]);
 
   const filteredTasks = useMemo(() => {
-    return tasks.filter(task => {
+    return allTasks.filter(task => {
       const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                            task.description?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = filterStatus === "all" || task.statusId === filterStatus;
-      const matchesPriority = filterPriority === "all" || task.priorityId === filterPriority;
+      const matchesStatus = filterStatus === "all" || task.statusId?.toString() === filterStatus;
+      const matchesPriority = filterPriority === "all" || task.priorityId?.toString() === filterPriority;
       return matchesSearch && matchesStatus && matchesPriority;
     });
-  }, [tasks, searchTerm, filterStatus, filterPriority]);
+  }, [allTasks, searchTerm, filterStatus, filterPriority]);
 
   const form = useForm<any>({
     resolver: zodResolver(createTaskSchema) as any,
