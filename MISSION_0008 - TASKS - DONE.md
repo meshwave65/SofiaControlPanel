@@ -7,4 +7,4 @@
 | 2.1 | Corrigir componente Agents.tsx | DONE | Manus AI | onSubmit restaurado com payload real |
 | 3.1 | Corrigir componente Tasks.tsx | DONE | Manus AI | Mock local removido, tRPC integrado |
 | 4.1 | Realizar commits de cada funcionalidade | DONE | Manus AI | Commits atômicos realizados |
-| 4.2 | Sincronizar com GitHub remoto | PROGRESS | Manus AI | |
+| 4.2 | Sincronizar com GitHub remoto | DONE | Manus AI | Deploy forçado no Render com migração |

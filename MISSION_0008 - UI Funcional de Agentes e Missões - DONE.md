@@ -1,7 +1,7 @@
 # Missão 0008: UI Funcional de Agentes e Missões
 
 **ID:** 0008
-**Status:** PROGRESS
+**Status:** DONE
 **Objetivo:** Desenvolver uma UI funcional para cadastro de agentes e criação de missões com persistência de dados garantida.
 
 ## Descrição
@@ -17,4 +17,4 @@ Esta missão foca na prioridade zero: garantir que o usuário consiga cadastrar 
 - [x] 1.0 Diagnóstico de Persistência
 - [x] 2.0 Correção da UI de Agentes
 - [x] 3.0 Correção da UI de Missões
-- [ ] 4.0 Validação Final e Commit
+- [x] 4.0 Validação Final e Deploy no Render
