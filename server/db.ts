@@ -396,13 +396,6 @@ export async function getAllTasksGlobal() {
   return db.select().from(tasks).orderBy(desc(tasks.createdAt));
 }
 
-export async function getAllAgentsGlobal() {
-  const db = await getDb();
-  if (!db) return [];
-  
-  return db.select().from(agents).orderBy(desc(agents.createdAt));
-}
-
 export async function getDashboardStats(ownerId: number) {
   const db = await getDb();
   if (!db) return { totalAgents: 0, onlineAgents: 0, totalTasks: 0, pendingTasks: 0, unreadMessages: 0 };
