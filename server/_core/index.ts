@@ -32,6 +32,11 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 }
 
 async function startServer() {
+  console.log("====================================================");
+  console.log("🚀 SOFIA CONTROL PANEL - PRODUCTION STARTING");
+  console.log(`📅 VERSION: Julho 2026 - v1.2`);
+  console.log(`🌐 NODE_ENV: ${process.env.NODE_ENV}`);
+  console.log("====================================================");
   const app = express();
   const server = createServer(app);
   // Configure body parser with larger size limit for file uploads
