@@ -1,25 +1,30 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, boolean, decimal, index, foreignKey } from "drizzle-orm/mysql-core";
+import { integer, pgEnum, pgTable, pgSchema, text, timestamp, varchar, boolean, numeric, index, foreignKey } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+
+const sofia = pgSchema("sofia");
+
+export const roleEnum = sofia.enum("role", ["user", "admin"]);
+export const agentStatusEnum = sofia.enum("agent_status", ["online", "offline", "idle", "paused"]);
 
 /**
  * Core user table backing auth flow.
  * Extend this file with additional tables as your product grows.
  * Columns use camelCase to match both database fields and generated types.
  */
-export const users = mysqlTable("users", {
+export const users = sofia.table("users", {
   /**
    * Surrogate primary key. Auto-incremented numeric value managed by the database.
    * Use this for relations between tables.
    */
-  id: int("id").autoincrement().primaryKey(),
+  id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
   /** Manus OAuth identifier (openId) returned from the OAuth callback. Unique per user. */
   openId: varchar("openId", { length: 64 }).notNull().unique(),
   name: text("name"),
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
-  role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
+  role: roleEnum("role").default("user").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
 });
 
@@ -30,14 +35,14 @@ export type InsertUser = typeof users.$inferInsert;
 // AGENT MANAGEMENT TABLES
 // ============================================
 
-export const agents = mysqlTable(
+export const agents = sofia.table(
   "agents",
   {
-    id: int("id").autoincrement().primaryKey(),
-    ownerId: int("ownerId").notNull(),
+    id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
+    ownerId: integer("ownerId").notNull(),
     name: varchar("name", { length: 255 }).notNull(),
     description: text("description"),
-    status: mysqlEnum("status", ["online", "offline", "idle", "paused"]).default("offline").notNull(),
+    status: agentStatusEnum("status").default("offline").notNull(),
     version: varchar("version", { length: 64 }),
     manusAccount: varchar("manusAccount", { length: 255 }),
     manusPassword: varchar("manusPassword", { length: 255 }),
@@ -45,10 +50,10 @@ export const agents = mysqlTable(
     lastHeartbeat: timestamp("lastHeartbeat"),
     connectionStatus: varchar("connectionStatus", { length: 32 }).default("not_configured").notNull(),
     connectionError: text("connectionError"),
-    creditsRemaining: decimal("creditsRemaining", { precision: 12, scale: 2 }),
+    creditsRemaining: numeric("creditsRemaining", { precision: 12, scale: 2 }),
     creditsUpdatedAt: timestamp("creditsUpdatedAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
-    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
   },
   (table) => ({
     ownerIdIdx: index("agents_ownerId_idx").on(table.ownerId),
@@ -67,8 +72,8 @@ export type InsertAgent = typeof agents.$inferInsert;
 // TASK MANAGEMENT TABLES
 // ============================================
 
-export const taskStatuses = mysqlTable("taskStatuses", {
-  id: int("id").autoincrement().primaryKey(),
+export const taskStatuses = sofia.table("taskStatuses", {
+  id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
   name: varchar("name", { length: 64 }).notNull().unique(),
   description: text("description"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -77,10 +82,10 @@ export const taskStatuses = mysqlTable("taskStatuses", {
 export type TaskStatus = typeof taskStatuses.$inferSelect;
 export type InsertTaskStatus = typeof taskStatuses.$inferInsert;
 
-export const taskPriorities = mysqlTable("taskPriorities", {
-  id: int("id").autoincrement().primaryKey(),
+export const taskPriorities = sofia.table("taskPriorities", {
+  id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
   name: varchar("name", { length: 64 }).notNull().unique(),
-  level: int("level").notNull(),
+  level: integer("level").notNull(),
   description: text("description"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
@@ -88,21 +93,21 @@ export const taskPriorities = mysqlTable("taskPriorities", {
 export type TaskPriority = typeof taskPriorities.$inferSelect;
 export type InsertTaskPriority = typeof taskPriorities.$inferInsert;
 
-export const tasks = mysqlTable(
+export const tasks = sofia.table(
   "tasks",
   {
-    id: int("id").autoincrement().primaryKey(),
-    agentId: int("agentId"),
-    createdBy: int("createdBy").notNull(),
+    id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
+    agentId: integer("agentId"),
+    createdBy: integer("createdBy").notNull(),
     title: varchar("title", { length: 255 }).notNull(),
     description: text("description"),
-    statusId: int("statusId").notNull(),
-    priorityId: int("priorityId").notNull(),
-    parentTaskId: int("parentTaskId"),
+    statusId: integer("statusId").notNull(),
+    priorityId: integer("priorityId").notNull(),
+    parentTaskId: integer("parentTaskId"),
     dueDate: timestamp("dueDate"),
     completedAt: timestamp("completedAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
-    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
   },
   (table) => ({
     agentIdIdx: index("tasks_agentId_idx").on(table.agentId),
@@ -138,8 +143,8 @@ export type InsertTask = typeof tasks.$inferInsert;
 // MESSAGE SYSTEM TABLES
 // ============================================
 
-export const messageTypes = mysqlTable("messageTypes", {
-  id: int("id").autoincrement().primaryKey(),
+export const messageTypes = sofia.table("messageTypes", {
+  id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
   name: varchar("name", { length: 64 }).notNull().unique(),
   description: text("description"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -148,14 +153,14 @@ export const messageTypes = mysqlTable("messageTypes", {
 export type MessageType = typeof messageTypes.$inferSelect;
 export type InsertMessageType = typeof messageTypes.$inferInsert;
 
-export const messages = mysqlTable(
+export const messages = sofia.table(
   "messages",
   {
-    id: int("id").autoincrement().primaryKey(),
-    taskId: int("taskId").notNull(),
-    senderId: int("senderId").notNull(),
-    parentMessageId: int("parentMessageId"),
-    typeId: int("typeId").notNull(),
+    id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
+    taskId: integer("taskId").notNull(),
+    senderId: integer("senderId").notNull(),
+    parentMessageId: integer("parentMessageId"),
+    typeId: integer("typeId").notNull(),
     content: text("content").notNull(),
     isRead: boolean("isRead").default(false).notNull(),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -190,8 +195,8 @@ export type InsertMessage = typeof messages.$inferInsert;
 // ACTIVITY LOGGING TABLES
 // ============================================
 
-export const activityEventTypes = mysqlTable("activityEventTypes", {
-  id: int("id").autoincrement().primaryKey(),
+export const activityEventTypes = sofia.table("activityEventTypes", {
+  id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
   name: varchar("name", { length: 64 }).notNull().unique(),
   description: text("description"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -200,13 +205,13 @@ export const activityEventTypes = mysqlTable("activityEventTypes", {
 export type ActivityEventType = typeof activityEventTypes.$inferSelect;
 export type InsertActivityEventType = typeof activityEventTypes.$inferInsert;
 
-export const activityLogs = mysqlTable(
+export const activityLogs = sofia.table(
   "activityLogs",
   {
-    id: int("id").autoincrement().primaryKey(),
-    agentId: int("agentId").notNull(),
-    taskId: int("taskId"),
-    eventTypeId: int("eventTypeId").notNull(),
+    id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
+    agentId: integer("agentId").notNull(),
+    taskId: integer("taskId"),
+    eventTypeId: integer("eventTypeId").notNull(),
     details: text("details"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
@@ -237,14 +242,14 @@ export type InsertActivityLog = typeof activityLogs.$inferInsert;
 // CONTEXT REPORT TABLES
 // ============================================
 
-export const contextReports = mysqlTable(
+export const contextReports = sofia.table(
   "contextReports",
   {
-    id: int("id").autoincrement().primaryKey(),
-    ownerId: int("ownerId").notNull(),
+    id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
+    ownerId: integer("ownerId").notNull(),
     title: varchar("title", { length: 255 }).notNull(),
     content: text("content").notNull(),
-    creditsUsed: decimal("creditsUsed", { precision: 10, scale: 2 }),
+    creditsUsed: numeric("creditsUsed", { precision: 10, scale: 2 }),
     gitHubUrl: varchar("gitHubUrl", { length: 512 }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
@@ -265,10 +270,10 @@ export type InsertContextReport = typeof contextReports.$inferInsert;
 // SCHEDULED TASKS TABLE
 // ============================================
 
-export const scheduledTasks = mysqlTable(
+export const scheduledTasks = sofia.table(
   "scheduledTasks",
   {
-    id: int("id").autoincrement().primaryKey(),
+    id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
     name: varchar("name", { length: 255 }).notNull(),
     description: text("description"),
     cronExpression: varchar("cronExpression", { length: 64 }).notNull(),
@@ -277,7 +282,7 @@ export const scheduledTasks = mysqlTable(
     lastRun: timestamp("lastRun"),
     nextRun: timestamp("nextRun"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
-    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
   },
   (table) => ({
     isActiveIdx: index("scheduledTasks_isActive_idx").on(table.isActive),
