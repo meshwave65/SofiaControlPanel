@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -16,24 +17,20 @@ export default function Messages() {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [replyToId, setReplyToId] = useState<number | null>(null);
 
-  // Mock data para tarefas (sidebar)
-  const mockTasks = [
-    { id: 1, title: "Análise de Portfólio Q3", status: "PROGRESS" },
-    { id: 2, title: "Scraping de Dados Competitivos", status: "DONE" },
-    { id: 3, title: "Monitoramento de Sentiment Analysis", status: "STAGED" },
-    { id: 4, title: "Relatório de Performance Mensal", status: "PROGRESS" },
-  ];
-
-  // Mock data para mensagens
-  const [allMessages, setAllMessages] = useState([
-    { id: 1, taskId: 1, senderId: 0, content: "Iniciando análise dos ativos do terceiro trimestre.", createdAt: new Date(Date.now() - 3600000).toISOString(), parentMessageId: null },
-    { id: 2, taskId: 1, senderId: user?.id || 999, content: "Priorize os ativos de tecnologia.", createdAt: new Date(Date.now() - 3000000).toISOString(), parentMessageId: 1 },
-    { id: 3, taskId: 1, senderId: 0, content: "Entendido. Focando em ativos TECH.", createdAt: new Date(Date.now() - 2500000).toISOString(), parentMessageId: 2 },
-    { id: 4, taskId: 2, senderId: 0, content: "Scraping concluído para 15 sites concorrentes.", createdAt: new Date(Date.now() - 1800000).toISOString(), parentMessageId: null },
-  ]);
-
-  const selectedTask = mockTasks.find(t => t.id === selectedTaskId);
-
+  const tasksQuery = trpc.tasks.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+    refetchInterval: autoRefresh ? 10000 : false,
+  });
+  const messagesQuery = trpc.messages.getByTask.useQuery(
+    { taskId: selectedTaskId || 0 },
+    { enabled: selectedTaskId !== null, refetchInterval: autoRefresh ? 5000 : false }
+  );
+  const createMessageMutation = trpc.messages.create.useMutation({
+    onSuccess: () => messagesQuery.refetch(),
+  });
+  const tasks = tasksQuery.data || [];
+  const allMessages = messagesQuery.data || [];
+  const selectedTask = tasks.find((task: any) => task.id === selectedTaskId);
   const threadedMessages = useMemo(() => {
     const taskMessages = allMessages.filter(m => m.taskId === selectedTaskId);
     const messages = [...taskMessages].sort((a, b) => 
@@ -54,35 +51,16 @@ export default function Messages() {
       toast.error("Preencha a mensagem e selecione uma tarefa");
       return;
     }
-
-    const newMessage = {
-      id: allMessages.length + 1,
+    createMessageMutation.mutate({
       taskId: selectedTaskId,
-      senderId: user?.id || 999,
-      content: messageContent,
-      createdAt: new Date().toISOString(),
-      parentMessageId: replyToId,
-    };
-
-    setAllMessages([...allMessages, newMessage]);
+      parentMessageId: replyToId || undefined,
+      typeId: 1,
+      content: messageContent.trim(),
+    });
     setMessageContent("");
     setReplyToId(null);
     toast.success("Transmissão enviada com sucesso!");
-
-    // Simular resposta do agente
-    setTimeout(() => {
-      const response = {
-        id: allMessages.length + 2,
-        taskId: selectedTaskId,
-        senderId: 0, // ID do agente
-        content: "Recebido. Processando informações no kernel...",
-        createdAt: new Date().toISOString(),
-        parentMessageId: newMessage.id,
-      };
-      setAllMessages(prev => [...prev, response]);
-    }, 2000);
   };
-
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
@@ -117,7 +95,7 @@ export default function Messages() {
               </div>
               <ScrollArea className="flex-1">
                 <div className="p-3 space-y-2">
-                  {mockTasks.map(task => (
+                  {tasks.map((task: any) => (
                     <button
                       key={task.id}
                       onClick={() => {
@@ -133,7 +111,7 @@ export default function Messages() {
                       <div className="flex justify-between items-start mb-2">
                         <span className="text-[9px] font-mono font-black opacity-50 uppercase">CH-{task.id.toString().padStart(3, '0')}</span>
                         <Badge variant="outline" className={`text-[8px] h-4 uppercase font-black border-2 ${task.status === 'DONE' ? 'border-green-500/50 text-green-500' : 'border-accent/50 text-accent'}`}>
-                          {task.status}
+                          {task.statusId ? `STATUS ${task.statusId}` : "SEM STATUS"}
                         </Badge>
                       </div>
                       <p className="text-[11px] font-black uppercase tracking-tight leading-tight">{task.title}</p>

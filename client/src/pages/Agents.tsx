@@ -37,8 +37,6 @@ export default function Agents() {
   const [showPassword, setShowPassword] = useState(false);
   const [showToken, setShowToken] = useState(false);
 
-  // Local Mock Storage for fallback
-  const [localAgents, setLocalAgents] = useState<any[]>([]);
 
   // Queries
   const agentsQuery = trpc.agents.list.useQuery(undefined, {
@@ -46,10 +44,7 @@ export default function Agents() {
     refetchInterval: 10000,
   });
 
-  // Merge local and remote agents
-  const displayAgents = [...(agentsQuery.data || []), ...localAgents].filter(
-    (agent, index, self) => index === self.findIndex((t) => t.id === agent.id)
-  );
+  const displayAgents = agentsQuery.data || [];
 
   const logsQuery = trpc.activityLogs.getByAgent.useQuery(
     { agentId: selectedAgent?.id || 0 },
@@ -135,28 +130,14 @@ export default function Agents() {
 
     if (isEditMode && selectedAgent) {
       updateAgentMutation.mutate({ id: selectedAgent.id, ...payload }, {
-        onError: () => {
-          // Fallback local update
-          setLocalAgents(prev => prev.map(a => a.id === selectedAgent.id ? { ...a, ...payload } : a));
-          toast.success("✓ Unidade atualizada localmente (Modo Offline)");
-          setIsOpen(false);
+        onError: (error) => {
+          toast.error(`✗ Erro ao atualizar agente: ${error.message}`);
         }
       });
     } else {
       createAgentMutation.mutate(payload, {
-        onError: () => {
-          // Fallback local creation
-          const mockAgent = {
-            id: Math.floor(Math.random() * 10000) + 500,
-            ...payload,
-            status: "online",
-            lastHeartbeat: new Date().toISOString(),
-            createdAt: new Date().toISOString()
-          };
-          setLocalAgents(prev => [...prev, mockAgent]);
-          toast.success("✓ Unidade inicializada localmente (Modo Offline)");
-          setIsOpen(false);
-          form.reset();
+        onError: (error) => {
+          toast.error(`✗ Erro ao criar agente: ${error.message}`);
         }
       });
     }
@@ -184,7 +165,7 @@ export default function Agents() {
       version: agent.version || "1.0.0",
       manusAccount: agent.manusAccount || "",
       manusPassword: "",
-      manusToken: agent.manusToken || "",
+      manusToken: "",
     });
     setIsOpen(true);
   };
@@ -202,6 +183,14 @@ export default function Agents() {
     if (!agent.lastHeartbeat) return false;
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
     return new Date(agent.lastHeartbeat) > fiveMinutesAgo;
+  };
+  const formatCredits = (value: unknown) => {
+    if (value === null || value === undefined || value === "") return "INDISPONÍVEL";
+    return new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 2 }).format(Number(value));
+  };
+  const connectionLabel = (agent: any) => {
+    if (agent.connectionStatus === "configured" && agent.hasCredential) return "CREDENCIAL SELADA";
+    return "NÃO CONFIGURADA";
   };
 
   if (!isAuthenticated) {
@@ -281,6 +270,16 @@ export default function Agents() {
                       </div>
                     </div>
 
+                    <div className="grid grid-cols-2 gap-3 mb-5 ml-2">
+                      <div className="bg-foreground/5 p-2.5 rounded border border-foreground/10">
+                        <span className="text-[8px] uppercase text-muted-foreground font-bold tracking-tighter block">Crédito restante</span>
+                        <span className={`text-sm font-mono font-black ${agent.creditsRemaining === null || agent.creditsRemaining === undefined ? "text-muted-foreground" : Number(agent.creditsRemaining) <= 0 ? "text-red-400" : "text-accent"}`}>{formatCredits(agent.creditsRemaining)}</span>
+                      </div>
+                      <div className="bg-foreground/5 p-2.5 rounded border border-foreground/10">
+                        <span className="text-[8px] uppercase text-muted-foreground font-bold tracking-tighter block">Conexão Manus</span>
+                        <span className="text-[10px] font-mono text-accent font-bold uppercase">{connectionLabel(agent)}</span>
+                      </div>
+                    </div>
                     <div className="flex gap-2 ml-2">
                       <Button
                         size="sm"
@@ -455,7 +454,7 @@ export default function Agents() {
                       <div className="space-y-2">
                         <label className="text-[9px] uppercase font-bold text-muted-foreground">Access Token</label>
                         <div className="p-3 bg-card border border-foreground/10 font-mono text-xs rounded truncate">
-                          {selectedAgent?.manusToken ? "••••••••••••••••" : "NÃO CONFIGURADO"}
+                          {selectedAgent?.hasCredential ? "CREDENCIAL SELADA NO SERVIDOR" : "NÃO CONFIGURADO"}
                         </div>
                       </div>
                     </div>

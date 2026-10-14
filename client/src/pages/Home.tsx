@@ -13,6 +13,7 @@ export default function Home() {
   const { data: agents = [] } = trpc.agents.list.useQuery(undefined, { enabled: isAuthenticated });
   const { data: tasks = [] } = trpc.tasks.list.useQuery(undefined, { enabled: isAuthenticated });
  
+  const totalCredits = agents.reduce((sum: number, agent: any) => sum + (Number(agent.creditsRemaining) || 0), 0);
   const stats = {
     totalAgents: agents.length || 0,
     onlineAgents: agents.filter((a: any) => a.status === 'online').length || 0,
@@ -83,7 +84,7 @@ export default function Home() {
               <CreditCard className="w-5 h-5" />
               <span className="text-[10px] font-black uppercase tracking-[0.2em]">Créditos de Processamento</span>
             </div>
-            <p className="text-4xl font-mono font-black text-accent tracking-tighter">1.250,00 <span className="text-xs text-muted-foreground">MNUS</span></p>
+            <p className="text-4xl font-mono font-black text-accent tracking-tighter">{totalCredits > 0 ? totalCredits.toLocaleString("pt-BR", { maximumFractionDigits: 2 }) : "—"} <span className="text-xs text-muted-foreground">CRÉDITOS CONHECIDOS</span></p>
           </div>
         </div>
       </div>

@@ -1,0 +1,1 @@
+{"routes":[{"path":"/","title":"Painel de Controle"},{"path":"/agents","title":"Agentes"},{"path":"/tasks","title":"Tarefas"},{"path":"/tasks/create","title":"Criar tarefa"},{"path":"/tasks/:id","title":"Detalhe da tarefa"},{"path":"/messages","title":"Mensagens"}]}

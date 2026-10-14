@@ -48,6 +48,16 @@ export default function Tasks() {
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterPriority, setFilterPriority] = useState<string>("all");
 
+  const utils = trpc.useUtils();
+  const createTaskMutation = trpc.tasks.create.useMutation({
+    onSuccess: async () => {
+      await utils.tasks.list.invalidate();
+      toast.success("Tarefa criada com sucesso");
+      setIsOpen(false);
+      form.reset();
+    },
+    onError: (error) => toast.error(`Erro ao criar tarefa: ${error.message}`),
+  });
   const tasksQuery = trpc.tasks.list.useQuery(undefined, {
     enabled: isAuthenticated,
     refetchInterval: 10000,
@@ -77,10 +87,14 @@ export default function Tasks() {
   });
 
   const onSubmit = (data: any) => {
-    console.log("Submitting task:", data);
-    toast.success("Tarefa criada com sucesso");
-    setIsOpen(false);
-    form.reset();
+    createTaskMutation.mutate({
+      title: data.title,
+      description: data.description || undefined,
+      agentId: data.agentId ? Number(data.agentId) : undefined,
+      statusId: Number(data.statusId),
+      priorityId: Number(data.priorityId),
+      dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
+    });
   };
 
   if (!isAuthenticated) {
@@ -122,7 +136,7 @@ export default function Tasks() {
                     <Button type="button" variant="outline" onClick={() => setIsOpen(false)} className="uppercase font-black text-[10px] tracking-widest h-12 px-8 border-2">
                       Abortar
                     </Button>
-                    <Button type="submit" className="bg-accent text-accent-foreground font-black uppercase tracking-widest text-[10px] h-12 px-10">
+                    <Button type="submit" disabled={createTaskMutation.isPending} className="bg-accent text-accent-foreground font-black uppercase tracking-widest text-[10px] h-12 px-10">
                       Confirmar Protocolo
                     </Button>
                   </DialogFooter>
@@ -208,7 +222,7 @@ export default function Tasks() {
                           <TableCell className="py-6">
                             <div className="flex items-center gap-2">
                               <Cpu className="w-3 h-3 text-accent" />
-                              <span className="text-[10px] font-black uppercase tracking-widest">{task.agentName}</span>
+                              <span className="text-[10px] font-black uppercase tracking-widest">{task.agentId ? `AGENTE #${task.agentId}` : "NÃO ATRIBUÍDA"}</span>
                             </div>
                           </TableCell>
                           <TableCell className="py-6">
