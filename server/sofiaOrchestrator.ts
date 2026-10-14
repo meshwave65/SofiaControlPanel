@@ -63,7 +63,7 @@ export class SofiaOrchestrator {
       
       const insertId = (result as any)[0]?.insertId;
       if (insertId) {
-        subtaskIds.append(insertId);
+        subtaskIds.push(insertId);
         
         // Criar log de atividade
         const eventType = await db.getOrCreateActivityEventType("task_factorization");

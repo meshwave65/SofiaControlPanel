@@ -162,15 +162,13 @@ export const appRouter = router({
     factorize: protectedProcedure
       .input(z.object({ taskId: z.number() }))
       .mutation(async ({ input }) => {
-        const orchestrator = new SofiaOrchestrator();
-        return orchestrator.factorizeTask(input.taskId);
+        return SofiaOrchestrator.factorizeTask(input.taskId);
       }),
 
     consolidate: protectedProcedure
       .input(z.object({ taskId: z.number() }))
       .mutation(async ({ input }) => {
-        const orchestrator = new SofiaOrchestrator();
-        return orchestrator.consolidateResults(input.taskId);
+        return SofiaOrchestrator.consolidateResults(input.taskId);
       }),
   }),
 

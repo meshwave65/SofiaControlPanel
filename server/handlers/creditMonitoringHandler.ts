@@ -1,64 +1,29 @@
 import { Request, Response } from "express";
-import { sdk } from "../\_core/sdk";
-import * as db from "../db";
+import { sdk } from "../_core/sdk";
 
 /**
- * Heartbeat handler para monitoramento de créditos
- * Verifica se os créditos estão abaixo de 50 e gera relatório de passagem de contexto
- * Path: /api/scheduled/creditMonitoring
+ * Endpoint reservado para o integrador oficial de créditos.
+ * Enquanto nenhuma fonte autorizada estiver configurada, o painel deve
+ * informar indisponibilidade em vez de publicar um saldo inventado.
  */
 export async function creditMonitoringHandler(req: Request, res: Response) {
   try {
     const user = await sdk.authenticateRequest(req);
-
-    // Validar que é uma requisição de cron
     if (!user.isCron || !user.taskUid) {
       return res.status(403).json({ error: "cron-only" });
     }
 
-    // Simular obtenção de créditos (em produção, viria de uma API externa)
-    const estimatedCredits = 45; // Valor simulado
-
-    // Se créditos abaixo de 50, gerar relatório
-    if (estimatedCredits <= 50) {
-      const contextReport = await db.createContextReport({
-        ownerId: user.id,
-        title: `Relatório de Passagem de Contexto - Créditos em ${estimatedCredits}`,
-        content: `Créditos disponíveis: ${estimatedCredits}. Relatório gerado automaticamente pelo heartbeat de monitoramento.`,
-        creditsUsed: String(100 - estimatedCredits),
-      });
-
-      // Log de atividade (requer agentId, usar 0 para sistema)
-      await db.createActivityLog({
-        agentId: 0,
-        eventTypeId: 5, // SYSTEM event
-        details: `Relatório de contexto gerado automaticamente (créditos: ${estimatedCredits})`,
-      });
-
-      return res.json({
-        ok: true,
-        action: "report_generated",
-        contextReportId: 0,
-        creditsRemaining: estimatedCredits,
-      });
-    }
-
     return res.json({
       ok: true,
-      action: "no_action_needed",
-      creditsRemaining: estimatedCredits,
+      action: "no_source_configured",
+      creditsRemaining: null,
+      message: "Nenhuma fonte oficial de créditos Manus está configurada.",
     });
   } catch (error) {
     const err = error instanceof Error ? error : new Error(String(error));
     console.error("[creditMonitoringHandler] Error:", err);
-
     return res.status(500).json({
       error: err.message,
-      stack: err.stack,
-      context: {
-        url: req.url,
-        taskUid: req.body?.taskUid,
-      },
       timestamp: new Date().toISOString(),
     });
   }
