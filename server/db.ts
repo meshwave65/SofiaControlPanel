@@ -1,5 +1,6 @@
 import { eq, and, desc, isNull } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import { InsertUser, InsertAgent, users, agents, tasks, messages, activityLogs, contextReports, taskStatuses, taskPriorities, messageTypes, activityEventTypes } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { encryptCredential } from './credentials';
@@ -11,7 +12,7 @@ export async function getDb() {
     const url = process.env.DATABASE_URL || process.env.VITE_DATABASE_URL;
     if (url) {
       try {
-        _db = drizzle(url);
+        _db = drizzle(postgres(url, { max: 5, prepare: false }));
         console.log("[Database] Connected successfully");
         // Tenta rodar o seed de forma assíncrona para garantir dados básicos
         setTimeout(() => {
@@ -78,7 +79,8 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       updateSet.lastSignedIn = new Date();
     }
 
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
+    await db.insert(users).values(values).onConflictDoUpdate({
+      target: users.openId,
       set: updateSet,
     });
   } catch (error) {
@@ -335,8 +337,8 @@ export async function getOrCreateTaskStatus(name: string) {
   const existing = await db.select().from(taskStatuses).where(eq(taskStatuses.name, name)).limit(1);
   if (existing.length > 0) return existing[0];
 
-  const result = await db.insert(taskStatuses).values({ name });
-  return { id: result[0].insertId, name };
+  const result = await db.insert(taskStatuses).values({ name }).returning({ id: taskStatuses.id });
+  return { id: result[0].id, name };
 }
 
 export async function getOrCreateTaskPriority(name: string, level: number) {
@@ -346,8 +348,8 @@ export async function getOrCreateTaskPriority(name: string, level: number) {
   const existing = await db.select().from(taskPriorities).where(eq(taskPriorities.name, name)).limit(1);
   if (existing.length > 0) return existing[0];
 
-  const result = await db.insert(taskPriorities).values({ name, level });
-  return { id: result[0].insertId, name, level };
+  const result = await db.insert(taskPriorities).values({ name, level }).returning({ id: taskPriorities.id });
+  return { id: result[0].id, name, level };
 }
 
 export async function getOrCreateMessageType(name: string) {
@@ -357,8 +359,8 @@ export async function getOrCreateMessageType(name: string) {
   const existing = await db.select().from(messageTypes).where(eq(messageTypes.name, name)).limit(1);
   if (existing.length > 0) return existing[0];
 
-  const result = await db.insert(messageTypes).values({ name });
-  return { id: result[0].insertId, name };
+  const result = await db.insert(messageTypes).values({ name }).returning({ id: messageTypes.id });
+  return { id: result[0].id, name };
 }
 
 export async function getOrCreateActivityEventType(name: string) {
@@ -368,8 +370,8 @@ export async function getOrCreateActivityEventType(name: string) {
   const existing = await db.select().from(activityEventTypes).where(eq(activityEventTypes.name, name)).limit(1);
   if (existing.length > 0) return existing[0];
 
-  const result = await db.insert(activityEventTypes).values({ name });
-  return { id: result[0].insertId, name };
+  const result = await db.insert(activityEventTypes).values({ name }).returning({ id: activityEventTypes.id });
+  return { id: result[0].id, name };
 }
 
 // ============================================
