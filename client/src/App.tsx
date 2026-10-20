@@ -15,6 +15,10 @@ import AuthCallback from "./pages/AuthCallback";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
+  if (window.location.pathname === "/auth/callback") {
+    return <AuthCallback />;
+  }
+
   return (
     <Switch>
       <Route path={"/"} component={Home} />
