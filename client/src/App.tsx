@@ -10,12 +10,19 @@ import Tasks from "./pages/Tasks";
 import TaskDetail from "./pages/TaskDetail";
 import TaskCreate from "./pages/TaskCreate";
 import Messages from "./pages/Messages";
+import LegalPage from "./pages/LegalPage";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route
+        path={"/privacity"}
+        component={() => <LegalPage kind="privacy" />}
+      />
+      <Route path={"/privacy"} component={() => <LegalPage kind="privacy" />} />
+      <Route path={"/terms"} component={() => <LegalPage kind="terms" />} />
       <Route path={"/agents"} component={Agents} />
       <Route path={"/tasks"} component={Tasks} />
       <Route path={"/tasks/create"} component={TaskCreate} />
