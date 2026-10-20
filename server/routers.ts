@@ -24,11 +24,7 @@ export const appRouter = router({
   // ============================================
   agents: router({
     list: protectedProcedure.query(async ({ ctx }) => {
-      const agents = await db.getAgentsByOwnerId(ctx.user.id);
-      if (agents.length === 0) {
-        return db.getAllAgentsGlobal();
-      }
-      return agents;
+      return db.getAgentsByOwnerId(ctx.user.id);
     }),
 
     create: protectedProcedure
@@ -54,8 +50,8 @@ export const appRouter = router({
 
     getById: protectedProcedure
       .input(z.object({ id: z.number() }))
-      .query(async ({ input }) => {
-        return db.getAgentById(input.id);
+      .query(async ({ input, ctx }) => {
+        return db.getAgentByIdForOwner(input.id, ctx.user.id);
       }),
 
     updateStatus: adminProcedure
@@ -100,19 +96,11 @@ export const appRouter = router({
   // ============================================
   tasks: router({
     list: protectedProcedure.query(async ({ ctx }) => {
-      const tasks = await db.getAllTasks(ctx.user.id);
-      if (tasks.length === 0) {
-        return db.getAllTasksGlobal();
-      }
-      return tasks;
+      return db.getAllTasks(ctx.user.id);
     }),
 
     listAll: protectedProcedure.query(async ({ ctx }) => {
-      const tasks = await db.getAllTasks(ctx.user.id);
-      if (tasks.length === 0) {
-        return db.getAllTasksGlobal();
-      }
-      return tasks;
+      return db.getAllTasks(ctx.user.id);
     }),
 
     create: protectedProcedure
@@ -146,8 +134,8 @@ export const appRouter = router({
 
     getByAgent: protectedProcedure
       .input(z.object({ agentId: z.number() }))
-      .query(async ({ input }) => {
-        return db.getTasksByAgentId(input.agentId);
+      .query(async ({ input, ctx }) => {
+        return db.getTasksByAgentIdForOwner(input.agentId, ctx.user.id);
       }),
 
     updateStatus: protectedProcedure
@@ -229,8 +217,8 @@ export const appRouter = router({
 
     getByAgent: protectedProcedure
       .input(z.object({ agentId: z.number() }))
-      .query(async ({ input }) => {
-        return db.getActivityLogsByAgentId(input.agentId);
+      .query(async ({ input, ctx }) => {
+        return db.getActivityLogsByAgentIdForOwner(input.agentId, ctx.user.id);
       }),
 
     getRecent: protectedProcedure

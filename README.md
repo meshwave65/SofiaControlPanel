@@ -1,4 +1,4 @@
-# Web App Template (tRPC + Manus Auth + Database)
+# Sofia Control Panel
 
 This template gives you a React 19 + Tailwind 4 + Express 4 + tRPC 11 stack with Manus OAuth already wired. Procedures are your contracts, types flow end to end, and authentication "just works".
 
@@ -82,29 +82,29 @@ Files in `client/public` are available at the root of your site—reference them
 
 ## Authentication Flow
 
-- Manus OAuth completes at `/api/oauth/callback` and drops a session cookie.
-- Each request to `/api/trpc` builds context via `server/_core/context.ts`, making the current user available as `ctx.user`.
-- Wrap protected logic in `protectedProcedure`; public access uses `publicProcedure`.
-- Frontend reads auth state with `trpc.auth.me.useQuery()` and invokes `trpc.auth.logout.useMutation()`—no cookie plumbing required.
+- The UI signs in with Google through Supabase Auth and completes at `/auth/callback`.
+- The browser sends the Supabase access token as `Authorization: Bearer ...` on each tRPC request.
+- `server/_core/context.ts` validates the token with Supabase Auth and upserts the identity into `sofia.users`; procedures use that row's numeric ID and database role.
+- Legacy Manus OAuth cookies are still accepted, but unauthenticated requests to protected procedures are rejected.
+- Set `OWNER_OPEN_ID` to the owner's Supabase Auth user UUID to grant the initial `admin` role. Do not make all authenticated users administrators.
 
 ---
 
 ## Environment Variables
 
-Available pre-defined system envs:
-- `DATABASE_URL`: MySQL/TiDB connection string
-- `JWT_SECRET`: Session cookie signing secret
-- `VITE_APP_ID`: Manus OAuth application ID
-- `OAUTH_SERVER_URL`: Manus OAuth backend base URL
-- `VITE_OAUTH_PORTAL_URL`: Manus login portal URL (frontend)
-- `OWNER_OPEN_ID`, `OWNER_NAME`: Owner's info
+Runtime configuration:
+- `DATABASE_URL`: PostgreSQL connection string. The app verifies connectivity before logging success; the `sofia` schema/tables are managed from `drizzle/schema.ts` and `pnpm db:push`.
+- `SUPABASE_URL` and `SUPABASE_ANON_KEY`: server-side settings used to verify Supabase access tokens. The server also accepts `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as fallbacks.
+- `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`: frontend Supabase Auth settings.
+- `OWNER_OPEN_ID`: Supabase Auth UUID for the owner/admin account (or the Manus `openId` when using legacy Manus OAuth).
+- `CREDENTIAL_ENCRYPTION_KEY`: required before saving non-empty Manus passwords/tokens for agents.
+- `JWT_SECRET`, `VITE_APP_ID`, `OAUTH_SERVER_URL`: required only for legacy Manus OAuth cookies.
 - `BUILT_IN_FORGE_API_URL`: Manus built-in apis (includes llm, storage, data_api, notification, etc...)
 - `BUILT_IN_FORGE_API_KEY`: Bearer token used by Manus built-in apis (server-side)
 - `VITE_FRONTEND_FORGE_API_KEY`: Bearer token for frontend access to Manus built-in apis
 - `VITE_FRONTEND_FORGE_API_URL`: Manus built-in apis URL for frontend
 
-Do not edit these directly in code or commit `.env` files.
-The envs above are system envs, when use env in website code, refer `server/_core/env.ts` for available list.
+Do not commit `.env` files or secrets. The obsolete `setup_sofia_db.sql` describes an old MySQL/TiDB schema and must not be run for this PostgreSQL version; use `pnpm db:push` with `DATABASE_URL` configured instead.
 
 ---
 

@@ -118,7 +118,6 @@ export default function Agents() {
   });
 
   const onSubmit = (data: any) => {
-    console.log("[Agents] Submitting data:", data);
     const payload = {
       ...data,
       description: data.description || "",
@@ -224,7 +223,19 @@ export default function Agents() {
       {/* Grid de Agentes */}
       <div className="px-6 py-8">
         <div className="max-w-7xl mx-auto">
-          {agentsQuery.isLoading && displayAgents.length === 0 ? (
+          {agentsQuery.isError ? (
+            <Card role="alert" className="text-center py-12 border-2 border-red-500/40 bg-card/30">
+              <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+              <h3 className="text-xl font-bold uppercase tracking-tighter mb-2">Falha ao consultar unidades</h3>
+              <p className="text-muted-foreground mb-6 max-w-xl mx-auto text-sm">
+                A API não conseguiu carregar os agentes. Verifique a conexão/configuração do banco e tente novamente.
+                <span className="block mt-2 font-mono text-xs">{agentsQuery.error.message}</span>
+              </p>
+              <Button variant="outline" onClick={() => agentsQuery.refetch()}>
+                Tentar novamente
+              </Button>
+            </Card>
+          ) : agentsQuery.isLoading && displayAgents.length === 0 ? (
             <div className="text-center py-20">
               <Loader2 className="w-10 h-10 text-accent animate-spin mx-auto mb-4" />
               <p className="text-muted-foreground animate-pulse font-mono uppercase text-xs tracking-widest">Escaneando rede de agentes...</p>

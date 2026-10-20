@@ -6,27 +6,38 @@ import { ENV } from './_core/env';
 import { encryptCredential } from './credentials';
 
 let _db: ReturnType<typeof drizzle> | null = null;
+let _dbPromise: Promise<ReturnType<typeof drizzle> | null> | null = null;
 
 export async function getDb() {
-  if (!_db) {
-    const url = process.env.DATABASE_URL || process.env.VITE_DATABASE_URL;
-    if (url) {
-      try {
-        _db = drizzle(postgres(url, { max: 5, prepare: false }));
-        console.log("[Database] Connected successfully");
-        // Tenta rodar o seed de forma assíncrona para garantir dados básicos
-        setTimeout(() => {
-          import('./seed').catch(err => console.error("[Database] Seed error:", err));
-        }, 1000);
-      } catch (error) {
-        console.error("[Database] Failed to connect:", error);
-        _db = null;
-      }
-    } else {
-      console.error("[Database] DATABASE_URL is not defined in environment variables");
-    }
+  if (_db) return _db;
+  if (_dbPromise) return _dbPromise;
+
+  const url = process.env.DATABASE_URL || process.env.VITE_DATABASE_URL;
+  if (!url) {
+    console.error("[Database] DATABASE_URL is not defined in environment variables");
+    return null;
   }
-  return _db;
+
+  _dbPromise = (async () => {
+    const client = postgres(url, { max: 5, prepare: false, connect_timeout: 10 });
+    try {
+      await client`select 1`;
+      _db = drizzle(client);
+      console.log("[Database] Connection verified successfully");
+      setTimeout(() => {
+        import('./seed').catch(err => console.error("[Database] Seed error:", err));
+      }, 1000);
+      return _db;
+    } catch (error) {
+      console.error("[Database] Connection check failed:", error);
+      await client.end({ timeout: 1 }).catch(() => undefined);
+      return null;
+    } finally {
+      _dbPromise = null;
+    }
+  })();
+
+  return _dbPromise;
 }
 
 export async function upsertUser(user: InsertUser): Promise<void> {
@@ -36,8 +47,7 @@ export async function upsertUser(user: InsertUser): Promise<void> {
 
   const db = await getDb();
   if (!db) {
-    console.warn("[Database] Cannot upsert user: database not available");
-    return;
+    throw new Error("Database unavailable: configure DATABASE_URL before authenticating users");
   }
 
   try {
@@ -148,6 +158,17 @@ export async function getAgentById(id: number) {
   const result = await db.select().from(agents).where(eq(agents.id, id)).limit(1);
   return result.length > 0 ? toPublicAgent(result[0]) : null;
 }
+
+export async function getAgentByIdForOwner(id: number, ownerId: number) {
+  const database = await getDb();
+  if (!database) return null;
+  const result = await database
+    .select()
+    .from(agents)
+    .where(and(eq(agents.id, id), eq(agents.ownerId, ownerId)))
+    .limit(1);
+  return result.length > 0 ? toPublicAgent(result[0]) : null;
+}
 export async function updateAgentStatus(id: number, status: "online" | "offline" | "idle" | "paused") {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -206,6 +227,12 @@ export async function getTasksByAgentId(agentId: number) {
   if (!db) return [];
 
   return db.select().from(tasks).where(eq(tasks.agentId, agentId));
+}
+
+export async function getTasksByAgentIdForOwner(agentId: number, ownerId: number) {
+  const agent = await getAgentByIdForOwner(agentId, ownerId);
+  if (!agent) return [];
+  return getTasksByAgentId(agentId);
 }
 
 export async function getTasksByParentId(parentTaskId: number) {
@@ -285,6 +312,12 @@ export async function getActivityLogsByAgentId(agentId: number) {
   if (!db) return [];
 
   return db.select().from(activityLogs).where(eq(activityLogs.agentId, agentId)).orderBy(desc(activityLogs.createdAt));
+}
+
+export async function getActivityLogsByAgentIdForOwner(agentId: number, ownerId: number) {
+  const agent = await getAgentByIdForOwner(agentId, ownerId);
+  if (!agent) return [];
+  return getActivityLogsByAgentId(agentId);
 }
 
 export async function getRecentActivityLogs(limit: number = 50) {
