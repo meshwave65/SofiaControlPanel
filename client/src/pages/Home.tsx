@@ -104,7 +104,9 @@ export default function Home() {
                 onClick={() =>
                   supabase.auth.signInWithOAuth({
                     provider: "google",
-                    options: { redirectTo: window.location.origin },
+                    options: {
+                      redirectTo: `${window.location.origin}/auth/callback`,
+                    },
                   })
                 }
                 className="h-14 border-2 border-accent bg-accent px-7 font-black uppercase tracking-[0.15em] text-accent-foreground shadow-[0_0_20px_rgba(6,182,212,0.5)] hover:bg-accent/90"

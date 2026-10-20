@@ -11,12 +11,14 @@ import TaskDetail from "./pages/TaskDetail";
 import TaskCreate from "./pages/TaskCreate";
 import Messages from "./pages/Messages";
 import LegalPage from "./pages/LegalPage";
+import AuthCallback from "./pages/AuthCallback";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/auth/callback"} component={AuthCallback} />
       <Route
         path={"/privacity"}
         component={() => <LegalPage kind="privacy" />}
