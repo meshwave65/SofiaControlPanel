@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,14 +15,28 @@ export default function TaskCreate() {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    statusId: "100",
-    priorityId: "2",
+    statusId: "",
+    priorityId: "",
     agentId: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
   const createTaskMutation = trpc.tasks.create.useMutation();
+  const lookupsQuery = trpc.lookups.listAll.useQuery();
+  const statuses = lookupsQuery.data?.statuses ?? [];
+  const priorities = lookupsQuery.data?.priorities ?? [];
+
+  useEffect(() => {
+    const staged = statuses.find((status) => status.name.toUpperCase() === "STAGED");
+    const defaultPriority = priorities.find((priority) => priority.name.toLowerCase() === "baixa")
+      ?? [...priorities].sort((a, b) => a.level - b.level)[0];
+    setFormData((prev) => ({
+      ...prev,
+      statusId: prev.statusId || (staged ? String(staged.id) : ""),
+      priorityId: prev.priorityId || (defaultPriority ? String(defaultPriority.id) : ""),
+    }));
+  }, [lookupsQuery.data]);
 
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -30,6 +44,14 @@ export default function TaskCreate() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!statuses.some((status) => status.id === Number(formData.statusId))) {
+      alert("O status inicial não está disponível no banco de dados.");
+      return;
+    }
+    if (!priorities.some((priority) => priority.id === Number(formData.priorityId))) {
+      alert("A prioridade selecionada não está disponível no banco de dados.");
+      return;
+    }
     setIsSubmitting(true);
 
     try {
@@ -138,9 +160,9 @@ export default function TaskCreate() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="100">STAGED (Aguardando)</SelectItem>
-                      <SelectItem value="110">PROGRESS (Em Progresso)</SelectItem>
-                      <SelectItem value="120">PAUSED (Pausada)</SelectItem>
+                      {statuses.map((status) => (
+                        <SelectItem key={status.id} value={String(status.id)}>{status.name}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -155,10 +177,9 @@ export default function TaskCreate() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="1">Baixa</SelectItem>
-                      <SelectItem value="2">Média</SelectItem>
-                      <SelectItem value="3">Alta</SelectItem>
-                      <SelectItem value="4">Crítica</SelectItem>
+                      {priorities.map((priority) => (
+                        <SelectItem key={priority.id} value={String(priority.id)}>{priority.name}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -190,7 +211,7 @@ export default function TaskCreate() {
                   </Button>
                   <Button
                     type="submit"
-                    disabled={isSubmitting || !formData.title || !formData.description}
+                    disabled={isSubmitting || !formData.title || !formData.description || statuses.length === 0 || priorities.length === 0}
                     className="bg-accent hover:bg-accent/80 text-foreground flex-1"
                   >
                     {isSubmitting ? (

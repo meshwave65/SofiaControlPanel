@@ -38,18 +38,24 @@ export default function Home() {
   const { data: tasks = [] } = trpc.tasks.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
+  const { data: lookups } = trpc.lookups.listAll.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
 
   const totalCredits = agents.reduce(
     (sum: number, agent: any) => sum + (Number(agent.creditsRemaining) || 0),
     0
   );
+  const pendingStatusIds = new Set(
+    (lookups?.statuses ?? [])
+      .filter((status) => ["STAGED", "PROGRESS"].includes(status.name.toUpperCase()))
+      .map((status) => status.id)
+  );
   const stats = {
     totalAgents: agents.length || 0,
     onlineAgents: agents.filter((a: any) => a.status === "online").length || 0,
     totalTasks: tasks.length || 0,
-    pendingTasks:
-      tasks.filter((t: any) => t.statusId === 100 || t.statusId === 110)
-        .length || 0,
+    pendingTasks: tasks.filter((task) => pendingStatusIds.has(task.statusId)).length,
     unreadMessages: 0,
     totalLogs: 0,
   };

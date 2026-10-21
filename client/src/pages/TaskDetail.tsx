@@ -16,6 +16,9 @@ export default function TaskDetail() {
 
   const taskQuery = trpc.tasks.getById.useQuery({ id: taskId });
   const messagesQuery = trpc.messages.getByTask.useQuery({ taskId });
+  const lookupsQuery = trpc.lookups.listAll.useQuery();
+  const statuses = lookupsQuery.data?.statuses ?? [];
+  const priorities = lookupsQuery.data?.priorities ?? [];
   const [subtasks, setSubtasks] = useState<any[]>([]);
   const [isFactorizing, setIsFactorizing] = useState(false);
   const [isConsolidating, setIsConsolidating] = useState(false);
@@ -66,25 +69,20 @@ export default function TaskDetail() {
   };
 
   const getStatusBadge = (statusId: number) => {
-    const statusMap: Record<number, { label: string; color: string }> = {
-      100: { label: "STAGED", color: "bg-yellow-500/20 text-yellow-500" },
-      110: { label: "PROGRESS", color: "bg-blue-500/20 text-blue-500" },
-      120: { label: "PAUSED", color: "bg-orange-500/20 text-orange-500" },
-      130: { label: "DONE", color: "bg-green-500/20 text-green-500" },
-      200: { label: "FAIL", color: "bg-red-500/20 text-red-500" },
+    const statusName = statuses.find((status) => status.id === statusId)?.name || `Status ${statusId}`;
+    const colorMap: Record<string, string> = {
+      STAGED: "bg-yellow-500/20 text-yellow-500",
+      PROGRESS: "bg-blue-500/20 text-blue-500",
+      PAUSED: "bg-orange-500/20 text-orange-500",
+      DONE: "bg-green-500/20 text-green-500",
+      FAIL: "bg-red-500/20 text-red-500",
     };
-    const status = statusMap[statusId] || { label: `Status ${statusId}`, color: "bg-gray-500/20 text-gray-500" };
-    return <Badge className={status.color}>{status.label}</Badge>;
+    const normalizedName = statusName.toUpperCase();
+    return <Badge className={colorMap[normalizedName] || "bg-gray-500/20 text-gray-500"}>{normalizedName}</Badge>;
   };
 
   const getPriorityLabel = (priorityId: number) => {
-    const priorityMap: Record<number, string> = {
-      1: "Baixa",
-      2: "Média",
-      3: "Alta",
-      4: "Crítica",
-    };
-    return priorityMap[priorityId] || `Prioridade ${priorityId}`;
+    return priorities.find((priority) => priority.id === priorityId)?.name || `Prioridade ${priorityId}`;
   };
 
   if (taskQuery.isLoading) {

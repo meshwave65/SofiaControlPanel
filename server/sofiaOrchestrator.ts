@@ -6,11 +6,10 @@ import { Task } from "../drizzle/schema";
  * Lógica central para orquestração de agentes e decomposição de tarefas.
  */
 
-// Status das tarefas conforme setup_sofia_db.sql
-const STATUS_STAGED = 100;
-const STATUS_PROGRESS = 110;
-const STATUS_DONE = 130;
-const STATUS_FAIL = 200;
+// Nomes estáveis do lookup; os IDs são gerados pelo banco e devem ser consultados.
+const STATUS_STAGED = "STAGED";
+const STATUS_PROGRESS = "PROGRESS";
+const STATUS_DONE = "DONE";
 
 export class SofiaOrchestrator {
   /**
@@ -56,7 +55,7 @@ export class SofiaOrchestrator {
         agentId: task.agentId,
         title: `${dim.title}: ${task.title}`,
         description: `${dim.suffix} ${task.description}`,
-        statusId: STATUS_STAGED,
+        statusId: await db.getTaskStatusIdByName(STATUS_STAGED),
         priorityId: task.priorityId,
         parentTaskId: task.id
       });
@@ -89,13 +88,14 @@ export class SofiaOrchestrator {
     // Buscar subtarefas
     const subtasks = await db.getTasksByParentId(parentTaskId);
     if (!subtasks || subtasks.length === 0) return "Nenhuma subtarefa encontrada para consolidação.";
+    const doneStatusId = await db.getTaskStatusIdByName(STATUS_DONE);
 
     let report = `# Relatório Consolidado - Tarefa ${parentTaskId}\n\n`;
     report += `**Data:** ${new Date().toLocaleString()}\n\n`;
 
     for (const subtask of subtasks) {
       report += `## ${subtask.title} (ID: ${subtask.id})\n`;
-      report += `**Status:** ${subtask.statusId === STATUS_DONE ? "✅ Concluída" : "❌ Falhou"}\n\n`;
+      report += `**Status:** ${subtask.statusId === doneStatusId ? "✅ Concluída" : "❌ Falhou"}\n\n`;
       
       // Buscar mensagens/relatórios da subtarefa
       const messages = await db.getMessagesByTaskId(subtask.id);
@@ -120,14 +120,15 @@ export class SofiaOrchestrator {
     const task = await db.getTaskById(taskId);
     if (!task) return;
 
-    if (task.statusId === STATUS_STAGED) {
+    const stagedStatusId = await db.getTaskStatusIdByName(STATUS_STAGED);
+    if (task.statusId === stagedStatusId) {
       if (this.shouldFactorize(task)) {
         await this.factorizeTask(task);
         // Em um sistema real, aqui poderíamos mudar para um status intermediário
         // ou aguardar as subtarefas.
       } else {
         // Mover para progresso se não for fatorar
-        await db.updateTaskStatus(taskId, STATUS_PROGRESS);
+        await db.updateTaskStatus(taskId, await db.getTaskStatusIdByName(STATUS_PROGRESS));
       }
     }
   }

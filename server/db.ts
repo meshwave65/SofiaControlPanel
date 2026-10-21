@@ -445,6 +445,7 @@ export async function getDashboardStats(ownerId: number) {
 
   const allAgents = await db.select().from(agents).where(eq(agents.ownerId, ownerId));
   const allTasks = await db.select().from(tasks).where(eq(tasks.createdBy, ownerId));
+  const [doneStatus] = await db.select({ id: taskStatuses.id }).from(taskStatuses).where(eq(taskStatuses.name, "DONE")).limit(1);
 
   // Unread messages are messages sent TO the owner (senderId != ownerId) that are not read
   const unreadMessages = await db.select().from(messages).where(and(eq(messages.isRead, false)));
@@ -457,7 +458,7 @@ export async function getDashboardStats(ownerId: number) {
     totalAgents: allAgents.length,
     onlineAgents,
     totalTasks: allTasks.length,
-    pendingTasks: allTasks.filter(t => t.statusId !== 130).length, // 130 is 'DONE'
+    pendingTasks: allTasks.filter(t => t.statusId !== doneStatus?.id).length,
     unreadMessages: unreadMessages.length,
   };
 }
@@ -474,6 +475,20 @@ export async function getLookups() {
   ]);
 
   return { statuses, priorities, messageTypes: mTypes, eventTypes: eTypes };
+}
+
+export async function getTaskStatusIdByName(name: string): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const [status] = await db
+    .select({ id: taskStatuses.id })
+    .from(taskStatuses)
+    .where(eq(taskStatuses.name, name))
+    .limit(1);
+
+  if (!status) throw new Error(`Task status \"${name}\" is not configured`);
+  return status.id;
 }
 
 // ============================================

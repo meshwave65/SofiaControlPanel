@@ -14,32 +14,32 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Filter, Search, Calendar, AlertCircle, Cpu, CheckCircle2, Clock, PlayCircle, PauseCircle, XCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 
 const createTaskSchema = z.object({
   title: z.string().min(1, "Título é obrigatório"),
   description: z.string().optional().default(""),
   agentId: z.string().optional().default(""),
-  statusId: z.string().default("100"),
-  priorityId: z.string().default("1"),
+  statusId: z.string().min(1, "Status inicial indisponível"),
+  priorityId: z.string().min(1, "Prioridade indisponível"),
   dueDate: z.string().optional().default(""),
 });
 
 type CreateTaskInput = z.infer<typeof createTaskSchema>;
 
-const STATUS_MAP: Record<string, { label: string, color: string, icon: any }> = {
-  "100": { label: "STAGED", color: "border-slate-500/50 text-slate-400", icon: Clock },
-  "110": { label: "PROGRESS", color: "border-blue-500/50 text-blue-400", icon: PlayCircle },
-  "120": { label: "PAUSED", color: "border-yellow-500/50 text-yellow-400", icon: PauseCircle },
-  "130": { label: "DONE", color: "border-green-500/50 text-green-400", icon: CheckCircle2 },
-  "200": { label: "FAIL", color: "border-red-500/50 text-red-400", icon: XCircle },
+const STATUS_PRESENTATION: Record<string, { color: string; icon: any }> = {
+  STAGED: { color: "border-slate-500/50 text-slate-400", icon: Clock },
+  PROGRESS: { color: "border-blue-500/50 text-blue-400", icon: PlayCircle },
+  PAUSED: { color: "border-yellow-500/50 text-yellow-400", icon: PauseCircle },
+  DONE: { color: "border-green-500/50 text-green-400", icon: CheckCircle2 },
+  FAIL: { color: "border-red-500/50 text-red-400", icon: XCircle },
 };
 
-const PRIORITY_MAP: Record<string, { label: string, color: string }> = {
-  "1": { label: "BAIXA", color: "text-slate-400" },
-  "2": { label: "MÉDIA", color: "text-blue-400" },
-  "3": { label: "ALTA", color: "text-orange-400" },
-  "4": { label: "CRÍTICA", color: "text-red-500" },
+const PRIORITY_PRESENTATION: Record<string, { color: string }> = {
+  BAIXA: { color: "text-slate-400" },
+  "MÉDIA": { color: "text-blue-400" },
+  ALTA: { color: "text-orange-400" },
+  "CRÍTICA": { color: "text-red-500" },
 };
 
 export default function Tasks() {
@@ -66,6 +66,14 @@ export default function Tasks() {
   const agentsQuery = trpc.agents.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
+  const lookupsQuery = trpc.lookups.listAll.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const statuses = lookupsQuery.data?.statuses ?? [];
+  const priorities = lookupsQuery.data?.priorities ?? [];
+  const stagedStatusId = statuses.find((status) => status.name.toUpperCase() === "STAGED")?.id;
+  const defaultPriority = priorities.find((priority) => priority.name.toLowerCase() === "baixa")
+    ?? [...priorities].sort((a, b) => a.level - b.level)[0];
 
   const filteredTasks = useMemo(() => {
     const tasks = tasksQuery.data || [];
@@ -83,20 +91,41 @@ export default function Tasks() {
     defaultValues: {
       title: "",
       description: "",
-      statusId: "100",
-      priorityId: "1",
+      statusId: "",
+      priorityId: "",
       agentId: "",
       dueDate: "",
     },
   });
 
-  const onSubmit = (data: any) => {
+  useEffect(() => {
+    if (!isOpen) return;
+    if (stagedStatusId !== undefined && !form.getValues("statusId")) {
+      form.setValue("statusId", String(stagedStatusId));
+    }
+    if (defaultPriority && !form.getValues("priorityId")) {
+      form.setValue("priorityId", String(defaultPriority.id));
+    }
+  }, [isOpen, stagedStatusId, defaultPriority?.id, form]);
+
+  const onSubmit = (data: CreateTaskInput) => {
+    const statusId = Number(data.statusId);
+    const priorityId = Number(data.priorityId);
+    if (!statuses.some((status) => status.id === statusId)) {
+      toast.error("O status inicial não está disponível no banco de dados.");
+      return;
+    }
+    if (!priorities.some((priority) => priority.id === priorityId)) {
+      toast.error("A prioridade selecionada não está disponível no banco de dados.");
+      return;
+    }
+
     createTaskMutation.mutate({
       title: data.title,
       description: data.description || undefined,
       agentId: data.agentId ? Number(data.agentId) : undefined,
-      statusId: Number(data.statusId),
-      priorityId: Number(data.priorityId),
+      statusId,
+      priorityId,
       dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
     });
   };
@@ -216,8 +245,8 @@ export default function Tasks() {
                               <SelectTrigger className="cad-box"><SelectValue placeholder="Selecione o status" /></SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {Object.entries(STATUS_MAP).map(([id, status]) => (
-                                <SelectItem key={id} value={id}>{status.label}</SelectItem>
+                              {statuses.map((status) => (
+                                <SelectItem key={status.id} value={String(status.id)}>{status.name}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
@@ -237,8 +266,8 @@ export default function Tasks() {
                               <SelectTrigger className="cad-box"><SelectValue placeholder="Selecione a prioridade" /></SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {Object.entries(PRIORITY_MAP).map(([id, priority]) => (
-                                <SelectItem key={id} value={id}>{priority.label}</SelectItem>
+                              {priorities.map((priority) => (
+                                <SelectItem key={priority.id} value={String(priority.id)}>{priority.name}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
@@ -252,7 +281,7 @@ export default function Tasks() {
                     <Button type="button" variant="outline" onClick={() => setIsOpen(false)} className="uppercase font-black text-[10px] tracking-widest h-12 px-8 border-2">
                       Abortar
                     </Button>
-                    <Button type="submit" disabled={createTaskMutation.isPending} className="bg-accent text-accent-foreground font-black uppercase tracking-widest text-[10px] h-12 px-10">
+                    <Button type="submit" disabled={createTaskMutation.isPending || statuses.length === 0 || priorities.length === 0} className="bg-accent text-accent-foreground font-black uppercase tracking-widest text-[10px] h-12 px-10">
                       Confirmar Protocolo
                     </Button>
                   </DialogFooter>
@@ -284,8 +313,8 @@ export default function Tasks() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all" className="font-black uppercase text-[10px]">TODOS OS STATUS</SelectItem>
-                {Object.entries(STATUS_MAP).map(([id, info]) => (
-                  <SelectItem key={id} value={id} className="font-black uppercase text-[10px]">{info.label}</SelectItem>
+                {statuses.map((status) => (
+                  <SelectItem key={status.id} value={String(status.id)} className="font-black uppercase text-[10px]">{status.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -295,8 +324,8 @@ export default function Tasks() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all" className="font-black uppercase text-[10px]">TODAS PRIORIDADES</SelectItem>
-                {Object.entries(PRIORITY_MAP).map(([id, info]) => (
-                  <SelectItem key={id} value={id} className="font-black uppercase text-[10px]">{info.label}</SelectItem>
+                {priorities.map((priority) => (
+                  <SelectItem key={priority.id} value={String(priority.id)} className="font-black uppercase text-[10px]">{priority.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -323,8 +352,17 @@ export default function Tasks() {
                 <TableBody>
                   {filteredTasks.length > 0 ? (
                     filteredTasks.map((task) => {
-                      const status = STATUS_MAP[task.statusId] || STATUS_MAP["100"];
-                      const priority = PRIORITY_MAP[task.priorityId] || PRIORITY_MAP["1"];
+                      const statusName = statuses.find((item) => item.id === task.statusId)?.name || `Status ${task.statusId}`;
+                      const statusPresentation = STATUS_PRESENTATION[statusName.toUpperCase()] || {
+                        color: "border-slate-500/50 text-slate-400",
+                        icon: Clock,
+                      };
+                      const status = { label: statusName.toUpperCase(), ...statusPresentation };
+                      const priorityName = priorities.find((item) => item.id === task.priorityId)?.name || `Prioridade ${task.priorityId}`;
+                      const priority = {
+                        label: priorityName.toUpperCase(),
+                        color: PRIORITY_PRESENTATION[priorityName.toUpperCase()]?.color || "text-slate-400",
+                      };
                       const StatusIcon = status.icon;
                       return (
                         <TableRow key={task.id} className="border-b border-foreground/10 hover:bg-foreground/5 transition-colors group">

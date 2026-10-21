@@ -285,7 +285,7 @@ export const appRouter = router({
     listStaged: publicProcedure
       .input(z.object({ agentId: z.number() }))
       .query(async ({ input }) => {
-        return db.getTasksByStatus(1);
+        return db.getTasksByStatus(await db.getTaskStatusIdByName("STAGED"));
       }),
 
     createQuestion: publicProcedure
