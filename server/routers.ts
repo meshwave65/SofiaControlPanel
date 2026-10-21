@@ -5,6 +5,8 @@ import { publicProcedure, protectedProcedure, adminProcedure, router } from "./_
 import { z } from "zod";
 import * as db from "./db";
 import { SofiaOrchestrator } from "./sofiaOrchestrator";
+import { TRPCError } from "@trpc/server";
+import { getConsolidatedTaskReport, uploadConsolidatedTaskReport } from "./controlPanelStorage";
 
 export const appRouter = router({
   system: systemRouter,
@@ -154,9 +156,25 @@ export const appRouter = router({
       }),
 
     consolidate: protectedProcedure
-      .input(z.object({ taskId: z.number() }))
-      .mutation(async ({ input }) => {
-        return SofiaOrchestrator.consolidateResults(input.taskId);
+      .input(z.object({ taskId: z.number().int().positive() }))
+      .mutation(async ({ input, ctx }) => {
+        const task = await db.getTaskById(input.taskId);
+        if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Tarefa não encontrada." });
+        }
+
+        const report = await SofiaOrchestrator.consolidateResults(input.taskId);
+        return uploadConsolidatedTaskReport(input.taskId, report);
+      }),
+
+    getConsolidatedReport: protectedProcedure
+      .input(z.object({ taskId: z.number().int().positive() }))
+      .query(async ({ input, ctx }) => {
+        const task = await db.getTaskById(input.taskId);
+        if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Tarefa não encontrada." });
+        }
+        return getConsolidatedTaskReport(input.taskId);
       }),
   }),
 

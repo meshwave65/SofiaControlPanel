@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import DashboardLayout from "@/components/DashboardLayout";
 import { trpc } from "@/lib/trpc";
-import { Loader2, ChevronLeft, Zap, FileText, AlertCircle } from "lucide-react";
+import { Loader2, ChevronLeft, Zap, FileText, AlertCircle, Download } from "lucide-react";
 
 export default function TaskDetail() {
   const { id } = useParams<{ id: string }>();
@@ -26,6 +26,10 @@ export default function TaskDetail() {
   const factorizeTaskMutation = trpc.tasks.factorize.useMutation();
   const consolidateTaskMutation = trpc.tasks.consolidate.useMutation();
   const updateStatusMutation = trpc.tasks.updateStatus.useMutation();
+  const consolidatedReportQuery = trpc.tasks.getConsolidatedReport.useQuery(
+    { taskId },
+    { enabled: taskId > 0 },
+  );
 
   const task = taskQuery.data;
   const messages = messagesQuery.data || [];
@@ -59,8 +63,7 @@ export default function TaskDetail() {
     setIsConsolidating(true);
     try {
       await consolidateTaskMutation.mutateAsync({ taskId });
-      // Recarregar dados
-      await messagesQuery.refetch();
+      await consolidatedReportQuery.refetch();
     } catch (error) {
       console.error("Erro ao consolidar:", error);
     } finally {
@@ -114,7 +117,6 @@ export default function TaskDetail() {
     );
   }
 
-  const consolidatedReport = messages.find(m => m.typeId === 3); // ConsolidatedReport type
   const operationalReports = messages.filter(m => m.typeId === 2); // OperationalReport type
 
   return (
@@ -299,16 +301,40 @@ export default function TaskDetail() {
 
             {/* Consolidado */}
             <TabsContent value="consolidated" className="mt-6">
-              {consolidatedReport ? (
+              {consolidatedReportQuery.isLoading ? (
                 <Card className="cad-card">
-                  <CardHeader>
-                    <CardTitle>Relatório Consolidado</CardTitle>
-                    <CardDescription>{new Date(consolidatedReport.createdAt).toLocaleString()}</CardDescription>
+                  <CardContent className="pt-6 flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Carregando do Supabase Storage...
+                  </CardContent>
+                </Card>
+              ) : consolidatedReportQuery.data ? (
+                <Card className="cad-card">
+                  <CardHeader className="flex flex-row items-center justify-between gap-4">
+                    <div>
+                      <CardTitle>Relatório Consolidado</CardTitle>
+                      <CardDescription>Arquivo privado no Supabase Storage</CardDescription>
+                    </div>
+                    <a
+                      href={consolidatedReportQuery.data.downloadUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-foreground/5"
+                    >
+                      <Download className="w-4 h-4" />
+                      Baixar .md
+                    </a>
                   </CardHeader>
                   <CardContent>
                     <div className="prose prose-invert max-w-none">
-                      <p className="text-sm text-foreground whitespace-pre-wrap">{consolidatedReport.content}</p>
+                      <p className="text-sm text-foreground whitespace-pre-wrap">{consolidatedReportQuery.data.content}</p>
                     </div>
+                  </CardContent>
+                </Card>
+              ) : consolidatedReportQuery.isError ? (
+                <Card className="cad-card">
+                  <CardContent className="pt-6 text-center text-red-500">
+                    Não foi possível carregar o relatório do Supabase Storage. Verifique a configuração server-side.
                   </CardContent>
                 </Card>
               ) : (
