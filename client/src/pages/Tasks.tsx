@@ -3,6 +3,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -61,6 +62,9 @@ export default function Tasks() {
   const tasksQuery = trpc.tasks.list.useQuery(undefined, {
     enabled: isAuthenticated,
     refetchInterval: 10000,
+  });
+  const agentsQuery = trpc.agents.list.useQuery(undefined, {
+    enabled: isAuthenticated,
   });
 
   const filteredTasks = useMemo(() => {
@@ -131,7 +135,119 @@ export default function Tasks() {
               </DialogHeader>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  {/* Form fields... */}
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-widest">Protocolo de Missão *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ex.: Analisar relatório mensal" {...field} className="cad-box" autoFocus />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-widest">Instruções</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Descreva o objetivo e os critérios de conclusão da missão" {...field} className="cad-box min-h-24" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="agentId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-[10px] font-black uppercase tracking-widest">Unidade responsável</FormLabel>
+                          <Select
+                            value={field.value || "unassigned"}
+                            onValueChange={(value) => field.onChange(value === "unassigned" ? "" : value)}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="cad-box">
+                                <SelectValue placeholder="Selecione uma unidade" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="unassigned">Sem atribuição</SelectItem>
+                              {(agentsQuery.data || []).map((agent) => (
+                                <SelectItem key={agent.id} value={String(agent.id)}>{agent.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="dueDate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-[10px] font-black uppercase tracking-widest">Prazo (opcional)</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} className="cad-box" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="statusId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-[10px] font-black uppercase tracking-widest">Status inicial</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="cad-box"><SelectValue placeholder="Selecione o status" /></SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {Object.entries(STATUS_MAP).map(([id, status]) => (
+                                <SelectItem key={id} value={id}>{status.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="priorityId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-[10px] font-black uppercase tracking-widest">Prioridade</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="cad-box"><SelectValue placeholder="Selecione a prioridade" /></SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {Object.entries(PRIORITY_MAP).map(([id, priority]) => (
+                                <SelectItem key={id} value={id}>{priority.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
                   <DialogFooter className="gap-3 pt-6 border-t border-foreground/10">
                     <Button type="button" variant="outline" onClick={() => setIsOpen(false)} className="uppercase font-black text-[10px] tracking-widest h-12 px-8 border-2">
                       Abortar
