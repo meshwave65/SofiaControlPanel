@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "wouter";
+import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 
 export default function AuthCallback() {
-  const [, setLocation] = useLocation();
   const [message, setMessage] = useState("Concluindo autenticação…");
 
   useEffect(() => {
@@ -19,8 +18,10 @@ export default function AuthCallback() {
         return;
       }
 
+      let session: Session | null = null;
+
       if (code) {
-        const { error: exchangeError } =
+        const { data, error: exchangeError } =
           await supabase.auth.exchangeCodeForSession(code);
         if (exchangeError) {
           if (active)
@@ -29,27 +30,36 @@ export default function AuthCallback() {
             );
           return;
         }
+        session = data.session;
+      } else {
+        const { data, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) {
+          if (active)
+            setMessage(
+              `Não foi possível concluir o login: ${sessionError.message}`
+            );
+          return;
+        }
+        session = data.session;
       }
 
-      const { data, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError || !data.session) {
+      if (!session) {
         if (active) {
           setMessage(
-            sessionError?.message ||
-              "A autenticação não retornou uma sessão válida."
+            "A autenticação não retornou uma sessão válida. Inicie o login novamente."
           );
         }
         return;
       }
 
-      setLocation("/");
+      window.location.replace("/");
     }
 
     completeOAuth().catch(callbackError => {
       if (active) {
         setMessage(
           callbackError instanceof Error
-            ? callbackError.message
+            ? `Não foi possível concluir o login: ${callbackError.message}`
             : "Erro inesperado ao concluir o login."
         );
       }
@@ -58,7 +68,7 @@ export default function AuthCallback() {
     return () => {
       active = false;
     };
-  }, [setLocation]);
+  }, []);
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-6 text-foreground">
