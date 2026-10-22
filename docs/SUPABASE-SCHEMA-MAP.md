@@ -5,7 +5,7 @@
 
 ## Resumo executivo
 
-O projeto tem **46 tabelas** distribuídas entre os schemas `public` e `sofia`. Há dois modelos de tarefas separados:
+O inventário detalhado refeito em 21/10/2026 confirma **46 tabelas** nos schemas `public` e `sofia` e **40 constraints de chave estrangeira** distintas. O mapa completo, com PKs, FKs por tabela, estado RLS e divergências, está em [SUPABASE-FULL-RELATIONAL-MAP.md](./SUPABASE-FULL-RELATIONAL-MAP.md). Há dois modelos de tarefas separados:
 
 - `public.tasks` é o modelo do backend/engine. Ele referencia `public.task_statuses`, `public.task_priorities` e `public.clients`.
 - `sofia.tasks` é o modelo do painel. Ele referencia `sofia.taskStatuses`, `sofia.taskPriorities`, `sofia.agents` e `sofia.users`.
