@@ -1,4 +1,4 @@
-import { integer, pgEnum, pgTable, pgSchema, text, timestamp, varchar, boolean, numeric, index, foreignKey } from "drizzle-orm/pg-core";
+import { integer, pgEnum, pgTable, pgSchema, text, timestamp, varchar, boolean, numeric, jsonb, index, foreignKey } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 const sofia = pgSchema("sofia");
@@ -293,6 +293,95 @@ export type ScheduledTask = typeof scheduledTasks.$inferSelect;
 export type InsertScheduledTask = typeof scheduledTasks.$inferInsert;
 
 // ============================================
+// ARC / PGC ASSESSMENT TABLES
+// ============================================
+
+export const arcPolicies = sofia.table(
+  "arcPolicies",
+  {
+    id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
+    name: varchar("name", { length: 128 }).notNull().unique(),
+    prior: numeric("prior", { precision: 7, scale: 6 }).notNull().default("0.500000"),
+    allowThreshold: numeric("allowThreshold", { precision: 7, scale: 6 }).notNull().default("0.850000"),
+    reviewThreshold: numeric("reviewThreshold", { precision: 7, scale: 6 }).notNull().default("0.550000"),
+    enabled: boolean("enabled").notNull().default(true),
+    version: varchar("version", { length: 32 }).notNull().default("0.1.0"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+  },
+  (table) => ({
+    enabledIdx: index("arcPolicies_enabled_idx").on(table.enabled),
+  }),
+);
+
+export type ArcPolicy = typeof arcPolicies.$inferSelect;
+export type InsertArcPolicy = typeof arcPolicies.$inferInsert;
+
+export const arcAssessments = sofia.table(
+  "arcAssessments",
+  {
+    id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
+    taskId: integer("taskId").notNull(),
+    agentId: integer("agentId"),
+    policyId: integer("policyId").notNull(),
+    prior: numeric("prior", { precision: 7, scale: 6 }).notNull(),
+    posterior: numeric("posterior", { precision: 7, scale: 6 }).notNull(),
+    decision: varchar("decision", { length: 16 }).notNull(),
+    mode: varchar("mode", { length: 16 }).notNull().default("shadow"),
+    explanation: text("explanation").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (table) => ({
+    taskIdIdx: index("arcAssessments_taskId_idx").on(table.taskId),
+    agentIdIdx: index("arcAssessments_agentId_idx").on(table.agentId),
+    policyIdIdx: index("arcAssessments_policyId_idx").on(table.policyId),
+    createdAtIdx: index("arcAssessments_createdAt_idx").on(table.createdAt),
+    taskIdFk: foreignKey({
+      columns: [table.taskId],
+      foreignColumns: [tasks.id],
+    }).onDelete("restrict"),
+    agentIdFk: foreignKey({
+      columns: [table.agentId],
+      foreignColumns: [agents.id],
+    }).onDelete("set null"),
+    policyIdFk: foreignKey({
+      columns: [table.policyId],
+      foreignColumns: [arcPolicies.id],
+    }).onDelete("restrict"),
+  }),
+);
+
+export type ArcAssessment = typeof arcAssessments.$inferSelect;
+export type InsertArcAssessment = typeof arcAssessments.$inferInsert;
+
+export const arcEvidence = sofia.table(
+  "arcEvidence",
+  {
+    id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
+    assessmentId: integer("assessmentId").notNull(),
+    key: varchar("key", { length: 128 }).notNull(),
+    value: numeric("value", { precision: 7, scale: 6 }).notNull(),
+    reliability: numeric("reliability", { precision: 7, scale: 6 }).notNull(),
+    likelihoodRatio: numeric("likelihoodRatio", { precision: 12, scale: 6 }).notNull(),
+    source: varchar("source", { length: 128 }).notNull(),
+    observedAt: timestamp("observedAt").notNull(),
+    metadata: jsonb("metadata"),
+  },
+  (table) => ({
+    assessmentIdIdx: index("arcEvidence_assessmentId_idx").on(table.assessmentId),
+    keyIdx: index("arcEvidence_key_idx").on(table.key),
+    observedAtIdx: index("arcEvidence_observedAt_idx").on(table.observedAt),
+    assessmentIdFk: foreignKey({
+      columns: [table.assessmentId],
+      foreignColumns: [arcAssessments.id],
+    }).onDelete("cascade"),
+  }),
+);
+
+export type ArcEvidence = typeof arcEvidence.$inferSelect;
+export type InsertArcEvidence = typeof arcEvidence.$inferInsert;
+
+// ============================================
 // RELATIONS
 // ============================================
 
@@ -311,6 +400,7 @@ export const agentsRelations = relations(agents, ({ one, many }) => ({
   }),
   tasks: many(tasks),
   activityLogs: many(activityLogs),
+  arcAssessments: many(arcAssessments),
 }));
 
 export const taskStatusesRelations = relations(taskStatuses, ({ many }) => ({
@@ -341,6 +431,34 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
   }),
   messages: many(messages),
   activityLogs: many(activityLogs),
+  arcAssessments: many(arcAssessments),
+}));
+
+export const arcPoliciesRelations = relations(arcPolicies, ({ many }) => ({
+  assessments: many(arcAssessments),
+}));
+
+export const arcAssessmentsRelations = relations(arcAssessments, ({ one, many }) => ({
+  task: one(tasks, {
+    fields: [arcAssessments.taskId],
+    references: [tasks.id],
+  }),
+  agent: one(agents, {
+    fields: [arcAssessments.agentId],
+    references: [agents.id],
+  }),
+  policy: one(arcPolicies, {
+    fields: [arcAssessments.policyId],
+    references: [arcPolicies.id],
+  }),
+  evidence: many(arcEvidence),
+}));
+
+export const arcEvidenceRelations = relations(arcEvidence, ({ one }) => ({
+  assessment: one(arcAssessments, {
+    fields: [arcEvidence.assessmentId],
+    references: [arcAssessments.id],
+  }),
 }));
 
 export const messageTypesRelations = relations(messageTypes, ({ many }) => ({
