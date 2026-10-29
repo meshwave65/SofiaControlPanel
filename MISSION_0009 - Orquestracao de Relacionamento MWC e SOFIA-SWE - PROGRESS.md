@@ -37,3 +37,10 @@ Nenhuma mensagem foi enviada por esta missão. O envio pelo Secretary requer aut
 A reunião de 06/11 de `NW-LI-0023` foi revalidada no `network`: briefing e inventário permanecem adequados, documentação SWE v1.0 continua em `AppAndroidSWE-Start` commit `2d264328d9c6cb23429cfa792e8d454c516eda82`, e teste end-to-end/latência seguem pendentes. O checkpoint está em `network` commit `85b3aa9f8d95e6dbf4072f4d54906f6dea0f5ee1`; o lock, adquirido em `bb983fc91acc40be155e83f00bc9c1d6d9401be3`, foi liberado separadamente em `dfeaced06639cbde525caa3f1c7365baf75daa6c`. Nenhuma mensagem, acesso ao canal autenticado, alteração de agenda ou cópia de credenciais ocorreu.
 
 A data de 03/11 foi confirmada pelo responsável, mas a identidade canônica do participante permanece ambígua; a tarefa 9.5 foi marcada `PAUSED` até esclarecimento. Consulte OR-20261029-0004. Para a próxima unidade, revalide o SCP e os locks do `network`: 9.3 ainda aparece `PROGRESS` atribuído genericamente a Manus AI e menciona NW-LI-0088; não assumir continuidade sem verificar ownership/lock. A 9.4 depende de autorização humana para qualquer envio; 9.6 depende de trabalho anterior e não está elegível para fechamento.
+
+
+## Continuidade HH/SOFIA-SWE 9.3 — 2026-10-29
+
+Após a pausa de 9.5, o quadro SCP remoto ainda marca 9.3 `PROGRESS`, com NW-LI-0088 como próximo candidato, e a instância Manus AI foi reconciliada para `sandbox:h7SkZHNvDwMX3KXO4H060e`. A verificação de locks no `network` percorreu `origin/main` e as refs remotas disponíveis; não encontrou lock para NW-LI-0088. Nenhum perfil, mapping, relatório individual, registro de fontes ou histórico de comunicação desse contato foi aberto neste preflight.
+
+A próxima etapa é concluir a orientação HH do projeto SOFIA/SWE, criar e publicar uma skill específica como `DRAFT` por não haver HH `ACTIVE` no registry, e adquirir/publicar o lock exclusivo de NW-LI-0088 em `network/main` antes de abrir conteúdo do contato. Se a publicação do lock falhar ou surgir lock concorrente, parar sem pesquisar. Registrar a lacuna de skill HH no OR da unidade; não declarar a skill DRAFT validada para produção.
