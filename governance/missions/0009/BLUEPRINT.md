@@ -21,7 +21,7 @@ Antes de atribuir qualquer novo contato, consultar no `network` os registros de 
 2. **Há apenas data pendente, proposta ou evento passado:** não tratar como reunião futura confirmada. Verificar se há follow-up autorizado pendente; caso contrário, prosseguir à fila de contatos.
 3. **Não há reunião futura confirmada:** iniciar ou continuar o fluxo abaixo para um único contato por vez.
 
-A fotografia inicial encontrou uma pasta `meet02-2026-11-06` para `NW-LI-0023` em `projects/sofia/meetings/phase-01-alignment/`. Ela é apenas uma **pista a verificar**, não comprova que a reunião está confirmada. O primeiro item operacional desta missão é verificar o estado registrado dessa reunião sob o lock do contato e, se confirmada, preparar os materiais. Se não confirmada, registrar o resultado e retomar a fila HH.
+A primeira verificação desta missão confirmou, nos registros de agenda já persistidos, a reunião SOFIA/SWE de `NW-LI-0023 — Renato Barros` em 06/11/2026, 16:00–16:45, `America/Sao_Paulo`, por videoconferência. Sob lock remoto (`a28e74c`), o briefing existente foi revisado e considerado suficiente; o inventário foi atualizado no checkpoint `1890bb9`. O lock foi removido em commit separado (`aac1d90`). Não houve acesso novo ao canal, mensagem, reagendamento ou cópia de credenciais. A demonstração de produto permanece condicional a teste end-to-end e latência, ambos pendentes.
 
 ## 3. Pipeline quando não há reunião confirmada
 
@@ -80,13 +80,13 @@ Cada contato deve produzir checkpoint próprio no `network`. A missão e a atrib
 
 A missão é acompanhada por `MISSION_0009 - TASKS - PROGRESS.md`. Agentes devem atualizar status e responsável antes de assumir uma etapa, após confirmar que não há conflito e que o lock pertinente está livre. Para cada unidade de contato assumida, criar um Operational Report usando `governance/skills/skill-governance-oracle/templates/OperationalReport.template.md`, adicionar uma linha única a `governance/operational_reports/INDEX.csv`, manter `oracle_status: PENDING` e publicar o OR em commit rastreável no SCP. Não copiar tokens, dados pessoais desnecessários ou conteúdo confidencial para o OR.
 
-A skill `linkedin-ocint-mapper` do SCP cobre OCINT e não substitui os protocolos HH ou Meeting Prep do `network`. Usar as instruções específicas vigentes do `network` para cada papel e a skill Oracle do SCP para o OR. Se o catálogo exigir uma skill ativa que não exista para o papel selecionado, registrar essa lacuna; não escolher uma skill incompatível só por semelhança de título.
+A skill `network-contact-orchestration` v0.1.0 foi criada e registrada como `DRAFT`; passou a validação estrutural e foi exercitada somente para o ramo Meeting Prep desta missão. Não alegar que o pipeline OCINT→HH→Secretary foi testado nem promovê-la a `ACTIVE` antes de execução e revisão Oracle suficientes. `linkedin-ocint-mapper` cobre OCINT, não substitui HH ou Meeting Prep. Para cada papel, seguir também os protocolos específicos vigentes do `network`; usar `skill-governance-oracle` para elaborar e indexar ORs. Não escolher skill incompatível só por semelhança de título.
 
 ## 8. Fotografia inicial da missão
 
-No `network` `main` em `bf9728054a89002d4b0e1050e29e9406c8666f10`, o índice canônico tinha 133 contatos; `projects/mwc/convergence.csv` continha 73 linhas e `projects/sofia/convergence.csv`, 82. As avaliações importadas são preliminares até revisão. A última sequência de revisões MWC e SOFIA/SWE segundo protocolo v0.3.0 chegou a `NW-LI-0086`.
+No snapshot de retomada do `network` `main` em `aac1d9077a89e29c205d2daed83e6270fdc80f6f`, o índice canônico tinha 133 contatos; `projects/mwc/convergence.csv` continha 73 linhas e `projects/sofia/convergence.csv`, 82. As avaliações importadas são preliminares até revisão. A sequência mais recente de reavaliações MWC e SOFIA/SWE segundo o protocolo v0.3.0 chegou a `NW-LI-0086`.
 
-O candidato seguinte observado é `NW-LI-0087 — Bruno Diogo`, com relatório legado ainda sem marcas do protocolo v0.3.0 e estado canônico `REVIEW_REQUIRED`; confirmar novamente índices e locks antes de selecioná-lo. `NW-LI-0153` tinha um lock ativo no snapshot e não deve ser tocado por outro agente. Priorizar, porém, a verificação da possível reunião de `NW-LI-0023` descrita na seção 2 antes de retomar essa fila.
+O candidato seguinte observado é `NW-LI-0087 — Bruno Diogo`, com avaliações datadas de 23/10/2026 ainda sem revisão v0.3.0 e estado canônico `REVIEW_REQUIRED`. O preflight não encontrou lock de 0087; reconfirmar índices e locks antes de selecioná-lo. `NW-LI-0153` continua com lock ativo neste snapshot e não deve ser tocado por outro agente. A verificação e revisão dos materiais da reunião de 0023 foram concluídas; a tarefa ativa seguinte é retomar a fila de convergência.
 
 Esta fotografia é apenas um ponto de retomada. Sempre sincronizar e verificar o estado remoto novamente; ela não substitui a consulta em tempo real.
 

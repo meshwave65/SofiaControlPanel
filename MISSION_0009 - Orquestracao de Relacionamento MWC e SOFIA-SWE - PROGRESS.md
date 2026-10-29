@@ -19,7 +19,7 @@ As duas avaliações-alvo são independentes: MWC e SOFIA/SWE. A ficha profissio
 
 ## Roteamento inicial
 
-A primeira verificação é a existência e o estado de reuniões nos diretórios MWC e SOFIA/SWE do `network`. Foi encontrada uma pasta com nome `meet02-2026-11-06` para `NW-LI-0023 — Renato Barros`; a pasta, isoladamente, não confirma o agendamento. A tarefa 9.2 deve conferir os registros após obter o lock remoto do contato. Se a reunião estiver confirmada, preparar os materiais; se for apenas tentativa/data pendente, registrar isso e avançar para a fila de contatos.
+A verificação inicial confirmou reunião SOFIA/SWE de `NW-LI-0023 — Renato Barros` em 06/11/2026, das 16:00 às 16:45 (`America/Sao_Paulo`), por videoconferência. O briefing existente foi revisado e considerado suficiente; o inventário de materiais registra as pendências de demonstração. A checagem ocorreu sob lock remoto, persistido no commit `a28e74c`; o checkpoint está em `1890bb9` e o lock foi liberado em `aac1d90`. Não houve nova mensagem, leitura de canal ou alteração de agenda.
 
 ## Estado de retomada
 
