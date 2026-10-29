@@ -2,7 +2,7 @@
 
 **Repositório canônico:** `https://github.com/meshwave65/SofiaARC-PGC`
 **Blueprint:** `governance/missions/0010/BLUEPRINT.md`
-**Último checkpoint técnico confirmado:** `bd64b82`
+**Último checkpoint técnico confirmado:** `3ba580c`
 **Atualizado em:** 2026-10-29
 
 | ID | Tarefa | Status | Instância | Repositório/artefato | Próxima ação |
@@ -12,8 +12,8 @@
 | ARC-003 | Implementar coletor ARC e avaliador PGC | DONE | Manus AI (sandbox:Tq8FCw5EEQC8s4y2kvJrrc) | `SofiaARC-PGC` — código `d9df1aa`, checkpoint `35f6486` | 5 sinais em memória, shadow mode, 4 testes novos; 12 testes totais passaram; OR-20261029-0005 |
 | ARC-004 | Adicionar persistência e migrations no SofiaControlPanel | DONE | Manus AI (sandbox:Tq8FCw5EEQC8s4y2kvJrrc) | `SofiaControlPanel` — schema/migration `44659ed`, checkpoint `governance/missions/0010/CHECKPOINT-ARC-004.md` | 3 tabelas, FKs, relações e índices; migration gerada/validada estaticamente; execução em banco real pendente; OR-20261029-0006 |
 | ARC-005 | Adicionar API tRPC protegida | DONE | Manus AI (sandbox:Tq8FCw5EEQC8s4y2kvJrrc) | `SofiaControlPanel` — código `e635492`, checkpoint `bd64b82`, OR-20261029-0007 | API `arc.evaluateTask`, `arc.getAssessment`, `arc.listAssessments`; ownership/admin; shadow default; integração do avaliador permanece ARC-006 |
-| ARC-006 | Integrar no orquestrador em shadow mode | STAGED | — | `SofiaControlPanel` + `SofiaARC-PGC` | Liberada após ARC-005; integrar coletor/avaliador sem bloquear tarefas |
-| ARC-007 | Criar UI mínima de avaliação na tarefa | STAGED | — | `SofiaControlPanel` | Aguardar ARC-006 |
+| ARC-006 | Integrar no orquestrador em shadow mode | DONE | Manus AI (sandbox:Tq8FCw5EEQC8s4y2kvJrrc) | `SofiaControlPanel` — código `3ba580c`, checkpoint `CHECKPOINT-ARC-006.md`, OR-20261029-0008 | Avaliação real usa task/agente/activity, policy habilitada e Bayes heurístico; não bloqueia tarefas; banco real/migration ainda pendentes |
+| ARC-007 | Criar UI mínima de avaliação na tarefa | STAGED | — | `SofiaControlPanel` | Liberada após ARC-006; exibir posterior, decisão, modo e evidências sem metadata sensível |
 | ARC-008 | Validar, fechar MVP e emitir handoff final | STAGED | — | Ambos | Aguardar ARC-007 |
 
 ## Regra de assunção
