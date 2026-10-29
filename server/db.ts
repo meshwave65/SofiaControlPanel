@@ -1,7 +1,7 @@
 import { eq, and, desc, isNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { InsertUser, InsertAgent, users, agents, tasks, messages, activityLogs, contextReports, taskStatuses, taskPriorities, messageTypes, activityEventTypes } from "../drizzle/schema";
+import { InsertUser, InsertAgent, users, agents, tasks, messages, activityLogs, contextReports, taskStatuses, taskPriorities, messageTypes, activityEventTypes, arcPolicies, arcAssessments, arcEvidence } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { encryptCredential } from './credentials';
 
@@ -262,6 +262,121 @@ export async function updateTaskStatus(id: number, statusId: number) {
   if (!db) throw new Error("Database not available");
 
   return db.update(tasks).set({ statusId, updatedAt: new Date() }).where(eq(tasks.id, id));
+}
+
+// ============================================
+// ARC / PGC HELPERS
+// ============================================
+
+type ArcEvidenceInput = {
+  key: string;
+  value: string;
+  reliability: string;
+  likelihoodRatio: string;
+  source: string;
+  observedAt: Date;
+  metadata?: Record<string, string | number | boolean>;
+};
+
+type ArcAssessmentInput = {
+  taskId: number;
+  agentId?: number | null;
+  policyId: number;
+  prior: string;
+  posterior: string;
+  decision: string;
+  mode: string;
+  explanation: string;
+  evidence: ArcEvidenceInput[];
+};
+
+async function canAccessTask(taskId: number, ownerId: number, isAdmin: boolean) {
+  const database = await getDb();
+  if (!database) return false;
+  if (isAdmin) {
+    const result = await database.select({ id: tasks.id }).from(tasks).where(eq(tasks.id, taskId)).limit(1);
+    return result.length > 0;
+  }
+  const result = await database
+    .select({ id: tasks.id })
+    .from(tasks)
+    .where(and(eq(tasks.id, taskId), eq(tasks.createdBy, ownerId)))
+    .limit(1);
+  return result.length > 0;
+}
+
+export async function createArcAssessment(data: ArcAssessmentInput) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+
+  return database.transaction(async (tx) => {
+    const [assessment] = await tx.insert(arcAssessments).values({
+      taskId: data.taskId,
+      agentId: data.agentId ?? null,
+      policyId: data.policyId,
+      prior: data.prior,
+      posterior: data.posterior,
+      decision: data.decision,
+      mode: data.mode,
+      explanation: data.explanation,
+    }).returning();
+
+    if (!assessment) throw new Error("Failed to create ARC assessment");
+
+    if (data.evidence.length > 0) {
+      await tx.insert(arcEvidence).values(data.evidence.map((item) => ({
+        assessmentId: assessment.id,
+        key: item.key,
+        value: item.value,
+        reliability: item.reliability,
+        likelihoodRatio: item.likelihoodRatio,
+        source: item.source,
+        observedAt: item.observedAt,
+        metadata: item.metadata,
+      })));
+    }
+
+    return assessment;
+  });
+}
+
+export async function getArcAssessmentByTask(taskId: number, ownerId: number, isAdmin: boolean) {
+  if (!(await canAccessTask(taskId, ownerId, isAdmin))) return null;
+  const database = await getDb();
+  if (!database) return null;
+  const assessments = await database
+    .select()
+    .from(arcAssessments)
+    .where(eq(arcAssessments.taskId, taskId))
+    .orderBy(desc(arcAssessments.createdAt));
+  if (assessments.length === 0) return null;
+  const evidence = await database
+    .select()
+    .from(arcEvidence)
+    .where(eq(arcEvidence.assessmentId, assessments[0].id));
+  return { ...assessments[0], evidence };
+}
+
+export async function listArcAssessmentsByTask(taskId: number, ownerId: number, isAdmin: boolean, limit: number) {
+  if (!(await canAccessTask(taskId, ownerId, isAdmin))) return [];
+  const database = await getDb();
+  if (!database) return [];
+  const assessments = await database
+    .select()
+    .from(arcAssessments)
+    .where(eq(arcAssessments.taskId, taskId))
+    .orderBy(desc(arcAssessments.createdAt))
+    .limit(limit);
+  if (assessments.length === 0) return [];
+  const result = [];
+  for (const assessment of assessments) {
+    const evidence = await database
+      .select()
+      .from(arcEvidence)
+      .where(eq(arcEvidence.assessmentId, assessment.id));
+    result.push({ ...assessment, evidence });
+  }
+  return result;
 }
 
 // ============================================
