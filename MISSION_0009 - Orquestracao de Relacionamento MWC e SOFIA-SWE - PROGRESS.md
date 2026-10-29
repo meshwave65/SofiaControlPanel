@@ -10,6 +10,10 @@ A missão coordena os agentes OCINT, HH, Secretary e Meeting Prep em torno de co
 
 As duas avaliações-alvo são independentes: MWC e SOFIA/SWE. A ficha profissional continua única em `network/contacts/`; os relatórios, índices, mensagens e materiais de reunião permanecem em `network/projects/`. O SCP guarda este plano, o status das tarefas e os Operational Reports.
 
+## Esclarecimento de escopo — 2026-10-28
+
+O responsável informou que a criptomoeda anteriormente chamada MWC passou a se chamar MWN. A partir desta correção, a convergência, comunicação e preparação de reuniões relativas à moeda são roteadas por `MISSION_0011` e não devem continuar usando avaliações/minutas MWC como atuais. `MISSION_0009` permanece com o escopo SOFIA/SWE; referências MWC antigas abaixo são histórico, não autorização para prospecção da moeda.
+
 ## Blueprint e controle
 
 - Blueprint operacional: [`governance/missions/0009/BLUEPRINT.md`](governance/missions/0009/BLUEPRINT.md), versão 0.1.0.

@@ -7,6 +7,10 @@
 **Repositório de dados e artefatos de projeto:** [`meshwave65/network`](https://github.com/meshwave65/network), branch `main`
 **Data da linha de base:** 2026-10-28
 
+## Correção de nomenclatura e escopo — 2026-10-28
+
+O responsável confirmou que a criptomoeda antes referida como MWC foi rebatizada para **MWN (MeshWave Network Crypto Coin)**. A partir desta data, a missão específica da moeda é `MISSION_0011`; avaliações, mensagens e materiais históricos MWC não devem ser reutilizados para MWN sem revalidação. MISSION_0009 permanece ativa somente para a trilha SOFIA/SWE. Não alterar os registros históricos do `network` por substituição global de siglas.
+
 ## 1. Objetivo e fronteiras
 
 Esta missão transfere para o SCP a coordenação de tarefas de relacionamento profissional para MWC e SOFIA/SWE. O SCP mantém a missão, a fila de tarefas e os Operational Reports. O repositório `network` continua sendo a fonte de verdade para identidade e mapeamento canônico de contatos, avaliações HH, índices de convergência, registros de reuniões, mensagens e materiais específicos dos projetos.
