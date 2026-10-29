@@ -3,15 +3,15 @@
 **Missão:** Orquestração Global MWN — MeshWave Network Crypto Coin
 **Blueprint:** `governance/missions/0011/BLUEPRINT.md`
 **Repositório canônico:** `meshwave65/network`, branch `main`
-**Atualizado em:** 2026-10-28
+**Atualizado em:** 2026-10-29
 
 | ID | Tarefa | Status | Instância | Repositório/artefato | Próxima ação |
 |---|---|---|---|---|---|
 | 11.1 | Criar missão global MWN, blueprint, ciclo de papéis, handoff e OR inicial | DONE | Manus AI | SCP: `governance/missions/0011/`, arquivos `MISSION_0011*`, OR-20261028-0005; `network/AGENTS.md` commit `4f49369` | Concluída; não repetir setup |
-| 11.2 | Reconciliar nome MWN, definição do projeto, fonte da verdade e relação não destrutiva com documentos/caminhos legados MWC | PAUSED | Manus AI | SCP `d08f669`; `network/main` `4f49369` | Pausa temporária por solicitação do responsável para executar a tarefa paralela 11.5; levantamento documental já iniciado, sem alterações ainda. Retomar 11.2 após concluir 11.5 e publicar seu OR |
+| 11.2 | Reconciliar nome MWN, definição do projeto, fonte da verdade e relação não destrutiva com documentos/caminhos legados MWC | PROGRESS | Manus AI | `network/main` baseline `4f49369`; inventário documental e reuniões conferidos | Retomada após fechar 11.5. Continuar a auditoria e registrar a decisão de nome/path sem renomear arquivos históricos nem iniciar HH/Secretary sem blueprint MWN aprovado |
 | 11.3 | Executar o ciclo contínuo MWN: Meeting Prep → Secretary autorizado → HH de mapeados pendentes → OCINT/OSINT genérico quando todos os mapeados estiverem avaliados | STAGED | — | `network/contacts/`, `network/projects/`, logs e reuniões | Depois do gate 11.2, reconciliar fila/locks e processar uma unidade/um contato por vez; publicar OR próprio por unidade |
 | 11.4 | Auditar cobertura, artefatos, estados de comunicação/reunião, locks, ORs e handoff de pausa/encerramento | STAGED | — | SCP + `network` | Executar ao pausar/encerrar; não declarar fila esgotada sem reconciliação dos registros |
-| 11.5 | Atualizar o protocolo de validação externa UMS/MWN para exigir evidência explícita de convergência e utilidade mútuas antes de recomendar uma conversa | PROGRESS | Manus AI | `meshwave65/mwc-ums-sim`: `docs/PROTOCOLO_VALIDACAO_EXTERNA.md`; referência: `network/docs/protocols/05_MUTUAL_CONVERGENCE_PROTOCOL.md` v0.3.0 | Tornar o benefício ao contato uma porta obrigatória distinta da contribuição esperada do contato; preservar E0–E5 como estágio de evidência de validação externa |
+| 11.5 | Atualizar o protocolo de validação externa UMS/MWN para exigir evidência explícita de convergência e utilidade mútuas antes de recomendar uma conversa | DONE | Manus AI | `meshwave65/mwc-ums-sim` commit `3547405`; OR-20261029-0001 | Gate bilateral publicado no protocolo e no blueprint HH; E0–E5 separados da elegibilidade; nenhuma abordagem realizada |
 
 ## Regra de retomada e prioridade
 
