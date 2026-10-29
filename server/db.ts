@@ -4,6 +4,7 @@ import postgres from "postgres";
 import { InsertUser, InsertAgent, users, agents, tasks, messages, activityLogs, contextReports, taskStatuses, taskPriorities, messageTypes, activityEventTypes, arcPolicies, arcAssessments, arcEvidence } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { encryptCredential } from './credentials';
+import { evaluateArcShadow } from './arcEvaluator';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 let _dbPromise: Promise<ReturnType<typeof drizzle> | null> | null = null;
@@ -255,6 +256,48 @@ export async function getTaskById(id: number) {
 
   const result = await db.select().from(tasks).where(eq(tasks.id, id)).limit(1);
   return result.length > 0 ? result[0] : null;
+}
+
+export async function evaluateTaskInShadow(taskId: number) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+  const task = await getTaskById(taskId);
+  if (!task) return null;
+  const policyRows = await database.select().from(arcPolicies).where(eq(arcPolicies.enabled, true)).orderBy(desc(arcPolicies.createdAt)).limit(1);
+  const policy = policyRows[0];
+  if (!policy) throw new Error("Nenhuma política ARC habilitada");
+  const agent = task.agentId ? await getAgentById(task.agentId) : null;
+  const agentTasks = task.agentId ? await getTasksByAgentId(task.agentId) : [];
+  const activity = task.agentId ? await getActivityLogsByAgentId(task.agentId) : [];
+  const completedTasks = agentTasks.filter((item) => item.completedAt !== null).length;
+  const assessment = evaluateArcShadow({
+    taskId,
+    taskAgentId: task.agentId,
+    agent: agent ? { id: agent.id, status: agent.status, lastHeartbeat: agent.lastHeartbeat } : null,
+    completedTasks,
+    observedTasks: agentTasks.length,
+    activityEvents: activity.length,
+  }, {
+    prior: Number(policy.prior),
+    allowThreshold: Number(policy.allowThreshold),
+    reviewThreshold: Number(policy.reviewThreshold),
+  });
+  return createArcAssessment({
+    taskId: assessment.taskId,
+    agentId: assessment.agentId,
+    policyId: policy.id,
+    prior: assessment.prior.toFixed(6),
+    posterior: assessment.posterior.toFixed(6),
+    decision: assessment.decision,
+    mode: assessment.mode,
+    explanation: assessment.explanation,
+    evidence: assessment.evidence.map((item) => ({
+      ...item,
+      value: item.value.toFixed(6),
+      reliability: item.reliability.toFixed(6),
+      likelihoodRatio: item.likelihoodRatio.toFixed(6),
+    })),
+  });
 }
 
 export async function updateTaskStatus(id: number, statusId: number) {

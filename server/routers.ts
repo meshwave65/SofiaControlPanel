@@ -286,32 +286,15 @@ export const appRouter = router({
   // ============================================
   arc: router({
     evaluateTask: protectedProcedure
-      .input(z.object({
-        taskId: z.number().int().positive(),
-        policyId: z.number().int().positive(),
-        prior: z.string().regex(/^0?\.\d+$/),
-        posterior: z.string().regex(/^0?\.\d+$/),
-        decision: z.enum(["ALLOW", "REVIEW", "DENY"]),
-        mode: z.enum(["shadow", "assisted", "enforced"]).default("shadow"),
-        explanation: z.string().min(1).max(4000),
-        agentId: z.number().int().positive().nullable().optional(),
-        evidence: z.array(z.object({
-          key: z.string().min(1).max(128),
-          value: z.string().regex(/^0?\.\d+$/),
-          reliability: z.string().regex(/^0?\.\d+$/),
-          likelihoodRatio: z.string().regex(/^\d+(\.\d+)?$/),
-          source: z.string().min(1).max(128),
-          observedAt: z.coerce.date(),
-          metadata: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
-        })).max(100).default([]),
-      }))
+      .input(z.object({ taskId: z.number().int().positive() }))
       .mutation(async ({ input, ctx }) => {
         const task = await db.getTaskById(input.taskId);
         if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
           throw new TRPCError({ code: "NOT_FOUND", message: "Tarefa não encontrada." });
         }
-        const assessment = await db.createArcAssessment(input);
-        return { ...assessment, evidence: input.evidence.map(({ metadata: _metadata, ...item }) => item) };
+        const assessment = await db.evaluateTaskInShadow(input.taskId);
+        if (!assessment) throw new TRPCError({ code: "NOT_FOUND", message: "Tarefa não encontrada." });
+        return assessment;
       }),
 
     getAssessment: protectedProcedure
