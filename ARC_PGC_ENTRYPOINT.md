@@ -21,4 +21,4 @@ O sistema de integração e Operational Reports é:
 
 Não iniciar trabalho pela conversa anterior. Confirmar `origin/main`, branch, status, commits e a linha `PROGRESS`/`STAGED` no arquivo de tarefas. Executar somente a próxima ação registrada no checkpoint remoto. Publicar código/documentação e checkpoint em commits separados; depois atualizar a tarefa e produzir o Operational Report no SCP.
 
-O estado inicial da missão é ARC-002 em `PROGRESS`, atribuída ao primeiro agente. O checkpoint técnico de entrada é `5d1ed3c`.
+O estado atual da missão é ARC-002 concluída e ARC-003 `STAGED`. O checkpoint técnico remoto mais recente é `84d21bf`. O próximo agente deve assumir ARC-003, não repetir ARC-002.
