@@ -10,7 +10,7 @@
 | ARC-001 | Criar repositório, blueprint, checkpoint inicial e OR de setup | DONE | Manus ARC-PGC Agent | `SofiaARC-PGC` — commits `a3b084f`, `5d1ed3c`; SCP OR `8a34083` | Nenhuma; marco de setup concluído |
 | ARC-002 | Implementar motor Bayesiano puro, tipos e testes | DONE | Manus ARC-PGC Agent | `SofiaARC-PGC` — código `0be1805`, higiene `86a3294`, checkpoint `84d21bf` | Concluída; 8 testes passaram e TypeScript foi validado |
 | ARC-003 | Implementar coletor ARC e avaliador PGC | DONE | Manus AI (sandbox:Tq8FCw5EEQC8s4y2kvJrrc) | `SofiaARC-PGC` — código `d9df1aa`, checkpoint `35f6486` | 5 sinais em memória, shadow mode, 4 testes novos; 12 testes totais passaram; OR-20261029-0005 |
-| ARC-004 | Adicionar persistência e migrations no SofiaControlPanel | STAGED | — | `SofiaControlPanel` + `SofiaARC-PGC` | Liberada após ARC-003; próximo checkpoint técnico `35f6486`; adicionar apenas `arcPolicies`, `arcAssessments`, `arcEvidence` e índices |
+| ARC-004 | Adicionar persistência e migrations no SofiaControlPanel | PROGRESS | Manus AI (sandbox:Tq8FCw5EEQC8s4y2kvJrrc) | `SofiaControlPanel` + `SofiaARC-PGC@35f6486`; skills `operational-task-lifecycle@0.2.0-DRAFT` + `skill-governance-oracle@1.0.0` | Adicionar apenas `arcPolicies`, `arcAssessments`, `arcEvidence`, índices e documentação de imutabilidade; publicar migration/checkpoint separados e OR |
 | ARC-005 | Adicionar API tRPC protegida | STAGED | — | `SofiaControlPanel` | Aguardar ARC-004 |
 | ARC-006 | Integrar no orquestrador em shadow mode | STAGED | — | `SofiaControlPanel` | Aguardar ARC-005 |
 | ARC-007 | Criar UI mínima de avaliação na tarefa | STAGED | — | `SofiaControlPanel` | Aguardar ARC-006 |
