@@ -1,3 +1,4 @@
 skill_name,version,status,source_repo,source_ref,trigger_summary,owner,last_or_id,last_or_status,last_validation
 linkedin-ocint-mapper,1.1.0,ACTIVE,https://github.com/meshwave65/SofiaControlPanel.git,main:governance/skills/linkedin-ocint-mapper,public professional mapping with one-contact locks and mandatory OperationalReport,Manus,OR-20261028-0001,SUBMITTED,VALIDATED
 skill-governance-oracle,1.0.0,ACTIVE,https://github.com/meshwave65/SofiaControlPanel.git,main:governance/skills/skill-governance-oracle,skill routing registry OperationalReports and autonomous Oracle review,Manus,OR-20261028-0001,SUBMITTED,VALIDATED
+operational-task-lifecycle,0.1.0,DRAFT,https://github.com/meshwave65/SofiaControlPanel.git,main:governance/skills/operational-task-lifecycle,agent task routing skill selection creation and OR reporting,Manus,,,VALIDATED
