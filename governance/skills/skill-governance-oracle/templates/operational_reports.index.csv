@@ -1,0 +1,2 @@
+or_id,task_id,skill_name,skill_version,status,oracle_status,proposal_status,created_at,reviewed_at,review_commit,notes
+OR-YYYYMMDD-####,<TASK_ID>,<SKILL_NAME>,<VERSION>,CREATED,PENDING,NONE,<ISO-8601>,,,

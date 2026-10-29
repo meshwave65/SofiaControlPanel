@@ -1,0 +1,2 @@
+or_id,task_id,skill_name,skill_version,status,oracle_status,proposal_status,created_at,reviewed_at,review_commit,notes
+OR-20261028-0001,task-skill-governance-20261028,linkedin-ocint-mapper|skill-governance-oracle,1.1.0|1.0.0,SUBMITTED,PENDING,NONE,2026-10-28T21:27:00-03:00,,,Initial OR for shared registry, routing protocol, Oracle Agent, and mandatory post-execution reporting.
