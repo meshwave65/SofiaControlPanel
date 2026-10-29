@@ -65,3 +65,9 @@ Todos os relatórios operacionais devem ser criados no diretório `OperationalRe
 
 **Autor:** Agente Luiz
 **Data:** 29 de maio de 2026
+
+## 5. Continuidade autônoma entre tarefas — 2026-10-29
+
+Ao concluir, pausar ou bloquear uma tarefa, o agente deve consultar novamente o SofiaControlPanel e continuar sem aguardar novo comando, selecionando a tarefa não reivindicada e segura de maior prioridade. Respeitar primeiro prazos e reuniões futuras confirmadas, dependências, missões `PROGRESS`, atribuições vigentes e locks; só iniciar tarefa `STAGED` quando suas dependências estiverem satisfeitas. Um bloqueio por decisão, definição ou autorização humana pausa apenas a unidade dependente, não tarefas independentes. Para cada unidade, assumir formalmente, selecionar/carregar a skill adequada, cumprir o critério de aceite, publicar artefatos e seu próprio Operational Report antes de escolher a seguinte.
+
+Não contornar aprovações, decisões humanas, limites de autorização, ownership ou locks para manter a continuidade. Não enviar comunicação externa automaticamente. Encerre a rodada apenas quando não houver tarefa elegível, houver conflito material de prioridade/ownership, ou as tarefas remanescentes dependerem de input/aprovação humana. Esta é uma regra de continuação durante a execução, não um serviço agendado ou job em background.

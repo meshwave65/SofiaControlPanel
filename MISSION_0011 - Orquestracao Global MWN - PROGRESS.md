@@ -25,6 +25,8 @@ O remoto recebido (`84ee94c`) contém alterações concorrentes em MWC/SOFIA e u
 
 **Estado:** 11.2 `PAUSED` até o responsável responder ao crosswalk: confirmar se MWN se refere somente à moeda; definir se a relação UMS–moeda é retirada, permanece hipótese ou será formalizada; classificar o parâmetro `1.000 UMS = 1 MWN = R$ 1,00` do simulador; e fornecer/aprovar finalidade, estágio e alegações permitidas para eventual HH. Não iniciar HH/Secretary nem transferir avaliações MWC para MWN até existir blueprint utilizável e aprovado. Após a resposta, sincronizar novamente SCP/network, reuniões, índices e locks.
 
+**Continuidade autônoma:** a pausa de 11.2 não encerra a execução do agente. Após registrar este checkpoint, consultar o SCP, avaliar as demais tarefas elegíveis por urgência, dependências e ownership, e continuar a mais prioritária com sua skill e OR próprios. Não contornar o gate MWN; retomar 11.2 somente após as decisões do responsável.
+
 ## Regras rápidas de retomada
 
 1. Ler `SofiaControlPanel/AGENTS.md`, o blueprint desta missão, este handoff, o arquivo de tarefas e a skill indicada pelo catálogo.
