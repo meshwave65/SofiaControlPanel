@@ -10,8 +10,8 @@
 | ARC-001 | Criar repositório, blueprint, checkpoint inicial e OR de setup | DONE | Manus ARC-PGC Agent | `SofiaARC-PGC` — commits `a3b084f`, `5d1ed3c`; SCP OR `8a34083` | Nenhuma; marco de setup concluído |
 | ARC-002 | Implementar motor Bayesiano puro, tipos e testes | DONE | Manus ARC-PGC Agent | `SofiaARC-PGC` — código `0be1805`, higiene `86a3294`, checkpoint `84d21bf` | Concluída; 8 testes passaram e TypeScript foi validado |
 | ARC-003 | Implementar coletor ARC e avaliador PGC | DONE | Manus AI (sandbox:Tq8FCw5EEQC8s4y2kvJrrc) | `SofiaARC-PGC` — código `d9df1aa`, checkpoint `35f6486` | 5 sinais em memória, shadow mode, 4 testes novos; 12 testes totais passaram; OR-20261029-0005 |
-| ARC-004 | Adicionar persistência e migrations no SofiaControlPanel | PROGRESS | Manus AI (sandbox:Tq8FCw5EEQC8s4y2kvJrrc) | `SofiaControlPanel` + `SofiaARC-PGC@35f6486`; skills `operational-task-lifecycle@0.2.0-DRAFT` + `skill-governance-oracle@1.0.0` | Adicionar apenas `arcPolicies`, `arcAssessments`, `arcEvidence`, índices e documentação de imutabilidade; publicar migration/checkpoint separados e OR |
-| ARC-005 | Adicionar API tRPC protegida | STAGED | — | `SofiaControlPanel` | Aguardar ARC-004 |
+| ARC-004 | Adicionar persistência e migrations no SofiaControlPanel | DONE | Manus AI (sandbox:Tq8FCw5EEQC8s4y2kvJrrc) | `SofiaControlPanel` — schema/migration `44659ed`, checkpoint `governance/missions/0010/CHECKPOINT-ARC-004.md` | 3 tabelas, FKs, relações e índices; migration gerada/validada estaticamente; execução em banco real pendente; OR-20261029-0006 |
+| ARC-005 | Adicionar API tRPC protegida | STAGED | — | `SofiaControlPanel` | Liberada após ARC-004; usar `arcPolicies`, `arcAssessments`, `arcEvidence`; manter shadow e validar ownership/admin |
 | ARC-006 | Integrar no orquestrador em shadow mode | STAGED | — | `SofiaControlPanel` | Aguardar ARC-005 |
 | ARC-007 | Criar UI mínima de avaliação na tarefa | STAGED | — | `SofiaControlPanel` | Aguardar ARC-006 |
 | ARC-008 | Validar, fechar MVP e emitir handoff final | STAGED | — | Ambos | Aguardar ARC-007 |
