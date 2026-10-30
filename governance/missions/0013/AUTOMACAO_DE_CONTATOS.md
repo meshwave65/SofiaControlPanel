@@ -1,6 +1,6 @@
 # Automação de contatos — MISSION_0013
 
-**Estado:** preparado; envio externo ainda não habilitado nesta execução.  
+**Estado:** campanha exploratória autorizada pelo responsável em 2026-10-29; execução de envio aguardando conexão da caixa remetente.  
 **Arquivo mestre:** [CONTROLE_INVESTIDORES.csv](./CONTROLE_INVESTIDORES.csv)
 
 ## Objetivo
@@ -48,6 +48,14 @@ Os estados não são intercambiáveis: `SENT` não prova entrega; `DELIVERED` n�
 2. Ainda não foi aprovada uma mensagem-base final, nem remetente, nem lista final de destinatários por modalidade.
 3. Equity e MWN ainda têm lacunas comerciais/jurídicas documentadas no dossiê. As mensagens não devem prometer termos que ainda não estejam definidos.
 
+## Autorização recebida e critério operacional
+
+Em 2026-10-29, o responsável delegou a condução integral da tarefa, autorizando a automação conforme avaliação de adequação. Esta autorização cobre pesquisa, qualificação, priorização, personalização e primeiro contato institucional exploratório com os investidores da lista, desde que se usem apenas canais profissionais públicos verificados e mensagem sem oferta vinculante ou termos financeiros não definidos.
+
+A primeira abordagem deve pedir uma conversa para avaliar aderência estratégica. Pode mencionar que existem duas possíveis frentes de discussão — participação societária na MeshWave e/ou ativo digital MWN — mas deve deixar claro que estrutura, direitos, condições e due diligence serão discutidos separadamente. Não anexar decks ou documentos não aprovados, não fixar valuation, ticket, percentual, quantidade, preço ou retorno.
+
+A autorização não supre a necessidade técnica de uma caixa remetente autenticada. A caixa deverá estar conectada e identificada antes de qualquer envio; não usar credenciais inferidas, endereço remetente inventado ou serviço alternativo sem autorização. Uma vez conectada, executar a fila de destinatários públicos verificados, começando pelos prioritários, com cadência conservadora e atualização do CSV após cada retorno do provedor. Formulários sem automação oficial ou sem campos adequados ficam como ação manual registrada, não contornar controles.
+
 ## Critério para ativar disparo
 
-Para ativar o envio automatizado em lote, o responsável deve confirmar: (a) caixa remetente conectada; (b) mensagem-base e anexos aprovados; (c) quais investidores da lista estão autorizados; (d) se a abordagem oferece equity, MWN ou apenas conversa exploratória; e (e) cadência e limite de follow-up. Com essa autorização de campanha, a automação pode executar a fila aprovada e registrar cada resultado sem pedir confirmação individual por mensagem.
+Bloqueio técnico remanescente: conexão da caixa remetente. A autorização de campanha exploratória foi recebida; não é necessário pedir nova aprovação de cada mensagem individual se o conteúdo permanecer dentro dos limites acima. Após conectar a caixa, validar destinatários, transmitir individualmente e registrar cada resultado observável.
