@@ -7,16 +7,31 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import DashboardLayout from "@/components/DashboardLayout";
 import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { Loader2, ChevronLeft, Zap, FileText, AlertCircle, Download, ShieldCheck, RefreshCw, Info } from "lucide-react";
 
 export default function TaskDetail() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
-  const taskId = parseInt(id || "0");
+  const { isAuthenticated, loading: authLoading } = useAuth();
+  const parsedTaskId = Number(id);
+  const taskId = Number.isInteger(parsedTaskId) && parsedTaskId > 0 ? parsedTaskId : 0;
+  const canLoadTask = isAuthenticated && taskId > 0;
 
-  const taskQuery = trpc.tasks.getById.useQuery({ id: taskId });
-  const messagesQuery = trpc.messages.getByTask.useQuery({ taskId });
-  const lookupsQuery = trpc.lookups.listAll.useQuery();
+  // Não iniciar consultas protegidas antes de a sessão estar resolvida.
+  // Sem retry automático: falhas devem ser exibidas, não parecer carregamento infinito.
+  const taskQuery = trpc.tasks.getById.useQuery(
+    { id: taskId },
+    { enabled: canLoadTask, retry: false, refetchOnWindowFocus: false },
+  );
+  const messagesQuery = trpc.messages.getByTask.useQuery(
+    { taskId },
+    { enabled: canLoadTask && Boolean(taskQuery.data), retry: false },
+  );
+  const lookupsQuery = trpc.lookups.listAll.useQuery(
+    undefined,
+    { enabled: canLoadTask && Boolean(taskQuery.data), retry: false },
+  );
   const statuses = lookupsQuery.data?.statuses ?? [];
   const priorities = lookupsQuery.data?.priorities ?? [];
   const [subtasks, setSubtasks] = useState<any[]>([]);
@@ -28,14 +43,14 @@ export default function TaskDetail() {
   const updateStatusMutation = trpc.tasks.updateStatus.useMutation();
   const arcAssessmentQuery = trpc.arc.getAssessment.useQuery(
     { taskId },
-    { enabled: taskId > 0 },
+    { enabled: canLoadTask && Boolean(taskQuery.data), retry: false },
   );
   const evaluateArcMutation = trpc.arc.evaluateTask.useMutation({
     onSuccess: () => arcAssessmentQuery.refetch(),
   });
   const consolidatedReportQuery = trpc.tasks.getConsolidatedReport.useQuery(
     { taskId },
-    { enabled: taskId > 0 },
+    { enabled: canLoadTask && Boolean(taskQuery.data), retry: false },
   );
 
   const task = taskQuery.data;
@@ -105,11 +120,69 @@ export default function TaskDetail() {
     return "bg-yellow-500/20 text-yellow-500 border-yellow-500/30";
   };
 
-  if (taskQuery.isLoading) {
+  if (authLoading || (canLoadTask && taskQuery.isLoading)) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-screen">
+        <div className="flex items-center justify-center min-h-[50vh]" role="status" aria-live="polite">
           <Loader2 className="w-8 h-8 animate-spin text-accent" />
+          <span className="sr-only">Carregando missão...</span>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <DashboardLayout>
+        <div className="px-6 py-8">
+          <Card className="cad-card">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3 text-red-500">
+                <AlertCircle className="w-5 h-5" />
+                <p>Sessão não autenticada. Entre novamente para consultar esta missão.</p>
+              </div>
+              <Button className="mt-4" onClick={() => navigate("/")}>Ir para o início</Button>
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!taskId) {
+    return (
+      <DashboardLayout>
+        <div className="px-6 py-8">
+          <Card className="cad-card">
+            <CardContent className="pt-6">
+              <p className="text-red-500">Identificador de missão inválido.</p>
+              <Button className="mt-4" onClick={() => navigate("/tasks")}>Voltar às missões</Button>
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (taskQuery.isError) {
+    return (
+      <DashboardLayout>
+        <div className="px-6 py-8">
+          <Card className="cad-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-red-500">
+                <AlertCircle className="w-5 h-5" /> Falha ao carregar missão
+              </CardTitle>
+              <CardDescription>{taskQuery.error.message}</CardDescription>
+            </CardHeader>
+            <CardContent className="flex gap-3">
+              <Button onClick={() => void taskQuery.refetch()} disabled={taskQuery.isFetching}>
+                {taskQuery.isFetching && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Tentar novamente
+              </Button>
+              <Button variant="outline" onClick={() => navigate("/tasks")}>Voltar às missões</Button>
+            </CardContent>
+          </Card>
         </div>
       </DashboardLayout>
     );
