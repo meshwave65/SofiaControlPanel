@@ -58,3 +58,15 @@ A API de comunidade retornou `hits.total = 33`, com agregações de 25 publicaç
 - Baixar/ler PDFs e anexos de cada record, começando pelos registros que correspondem diretamente às fontes ResearchGate obrigatórias e à formulação HIT/v2.0.
 - Registrar para cada record a correspondência exata com os arquivos GitHub e com versões anteriores.
 - Manter a distinção entre publicação, submissão declarada, preprint, apresentação, evidência numérica sintética e validação independente.
+
+
+## 4. Registro relacionado descoberto fora da lista inicial
+
+Durante a leitura do CFD-Online foi localizado o DOI **10.5281/zenodo.17843237**, *Mathematical Foundations of Multiflux Theory — Expanded Edition* (06/12/2025, versão v1, PDF de 321,9 kB, CC BY-NC-SA 4.0). O registro foi referido pelo autor no thread como a versão com projeção, termo inter-subfluxo, Mori–Zwanzig, evolução de N(t) e CRT.
+
+Este DOI não apareceu na tabela inicial de 33 itens. A membership na comunidade `multiflux` ainda não foi confirmada pela extração disponível do endpoint do registro. Portanto:
+- ele foi adicionado ao corpus científico obrigatório por referência cruzada no CFD-Online;
+- não deve ser somado aos 33 registros até confirmar membership;
+- o inventário original de 33 permanece sujeito a reconciliação item a item.
+
+Leitura integral e auditoria registrada em `governance/missions/0014/expanded-derivation-and-cfd-audit.md`.
