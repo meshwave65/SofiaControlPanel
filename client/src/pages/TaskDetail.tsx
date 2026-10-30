@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import DashboardLayout from "@/components/DashboardLayout";
 import { trpc } from "@/lib/trpc";
-import { Loader2, ChevronLeft, Zap, FileText, AlertCircle, Download } from "lucide-react";
+import { Loader2, ChevronLeft, Zap, FileText, AlertCircle, Download, ShieldCheck, RefreshCw, Info } from "lucide-react";
 
 export default function TaskDetail() {
   const { id } = useParams<{ id: string }>();
@@ -26,6 +26,13 @@ export default function TaskDetail() {
   const factorizeTaskMutation = trpc.tasks.factorize.useMutation();
   const consolidateTaskMutation = trpc.tasks.consolidate.useMutation();
   const updateStatusMutation = trpc.tasks.updateStatus.useMutation();
+  const arcAssessmentQuery = trpc.arc.getAssessment.useQuery(
+    { taskId },
+    { enabled: taskId > 0 },
+  );
+  const evaluateArcMutation = trpc.arc.evaluateTask.useMutation({
+    onSuccess: () => arcAssessmentQuery.refetch(),
+  });
   const consolidatedReportQuery = trpc.tasks.getConsolidatedReport.useQuery(
     { taskId },
     { enabled: taskId > 0 },
@@ -71,6 +78,10 @@ export default function TaskDetail() {
     }
   };
 
+  const handleArcEvaluation = async () => {
+    await evaluateArcMutation.mutateAsync({ taskId });
+  };
+
   const getStatusBadge = (statusId: number) => {
     const statusName = statuses.find((status) => status.id === statusId)?.name || `Status ${statusId}`;
     const colorMap: Record<string, string> = {
@@ -86,6 +97,12 @@ export default function TaskDetail() {
 
   const getPriorityLabel = (priorityId: number) => {
     return priorities.find((priority) => priority.id === priorityId)?.name || `Prioridade ${priorityId}`;
+  };
+
+  const getArcDecisionClass = (decision?: string) => {
+    if (decision === "ALLOW") return "bg-green-500/20 text-green-500 border-green-500/30";
+    if (decision === "DENY") return "bg-red-500/20 text-red-500 border-red-500/30";
+    return "bg-yellow-500/20 text-yellow-500 border-yellow-500/30";
   };
 
   if (taskQuery.isLoading) {
@@ -199,6 +216,129 @@ export default function TaskDetail() {
                       </>
                     )}
                   </Button>
+                </CardContent>
+              </Card>
+
+              {/* ARC / PGC — avaliação contextual em shadow mode */}
+              <Card className="cad-card mt-6 border-accent/30">
+                <CardHeader>
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <ShieldCheck className="w-5 h-5 text-accent" />
+                        Avaliação ARC/PGC
+                      </CardTitle>
+                      <CardDescription className="mt-2">
+                        Sinais contextuais heurísticos da tarefa e do agente.
+                      </CardDescription>
+                    </div>
+                    <Badge variant="outline" className="shrink-0">SHADOW</Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {arcAssessmentQuery.isLoading ? (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Carregando avaliação...
+                    </div>
+                  ) : arcAssessmentQuery.data ? (
+                    <div className="space-y-5">
+                      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                        <div className="rounded-lg border p-3">
+                          <p className="text-xs text-muted-foreground">Posterior</p>
+                          <p className="mt-1 text-xl font-semibold">
+                            {(Number(arcAssessmentQuery.data.posterior) * 100).toFixed(1)}%
+                          </p>
+                        </div>
+                        <div className="rounded-lg border p-3">
+                          <p className="text-xs text-muted-foreground">Decisão</p>
+                          <Badge className={`mt-2 ${getArcDecisionClass(arcAssessmentQuery.data.decision)}`}>
+                            {arcAssessmentQuery.data.decision}
+                          </Badge>
+                        </div>
+                        <div className="rounded-lg border p-3">
+                          <p className="text-xs text-muted-foreground">Modo</p>
+                          <p className="mt-1 text-sm font-medium uppercase">{arcAssessmentQuery.data.mode}</p>
+                        </div>
+                        <div className="rounded-lg border p-3">
+                          <p className="text-xs text-muted-foreground">Prior</p>
+                          <p className="mt-1 text-xl font-semibold">
+                            {(Number(arcAssessmentQuery.data.prior) * 100).toFixed(1)}%
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="rounded-lg bg-muted/40 p-3 text-sm text-muted-foreground">
+                        <div className="flex gap-2">
+                          <Info className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+                          <p>{arcAssessmentQuery.data.explanation}</p>
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Evidências observadas</p>
+                        <div className="overflow-x-auto rounded-lg border">
+                          <table className="w-full text-left text-xs">
+                            <thead className="bg-muted/40 text-muted-foreground">
+                              <tr>
+                                <th className="px-3 py-2 font-medium">Sinal</th>
+                                <th className="px-3 py-2 font-medium">Valor</th>
+                                <th className="px-3 py-2 font-medium">Confiabilidade</th>
+                                <th className="px-3 py-2 font-medium">Origem</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {arcAssessmentQuery.data.evidence.map((evidence) => (
+                                <tr key={`${evidence.key}-${evidence.observedAt}`} className="border-t">
+                                  <td className="px-3 py-2 font-medium">{evidence.key}</td>
+                                  <td className="px-3 py-2">{Number(evidence.value).toFixed(2)}</td>
+                                  <td className="px-3 py-2">{(Number(evidence.reliability) * 100).toFixed(0)}%</td>
+                                  <td className="px-3 py-2 text-muted-foreground">{evidence.source}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <p className="text-xs text-muted-foreground">
+                          Avaliação criada em {new Date(arcAssessmentQuery.data.createdAt).toLocaleString()}.
+                        </p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleArcEvaluation}
+                          disabled={evaluateArcMutation.isPending}
+                        >
+                          {evaluateArcMutation.isPending ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <RefreshCw className="mr-2 h-4 w-4" />
+                          )}
+                          Reavaliar
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-start gap-3">
+                      <p className="text-sm text-muted-foreground">
+                        Ainda não existe uma avaliação persistida para esta tarefa.
+                      </p>
+                      <Button
+                        onClick={handleArcEvaluation}
+                        disabled={evaluateArcMutation.isPending}
+                        className="bg-accent hover:bg-accent/80 text-foreground"
+                      >
+                        {evaluateArcMutation.isPending ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <ShieldCheck className="mr-2 h-4 w-4" />
+                        )}
+                        Avaliar tarefa
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
