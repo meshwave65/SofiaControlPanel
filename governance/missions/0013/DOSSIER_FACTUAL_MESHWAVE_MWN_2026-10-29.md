@@ -81,6 +81,19 @@ O repositório `meshwave65/mwc-ums-sim` contém migrações para:
 
 O fluxo codificado é autenticado e depende de validação administrativa. A migração prevê registro de ledger após aprovação. A existência do código e das migrações não prova, por si só, que cada etapa está publicamente disponível ou que pagamentos foram liquidados; os registros agregados no banco confirmam solicitações e validações registradas.
 
+## 2.5 Histórico da designação MWC → MWN
+
+O responsável esclareceu em 2026-10-29 que a designação inicial do ativo MeshWave era **MWC** e que optou-se por alterá-la para **MWN** porque já existe — ou existiu — uma moeda em circulação denominada MWC. O objetivo da alteração foi evitar colisão de nomenclatura e confusão com o ativo preexistente.
+
+Este registro preserva a informação histórica sem afirmar que a outra moeda MWC foi verificada independentemente. A data exata em que a decisão de renomear foi tomada não foi informada.
+
+**Convenção documental:**
+- MWN = designação atual do ativo MeshWave.
+- MWC = designação histórica do ativo MeshWave e identificador legado ainda presente em tabelas, tipos de transação, migrações e registros anteriores.
+- A presença de MWC em registros históricos não significa que a designação atual tenha voltado a ser MWC.
+- A renomeação, por si só, não comprova troca de contrato, migração de tokens, alteração de supply, mudança de titularidade ou equivalência técnica integral.
+- Dados e transações históricos devem permanecer imutáveis; novas interfaces e materiais devem usar MWN, com crosswalk explícito quando necessário.
+
 ## 3. Evidências técnicas e limites
 
 ### 3.1 Repositório `meshwave65/mwc-ums-sim`
@@ -95,7 +108,7 @@ O mesmo repositório contém migrações e funcionalidades de aquisição/ledger
 
 O blueprint normativo `docs/blueprints/MESHWAVE_BLUEPRINT_NORMATIVE_v0.1.md` permanece `DRAFT_FOR_VALIDATION`, com caso mínimo UMS/SOFIA-SWE. Ele não é uma especificação aprovada da moeda MWN.
 
-### 3.3 Divergência de nomenclatura
+### 3.3 Divergência de nomenclatura e histórico da alteração
 
 Apesar da instrução do responsável de que o nome atual da criptomoeda é **MWN**, a implementação consultada ainda contém nomenclatura legada:
 - tabelas `mwc_acquisitions`, `mwc_sale_prices`, `mwc_wallet_ledger`;
