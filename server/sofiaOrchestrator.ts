@@ -60,7 +60,7 @@ export class SofiaOrchestrator {
         parentTaskId: task.id
       });
       
-      const insertId = (result as any)[0]?.insertId;
+      const insertId = (result as any)[0]?.id;
       if (insertId) {
         subtaskIds.push(insertId);
         
