@@ -7,8 +7,8 @@
 |---|---|---|---|---|
 | 13.1 | Consolidar dossiê factual MeshWave/MWN e matriz de evidências | DONE | ChatGPT | Dossiê factual publicado; evidência separada entre declaração do responsável, código, documentos e dados agregados do Supabase |
 | 13.2 | Mapear estrutura e lacunas das trilhas equity e MWN | DONE | ChatGPT | Matriz separada publicada; gaps de equity, supply, titularidade, transferibilidade, ledger e revisão jurídica registrados |
-| 13.3 | Pesquisar, segmentar e priorizar investidores potenciais | STAGED | — | Lista verificável com tese de aderência, fonte pública, categoria e canal profissional; sem contato |
-| 13.4 | Preparar tese e materiais separados para equity e MWN | STAGED | — | Apresentação/FAQ com afirmações rastreáveis e riscos explícitos; materiais independentes por modalidade |
+| 13.3 | Pesquisar, segmentar e priorizar investidores potenciais | DONE | ChatGPT | Longlist preliminar publicada em `governance/missions/0013/LISTA_PRELIMINAR_INVESTIDORES_2026-10-29.md`; priorização por ticket depende de parâmetros do responsável; sem contato |
+| 13.4 | Preparar tese e materiais separados para equity e MWN | PAUSED | — | Aguardar entidade/termos de equity e supply/direitos/transferibilidade MWN; pode ser retomada com dossiê atualizado e decisões do responsável |
 | 13.5 | Preparar plano de abordagem e mensagens individualizadas | STAGED | — | Minutas para revisão; nenhum envio sem autorização humana específica |
 | 13.6 | Acompanhar contatos, respostas, reuniões e due diligence | BLOCKED | — | Só iniciar após autorização de abordagem e acesso ao canal; registrar eventos observáveis |
 
