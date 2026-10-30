@@ -27,6 +27,15 @@ A captação orgânica já implementada é uma frente existente e independente. 
 - **13.5 STAGED:** preparar mensagens para revisão e aprovação humana.
 - **13.6 BLOCKED:** acompanhamento de contatos depende de autorização explícita de abordagem e de acesso ao canal.
 
+## Atualização — automação de prospecção e histórico MWC→MWN (2026-10-29)
+
+- Histórico: a designação original do ativo MeshWave era MWC; o responsável informa que foi alterada para MWN porque já existe ou existiu moeda em circulação com a designação MWC. MWC permanece em registros históricos; MWN é a designação atual. A data exata da decisão não foi informada.
+- Controle mestre de investidores: `governance/missions/0013/CONTROLE_INVESTIDORES.csv` (11 organizações; todas registradas como `NOT_CONTACTED` na criação).
+- Procedimento de automação: `governance/missions/0013/AUTOMACAO_DE_CONTATOS.md`.
+- Checkpoint: `governance/missions/0013/CHECKPOINT-13.5-13.6-2026-10-29.md`.
+- 13.5 PROGRESS; 13.6 PROGRESS com disparo externo BLOCKED até conexão de caixa remetente e aprovação de mensagem, lista e campanha.
+- Nenhuma mensagem foi enviada nesta atualização.
+
 ## Limites
 
 Nenhuma mensagem, deck, oferta, publicação, negociação, aceite, assinatura ou transferência foi realizada nesta execução. Não prometer retorno, valorização, liquidez, recompra, resgate ou listagem. Não confundir preço interno configurado com preço de mercado. Não apresentar o ledger piloto como blockchain descentralizada ou rede em escala.
