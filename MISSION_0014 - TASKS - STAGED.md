@@ -23,3 +23,13 @@
 - Cada tarefa assumida deve ter instância, status atualizado, critério verificável e Operational Report próprio.
 - Não modificar artefatos científicos originais nesta missão de auditoria.
 - Registrar separadamente material não acessível e solicitar sua disponibilização sem interromper tarefas independentes.
+
+
+## Fontes obrigatórias adicionais para execução
+
+A tarefa 14.1 deve inventariar integralmente a comunidade Zenodo Multiflux (todas as páginas, registros e versões) e os artefatos vinculados às duas fontes ResearchGate fornecidas pelo responsável. Deve também capturar as três páginas do tópico CFD-Online indicado, classificando cada contribuição como afirmação do autor, crítica externa, resposta, referência ou evidência verificável.
+
+A tarefa 14.2 deverá comparar cronologicamente as formulações presentes nesses documentos, sem assumir continuidade matemática entre versões. A tarefa 14.3 deverá localizar e confrontar os códigos, notebooks, datasets, tabelas e figuras citados nos registros. A tarefa 14.5 deverá incluir uma matriz de objeções técnicas do CFD-Online e compará-las com a literatura e os artefatos efetivos. A tarefa 14.6 deverá transformar objeções ainda abertas em testes de falsificação/validação.
+
+**Gate de completude:** a 14.1 não poderá ser considerada concluída enquanto a comunidade Zenodo não tiver sido percorrida integralmente e as fontes ResearchGate/CFD-Online não estiverem inventariadas, ou enquanto indisponibilidades específicas não estiverem registradas com evidência de tentativa de acesso.
+
