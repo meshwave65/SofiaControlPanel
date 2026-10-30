@@ -39,8 +39,8 @@ function Router() {
       <Route path={"/terms"} component={() => <LegalPage kind="terms" />} />
       <Route path={"/agents"} component={() => <InternalRoute><Agents /></InternalRoute>} />
       <Route path={"/tasks"} component={() => <InternalRoute><Tasks /></InternalRoute>} />
-      <Route path={"/tasks/create"} component={() => <InternalRoute><TaskCreate /></InternalRoute>} />
-      <Route path={"/tasks/:id"} component={() => <InternalRoute><TaskDetail /></InternalRoute>} />
+      <Route path={"/tasks/create"} component={TaskCreate} />
+      <Route path={"/tasks/:id"} component={TaskDetail} />
       <Route path={"/messages"} component={() => <InternalRoute><Messages /></InternalRoute>} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
