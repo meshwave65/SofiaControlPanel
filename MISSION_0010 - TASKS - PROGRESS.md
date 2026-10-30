@@ -2,8 +2,8 @@
 
 **Repositório canônico:** `https://github.com/meshwave65/SofiaARC-PGC`
 **Blueprint:** `governance/missions/0010/BLUEPRINT.md`
-**Último checkpoint técnico confirmado:** `3ba580c`
-**Atualizado em:** 2026-10-29
+**Último checkpoint técnico confirmado:** `cce90ae`
+**Atualizado em:** 2026-10-30
 
 | ID | Tarefa | Status | Instância | Repositório/artefato | Próxima ação |
 |---|---|---|---|---|---|
@@ -13,8 +13,8 @@
 | ARC-004 | Adicionar persistência e migrations no SofiaControlPanel | DONE | Manus AI (sandbox:Tq8FCw5EEQC8s4y2kvJrrc) | `SofiaControlPanel` — schema/migration `44659ed`, checkpoint `governance/missions/0010/CHECKPOINT-ARC-004.md` | 3 tabelas, FKs, relações e índices; migration gerada/validada estaticamente; execução em banco real pendente; OR-20261029-0006 |
 | ARC-005 | Adicionar API tRPC protegida | DONE | Manus AI (sandbox:Tq8FCw5EEQC8s4y2kvJrrc) | `SofiaControlPanel` — código `e635492`, checkpoint `bd64b82`, OR-20261029-0007 | API `arc.evaluateTask`, `arc.getAssessment`, `arc.listAssessments`; ownership/admin; shadow default; integração do avaliador permanece ARC-006 |
 | ARC-006 | Integrar no orquestrador em shadow mode | DONE | Manus AI (sandbox:Tq8FCw5EEQC8s4y2kvJrrc) | `SofiaControlPanel` — código `3ba580c`, checkpoint `CHECKPOINT-ARC-006.md`, OR-20261029-0008 | Avaliação real usa task/agente/activity, policy habilitada e Bayes heurístico; não bloqueia tarefas; banco real/migration ainda pendentes |
-| ARC-007 | Criar UI mínima de avaliação na tarefa | STAGED | — | `SofiaControlPanel` | Liberada após ARC-006; exibir posterior, decisão, modo e evidências sem metadata sensível |
-| ARC-008 | Validar, fechar MVP e emitir handoff final | STAGED | — | Ambos | Aguardar ARC-007 |
+| ARC-007 | Criar UI mínima de avaliação na tarefa | DONE | Manus ARC-PGC Agent | `SofiaControlPanel` — UI `d759954`, checkpoint `cce90ae`, OR-20261030-0003 | Concluída; posterior, decisão, modo e evidências sem metadata sensível; check/test/build aprovados |
+| ARC-008 | Validar, fechar MVP e emitir handoff final | STAGED | — | Ambos | Próximo agente deve executar matriz final de validação e publicar handoff final |
 
 ## Regra de assunção
 
