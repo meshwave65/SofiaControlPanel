@@ -17,13 +17,14 @@ export default function TaskCreate() {
     description: "",
     statusId: "",
     priorityId: "",
-    agentId: "",
+    agentId: "auto",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
   const createTaskMutation = trpc.tasks.create.useMutation();
   const lookupsQuery = trpc.lookups.listAll.useQuery();
+  const agentsQuery = trpc.agents.list.useQuery();
   const statuses = lookupsQuery.data?.statuses ?? [];
   const priorities = lookupsQuery.data?.priorities ?? [];
 
@@ -60,7 +61,7 @@ export default function TaskCreate() {
         description: formData.description,
         statusId: parseInt(formData.statusId),
         priorityId: parseInt(formData.priorityId),
-        agentId: formData.agentId ? parseInt(formData.agentId) : undefined,
+        agentId: formData.agentId && formData.agentId !== "auto" ? parseInt(formData.agentId) : undefined,
       });
 
       setSuccess(true);
@@ -184,19 +185,27 @@ export default function TaskCreate() {
                   </Select>
                 </div>
 
-                {/* Agente (opcional) */}
+                {/* Agente responsável */}
                 <div>
                   <Label htmlFor="agent" className="text-foreground">
-                    Agente (Opcional)
+                    Agente responsável
                   </Label>
-                  <Input
-                    id="agent"
-                    type="number"
-                    placeholder="ID do agente responsável"
-                    value={formData.agentId}
-                    onChange={(e) => handleChange("agentId", e.target.value)}
-                    className="mt-2 bg-input border-foreground/30"
-                  />
+                  <Select value={formData.agentId} onValueChange={(value) => handleChange("agentId", value)}>
+                    <SelectTrigger id="agent" className="mt-2 bg-input border-foreground/30">
+                      <SelectValue placeholder="Seleção automática" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="auto">Automático — SCP escolhe por créditos disponíveis</SelectItem>
+                      {(agentsQuery.data || []).map((agent) => (
+                        <SelectItem key={agent.id} value={String(agent.id)}>
+                          {agent.name} — conta {agent.manusAccount || "não identificada"}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Escolha um agente para mantê-lo vinculado à missão. Em automático, o SCP seleciona uma conta com saldo Manus disponível.
+                  </p>
                 </div>
 
                 {/* Botões */}
