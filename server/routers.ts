@@ -285,6 +285,179 @@ export const appRouter = router({
         });
       }),
 
+    dispatchToManus: protectedProcedure
+      .input(z.object({ taskId: z.number().int().positive() }))
+      .mutation(async ({ input, ctx }) => {
+        const task = await db.getTaskById(input.taskId);
+        if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada." });
+        }
+        if (task.externalTaskId) {
+          throw new TRPCError({ code: "CONFLICT", message: "Esta missão já possui uma execução Manus vinculada." });
+        }
+
+        const stagedId = await db.getTaskStatusIdByName("STAGED");
+        if (task.statusId !== stagedId) {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Somente missões STAGED podem ser enviadas." });
+        }
+
+        const configuredAgents = task.agentId
+          ? [await db.getAgentByIdForOwner(task.agentId, ctx.user.id)].filter(Boolean) as NonNullable<Awaited<ReturnType<typeof db.getAgentByIdForOwner>>>[]
+          : await db.getAgentsByOwnerId(ctx.user.id);
+
+        if (configuredAgents.length === 0) {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Nenhum agente disponível foi cadastrado." });
+        }
+
+        const candidates: Array<{ id: number; token: string; credits: number | null }> = [];
+        for (const agent of configuredAgents) {
+          const credentials = await db.getManusCredentialsForAgentForOwner(agent.id, ctx.user.id);
+          if (!credentials?.manusToken) {
+            if (task.agentId) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O agente escolhido não possui API key Manus configurada." });
+            continue;
+          }
+
+          if (task.agentId) {
+            candidates.push({ id: agent.id, token: credentials.manusToken, credits: null });
+            continue;
+          }
+
+          try {
+            const creditResponse = await fetch("https://api.manus.ai/v2/usage.availableCredits", {
+              headers: { "x-manus-api-key": credentials.manusToken },
+              signal: AbortSignal.timeout(15000),
+            });
+            const creditPayload = await creditResponse.json().catch(() => null) as { ok?: boolean; total_credits?: number | string } | null;
+            const balance = Number(creditPayload?.total_credits);
+            if (creditResponse.ok && creditPayload?.ok === true && Number.isFinite(balance) && balance > 0) {
+              candidates.push({ id: agent.id, token: credentials.manusToken, credits: balance });
+            }
+          } catch (error) {
+            console.warn(`[Manus] Não foi possível consultar créditos do agente ${agent.id} para seleção automática:`, error);
+          }
+        }
+
+        if (!task.agentId) candidates.sort((a, b) => (b.credits ?? 0) - (a.credits ?? 0));
+        if (candidates.length === 0) {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: task.agentId ? "Credencial Manus indisponível para o agente escolhido." : "Nenhum agente possui créditos Manus disponíveis e consulta válida." });
+        }
+
+        let lastError = "A Manus não aceitou a criação da tarefa.";
+        for (const candidate of candidates) {
+          try {
+            const response = await fetch("https://api.manus.ai/v2/task.create", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "x-manus-api-key": candidate.token,
+              },
+              body: JSON.stringify({
+                title: task.title,
+                message: {
+                  content: [{
+                    type: "text",
+                    text: [task.title, task.description || ""].filter(Boolean).join("\n\n"),
+                    visibility: "visible",
+                  }],
+                },
+                locale: "pt-BR",
+                agent_profile: "standard",
+                share_visibility: "private",
+              }),
+              signal: AbortSignal.timeout(30000),
+            });
+            const payload = await response.json().catch(() => null) as {
+              ok?: boolean;
+              task_id?: string;
+              error?: { code?: string; message?: string };
+            } | null;
+
+            if (!response.ok || payload?.ok !== true || !payload.task_id) {
+              const code = payload?.error?.code || "";
+              lastError = payload?.error?.message || `A Manus retornou HTTP ${response.status}.`;
+              const insufficientCredits = /credit|quota|balance|insufficient/i.test(`${code} ${lastError}`);
+              if (!task.agentId && insufficientCredits) continue;
+              throw new TRPCError({
+                code: response.status === 401 || response.status === 403 ? "UNAUTHORIZED" : "BAD_GATEWAY",
+                message: lastError,
+              });
+            }
+
+            await db.updateTaskExternalId(task.id, payload.task_id, candidate.id);
+            await db.updateTaskStatus(task.id, await db.getTaskStatusIdByName("PROGRESS"));
+            return {
+              ok: true,
+              agentId: candidate.id,
+              externalTaskId: payload.task_id,
+            };
+          } catch (error) {
+            if (error instanceof TRPCError) throw error;
+            lastError = error instanceof Error ? error.message : lastError;
+            if (task.agentId) break;
+          }
+        }
+
+        throw new TRPCError({ code: "BAD_GATEWAY", message: lastError });
+      }),
+
+    getManusExecution: protectedProcedure
+      .input(z.object({ taskId: z.number().int().positive() }))
+      .query(async ({ input, ctx }) => {
+        const task = await db.getTaskById(input.taskId);
+        if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada." });
+        }
+        if (!task.externalTaskId || !task.agentId) return null;
+
+        const credentials = await db.getManusCredentialsForAgentForOwner(task.agentId, ctx.user.id);
+        if (!credentials?.manusToken) {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A credencial Manus do agente vinculado não está disponível." });
+        }
+
+        const headers = { "x-manus-api-key": credentials.manusToken };
+        const [detailResponse, messagesResponse] = await Promise.all([
+          fetch(`https://api.manus.ai/v2/task.detail?task_id=${encodeURIComponent(task.externalTaskId)}`, { headers, signal: AbortSignal.timeout(15000) }),
+          fetch(`https://api.manus.ai/v2/task.listMessages?task_id=${encodeURIComponent(task.externalTaskId)}&order=asc&limit=100`, { headers, signal: AbortSignal.timeout(15000) }),
+        ]);
+        const detailPayload = await detailResponse.json().catch(() => null) as { ok?: boolean; task?: { status?: string; has_running_background_jobs?: boolean; task_url?: string } ; error?: { message?: string } } | null;
+        const messagesPayload = await messagesResponse.json().catch(() => null) as { ok?: boolean; messages?: Array<Record<string, any>>; error?: { message?: string } } | null;
+
+        if (!detailResponse.ok || detailPayload?.ok !== true || !detailPayload.task) {
+          throw new TRPCError({ code: "BAD_GATEWAY", message: detailPayload?.error?.message || `Falha ao consultar execução Manus (HTTP ${detailResponse.status}).` });
+        }
+        if (!messagesResponse.ok || messagesPayload?.ok !== true) {
+          throw new TRPCError({ code: "BAD_GATEWAY", message: messagesPayload?.error?.message || `Falha ao consultar mensagens Manus (HTTP ${messagesResponse.status}).` });
+        }
+
+        const remoteStatus = detailPayload.task.status || "unknown";
+        if (remoteStatus === "error") {
+          await db.updateTaskStatus(task.id, await db.getTaskStatusIdByName("FAIL"));
+        } else if (remoteStatus === "stopped" && !detailPayload.task.has_running_background_jobs) {
+          await db.updateTaskStatus(task.id, await db.getTaskStatusIdByName("DONE"));
+        }
+
+        return {
+          externalTaskId: task.externalTaskId,
+          taskUrl: detailPayload.task.task_url || null,
+          status: remoteStatus,
+          hasRunningBackgroundJobs: Boolean(detailPayload.task.has_running_background_jobs),
+          messages: (messagesPayload.messages || []).map((event) => ({
+            id: event.id,
+            type: event.type,
+            timestamp: event.timestamp,
+            content: event.assistant_message?.content
+              || event.user_message?.content
+              || event.error_message?.content
+              || event.status_update?.description
+              || event.status_update?.brief
+              || event.explanation?.content
+              || event.structured_output_result?.value
+              || (event.type === "status_update" ? `Status: ${event.status_update?.agent_status || "atualizando"}` : ""),
+            attachments: event.assistant_message?.attachments || [],
+          })),
+        };
+      }),
+
     getById: protectedProcedure
       .input(z.object({ id: z.number().int().positive() }))
       .query(async ({ input, ctx }) => {
