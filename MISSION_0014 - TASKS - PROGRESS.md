@@ -33,3 +33,26 @@ A tarefa 14.2 deverá comparar cronologicamente as formulações presentes nesse
 
 **Gate de completude:** a 14.1 não poderá ser considerada concluída enquanto a comunidade Zenodo não tiver sido percorrida integralmente e as fontes ResearchGate/CFD-Online não estiverem inventariadas, ou enquanto indisponibilidades específicas não estiverem registradas com evidência de tentativa de acesso.
 
+
+
+## Registro de execução — 2026-10-30
+
+A tarefa 14.1 permanece **PROGRESS**. Foram publicados checkpoints adicionais:
+- `governance/missions/0014/notebook-execution-audit-checkpoint.md`
+- `governance/missions/0014/zenodo-core-claims-audit-checkpoint.md`
+- `governance/missions/0014/temporal-lifting-dependency-audit.md`
+- `governance/missions/0014/zenodo-extensions-audit-checkpoint.md`
+- `governance/missions/0014/expanded-derivation-and-cfd-audit.md`
+- `governance/missions/0014/zenodo-community-catalog.md` (inclui DOI relacionado 17843237, cuja membership na lista inicial de 33 ainda está pendente).
+
+Achados prioritários já documentados:
+1. Os notebooks 192³, 256³, 384³, 512³, JHTDB e Ethier–Steinman não sustentam todos os claims de execução/validação que seus nomes ou descrições podem sugerir.
+2. O KMeans com k=12 fixa previamente o teto de clusters; o relatório HIT 64 mostra N_eff=11 quando o cutoff sobe para 2%.
+3. A formulação expandida 17843237 usa (v_k=\chi_kv), mas não demonstra preservação da incompressibilidade por subfluxo nem reconcilia todos os termos de interface/pressão na expressão de (f_k).
+4. A equação de N(t) e a lei CRT 0,62 são apresentadas sem derivação/calibração/dataset completo no PDF consultado.
+5. A dependência Temporal Lifting não fornece, na fonte externa acessível, prova global de regularidade; o teorema consultado é condicional e preserva critérios de blow-up.
+6. O CFD-Online registra que, em 3–4 Dec 2025, o desenvolvimento ainda era a posteriori, sem solver forward-in-time completo e sem prova matemática rigorosa; as versões posteriores devem ser avaliadas contra esse histórico.
+
+**Bloqueios específicos:** ResearchGate publication 399025958 e PhilArchive iDNS seguem com acesso direto bloqueado; CFD-Online page 3 só foi parcialmente recuperada por indexação. As fontes Zenodo selecionadas foram lidas, mas ainda não todos os 33 registros e anexos.
+
+**Regra de roteamento:** a 14.2 ainda não foi assumida porque o registry atual não contém skill ACTIVE específica para reconstrução matemática de PDEs/regularidade; a skill-creator oficial não está disponível nesta execução. Não foi inventada uma skill. O inventário 14.1 continuará até fechar as fontes ou documentar os bloqueios item a item.
