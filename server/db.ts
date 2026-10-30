@@ -625,6 +625,25 @@ export async function getLookups() {
   const db = await getDb();
   if (!db) return { statuses: [], priorities: [], messageTypes: [], eventTypes: [] };
 
+  // Ensure the mission form's required lookup values exist even when the
+  // background seed has not run yet (or the lookup tables were initially empty).
+  // Unique constraints plus onConflictDoNothing make this safe to repeat.
+  await Promise.all([
+    db.insert(taskStatuses).values([
+      { name: "STAGED" },
+      { name: "PROGRESS" },
+      { name: "PAUSED" },
+      { name: "DONE" },
+      { name: "FAIL" },
+    ]).onConflictDoNothing({ target: taskStatuses.name }),
+    db.insert(taskPriorities).values([
+      { name: "Baixa", level: 10 },
+      { name: "Média", level: 20 },
+      { name: "Alta", level: 30 },
+      { name: "Crítica", level: 40 },
+    ]).onConflictDoNothing({ target: taskPriorities.name }),
+  ]);
+
   const [statuses, priorities, mTypes, eTypes] = await Promise.all([
     db.select().from(taskStatuses),
     db.select().from(taskPriorities),
