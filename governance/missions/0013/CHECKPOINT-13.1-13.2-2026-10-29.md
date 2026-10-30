@@ -1,4 +1,4 @@
-# Checkpoint MISSION_0013 — 13.1 e 13.2 — 2026-10-29
+# Checkpoint MISSION_0013 — 13.1 a 13.3 — 2026-10-29
 
 ## Decisão de escopo
 
@@ -31,9 +31,15 @@ O responsável esclareceu que a missão deve contactar investidores em troca de 
 - Nenhum pagamento foi testado e nenhuma transação foi criada nesta execução.
 - Não houve contato externo.
 
+## Tarefa 13.3 — pesquisa de investidores
+
+Foi publicada a longlist preliminar `governance/missions/0013/LISTA_PRELIMINAR_INVESTIDORES_2026-10-29.md`. A pesquisa separa fundos crypto-native/Web3/infraestrutura (Multicoin, Borderless, OKX Ventures, Coinbase Ventures, Blockchain Founders Fund, Crypto.com Capital e Circle Ventures) de investidores regionais/adjacentes para equity (17Sigma, Honey Island Capital, Valor Capital Group e DOMO.VC). A priorização final depende do ticket e dos termos ainda não fornecidos. Nenhum contato foi realizado.
+
 ## Estado
 
-13.1 DONE; 13.2 DONE. Próxima unidade elegível: 13.3 — segmentação e pesquisa pública de investidores. 13.4/13.5 seguem dependentes de tese e materiais aprováveis. 13.6 permanece bloqueada até autorização humana específica para abordagem.
+13.1 DONE; 13.2 DONE; 13.3 DONE como longlist preliminar. 13.4 PAUSED até definição da entidade/instrumento/percentual de equity e supply/direitos/condições de MWN. 13.5 STAGED; 13.6 BLOCKED até autorização humana específica para abordagem.
+
+ORs: 0012 (13.1), 0013 (13.2), 0014 (13.3), todos SUBMITTED / Oracle PENDING.
 
 ## Commits dos artefatos
 
