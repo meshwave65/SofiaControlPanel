@@ -115,3 +115,35 @@ A aplicação CFD é um objetivo tecnológico condicionado à validação. Avali
 ### 9.4 Terminologia
 
 “Multifluxos” é, neste estágio, a denominação conceitual adotada pelo framework para o fenômeno/descrição em estudo. A auditoria deverá localizar e registrar sua definição matemática operacional, evitando tratar a mudança terminológica como evidência de uma nova classe física.
+
+
+## 10. Corpus primário obrigatório do responsável
+
+A missão incorpora como fontes obrigatórias, e não opcionais:
+
+1. Comunidade Zenodo Multiflux e todos os seus registros/versões: https://zenodo.org/communities/multiflux/records?q=&l=list&p=1&s=10&sort=newest
+2. Discussão ResearchGate “Multiflux Theory: First Reproducible HIT Simulations (64→384³) and Stable N_eff = 12 Across Resolutions”: https://www.researchgate.net/post/Multiflux_Theory_First_Reproducible_HIT_Simulations_64384_and_Stable_N_eff_12_Across_Resolutions
+3. Publicação ResearchGate “Numerical Evidence for Instantaneous Multiflux Decomposition in Synthetic Turbulence Fields”: https://www.researchgate.net/publication/399025958_Numerical_Evidence_for_Instantaneous_Multiflux_Decomposition_in_Synthetic_Turbulence_Fields_Proof-of-Concept_Simulations_at_Resolutions_32_3_to_384_3_This_work_is_licensed_under_the_Creative_Commons_A
+4. Tópico CFD-Online “Contested AI Based Theory: A New Framework for Turbulence: The Multiflux Theory”: https://www.cfd-online.com/Forums/site-help-feedback-discussions/261616-contested-ai-based-theory-new-framework-turbulence-multiflux-theory.html
+
+### 10.1 Procedimento obrigatório de leitura
+
+- Zenodo: percorrer todas as páginas da comunidade e inventariar cada registro, versão, DOI, metadados, documento integral, anexo, código, dataset e relação entre versões. A ordenação por mais recentes é ponto de entrada, não limite de leitura.
+- ResearchGate: ler a publicação/discussão integral, incluindo texto, comentários relevantes, suplementos, DOI e arquivos citados. Rastrear cada resultado até seu artefato primário.
+- CFD-Online: ler as três páginas completas do tópico e extrair objeções técnicas, perguntas, respostas, compromissos de derivação e referências. Não confundir avaliação/opinião dos participantes com demonstração ou refutação.
+- Se um arquivo não puder ser acessado na plataforma, localizar pelo DOI ou repositório associado; se ainda inacessível, registrar URL, data, tentativa, erro/limitação e dependência.
+
+### 10.2 Reconstrução da evolução e divergências
+
+O histórico deverá ser comparado cronologicamente. Investigar explicitamente alterações de: número de subfluxos e significado de N/N_eff; decomposição e algoritmo de identificação; hipótese de coerência local; relação entre subfluxos e equações de Navier–Stokes; formulação Euleriana–Lagrangiana/variacional; definição da ação efetiva e dissipação; hipóteses de supressão de interação/transferência de momento; e aplicações propostas.
+
+Não harmonizar versões contraditórias por redação editorial. Registrar cada versão, sua data, equações, hipóteses, resultados, limitações e status. Distinguir parâmetros impostos pelo algoritmo de propriedades emergentes do campo. Em particular, quando o agrupamento usa k fixo, verificar se a métrica apresentada como N_eff é independente do k imposto.
+
+### 10.3 Matriz obrigatória de críticas
+
+Para cada objeção técnica do CFD-Online ou de comentários ResearchGate, registrar: identificador/data/autor, questão exata em linguagem técnica, resposta do projeto, equação/código/dado que a resolve, teste independente necessário e status (resolvida, parcialmente resolvida, aberta, não aplicável). Questões sobre projeção fraca/Galerkin, conservação discreta de momento, unicidade/robustez do clustering, interpretação física de N≈12, relação com cascata/backscatter e distinção frente a modelos existentes devem ser avaliadas explicitamente quando presentes no corpus.
+
+### 10.4 Limite epistemológico
+
+Publicação em Zenodo, DOI, licença aberta, depósito de código ou comentários públicos estabelecem proveniência e possibilidade de escrutínio; não equivalem a revisão por pares, prova matemática, reprodução independente ou validação física. O corpus do autor é fonte primária para reconstruir a teoria e seu histórico, mas suas alegações devem ser confrontadas com os artefatos e literatura independente.
+
