@@ -22,7 +22,6 @@ import {
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
 import {
-  Activity,
   ArrowLeft,
   ClipboardList,
   LayoutDashboard,
@@ -30,7 +29,6 @@ import {
   MessageSquare,
   PanelLeft,
   Users,
-  MoreHorizontal,
 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -274,7 +272,7 @@ function DashboardLayoutContent({
             className="fixed inset-x-0 bottom-0 z-50 border-t bg-background/95 px-1 pt-2 backdrop-blur supports-[backdrop-filter]:bg-background/85"
             style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}
           >
-            <div className="mx-auto grid max-w-lg grid-cols-5 gap-1">
+            <div className="mx-auto grid max-w-lg grid-cols-4 gap-1">
               {menuItems.map((item) => {
                 const isActive =
                   item.path === "/tasks"
@@ -293,14 +291,6 @@ function DashboardLayoutContent({
                   </button>
                 );
               })}
-              <button
-                type="button"
-                onClick={toggleSidebar}
-                className="hidden"
-                aria-label="Abrir mais opções"
-              >
-                <MoreHorizontal className="h-5 w-5" />
-              </button>
             </div>
           </nav>
         )}
