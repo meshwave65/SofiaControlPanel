@@ -22,7 +22,7 @@ export default function TaskDetail() {
   // Sem retry automático: falhas devem ser exibidas, não parecer carregamento infinito.
   const taskQuery = trpc.tasks.getById.useQuery(
     { id: taskId },
-    { enabled: canLoadTask, retry: false, refetchOnWindowFocus: false },
+    { enabled: canLoadTask, retry: false, refetchOnWindowFocus: false, refetchInterval: (query) => query.state.data?.externalTaskId ? 10000 : false },
   );
   const messagesQuery = trpc.messages.getByTask.useQuery(
     { taskId },
