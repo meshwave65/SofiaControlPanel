@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import DashboardLayout from "@/components/DashboardLayout";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { Loader2, ChevronLeft, Zap, FileText, AlertCircle, Download, ShieldCheck, RefreshCw, Info } from "lucide-react";
+import { Loader2, ChevronLeft, Zap, FileText, AlertCircle, Download, ShieldCheck, RefreshCw, Info, PlayCircle, ExternalLink } from "lucide-react";
 
 export default function TaskDetail() {
   const { id } = useParams<{ id: string }>();
@@ -41,6 +41,21 @@ export default function TaskDetail() {
   const factorizeTaskMutation = trpc.tasks.factorize.useMutation();
   const consolidateTaskMutation = trpc.tasks.consolidate.useMutation();
   const updateStatusMutation = trpc.tasks.updateStatus.useMutation();
+  const dispatchMutation = trpc.tasks.dispatchToManus.useMutation({
+    onSuccess: async () => {
+      await taskQuery.refetch();
+      await messagesQuery.refetch();
+    },
+  });
+  const manusExecutionQuery = trpc.tasks.getManusExecution.useQuery(
+    { taskId },
+    {
+      enabled: canLoadTask && Boolean(taskQuery.data?.externalTaskId),
+      refetchInterval: 5000,
+      refetchOnWindowFocus: true,
+      retry: 1,
+    },
+  );
   const arcAssessmentQuery = trpc.arc.getAssessment.useQuery(
     { taskId },
     { enabled: canLoadTask && Boolean(taskQuery.data), retry: false },
@@ -248,6 +263,95 @@ export default function TaskDetail() {
                   <p className="text-foreground whitespace-pre-wrap">{task.description || "Sem descrição"}</p>
                 </CardContent>
               </Card>
+
+              {task.externalTaskId ? (
+                <Card className="cad-card mt-6 border-primary/30">
+                  <CardHeader>
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <CardTitle className="flex items-center gap-2 text-lg">
+                          <PlayCircle className="h-5 w-5 text-primary" /> Execução Manus
+                        </CardTitle>
+                        <CardDescription className="mt-1 break-all">
+                          ID externo: {task.externalTaskId}
+                        </CardDescription>
+                      </div>
+                      <Badge variant="outline">
+                        {manusExecutionQuery.data?.status?.toUpperCase() || "CONSULTANDO"}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {manusExecutionQuery.isError ? (
+                      <div className="flex items-start gap-2 text-sm text-destructive">
+                        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                        <span>{manusExecutionQuery.error.message}</span>
+                      </div>
+                    ) : manusExecutionQuery.isLoading ? (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Loader2 className="h-4 w-4 animate-spin" /> Consultando execução na Manus...
+                      </div>
+                    ) : (
+                      <>
+                        {manusExecutionQuery.data?.taskUrl && (
+                          <a href={manusExecutionQuery.data.taskUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm text-primary underline">
+                            Abrir execução na Manus <ExternalLink className="h-3 w-3" />
+                          </a>
+                        )}
+                        {manusExecutionQuery.data?.hasRunningBackgroundJobs && (
+                          <p className="text-xs text-muted-foreground">O agente principal parou, mas ainda existem atividades em segundo plano.</p>
+                        )}
+                        <div className="max-h-[480px] space-y-3 overflow-y-auto rounded-lg border p-3">
+                          {(manusExecutionQuery.data?.messages || []).length === 0 ? (
+                            <p className="text-sm text-muted-foreground">A Manus ainda não retornou eventos para esta execução.</p>
+                          ) : (
+                            manusExecutionQuery.data?.messages.map((event) => (
+                              <div key={event.id} className="rounded-md bg-muted/40 p-3">
+                                <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+                                  <span className="text-xs font-semibold uppercase text-muted-foreground">{event.type.replaceAll("_", " ")}</span>
+                                  <span className="text-xs text-muted-foreground">{event.timestamp ? new Date(event.timestamp).toLocaleString() : ""}</span>
+                                </div>
+                                {typeof event.content === "string" && event.content && (
+                                  <p className="whitespace-pre-wrap break-words text-sm">{event.content}</p>
+                                )}
+                                {event.attachments?.map((attachment, index) => (
+                                  <a key={attachment.file_uid || attachment.url || index} href={attachment.url} target="_blank" rel="noreferrer" className="mt-2 flex items-center gap-2 text-sm text-primary underline">
+                                    <Download className="h-3 w-3" /> {attachment.filename || "Arquivo gerado"}
+                                  </a>
+                                ))}
+                              </div>
+                            ))
+                          )}
+                        </div>
+                        <div className="flex justify-end">
+                          <Button variant="outline" size="sm" onClick={() => void manusExecutionQuery.refetch()} disabled={manusExecutionQuery.isFetching}>
+                            <RefreshCw className={`mr-2 h-4 w-4 ${manusExecutionQuery.isFetching ? "animate-spin" : ""}`} /> Atualizar execução
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="cad-card mt-6 border-primary/30">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg"><PlayCircle className="h-5 w-5 text-primary" /> Enviar missão para Manus</CardTitle>
+                    <CardDescription>
+                      {task.agentId ? "A missão será executada pelo agente escolhido." : "Sem agente definido, o SCP selecionará um agente com créditos disponíveis."}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex flex-wrap items-center gap-3">
+                    <Button
+                      onClick={() => dispatchMutation.mutate({ taskId })}
+                      disabled={dispatchMutation.isPending || task.statusId !== (statuses.find((status) => status.name.toUpperCase() === "STAGED")?.id)}
+                    >
+                      {dispatchMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlayCircle className="mr-2 h-4 w-4" />}
+                      {dispatchMutation.isPending ? "Enviando para Manus..." : "Iniciar execução"}
+                    </Button>
+                    {dispatchMutation.error && <p className="text-sm text-destructive">{dispatchMutation.error.message}</p>}
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Ações */}
               <Card className="cad-card mt-6">
