@@ -234,9 +234,13 @@ export const appRouter = router({
       }),
 
     getById: protectedProcedure
-      .input(z.object({ id: z.number() }))
-      .query(async ({ input }) => {
-        return db.getTaskById(input.id);
+      .input(z.object({ id: z.number().int().positive() }))
+      .query(async ({ input, ctx }) => {
+        const task = await db.getTaskById(input.id);
+        if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+        }
+        return task;
       }),
 
     getByAgent: protectedProcedure
