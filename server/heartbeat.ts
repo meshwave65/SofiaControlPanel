@@ -12,7 +12,6 @@ import { invokeLLM } from "./_core/llm";
  */
 
 let heartbeatInterval: NodeJS.Timeout | null = null;
-let creditCheckInterval: NodeJS.Timeout | null = null;
 
 /**
  * Inicia o sistema de heartbeat
@@ -30,14 +29,6 @@ export async function startHeartbeatSystem() {
     }
   }, 30000); // 30 segundos
 
-  // Verificar créditos e gerar relatório a cada 5 minutos
-  creditCheckInterval = setInterval(async () => {
-    try {
-      await checkCreditsAndGenerateReport();
-    } catch (error) {
-      console.error("[Heartbeat] Erro ao verificar créditos:", error);
-    }
-  }, 300000); // 5 minutos
 }
 
 /**
@@ -45,7 +36,6 @@ export async function startHeartbeatSystem() {
  */
 export function stopHeartbeatSystem() {
   if (heartbeatInterval) clearInterval(heartbeatInterval);
-  if (creditCheckInterval) clearInterval(creditCheckInterval);
   console.log("[Heartbeat] Sistema parado");
 }
 
@@ -81,24 +71,6 @@ async function checkAgentStatus() {
     }
   } catch (error) {
     console.error("[Heartbeat] Erro em checkAgentStatus:", error);
-  }
-}
-
-/**
- * Verifica créditos e gera relatório de contexto quando necessário
- * Dispara automaticamente ao atingir ~40 créditos
- */
-async function checkCreditsAndGenerateReport() {
-  try {
-    // Simular verificação de créditos (em produção, viria de um serviço externo)
-    const estimatedCredits = Math.random() * 100;
-
-    if (estimatedCredits <= 40) {
-      console.log(`[Heartbeat] Créditos baixos detectados: ${estimatedCredits.toFixed(2)}`);
-      await generateContextReport();
-    }
-  } catch (error) {
-    console.error("[Heartbeat] Erro em checkCreditsAndGenerateReport:", error);
   }
 }
 
