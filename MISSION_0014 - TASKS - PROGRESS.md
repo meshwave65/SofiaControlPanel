@@ -1,4 +1,4 @@
-# MISSION_0014 — TASKS — STAGED
+# MISSION_0014 — TASKS — PROGRESS
 
 **Missão:** 0014 — Estruturação científica e determinação do estado da arte do Multiflux Theory  
 **Blueprint:** `governance/missions/0014/BLUEPRINT.md`
