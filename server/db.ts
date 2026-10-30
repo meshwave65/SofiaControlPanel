@@ -3,7 +3,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { InsertUser, InsertAgent, users, agents, tasks, messages, activityLogs, contextReports, taskStatuses, taskPriorities, messageTypes, activityEventTypes, arcPolicies, arcAssessments, arcEvidence } from "../drizzle/schema";
 import { ENV } from './_core/env';
-import { encryptCredential } from './credentials';
+import { decryptCredential, encryptCredential } from './credentials';
 import { evaluateArcShadow } from './arcEvaluator';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -169,6 +169,33 @@ export async function getAgentByIdForOwner(id: number, ownerId: number) {
     .where(and(eq(agents.id, id), eq(agents.ownerId, ownerId)))
     .limit(1);
   return result.length > 0 ? toPublicAgent(result[0]) : null;
+}
+
+/**
+ * Internal server-only credential access. Never expose this result through an API response.
+ */
+export async function getManusCredentialsForAgentForOwner(id: number, ownerId: number) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+
+  const [agent] = await database
+    .select({
+      manusAccount: agents.manusAccount,
+      manusToken: agents.manusToken,
+    })
+    .from(agents)
+    .where(and(eq(agents.id, id), eq(agents.ownerId, ownerId)))
+    .limit(1);
+
+  if (!agent) return null;
+  if (!agent.manusToken) {
+    return { manusAccount: agent.manusAccount, manusToken: null };
+  }
+
+  return {
+    manusAccount: agent.manusAccount,
+    manusToken: decryptCredential(agent.manusToken),
+  };
 }
 export async function updateAgentStatus(id: number, status: "online" | "offline" | "idle" | "paused") {
   const db = await getDb();
