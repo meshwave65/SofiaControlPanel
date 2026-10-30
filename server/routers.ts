@@ -56,6 +56,111 @@ export const appRouter = router({
         return db.getAgentByIdForOwner(input.id, ctx.user.id);
       }),
 
+    validateManusConnection: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ input, ctx }) => {
+        let credentials: Awaited<ReturnType<typeof db.getManusCredentialsForAgentForOwner>>;
+        try {
+          credentials = await db.getManusCredentialsForAgentForOwner(input.id, ctx.user.id);
+        } catch (error) {
+          console.error("[Manus] Credential retrieval failed:", error instanceof Error ? error.message : "unknown error");
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Não foi possível recuperar a credencial armazenada. Verifique CREDENTIAL_ENCRYPTION_KEY.",
+          });
+        }
+
+        if (!credentials) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Agente não encontrado." });
+        }
+        if (!credentials.manusToken) {
+          return {
+            ok: false,
+            authenticated: false,
+            identityMatches: null,
+            error: "missing_credential",
+            message: "Este agente não possui API key Manus armazenada.",
+          };
+        }
+
+        let response: Response;
+        try {
+          response = await fetch("https://api.manus.ai/v2/user.me", {
+            method: "GET",
+            headers: { "x-manus-api-key": credentials.manusToken },
+            signal: AbortSignal.timeout(15000),
+          });
+        } catch {
+          throw new TRPCError({
+            code: "BAD_GATEWAY",
+            message: "Não foi possível conectar à API da Manus.",
+          });
+        }
+
+        if (response.status === 401 || response.status === 403) {
+          return {
+            ok: false,
+            authenticated: false,
+            identityMatches: null,
+            httpStatus: response.status,
+            error: "authentication_failed",
+            message: "A Manus rejeitou a API key armazenada.",
+          };
+        }
+
+        if (!response.ok) {
+          return {
+            ok: false,
+            authenticated: false,
+            identityMatches: null,
+            httpStatus: response.status,
+            error: "manus_api_error",
+            message: `A API Manus retornou HTTP ${response.status}.`,
+          };
+        }
+
+        let identity: { ok?: boolean; email?: string; name?: string; user_id?: string };
+        try {
+          identity = await response.json() as typeof identity;
+        } catch {
+          throw new TRPCError({
+            code: "BAD_GATEWAY",
+            message: "A resposta da API Manus não contém JSON válido.",
+          });
+        }
+
+        if (identity.ok !== true) {
+          return {
+            ok: false,
+            authenticated: false,
+            identityMatches: null,
+            error: "unexpected_manus_response",
+            message: "A Manus não confirmou a autenticação.",
+          };
+        }
+
+        const expectedEmail = credentials.manusAccount?.trim().toLowerCase();
+        const actualEmail = identity.email?.trim().toLowerCase();
+        const identityMatches = expectedEmail && actualEmail ? expectedEmail === actualEmail : null;
+
+        return {
+          ok: identityMatches !== false,
+          authenticated: true,
+          identityMatches,
+          account: {
+            email: identity.email ?? null,
+            name: identity.name ?? null,
+            userId: identity.user_id ?? null,
+          },
+          expectedAccount: credentials.manusAccount ?? null,
+          message: identityMatches === false
+            ? "A API key é válida, mas pertence a uma conta diferente da cadastrada no agente."
+            : identityMatches === true
+              ? "API key válida e conta correspondente ao agente."
+              : "API key válida; não foi possível comparar o e-mail da conta.",
+        };
+      }),
+
     updateStatus: adminProcedure
       .input(z.object({
         id: z.number(),
