@@ -220,7 +220,7 @@ export async function createTask(data: {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  return db.insert(tasks).values(data);
+  return db.insert(tasks).values(data).returning({ id: tasks.id });
 }
 
 export async function getTasksByAgentId(agentId: number) {
@@ -248,6 +248,19 @@ export async function getTasksByStatus(statusId: number) {
   if (!db) return [];
 
   return db.select().from(tasks).where(eq(tasks.statusId, statusId));
+}
+
+/**
+ * Retorna somente as missões pendentes atribuídas ao agente solicitante.
+ * O agente externo consome esta fila e inicia o processamento em seu próprio runtime.
+ */
+export async function getStagedTasksByAgentId(agentId: number, statusId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db.select().from(tasks).where(
+    and(eq(tasks.agentId, agentId), eq(tasks.statusId, statusId))
+  ).orderBy(desc(tasks.createdAt));
 }
 
 export async function getTaskById(id: number) {
