@@ -6,6 +6,7 @@
 - **Blueprint:** `governance/missions/0013/BLUEPRINT.md`
 - **Dossiê factual:** `governance/missions/0013/DOSSIER_FACTUAL_MESHWAVE_MWN_2026-10-29.md`
 - **Matriz de lacunas:** `governance/missions/0013/MATRIZ_ESTRUTURA_E_LACUNAS_2026-10-29.md`
+- **Lista preliminar de investidores:** `governance/missions/0013/LISTA_PRELIMINAR_INVESTIDORES_2026-10-29.md`
 - **Escopo:** prospecção de investidores; não é campanha de apoiadores voluntários.
 - **Gatilho de retomada:** “Prossiga com MISSION_0013 a partir do último checkpoint remoto.”
 
@@ -21,8 +22,8 @@ A captação orgânica já implementada é uma frente existente e independente. 
 
 - **13.1 DONE:** dossiê factual compilado. Consulta read-only ao Supabase `mwn` confirmou registros agregados de aquisições e ledger piloto: 8 aquisições validadas, 1 rejeitada, 8 com hash de transação, 8 carteiras, 10 blocos e 10 transações. Os registros ainda usam nomenclatura MWC; o dossiê limita as conclusões ao que foi observado.
 - **13.2 DONE:** matriz separada de equity e MWN publicada. A estrutura societária e os direitos concretos de equity não foram localizados. Para MWN, permanecem lacunas sobre supply, titularidade, transferência externa, validação independente, mercado e reconciliação MWC→MWN.
-- **13.3 STAGED:** segmentar e pesquisar investidores potenciais com fontes públicas verificáveis. A pesquisa pode começar sem oferta fechada; a priorização final deve considerar ticket, estágio, jurisdição e tese.
-- **13.4 STAGED:** preparar tese e materiais separados para equity e MWN, depois de estabelecer limites factuais.
+- **13.3 DONE:** longlist pública preliminar de investidores publicada, separada por aderência cripto/Web3 e equity regional. A priorização final por ticket depende de parâmetros ainda não fornecidos.
+- **13.4 PAUSED:** preparar materiais de oferta somente após definir entidade/instrumento/percentual de equity e supply/direitos/condições de MWN.
 - **13.5 STAGED:** preparar mensagens para revisão e aprovação humana.
 - **13.6 BLOCKED:** acompanhamento de contatos depende de autorização explícita de abordagem e de acesso ao canal.
 
@@ -32,4 +33,4 @@ Nenhuma mensagem, deck, oferta, publicação, negociação, aceite, assinatura o
 
 ## Próxima ação
 
-Iniciar a tarefa 13.3: segmentação e pesquisa pública de investidores compatíveis, mantendo a lista separada por tese equity e tese MWN. Não enviar mensagens.
+Retomar 13.4 após as definições comerciais e jurídicas de equity e MWN; até lá, a lista 13.3 está pronta em caráter preliminar. Nenhum contato foi realizado.
