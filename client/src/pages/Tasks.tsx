@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useForm } from "react-hook-form";
+import { useLocation } from "wouter";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Filter, Search, Calendar, AlertCircle, Cpu, CheckCircle2, Clock, PlayCircle, PauseCircle, XCircle, Loader2 } from "lucide-react";
@@ -44,6 +45,7 @@ const PRIORITY_PRESENTATION: Record<string, { color: string }> = {
 
 export default function Tasks() {
   const { isAuthenticated } = useAuth();
+  const [, navigate] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
@@ -389,7 +391,12 @@ export default function Tasks() {
                             <span className={`text-[10px] font-black tracking-widest ${priority.color}`}>{priority.label}</span>
                           </TableCell>
                           <TableCell className="py-6 text-right pr-8">
-                            <Button variant="ghost" size="sm" className="text-[10px] font-black uppercase tracking-widest hover:text-accent hover:bg-accent/10">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => navigate(`/tasks/${task.id}`)}
+                              className="text-[10px] font-black uppercase tracking-widest hover:text-accent hover:bg-accent/10"
+                            >
                               Gerenciar
                             </Button>
                           </TableCell>
