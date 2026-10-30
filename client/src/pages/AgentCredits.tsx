@@ -14,7 +14,7 @@ function formatCredits(value: number | null) {
 function formatUpdatedAt(value: string | Date | null) {
   if (!value) return "Sem consulta bem-sucedida";
   try {
-    return formatDistanceToNow(new Date(value), { addSuffix: true, locale: ptBR });
+    return formatDistanceToNow(value instanceof Date ? value : new Date(value), { addSuffix: true, locale: ptBR });
   } catch {
     return "Data indisponível";
   }
