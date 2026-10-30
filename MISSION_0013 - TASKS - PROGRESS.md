@@ -9,8 +9,8 @@
 | 13.2 | Mapear estrutura e lacunas das trilhas equity e MWN | DONE | ChatGPT | Matriz separada publicada; gaps de equity, supply, titularidade, transferibilidade, ledger e revisão jurídica registrados |
 | 13.3 | Pesquisar, segmentar e priorizar investidores potenciais | DONE | ChatGPT | Longlist preliminar publicada em `governance/missions/0013/LISTA_PRELIMINAR_INVESTIDORES_2026-10-29.md`; priorização por ticket depende de parâmetros do responsável; sem contato |
 | 13.4 | Preparar tese e materiais separados para equity e MWN | PAUSED | — | Aguardar entidade/termos de equity e supply/direitos/transferibilidade MWN; pode ser retomada com dossiê atualizado e decisões do responsável |
-| 13.5 | Preparar plano de abordagem e mensagens individualizadas | STAGED | — | Minutas para revisão; nenhum envio sem autorização humana específica |
-| 13.6 | Acompanhar contatos, respostas, reuniões e due diligence | BLOCKED | — | Só iniciar após autorização de abordagem e acesso ao canal; registrar eventos observáveis |
+| 13.5 | Preparar plano de abordagem e mensagens individualizadas | PROGRESS | ChatGPT | Fluxo e regras de automação publicados; mensagem-base final e autorização de campanha pendentes |
+| 13.6 | Automatizar envio e acompanhar contatos, respostas, reuniões e due diligence | PROGRESS (envio BLOCKED) | ChatGPT | CSV mestre e procedimento publicados; conexão de caixa, aprovação de mensagem/remetente/destinatários e autorização de campanha pendentes |
 
 ## Checkpoint 13.1–13.3 — 2026-10-29
 
@@ -24,6 +24,13 @@
 - **13.3 DONE:** lista preliminar pública de investidores publicada em `governance/missions/0013/LISTA_PRELIMINAR_INVESTIDORES_2026-10-29.md`; prioridade temática definida, ajuste por ticket pendente.
 - **13.4 PAUSED:** materiais de oferta aguardam parâmetros de equity e MWN.
 - ORs: `OR-20261029-0012` (13.1), `OR-20261029-0013` (13.2), `OR-20261029-0014` (13.3); todos SUBMITTED, Oracle PENDING.
+
+## Atualização 2026-10-29 — nomenclatura e automação
+
+- Histórico formalizado: ativo MeshWave inicialmente designado MWC; o responsável informa que a designação foi alterada para MWN porque já existe ou existiu moeda em circulação com o nome MWC. Data exata da decisão não informada. Preservar MWC em registros históricos e usar MWN em novas referências.
+- Arquivo mestre: `governance/missions/0013/CONTROLE_INVESTIDORES.csv` (11 investidores; todos `NOT_CONTACTED` no momento da criação).
+- Procedimento: `governance/missions/0013/AUTOMACAO_DE_CONTATOS.md`.
+- Nenhum envio ocorreu nesta atualização. O envio automatizado permanece bloqueado até conexão da caixa remetente, aprovação da mensagem-base e autorização do universo de destinatários/canais.
 
 ## Regras
 
