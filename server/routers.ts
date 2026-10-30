@@ -29,6 +29,58 @@ export const appRouter = router({
       return db.getAgentsByOwnerId(ctx.user.id);
     }),
 
+    listCredits: protectedProcedure.query(async ({ ctx }) => {
+      const agents = await db.getAgentsByOwnerId(ctx.user.id);
+      return Promise.all(agents.map(async (agent) => {
+        const base = {
+          id: agent.id,
+          name: agent.name,
+          manusAccount: agent.manusAccount ?? null,
+          creditsUpdatedAt: agent.creditsUpdatedAt ?? null,
+        };
+
+        let credentials: Awaited<ReturnType<typeof db.getManusCredentialsForAgentForOwner>>;
+        try {
+          credentials = await db.getManusCredentialsForAgentForOwner(agent.id, ctx.user.id);
+        } catch {
+          return { ...base, creditsRemaining: null, sourceStatus: "error" as const, message: "Falha ao recuperar a credencial armazenada." };
+        }
+
+        if (!credentials?.manusToken) {
+          return { ...base, creditsRemaining: null, sourceStatus: "not_configured" as const, message: "API key Manus não configurada." };
+        }
+
+        try {
+          const response = await fetch("https://api.manus.ai/v2/usage.availableCredits", {
+            method: "GET",
+            headers: { "x-manus-api-key": credentials.manusToken },
+            signal: AbortSignal.timeout(15000),
+          });
+          const payload = await response.json().catch(() => null) as {
+            ok?: boolean;
+            total_credits?: number | string;
+            error?: { code?: string; message?: string };
+          } | null;
+
+          if (!response.ok || payload?.ok !== true) {
+            const message = payload?.error?.message || `A Manus retornou HTTP ${response.status}.`;
+            return { ...base, creditsRemaining: null, sourceStatus: response.status === 401 || response.status === 403 ? "authentication_error" as const : "error" as const, message };
+          }
+
+          const rawCredits = payload.total_credits;
+          const credits = typeof rawCredits === "number" ? rawCredits : Number(rawCredits);
+          if (rawCredits === undefined || rawCredits === null || !Number.isFinite(credits)) {
+            return { ...base, creditsRemaining: null, sourceStatus: "invalid_response" as const, message: "A resposta Manus não trouxe total_credits válido." };
+          }
+
+          await db.updateAgentCredits(agent.id, credits.toFixed(2));
+          return { ...base, creditsRemaining: credits, creditsUpdatedAt: new Date(), sourceStatus: "ok" as const, message: null };
+        } catch (error) {
+          return { ...base, creditsRemaining: null, sourceStatus: "error" as const, message: error instanceof Error ? error.message : "Falha ao consultar a Manus." };
+        }
+      }));
+    }),
+
     create: protectedProcedure
       .input(z.object({
         name: z.string().min(1),
