@@ -88,3 +88,30 @@ Não duplicar documentos existentes; preferir atualizar ou referenciar fontes ca
 ## 8. Próxima ação
 
 Executar 14.1 após assunção formal, seguindo `AGENTS.md`, `GOVERNANCE.md`, o registry de skills e o ciclo operacional vigente do SofiaControlPanel.
+
+
+## 9. Direcionamento científico informado pelo responsável
+
+O responsável esclareceu que a contribuição pretendida é uma **nova formulação matemática**, acompanhada da otimização/reformulação de conceitos e fundamentos existentes, com atenção especial a Navier–Stokes e à cascata de energia de Kolmogorov, entre outros frameworks. Informou também que resultados preliminares e simulações sugerem as propriedades alegadas e que, se confirmadas e aperfeiçoadas, as formulações poderão sustentar modelos, especialmente CFD, para o tratamento da turbulência, denominada “multifluxos” no framework.
+
+### 9.1 Classificação epistemológica
+
+As informações acima são **DECLARAÇÕES DO RESPONSÁVEL** sobre intenção, resultados preliminares e aplicação pretendida. Não constituem, por si, demonstração matemática, validação física, reprodução independente ou comprovação de desempenho. A classificação só poderá ser elevada mediante inspeção de fontes e evidências identificáveis.
+
+### 9.2 Questões científicas obrigatórias
+
+- Qual é a formulação matemática exata proposta e em que difere das equações de Navier–Stokes ou de suas formas/fechamentos conhecidos?
+- Quais hipóteses, variáveis, operadores, condições iniciais e de contorno são introduzidos, removidos ou transformados?
+- Como são tratados conservação de massa, quantidade de movimento e energia, consistência dimensional, dissipação e transferência entre escalas?
+- Qual é a relação formal com a cascata de Kolmogorov: recuperação de resultados clássicos em limites apropriados, explicação alternativa, generalização ou previsão distinta?
+- Quais propriedades preliminares foram observadas, em quais casos, escalas, métricas e condições?
+- Que testes podem distinguir uma propriedade emergente do escoamento de um artefato da decomposição, discretização, clustering, solver ou escolha de parâmetros?
+- Que resultados seriam suficientes para justificar um protótipo CFD e quais benchmarks comparativos seriam necessários?
+
+### 9.3 Aplicação CFD como hipótese de desenvolvimento
+
+A aplicação CFD é um objetivo tecnológico condicionado à validação. Avaliar por etapas: formulação fechada e bem posta; discretização/conservação; estabilidade e convergência; custo computacional; verificação por soluções de referência; validação com dados físicos/experimentais; e comparação justa com DNS, LES, RANS ou outros baselines pertinentes. Não declarar vantagem ou substituição de métodos existentes antes desses testes.
+
+### 9.4 Terminologia
+
+“Multifluxos” é, neste estágio, a denominação conceitual adotada pelo framework para o fenômeno/descrição em estudo. A auditoria deverá localizar e registrar sua definição matemática operacional, evitando tratar a mudança terminológica como evidência de uma nova classe física.
