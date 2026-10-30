@@ -27,6 +27,10 @@ A captação orgânica já implementada é uma frente existente e independente. 
 - **13.5 STAGED:** preparar mensagens para revisão e aprovação humana.
 - **13.6 BLOCKED:** acompanhamento de contatos depende de autorização explícita de abordagem e de acesso ao canal.
 
+## Atualização — autorização de prospecção (2026-10-29)
+
+O responsável delegou a condução integral da tarefa conforme avaliação de adequação. A campanha foi delimitada como primeiro contato institucional exploratório, individualizado, sem oferta vinculante, valuation, ticket, percentual, quantidade, preço ou promessa de retorno. Foram publicadas mensagens-base em `governance/missions/0013/MENSAGENS_PRIMEIRO_CONTATO.md` e cadência em `governance/missions/0013/AUTOMACAO_DE_CONTATOS.md`. A execução de envio está aguardando conexão autenticada da caixa remetente. Nenhum envio foi feito ainda.
+
 ## Atualização — automação de prospecção e histórico MWC→MWN (2026-10-29)
 
 - Histórico: a designação original do ativo MeshWave era MWC; o responsável informa que foi alterada para MWN porque já existe ou existiu moeda em circulação com a designação MWC. MWC permanece em registros históricos; MWN é a designação atual. A data exata da decisão não foi informada.
