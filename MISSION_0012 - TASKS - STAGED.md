@@ -5,7 +5,7 @@
 
 | ID | Tarefa | Status | Instância | Critério/saída |
 |---|---|---|---|---|
-| 12.1 | Confirmar enquadramento e auditar presença digital e fluxo real de contribuição | STAGED | — | Verificar site, página, formulário, termos, meios de pagamento, registro/recibo e correspondência com o kit; documentar divergências sem alterar produção |
+| 12.1 | Confirmar enquadramento e auditar presença digital e fluxo real de contribuição | PAUSED | ChatGPT | Auditoria pública concluída; /participar não apresenta fluxo de contribuição. Falta confirmar enquadramento, eventual mecanismo privado e reconciliar divergência entre kit e /mwn. Ver CHECKPOINT-12.1-SITE-AUDIT.md |
 | 12.2 | Reconciliar kit de comunicação com fatos atuais e produzir pacote público revisado | BLOCKED | — | Depende de 12.1 e aprovação humana das alegações/termos; não publicar |
 | 12.3 | Mapear comunidades e grupos adequados, regras de divulgação e pontos de contato públicos | STAGED | — | Fontes verificáveis; sem mensagens; sem duplicidade |
 | 12.4 | Preparar plano de abordagem e mensagens para revisão humana | STAGED | — | Minutas personalizadas; nenhum envio sem autorização explícita |
