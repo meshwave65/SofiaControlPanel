@@ -102,3 +102,30 @@ Em 2026-10-30, o responsável científico esclareceu o posicionamento pretendido
 Este direcionamento define a intenção científica e tecnológica, não uma conclusão de validade, originalidade, superioridade ou aplicabilidade. A revisão deverá comparar a formulação proposta com os fundamentos clássicos e com o estado da arte, identificando precisamente o que é preservado, reformulado, generalizado ou substituído. O termo “multifluxos” deverá ser tratado como nomenclatura do framework até que sua definição matemática operacional esteja documentada.
 
 A auditoria deverá avaliar separadamente: (a) consistência matemática e dimensional; (b) compatibilidade com leis de conservação e condições físicas; (c) relação com Navier–Stokes e com a cascata de Kolmogorov; (d) evidência numérica e reprodutibilidade; (e) capacidade preditiva e comparação com baselines; e (f) viabilidade de incorporação em modelos CFD. Não pressupor que uma nova nomenclatura, por si só, corresponda a um novo regime físico ou a uma nova classe de equações.
+
+
+## Fontes documentais obrigatórias e protocolo de leitura
+
+A execução da missão **deverá obrigatoriamente** incluir a leitura e análise dos documentos e registros da comunidade Zenodo Multiflux, bem como das duas publicações/discussões ResearchGate e do tópico CFD-Online indicados pelo responsável. Essas fontes integram o corpus primário do projeto e não podem ser substituídas por resumos de terceiros ou por uma busca genérica na literatura.
+
+### Corpus obrigatório indicado pelo responsável
+
+1. **Zenodo — comunidade Multiflux, registros ordenados por mais recentes:** https://zenodo.org/communities/multiflux/records?q=&l=list&p=1&s=10&sort=newest  
+   A leitura deve abranger todos os registros da comunidade, percorrendo paginação e versões; não apenas a primeira página. Para cada registro, identificar DOI, título, autores, datas, versão, tipo de recurso, licença, arquivos, anexos, código/dados associados e relações com outros registros. Ler os documentos integrais disponíveis e registrar os materiais inacessíveis.
+2. **ResearchGate — HIT e estabilidade de N_eff:** https://www.researchgate.net/post/Multiflux_Theory_First_Reproducible_HIT_Simulations_64384_and_Stable_N_eff_12_Across_Resolutions  
+   Analisar texto, comentários, DOI/Zenodo associados, código, relatórios, tabelas e figuras citadas. Verificar a geração dos campos sintéticos, inicialização espectral, projeção solenoidal, cálculo de invariantes, parâmetros do K-means e definição/estimativa de N_eff.
+3. **ResearchGate — decomposição instantânea em campos sintéticos:** https://www.researchgate.net/publication/399025958_Numerical_Evidence_for_Instantaneous_Multiflux_Decomposition_in_Synthetic_Turbulence_Fields_Proof-of-Concept_Simulations_at_Resolutions_32_3_to_384_3_This_work_is_licensed_under_the_Creative_Commons_A  
+   Obter e ler o texto integral e seus suplementos; rastrear as resoluções 32³ a 384³, método de geração dos campos, definição operacional da decomposição, algoritmos, parâmetros, métricas e limitações.
+4. **CFD-Online — discussão técnica e crítica:** https://www.cfd-online.com/Forums/site-help-feedback-discussions/261616-contested-ai-based-theory-new-framework-turbulence-multiflux-theory.html  
+   Ler as três páginas completas do tópico, incluindo perguntas, objeções, respostas do responsável, correções e referências. Extrair questões técnicas verificáveis, sem classificar opiniões ou tom retórico como evidência científica.
+
+### Regra de completude e rastreabilidade
+
+- O corpus acima é obrigatório mesmo quando houver versões mais recentes no GitHub ou em outros locais.
+- A comunidade Zenodo deve ser percorrida integralmente; registrar data da consulta, paginação, total de registros encontrados e registros lidos/pendentes. Se a plataforma limitar acesso, registrar o bloqueio e buscar o mesmo DOI/arquivo pelo identificador persistente.
+- Para cada documento, registrar a versão exata e não presumir que um título semelhante seja o mesmo artefato.
+- Comparar versões cronologicamente e manter divergências explícitas. Em particular, investigar mudanças no número de subfluxos alegado, na definição de N_eff, no método de decomposição, na formulação variacional e no escopo das hipóteses.
+- Confrontar cada afirmação com código, notebooks, dados e relatórios correspondentes. DOI, depósito público ou licença aberta comprovam disponibilidade/proveniência, não correção matemática nem validação independente.
+- As críticas do CFD-Online devem gerar uma matriz de objeções e respostas: questão, autor/data/post, resposta do projeto, artefato que a resolve, teste necessário e status (resolvida/parcial/aberta/não aplicável).
+- Não encerrar a tarefa 14.1 enquanto a lista completa de registros Zenodo não estiver inventariada ou cada indisponibilidade estiver explicitamente documentada.
+
