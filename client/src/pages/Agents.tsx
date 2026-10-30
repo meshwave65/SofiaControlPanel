@@ -36,6 +36,7 @@ export default function Agents() {
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showToken, setShowToken] = useState(false);
+  const [manusValidation, setManusValidation] = useState<any>(null);
 
 
   // Queries
@@ -101,6 +102,21 @@ export default function Agents() {
     },
     onError: (error) => {
       toast.error(`✗ Erro ao atualizar status: ${error.message}`);
+    },
+  });
+
+  const validateManusConnectionMutation = trpc.agents.validateManusConnection.useMutation({
+    onSuccess: (result) => {
+      setManusValidation(result);
+      if (result.ok) {
+        toast.success("Conexão Manus validada.");
+      } else {
+        toast.error(result.message || "Falha na validação da conexão Manus.");
+      }
+    },
+    onError: (error) => {
+      setManusValidation({ ok: false, message: error.message });
+      toast.error(`Falha na validação Manus: ${error.message}`);
     },
   });
 
@@ -408,6 +424,48 @@ export default function Agents() {
                         </div>
                       </div>
                     </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="font-bold uppercase tracking-widest text-[10px]"
+                      disabled={!selectedAgent?.id || validateManusConnectionMutation.isPending}
+                      onClick={() => {
+                        setManusValidation(null);
+                        validateManusConnectionMutation.mutate({ id: selectedAgent.id });
+                      }}
+                    >
+                      {validateManusConnectionMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                      {!validateManusConnectionMutation.isPending && <Shield className="w-4 h-4 mr-2" />}
+                      Validar credencial armazenada
+                    </Button>
+
+                    {manusValidation && (
+                      <div className={`p-4 rounded border ${manusValidation.ok ? "border-green-500/40 bg-green-500/5" : "border-red-500/40 bg-red-500/5"}`}>
+                        <div className="flex items-center gap-2 mb-2">
+                          {manusValidation.ok
+                            ? <CheckCircle2 className="w-4 h-4 text-green-500" />
+                            : <AlertCircle className="w-4 h-4 text-red-400" />}
+                          <span className="text-xs font-bold uppercase">
+                            {manusValidation.ok ? "Credencial validada" : "Validação não concluída"}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{manusValidation.message}</p>
+                        {manusValidation.account && (
+                          <div className="mt-3 space-y-1 font-mono text-[10px]">
+                            <p>Nome: {manusValidation.account.name || "Não informado"}</p>
+                            <p>E-mail Manus: {manusValidation.account.email || "Não informado"}</p>
+                            <p>User ID: {manusValidation.account.userId || "Não informado"}</p>
+                            <p>Conta cadastrada: {manusValidation.expectedAccount || "Não informada"}</p>
+                          </div>
+                        )}
+                        {manusValidation.httpStatus && (
+                          <p className="mt-2 text-[10px] font-mono">HTTP {manusValidation.httpStatus}</p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </TabsContent>
 
