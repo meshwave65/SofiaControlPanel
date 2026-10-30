@@ -1,19 +1,19 @@
 # Blueprint da Missão 0013 — Prospecção de investidores e parceiros de capital para MeshWave
 
 **Missão:** `MISSION_0013`
-**Estado:** STAGED
+**Estado:** PROGRESS
 **Orquestrador:** SofiaControlPanel (SCP)
 **Projeto-alvo:** MeshWave / MWN — ativo digital e ecossistema MeshWave
 **Data de registro:** 2026-10-29
 
 ## 1. Objetivo
 
-Identificar, qualificar e estabelecer contato com potenciais investidores e parceiros de capital interessados na MeshWave, apresentando duas vias distintas de participação econômica, conforme a estrutura efetivamente disponível e aprovada:
+Prospectar investidores para aporte na MeshWave, com duas alternativas distintas de contrapartida: (a) equity/participação societária na estrutura empresarial; ou (b) o próprio ativo digital MWN. A missão deve mapear, qualificar e preparar contatos para negociação, mantendo separadas as duas modalidades e validando a disponibilidade real de cada uma:
 
 1. **Equity:** participação societária ou direitos econômicos em entidade/veículo juridicamente identificado, mediante estrutura, instrumento e condições ainda sujeitos a confirmação.
 2. **Ativo digital MWN:** aquisição ou negociação do ativo criptográfico MWN como ativo digital real, com base em sua existência, funcionamento, titularidade, emissão, distribuição, transferibilidade, condições de aquisição e riscos verificáveis.
 
-O objetivo é prospecção de investidores — não mobilização de apoiadores voluntários. A captação orgânica já implementada pelo responsável é uma frente existente e não constitui o escopo desta missão.
+O objetivo é prospecção de investidores — não mobilização de apoiadores voluntários. A captação orgânica já implementada pelo responsável é uma frente existente e independente; não é a finalidade desta missão. O dossiê factual de 2026-10-29 registra evidência agregada de aquisições e ledger piloto no Supabase mwn, sem inferir mercado externo ou liquidez. Ver `DOSSIER_FACTUAL_MESHWAVE_MWN_2026-10-29.md`.
 
 ## 2. Distinção de instrumentos
 
@@ -79,6 +79,6 @@ O material de apoiadores voluntários versão 1.0 não é documento-base desta m
 
 ## 8. Dependências e estado inicial
 
-A missão permanece STAGED. O responsável declarou que a captação orgânica já está implementada e que a MeshWave pretende abordar investidores em troca de equity ou do ativo real de criptomoeda MWN. Essas declarações definem o objetivo da missão, mas não substituem a coleta de evidências necessárias para materiais externos.
+A missão está em PROGRESS. O responsável confirmou que a captação orgânica já está implementada e que a nova frente deve prospectar investidores em troca de equity ou do ativo digital MWN. A consulta read-only ao Supabase mwn confirmou 8 aquisições validadas e registros de uma cadeia piloto; o código/banco ainda conserva nomenclatura MWC. A estrutura societária para equity e os direitos/condições completos do ativo MWN permanecem pendentes. O kit de apoiadores voluntários v1.0 é explicitamente excluído como base desta missão.
 
 A primeira tarefa é consolidar o estado factual atual, sem presumir que documentos históricos ou o kit de apoiadores descrevam a operação vigente.
