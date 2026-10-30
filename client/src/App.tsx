@@ -3,7 +3,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
+import DashboardLayout from "./components/DashboardLayout";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { useAuth } from "@/_core/hooks/useAuth";
 import Home from "./pages/Home";
 import Agents from "./pages/Agents";
 import Tasks from "./pages/Tasks";
@@ -13,45 +15,43 @@ import Messages from "./pages/Messages";
 import LegalPage from "./pages/LegalPage";
 import AuthCallback from "./pages/AuthCallback";
 
+function HomeRoute() {
+  const { user, loading } = useAuth();
+  if (loading) return <DashboardLayout><Home /></DashboardLayout>;
+  return user ? <DashboardLayout><Home /></DashboardLayout> : <Home />;
+}
+
+function InternalRoute({ children }: { children: React.ReactNode }) {
+  return <DashboardLayout>{children}</DashboardLayout>;
+}
+
 function Router() {
-  // make sure to consider if you need authentication for certain routes
   if (window.location.pathname === "/auth/callback") {
     return <AuthCallback />;
   }
 
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
+      <Route path={"/"} component={HomeRoute} />
       <Route path={"/auth/callback"} component={AuthCallback} />
-      <Route
-        path={"/privacity"}
-        component={() => <LegalPage kind="privacy" />}
-      />
+      <Route path={"/privacity"} component={() => <LegalPage kind="privacy" />} />
       <Route path={"/privacy"} component={() => <LegalPage kind="privacy" />} />
       <Route path={"/terms"} component={() => <LegalPage kind="terms" />} />
-      <Route path={"/agents"} component={Agents} />
-      <Route path={"/tasks"} component={Tasks} />
-      <Route path={"/tasks/create"} component={TaskCreate} />
-      <Route path={"/tasks/:id"} component={TaskDetail} />
-      <Route path={"/messages"} component={Messages} />
+      <Route path={"/agents"} component={() => <InternalRoute><Agents /></InternalRoute>} />
+      <Route path={"/tasks"} component={() => <InternalRoute><Tasks /></InternalRoute>} />
+      <Route path={"/tasks/create"} component={() => <InternalRoute><TaskCreate /></InternalRoute>} />
+      <Route path={"/tasks/:id"} component={() => <InternalRoute><TaskDetail /></InternalRoute>} />
+      <Route path={"/messages"} component={() => <InternalRoute><Messages /></InternalRoute>} />
       <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
       <Route component={NotFound} />
     </Switch>
   );
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
+      <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster />
           <Router />
