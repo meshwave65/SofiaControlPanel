@@ -24,6 +24,7 @@ import { useIsMobile } from "@/hooks/useMobile";
 import {
   ArrowLeft,
   ClipboardList,
+  Coins,
   LayoutDashboard,
   LogOut,
   MessageSquare,
@@ -38,6 +39,7 @@ import { Button } from "./ui/button";
 const menuItems = [
   { icon: LayoutDashboard, label: "Painel", path: "/" },
   { icon: Users, label: "Agentes", path: "/agents" },
+  { icon: Coins, label: "Créditos", path: "/agent-credits" },
   { icon: ClipboardList, label: "Missões", path: "/tasks" },
   { icon: MessageSquare, label: "Mensagens", path: "/messages" },
 ];
@@ -284,7 +286,7 @@ function DashboardLayoutContent({
             className="fixed inset-x-0 bottom-0 z-50 border-t bg-background/95 px-1 pt-2 backdrop-blur supports-[backdrop-filter]:bg-background/85"
             style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}
           >
-            <div className="mx-auto grid max-w-lg grid-cols-4 gap-1">
+            <div className="mx-auto grid max-w-lg grid-cols-5 gap-1">
               {menuItems.map((item) => {
                 const isActive =
                   item.path === "/tasks"

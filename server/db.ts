@@ -197,6 +197,16 @@ export async function getManusCredentialsForAgentForOwner(id: number, ownerId: n
     manusToken: decryptCredential(agent.manusToken),
   };
 }
+export async function updateAgentCredits(id: number, creditsRemaining: string | null) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+  return database.update(agents).set({
+    creditsRemaining,
+    creditsUpdatedAt: new Date(),
+    updatedAt: new Date(),
+  }).where(eq(agents.id, id));
+}
+
 export async function updateAgentStatus(id: number, status: "online" | "offline" | "idle" | "paused") {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -338,6 +348,16 @@ export async function evaluateTaskInShadow(taskId: number) {
       likelihoodRatio: item.likelihoodRatio.toFixed(6),
     })),
   });
+}
+
+export async function updateTaskExternalId(id: number, externalTaskId: string, agentId: number) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+  return database.update(tasks).set({
+    externalTaskId,
+    agentId,
+    updatedAt: new Date(),
+  }).where(eq(tasks.id, id));
 }
 
 export async function updateTaskStatus(id: number, statusId: number) {

@@ -8,6 +8,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import Home from "./pages/Home";
 import Agents from "./pages/Agents";
+import AgentCredits from "./pages/AgentCredits";
 import Tasks from "./pages/Tasks";
 import TaskDetail from "./pages/TaskDetail";
 import TaskCreate from "./pages/TaskCreate";
@@ -38,6 +39,7 @@ function Router() {
       <Route path={"/privacy"} component={() => <LegalPage kind="privacy" />} />
       <Route path={"/terms"} component={() => <LegalPage kind="terms" />} />
       <Route path={"/agents"} component={() => <InternalRoute><Agents /></InternalRoute>} />
+      <Route path={"/agent-credits"} component={() => <InternalRoute><AgentCredits /></InternalRoute>} />
       <Route path={"/tasks"} component={() => <InternalRoute><Tasks /></InternalRoute>} />
       <Route path={"/tasks/create"} component={TaskCreate} />
       <Route path={"/tasks/:id"} component={TaskDetail} />
