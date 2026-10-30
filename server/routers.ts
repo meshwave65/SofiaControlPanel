@@ -150,9 +150,13 @@ export const appRouter = router({
       }),
 
     factorize: protectedProcedure
-      .input(z.object({ taskId: z.number() }))
-      .mutation(async ({ input }) => {
-        return SofiaOrchestrator.factorizeTask(input.taskId);
+      .input(z.object({ taskId: z.number().int().positive() }))
+      .mutation(async ({ input, ctx }) => {
+        const task = await db.getTaskById(input.taskId);
+        if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada." });
+        }
+        return SofiaOrchestrator.factorizeTask(task);
       }),
 
     consolidate: protectedProcedure
@@ -336,9 +340,12 @@ export const appRouter = router({
   // ============================================
   externalAgents: router({
     listStaged: publicProcedure
-      .input(z.object({ agentId: z.number() }))
+      .input(z.object({ agentId: z.number().int().positive() }))
       .query(async ({ input }) => {
-        return db.getTasksByStatus(await db.getTaskStatusIdByName("STAGED"));
+        return db.getStagedTasksByAgentId(
+          input.agentId,
+          await db.getTaskStatusIdByName("STAGED")
+        );
       }),
 
     createQuestion: publicProcedure
