@@ -104,6 +104,7 @@ export const tasks = sofia.table(
     statusId: integer("statusId").notNull(),
     priorityId: integer("priorityId").notNull(),
     parentTaskId: integer("parentTaskId"),
+    externalTaskId: varchar("externalTaskId", { length: 128 }),
     dueDate: timestamp("dueDate"),
     completedAt: timestamp("completedAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
