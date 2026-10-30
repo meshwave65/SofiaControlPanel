@@ -350,6 +350,16 @@ export async function evaluateTaskInShadow(taskId: number) {
   });
 }
 
+export async function updateTaskExternalId(id: number, externalTaskId: string, agentId: number) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+  return database.update(tasks).set({
+    externalTaskId,
+    agentId,
+    updatedAt: new Date(),
+  }).where(eq(tasks.id, id));
+}
+
 export async function updateTaskStatus(id: number, statusId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
