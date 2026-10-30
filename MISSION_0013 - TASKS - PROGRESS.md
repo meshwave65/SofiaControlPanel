@@ -25,6 +25,12 @@
 - **13.4 PAUSED:** materiais de oferta aguardam parâmetros de equity e MWN.
 - ORs: `OR-20261029-0012` (13.1), `OR-20261029-0013` (13.2), `OR-20261029-0014` (13.3); todos SUBMITTED, Oracle PENDING.
 
+## Atualização 2026-10-29 — autorização e preparação do primeiro contato
+
+- O responsável delegou a condução integral da prospecção conforme avaliação de adequação. Autorizado primeiro contato exploratório individualizado com canais profissionais públicos verificados, sem oferta vinculante ou termos financeiros não definidos.
+- Mensagens-base em `governance/missions/0013/MENSAGENS_PRIMEIRO_CONTATO.md`; cadência conservadora e limites documentados.
+- Bloqueio técnico remanescente: conexão da caixa remetente. Hostinger Mail foi sugerido para conexão; ainda não há confirmação de autenticação.
+
 ## Atualização 2026-10-29 — nomenclatura e automação
 
 - Histórico formalizado: ativo MeshWave inicialmente designado MWC; o responsável informa que a designação foi alterada para MWN porque já existe ou existiu moeda em circulação com o nome MWC. Data exata da decisão não informada. Preservar MWC em registros históricos e usar MWN em novas referências.
