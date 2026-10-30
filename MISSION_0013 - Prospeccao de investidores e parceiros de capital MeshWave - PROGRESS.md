@@ -24,8 +24,8 @@ A captação orgânica já implementada é uma frente existente e independente. 
 - **13.2 DONE:** matriz separada de equity e MWN publicada. A estrutura societária e os direitos concretos de equity não foram localizados. Para MWN, permanecem lacunas sobre supply, titularidade, transferência externa, validação independente, mercado e reconciliação MWC→MWN.
 - **13.3 DONE:** longlist pública preliminar de investidores publicada, separada por aderência cripto/Web3 e equity regional. A priorização final por ticket depende de parâmetros ainda não fornecidos.
 - **13.4 PAUSED:** preparar materiais de oferta somente após definir entidade/instrumento/percentual de equity e supply/direitos/condições de MWN.
-- **13.5 STAGED:** preparar mensagens para revisão e aprovação humana.
-- **13.6 BLOCKED:** acompanhamento de contatos depende de autorização explícita de abordagem e de acesso ao canal.
+- **13.5 PROGRESS:** mensagens-base e personalização individual em execução.
+- **13.6 PROGRESS:** Gmail operacional; dois primeiros contatos enviados e registrados, sem confirmação independente de entrega.
 
 ## Atualização — autorização de prospecção (2026-10-29)
 
@@ -47,3 +47,15 @@ Nenhuma mensagem, deck, oferta, publicação, negociação, aceite, assinatura o
 ## Próxima ação
 
 Retomar 13.4 após as definições comerciais e jurídicas de equity e MWN; até lá, a lista 13.3 está pronta em caráter preliminar. Nenhum contato foi realizado.
+
+
+## Atualização — remetente oficial e primeiro lote (2026-10-29)
+
+- O responsável confirmou `info@meshwave.com.br` como remetente oficial para todas as comunicações MeshWave.
+- Gmail foi validado para leitura e envio.
+- Primeiro lote enviado individualmente:
+  - OKX Ventures — `ventures@okx.com` — ID Gmail: `1a18a4ce5645ca3f`.
+  - Blockchain Founders Fund — `contact@bff.com` — ID Gmail: `1a18a4cf39ef2210`.
+- O Gmail retornou IDs para ambos os envios; entrega e leitura não foram confirmadas independentemente.
+- Valor Capital Group não recebeu email: o site institucional orienta submissões de pitch pelo fluxo “Get Started”; `info@valorcapitalgroup.com` está identificado como contato de consultas gerais.
+- Próxima verificação de respostas: após 7 dias, em 2026-11-06. Não enviar follow-up antes disso.
