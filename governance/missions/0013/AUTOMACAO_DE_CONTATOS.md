@@ -1,15 +1,15 @@
 # Automação de contatos — MISSION_0013
 
-**Estado:** campanha exploratória autorizada pelo responsável em 2026-10-29; execução de envio aguardando conexão da caixa remetente.  
+**Estado:** campanha exploratória autorizada; Gmail operacional e remetente oficial confirmado como `info@meshwave.com.br` em 2026-10-29.  
 **Arquivo mestre:** [CONTROLE_INVESTIDORES.csv](./CONTROLE_INVESTIDORES.csv)
 
 ## Objetivo
 
 Automatizar o envio individualizado de mensagens de prospecção e manter trilha de auditoria de cada investidor, desde a identificação até resposta, reunião, due diligence ou encerramento.
 
-## Estado inicial da lista
+## Estado da lista após o primeiro lote
 
-A longlist contém 11 organizações. Todas começam como `IDENTIFIED` e `NOT_CONTACTED`. A lista preliminar contém três endereços de email institucionais identificados publicamente (OKX Ventures, Blockchain Founders Fund e Valor Capital Group); os demais canais exigem confirmação do formulário/rota oficial antes de qualquer abordagem. A presença de um email nesta lista não significa que a mensagem foi enviada.
+A longlist contém 11 organizações. Em 2026-10-29, foram enviados dois primeiros contatos individualizados pelo Gmail, remetente `info@meshwave.com.br`: OKX Ventures (`ventures@okx.com`) e Blockchain Founders Fund (`contact@bff.com`). O provedor retornou IDs de mensagem para ambos; entrega não foi confirmada independentemente. Os outros nove registros permanecem sem contato. Para Valor Capital Group, a página institucional orienta empresas com pitch a iniciar pelo fluxo `Get Started`; o endereço `info@valorcapitalgroup.com` é apresentado para consultas gerais e não foi usado como substituto do canal de candidatura.
 
 ## Fluxo de automação
 
@@ -42,11 +42,12 @@ Os estados não são intercambiáveis: `SENT` não prova entrega; `DELIVERED` n�
 - Não apresentar MWC como ticker atual: usar MWN, explicando a nomenclatura histórica quando necessário.
 - Não misturar a campanha com o kit de apoiadores voluntários ou a captação orgânica existente.
 
-## Bloqueios atuais
+## Estado e bloqueios atuais
 
-1. Não há conexão de caixa de email disponível/confirmada nesta execução. Foi identificada a possibilidade de integração com Hostinger Mail, Gmail ou Outlook; a sugestão de conexão de Hostinger Mail não foi aceita pelo diretório nesta tentativa.
-2. Ainda não foi aprovada uma mensagem-base final, nem remetente, nem lista final de destinatários por modalidade.
-3. Equity e MWN ainda têm lacunas comerciais/jurídicas documentadas no dossiê. As mensagens não devem prometer termos que ainda não estejam definidos.
+1. Gmail está operacional para leitura e envio; o responsável confirmou `info@meshwave.com.br` como remetente oficial de todas as comunicações MeshWave.
+2. Dois primeiros contatos foram enviados individualmente: OKX Ventures e Blockchain Founders Fund. Os IDs retornados pelo Gmail estão registrados no CSV mestre. Não há confirmação independente de entrega ou leitura.
+3. Valor Capital Group: usar o fluxo institucional `Get Started` para submissão de pitch, não o endereço de consultas gerais como atalho.
+4. Equity e MWN ainda têm lacunas comerciais/jurídicas documentadas no dossiê. Os primeiros contatos são exploratórios e não oferecem termos ainda indefinidos.
 
 ## Autorização recebida e critério operacional
 
@@ -54,8 +55,8 @@ Em 2026-10-29, o responsável delegou a condução integral da tarefa, autorizan
 
 A primeira abordagem deve pedir uma conversa para avaliar aderência estratégica. Pode mencionar que existem duas possíveis frentes de discussão — participação societária na MeshWave e/ou ativo digital MWN — mas deve deixar claro que estrutura, direitos, condições e due diligence serão discutidos separadamente. Não anexar decks ou documentos não aprovados, não fixar valuation, ticket, percentual, quantidade, preço ou retorno.
 
-A autorização não supre a necessidade técnica de uma caixa remetente autenticada. A caixa deverá estar conectada e identificada antes de qualquer envio; não usar credenciais inferidas, endereço remetente inventado ou serviço alternativo sem autorização. Uma vez conectada, executar a fila de destinatários públicos verificados, começando pelos prioritários, com cadência conservadora e atualização do CSV após cada retorno do provedor. Formulários sem automação oficial ou sem campos adequados ficam como ação manual registrada, não contornar controles.
+A autorização cobre a prospecção exploratória por canais profissionais públicos verificados. A caixa Gmail foi conectada e o responsável confirmou `info@meshwave.com.br` como remetente oficial. Os envios devem ser individuais, com registro do ID retornado pelo provedor e sem confundir aceitação técnica com entrega ou leitura. Formulários sem automação oficial ou sem campos adequados ficam como ação manual registrada, não contornar controles.
 
-## Critério para ativar disparo
+## Critério operacional
 
-Bloqueio técnico remanescente: conexão da caixa remetente. A autorização de campanha exploratória foi recebida; não é necessário pedir nova aprovação de cada mensagem individual se o conteúdo permanecer dentro dos limites acima. Após conectar a caixa, validar destinatários, transmitir individualmente e registrar cada resultado observável.
+A caixa remetente está ativa. A autorização de campanha exploratória foi recebida; não é necessário pedir nova aprovação de cada mensagem individual se o conteúdo permanecer dentro dos limites acima. Prosseguir com destinatários e canais institucionais verificados, registrar cada resultado observável e respeitar a cadência de 7 dias.
