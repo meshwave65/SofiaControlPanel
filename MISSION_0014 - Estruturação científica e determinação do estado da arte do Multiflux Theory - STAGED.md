@@ -89,3 +89,16 @@ Os nomes finais, caminhos e estrutura dos artefatos serão definidos na tarefa d
 ## Estado e próxima ação
 
 A missão permanece **STAGED**. A tarefa inicial é reconciliar identidade, localizar e inventariar fontes e registrar os critérios de auditoria. Nenhum experimento será modificado nem qualquer alegação científica será promovida a fato sem evidência.
+
+
+## Direcionamento científico esclarecido pelo responsável
+
+Em 2026-10-30, o responsável científico esclareceu o posicionamento pretendido para o framework:
+
+1. **Natureza da contribuição pretendida:** desenvolver uma formulação matemática nova e otimizar/reformular conceitos e fundamentos anteriores, especialmente Navier–Stokes e a cascata de energia de Kolmogorov, entre outros frameworks relevantes.
+2. **Resultados preliminares:** o responsável informa que resultados e simulações preliminares sugerem as propriedades alegadas pelo framework. Esta informação deve ser registrada como **DECLARAÇÃO DO RESPONSÁVEL**, até que os artefatos sejam inventariados, inspecionados e, quando possível, reproduzidos.
+3. **Aplicação pretendida:** caso as formulações e propriedades sejam confirmadas e aperfeiçoadas, investigar o desenvolvimento de modelos — em especial CFD — para representar e tratar a turbulência, denominada **multifluxos** na terminologia do framework.
+
+Este direcionamento define a intenção científica e tecnológica, não uma conclusão de validade, originalidade, superioridade ou aplicabilidade. A revisão deverá comparar a formulação proposta com os fundamentos clássicos e com o estado da arte, identificando precisamente o que é preservado, reformulado, generalizado ou substituído. O termo “multifluxos” deverá ser tratado como nomenclatura do framework até que sua definição matemática operacional esteja documentada.
+
+A auditoria deverá avaliar separadamente: (a) consistência matemática e dimensional; (b) compatibilidade com leis de conservação e condições físicas; (c) relação com Navier–Stokes e com a cascata de Kolmogorov; (d) evidência numérica e reprodutibilidade; (e) capacidade preditiva e comparação com baselines; e (f) viabilidade de incorporação em modelos CFD. Não pressupor que uma nova nomenclatura, por si só, corresponda a um novo regime físico ou a uma nova classe de equações.
