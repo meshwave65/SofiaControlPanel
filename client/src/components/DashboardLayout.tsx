@@ -259,6 +259,18 @@ function DashboardLayoutContent({
             <span className="min-w-0 flex-1 truncate font-semibold text-foreground">
               {activeMenuItem.label}
             </span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-10 shrink-0 gap-2 px-3 text-destructive hover:bg-destructive/10 hover:text-destructive"
+              onClick={() => void logout()}
+              aria-label="Sair da conta"
+              title="Sair da conta"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="text-xs font-semibold">Sair</span>
+            </Button>
           </header>
         )}
 
