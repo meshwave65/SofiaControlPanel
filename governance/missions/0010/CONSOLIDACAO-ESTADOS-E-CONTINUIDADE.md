@@ -28,7 +28,7 @@ A conversa não é fonte de estado. Um sucessor deve sempre sincronizar ambos os
 | ARC-001 | `DONE` | `SofiaARC-PGC@a3b084f` e `5d1ed3c`; SCP OR de setup | Não reabrir criação do repositório ou blueprint |
 | ARC-002 | `DONE` | `SofiaARC-PGC@0be1805`, `86a3294`, checkpoint `84d21bf` | Motor puro; 8 testes registrados |
 | ARC-003 | `DONE` | `SofiaARC-PGC@d9df1aa`, checkpoint `35f6486`; OR `OR-20261029-0005` | Coletor/avaliador em memória; 12 testes acumulados |
-| ARC-004 | `DONE` | `SofiaControlPanel@44659ed`; checkpoint ARC-004 | Schema/migration estáticos; aplicação real ainda não confirmada |
+| ARC-004 | `DONE` | `SofiaControlPanel@44659ed`; checkpoint ARC-004 | Schema/migration concluídos; aplicação real registrada em ARC-009 |
 | ARC-005 | `DONE` | `SofiaControlPanel@e635492`; checkpoint ARC-005 | API protegida; ownership/admin e shadow |
 | ARC-006 | `DONE` | `SofiaControlPanel@3ba580c`; checkpoint ARC-006 | Avaliação real integrada em shadow; sem bloqueio |
 | ARC-007 | `DONE` | UI `d759954`; checkpoint `cce90ae`; OR `OR-20261030-0003` | UI preservada no estado atual `SCP@b303837` |
@@ -48,7 +48,7 @@ A conversa não é fonte de estado. Um sucessor deve sempre sincronizar ambos os
 ### Confirmado apenas estaticamente
 
 - A cadeia completa de avaliação e persistência foi verificada por código, schema, migration e testes unitários/server-side.
-- A existência de uma `arcPolicies` habilitada e a execução da migration não foram verificadas em PostgreSQL autorizado.
+- A execução da migration e a existência de `arc_default_shadow` foram confirmadas no Supabase; RLS ainda está pendente.
 - A UI foi compilada, mas não foi exercitada em navegador autenticado neste ambiente.
 
 ### Não alegar
@@ -71,17 +71,16 @@ A conversa não é fonte de estado. Um sucessor deve sempre sincronizar ambos os
 
 A missão não possui outra etapa ARC numerada automaticamente. Qualquer continuação deve ser uma nova tarefa formal, preferencialmente um pacote de validação de ambiente com:
 
-1. aplicação autorizada da migration em PostgreSQL de teste/produção;
-2. criação ou confirmação de uma política ARC habilitada;
-3. fluxo autenticado end-to-end de avaliação e consulta;
-4. métricas de comportamento e revisão de privacidade;
-5. decisão explícita, separada e aprovada antes de propor `assisted` ou `enforced`.
+1. definição e aplicação de policies RLS para as três tabelas ARC;
+2. fluxo autenticado end-to-end de avaliação e consulta;
+3. métricas de comportamento e revisão de privacidade;
+4. decisão explícita, separada e aprovada antes de propor `assisted` ou `enforced`.
 
 Até que esse gate seja satisfeito, o estado operacional é `shadow-only`, sem bloqueio de tarefas.
 
 ## Supabase e armazenamento
 
-As tabelas ARC já estão definidas na migration relacional `drizzle/0001_fixed_eternity.sql`; ARC/PGC persiste avaliações e evidências em PostgreSQL/JSONB e não precisa de bucket de arquivos. Buckets existentes no SCP atendem relatórios consolidados e não devem ser reutilizados para evidências ARC. Nesta auditoria não havia `DATABASE_URL`, `SUPABASE_URL` ou chave server-side configurada no ambiente, nem conector Supabase disponível; portanto nenhuma alteração externa foi executada. A aplicação da migration no Supabase só deve ocorrer em nova tarefa formal, com alvo autorizado e verificação posterior das tabelas e de uma política habilitada.
+As tabelas ARC foram aplicadas no projeto Supabase `ufylccbdjfzydbwhpmpp` pela migration `20261031133650_create_arc_pgc_persistence`, e a política `arc_default_shadow` foi criada e habilitada. ARC/PGC persiste avaliações e evidências em PostgreSQL/JSONB e não precisa de bucket de arquivos. Buckets existentes no SCP atendem relatórios consolidados e não devem ser reutilizados para evidências ARC. O advisor Supabase detectou RLS desabilitado nas três tabelas ARC; nenhuma policy foi aplicada automaticamente. A continuidade está bloqueada até definir ownership/admin e acesso server-side.
 
 ## Instrução de continuidade
 

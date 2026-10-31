@@ -2,7 +2,7 @@
 
 **Repositório canônico:** `https://github.com/meshwave65/SofiaARC-PGC`
 **Blueprint:** `governance/missions/0010/BLUEPRINT.md`
-**Último checkpoint técnico confirmado:** `456900a`
+**Último checkpoint técnico confirmado:** `CHECKPOINT-ARC-009.md`
 **Atualizado em:** 2026-10-31
 
 | ID | Tarefa | Status | Instância | Repositório/artefato | Próxima ação |
@@ -14,7 +14,8 @@
 | ARC-005 | Adicionar API tRPC protegida | DONE | Manus AI (sandbox:Tq8FCw5EEQC8s4y2kvJrrc) | `SofiaControlPanel` — código `e635492`, checkpoint `bd64b82`, OR-20261029-0007 | API `arc.evaluateTask`, `arc.getAssessment`, `arc.listAssessments`; ownership/admin; shadow default; integração do avaliador permanece ARC-006 |
 | ARC-006 | Integrar no orquestrador em shadow mode | DONE | Manus AI (sandbox:Tq8FCw5EEQC8s4y2kvJrrc) | `SofiaControlPanel` — código `3ba580c`, checkpoint `CHECKPOINT-ARC-006.md`, OR-20261029-0008 | Avaliação real usa task/agente/activity, policy habilitada e Bayes heurístico; não bloqueia tarefas; banco real/migration ainda pendentes |
 | ARC-007 | Criar UI mínima de avaliação na tarefa | DONE | Manus ARC-PGC Agent | `SofiaControlPanel` — UI `d759954`, checkpoint `cce90ae`, OR-20261030-0003 | Concluída; posterior, decisão, modo e evidências sem metadata sensível; check/test/build aprovados |
-| ARC-008 | Validar, fechar MVP e emitir handoff final | DONE | Manus ARC-PGC Agent | `SofiaControlPanel` — checkpoint `456900a`, OR-20261031-0001 | MVP consolidado para uso controlado em shadow; PostgreSQL/autenticação real são gates de uma nova tarefa formal |
+| ARC-008 | Validar, fechar MVP e emitir handoff final | DONE | Manus ARC-PGC Agent | `SofiaControlPanel` — checkpoint `456900a`, OR-20261031-0001 | MVP consolidado para uso controlado em shadow; não reabrir |
+| ARC-009 | Provisionar persistência Supabase e fechar gate de segurança | BLOCKED | Manus ARC-PGC Agent | `SofiaControlPanel` — checkpoint `CHECKPOINT-ARC-009.md`, OR-20261031-0002; projeto `ufylccbdjfzydbwhpmpp` | Definir/aplicar policies RLS para `arcPolicies`, `arcAssessments` e `arcEvidence`; não ativar assisted/enforced |
 
 ## Regra de assunção
 
