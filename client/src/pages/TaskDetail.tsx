@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import DashboardLayout from "@/components/DashboardLayout";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { Loader2, ChevronLeft, Zap, FileText, AlertCircle, Download, ShieldCheck, RefreshCw, Info } from "lucide-react";
+import { Loader2, ChevronLeft, Zap, FileText, AlertCircle, Download, ShieldCheck, RefreshCw, Info, Play } from "lucide-react";
+import { toast } from "sonner";
 
 export default function TaskDetail() {
   const { id } = useParams<{ id: string }>();
@@ -35,10 +36,12 @@ export default function TaskDetail() {
   const statuses = lookupsQuery.data?.statuses ?? [];
   const priorities = lookupsQuery.data?.priorities ?? [];
   const [subtasks, setSubtasks] = useState<any[]>([]);
+  const [isStarting, setIsStarting] = useState(false);
   const [isFactorizing, setIsFactorizing] = useState(false);
   const [isConsolidating, setIsConsolidating] = useState(false);
 
   const factorizeTaskMutation = trpc.tasks.factorize.useMutation();
+  const startTaskMutation = trpc.tasks.start.useMutation();
   const consolidateTaskMutation = trpc.tasks.consolidate.useMutation();
   const updateStatusMutation = trpc.tasks.updateStatus.useMutation();
   const arcAssessmentQuery = trpc.arc.getAssessment.useQuery(
@@ -78,6 +81,23 @@ export default function TaskDetail() {
       console.error("Erro ao fatorizar:", error);
     } finally {
       setIsFactorizing(false);
+    }
+  };
+
+  const handleStart = async () => {
+    setIsStarting(true);
+    try {
+      const result = await startTaskMutation.mutateAsync({ taskId });
+      await Promise.all([taskQuery.refetch(), messagesQuery.refetch(), consolidatedReportQuery.refetch()]);
+      if (result?.started) {
+        toast.success(result.factorized ? "Missão iniciada e fatorada em subtarefas." : "Missão iniciada.");
+      } else {
+        toast.info("A missão já não está em STAGED; nenhum reinício foi necessário.");
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível iniciar a missão.");
+    } finally {
+      setIsStarting(false);
     }
   };
 
@@ -255,6 +275,18 @@ export default function TaskDetail() {
                   <CardTitle className="text-lg">Ações</CardTitle>
                 </CardHeader>
                 <CardContent className="flex gap-3">
+                  <Button
+                    onClick={handleStart}
+                    disabled={isStarting || task.statusId !== statuses.find((status) => status.name.toUpperCase() === "STAGED")?.id}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    {isStarting ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Play className="w-4 h-4 mr-2" />
+                    )}
+                    {isStarting ? "Iniciando..." : "Iniciar missão"}
+                  </Button>
                   <Button
                     onClick={handleFactorize}
                     disabled={isFactorizing}

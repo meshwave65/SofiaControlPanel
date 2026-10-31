@@ -118,19 +118,30 @@ export class SofiaOrchestrator {
    */
   static async processTask(taskId: number) {
     const task = await db.getTaskById(taskId);
-    if (!task) return;
+    if (!task) return null;
 
     const stagedStatusId = await db.getTaskStatusIdByName(STATUS_STAGED);
-    if (task.statusId === stagedStatusId) {
-      if (this.shouldFactorize(task)) {
-        await this.factorizeTask(task);
-        // Em um sistema real, aqui poderíamos mudar para um status intermediário
-        // ou aguardar as subtarefas.
-      } else {
-        // Mover para progresso se não for fatorar
-        await db.updateTaskStatus(taskId, await db.getTaskStatusIdByName(STATUS_PROGRESS));
-      }
+    if (task.statusId !== stagedStatusId) {
+      return { task, started: false, factorized: false, subtaskIds: [] };
     }
+
+    const existingSubtasks = await db.getTasksByParentId(taskId);
+    let subtaskIds: number[] = [];
+    const factorized = this.shouldFactorize(task) && existingSubtasks.length === 0;
+
+    if (factorized) {
+      subtaskIds = await this.factorizeTask(task);
+    }
+
+    await db.updateTaskStatus(taskId, await db.getTaskStatusIdByName(STATUS_PROGRESS));
+    const updatedTask = await db.getTaskById(taskId);
+
+    return {
+      task: updatedTask,
+      started: true,
+      factorized,
+      subtaskIds,
+    };
   }
 }
 

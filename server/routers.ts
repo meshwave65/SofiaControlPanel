@@ -268,6 +268,26 @@ export const appRouter = router({
         return SofiaOrchestrator.factorizeTask(task);
       }),
 
+    start: protectedProcedure
+      .input(z.object({ taskId: z.number().int().positive() }))
+      .mutation(async ({ input, ctx }) => {
+        const task = await db.getTaskById(input.taskId);
+        if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada." });
+        }
+
+        try {
+          return await SofiaOrchestrator.processTask(input.taskId);
+        } catch (error) {
+          console.error(`[Tasks] Failed to start task ${input.taskId}:`, error);
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Não foi possível iniciar a missão. Verifique o banco e tente novamente.",
+            cause: error,
+          });
+        }
+      }),
+
     consolidate: protectedProcedure
       .input(z.object({ taskId: z.number().int().positive() }))
       .mutation(async ({ input, ctx }) => {
