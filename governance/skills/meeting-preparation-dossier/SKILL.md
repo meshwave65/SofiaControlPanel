@@ -22,6 +22,23 @@ A task is complete only when:
 
 Creating only a README, filling date/time, copying generic questions, listing files that do not exist, or writing “materials to prepare” is not completion.
 
+## 1.1 Reprocess previously prepared meetings
+
+Whenever this skill is introduced, materially revised, or an owner identifies that an existing meeting package was not adequately produced, all affected meetings previously labeled prepared/complete must be reopened and reprocessed.
+
+Set the operational state to `PENDING_REPROCESSING` until the new quality gate passes. Existing README files, agendas, briefings, and reports are historical inputs only; their existence or previous completion label does not satisfy this skill.
+
+For each affected meeting:
+1. inventory every existing file and classify it as reusable, stale, incomplete, unsupported, or historical;
+2. preserve historical material and provenance; do not silently delete or overwrite it;
+3. reread the current blueprint, participant mapping, evidence, and meeting logistics;
+4. rebuild the dossier against the full requirements in this skill, not merely patch the previous agenda;
+5. produce and persist missing supporting artifacts, including executive brief, talk track, evidence/claims, demo plan, discovery questions/objections, and conditional next steps as applicable;
+6. validate every relative link, claim, source, maturity statement, and deliverable;
+7. update the meeting README with a file-by-file status and only mark `COMPLETE` after the quality checklist passes.
+
+A reprocessing batch must list every affected meeting and its state. If a meeting cannot be reprocessed because of an active writer lock, missing identity, inaccessible evidence, or a human decision, leave it explicitly pending/blocked and record the exact dependency. Do not claim that the batch is complete while any affected meeting remains pending or blocked.
+
 ## 2. Authority and mandatory inputs
 
 Before authoring, read:
