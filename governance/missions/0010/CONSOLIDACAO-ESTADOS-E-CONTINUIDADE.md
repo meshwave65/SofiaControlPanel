@@ -79,6 +79,10 @@ A missão não possui outra etapa ARC numerada automaticamente. Qualquer continu
 
 Até que esse gate seja satisfeito, o estado operacional é `shadow-only`, sem bloqueio de tarefas.
 
+## Supabase e armazenamento
+
+As tabelas ARC já estão definidas na migration relacional `drizzle/0001_fixed_eternity.sql`; ARC/PGC persiste avaliações e evidências em PostgreSQL/JSONB e não precisa de bucket de arquivos. Buckets existentes no SCP atendem relatórios consolidados e não devem ser reutilizados para evidências ARC. Nesta auditoria não havia `DATABASE_URL`, `SUPABASE_URL` ou chave server-side configurada no ambiente, nem conector Supabase disponível; portanto nenhuma alteração externa foi executada. A aplicação da migration no Supabase só deve ocorrer em nova tarefa formal, com alvo autorizado e verificação posterior das tabelas e de uma política habilitada.
+
 ## Instrução de continuidade
 
 Ao receber “Assuma ARC/PGC a partir do painel do SCP”, o agente deve:

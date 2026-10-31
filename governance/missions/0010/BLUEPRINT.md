@@ -1,7 +1,7 @@
 # Blueprint da Missão 0010 — Desenvolvimento do ARC/PGC
 
 **Missão:** `MISSION_0010`
-**Estado:** `PROGRESS`
+**Estado:** `CONSOLIDATED`
 **Orquestrador:** SofiaControlPanel (SCP)
 **Repositório canônico do produto:** [`meshwave65/SofiaARC-PGC`](https://github.com/meshwave65/SofiaARC-PGC), branch `main`
 **Sistema-alvo:** [`meshwave65/SofiaControlPanel`](https://github.com/meshwave65/SofiaControlPanel), branch `main`
@@ -47,17 +47,22 @@ A missão não autoriza alegar autenticação criptográfica, prova de presença
 ## 5. Fases
 
 - **ARC-001:** blueprint, repositório, checkpoint inicial e OR — concluída.
-- **ARC-002:** motor Bayesiano puro, tipos e testes — em execução pelo primeiro agente.
-- **ARC-003:** coletor ARC e avaliador PGC.
-- **ARC-004:** persistência e migrations no SofiaControlPanel.
-- **ARC-005:** API tRPC.
-- **ARC-006:** integração do orquestrador em `shadow mode`.
-- **ARC-007:** UI mínima.
-- **ARC-008:** validação final, handoff e decisão sobre `assisted`.
+- **ARC-002:** motor Bayesiano puro, tipos e testes — concluída.
+- **ARC-003:** coletor ARC e avaliador PGC — concluída.
+- **ARC-004:** persistência e migrations no SofiaControlPanel — concluída estaticamente; aplicação real pendente.
+- **ARC-005:** API tRPC — concluída.
+- **ARC-006:** integração do orquestrador em `shadow mode` — concluída.
+- **ARC-007:** UI mínima — concluída.
+- **ARC-008:** validação final e handoff — concluída para uso controlado; `assisted` não autorizado.
+- **Consolidação:** estados reconciliados em `CONSOLIDACAO-ESTADOS-E-CONTINUIDADE.md`.
 
 Nenhuma fase posterior pode ser iniciada antes do checkpoint e dos critérios de aceite da fase anterior.
 
-## 6. Critérios de aceite da missão
+## 6. Consolidação e continuidade
+
+A missão está em estado `CONSOLIDATED`. O documento `CONSOLIDACAO-ESTADOS-E-CONTINUIDADE.md` é a referência para a ordem de autoridade, o estado de cada fase e os gates de continuidade. Nenhum agente deve reabrir ARC-001–ARC-008 por numeração ou ativar `assisted`/`enforced` sem nova tarefa formal, decisão explícita e validação de ambiente.
+
+## 7. Critérios de aceite da missão
 
 - Cada fase possui código/documentação, validação, commit remoto e checkpoint.
 - O checkpoint permite que um agente novo retome sem consultar esta conversa.

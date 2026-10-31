@@ -8,15 +8,15 @@
 - **Repositório de execução:** `https://github.com/meshwave65/SofiaARC-PGC`
 - **Sistema-alvo:** `https://github.com/meshwave65/SofiaControlPanel`
 - **Instância atual:** Manus ARC-PGC Agent
-- **Estado:** `PROGRESS`
+- **Estado:** `CONSOLIDATED`
 - **Gatilho curto:** “Assuma ARC/PGC a partir do painel do SCP.”
 
 ## Estado atual
 
-A missão está em execução. ARC-001 a ARC-006 foram concluídas por agentes anteriores. ARC-007 foi concluída no `SofiaControlPanel@d759954`, com checkpoint `cce90ae` e OR `OR-20261030-0003`; a UI consulta, executa e exibe avaliações ARC/PGC em shadow mode sem metadata sensível. A validação contra PostgreSQL real e navegador autenticado permanece pendente; ARC-008 é a próxima etapa liberada.
+A missão foi auditada e consolidada. ARC-001 a ARC-008 estão concluídas conforme os checkpoints e artefatos publicados. O MVP funciona em `shadow mode`, com UI, API, persistência estática, coletor e inferência Bayesiana validados por código, testes e build. A aplicação da migration em PostgreSQL autorizado e o fluxo end-to-end em navegador autenticado permanecem gates de continuidade, não evidência implícita de produção. `assisted` e `enforced` continuam não autorizados.
 
 ## Handoff
 
 Para assumir a missão, leia este arquivo, o arquivo de tarefas, o blueprint da missão e depois sincronize o repositório `SofiaARC-PGC`. O último checkpoint técnico remoto é a autoridade; não use a conversa como estado.
 
-**Próxima ação:** assumir a única tarefa `ARC-008` em `MISSION_0010 - TASKS - PROGRESS.md`, confirmando `SofiaControlPanel@cce90ae` e lendo `governance/missions/0010/CHECKPOINT-ARC-007.md` antes de editar.
+**Próxima ação:** não reabrir ARC-001–ARC-008. Para continuar, registrar nova tarefa formal de validação de ambiente, ler `governance/missions/0010/CONSOLIDACAO-ESTADOS-E-CONTINUIDADE.md` e confirmar o gate de PostgreSQL/autenticação antes de qualquer mudança de modo.
