@@ -178,7 +178,13 @@ export class SofiaOrchestrator {
       try {
         await syncAgentCredits(agent.id);
       } catch (error) {
-        console.warn(`[Orchestrator] Não foi possível atualizar créditos do agente ${agent.id} antes da alocação:`, error instanceof Error ? error.message : error);
+        const message = error instanceof Error ? error.message : String(error);
+        try {
+          await db.recordAgentCreditSyncError(agent.id, message);
+        } catch (recordError) {
+          console.error(`[Orchestrator] Não foi possível registrar a falha de consulta do agente ${agent.id}:`, recordError);
+        }
+        console.warn(`[Orchestrator] Não foi possível atualizar créditos do agente ${agent.id} antes da alocação:`, message);
       }
     }));
 
@@ -198,20 +204,6 @@ export class SofiaOrchestrator {
         executionStarted: false,
         externalTaskIds: [],
         waitingForAgent: true,
-      };
-    }
-
-    // Duplicate webhook/manual requests become harmless: only the STAGED -> PROGRESS
-    // transition can reserve the mission.
-    if (!claimedTask) {
-      const currentTask = await db.getTaskById(taskId);
-      return {
-        task: currentTask,
-        started: false,
-        factorized: false,
-        subtaskIds: [],
-        executionStarted: Boolean(currentTask?.manusTaskId),
-        externalTaskIds: currentTask?.manusTaskId ? [currentTask.manusTaskId] : [],
       };
     }
 
