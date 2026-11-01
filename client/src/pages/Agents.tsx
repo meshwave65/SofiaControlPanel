@@ -230,7 +230,8 @@ export default function Agents() {
     return new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 2 }).format(Number(value));
   };
   const connectionLabel = (agent: any) => {
-    if (agent.connectionStatus === "configured" && agent.hasCredential) return "CREDENCIAL SELADA";
+    if (agent.hasCredential && agent.connectionStatus === "connected") return "CONECTADA";
+    if (agent.hasCredential && agent.connectionStatus === "configured") return "CREDENCIAL CONFIGURADA";
     return "NÃO CONFIGURADA";
   };
 
