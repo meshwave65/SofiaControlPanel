@@ -2,6 +2,7 @@ import * as db from "./db";
 import { notifyOwner } from "./_core/notification";
 import { invokeLLM } from "./_core/llm";
 import { syncAllAgentCredits, syncRunningManusTasks } from "./manusExecutionService";
+import { SofiaOrchestrator } from "./sofiaOrchestrator";
 
 /**
  * Sistema de Heartbeat e Monitoramento
@@ -26,6 +27,7 @@ export async function startHeartbeatSystem() {
   heartbeatInterval = setInterval(async () => {
     try {
       await checkAgentStatus();
+      await dispatchWaitingTasks();
     } catch (error) {
       console.error("[Heartbeat] Erro ao verificar status:", error);
     }
@@ -83,6 +85,30 @@ async function checkAgentStatus() {
     }
   } catch (error) {
     console.error("[Heartbeat] Erro em checkAgentStatus:", error);
+  }
+}
+
+/**
+ * Verifica se há missões pendentes aguardando um agente livre ou saldo.
+ * Não reabre tarefas STAGED antigas: somente as que já foram marcadas como aguardando.
+ */
+async function dispatchWaitingTasks() {
+  try {
+    const stagedStatusId = await db.getTaskStatusIdByName("STAGED");
+    const tasks = (await db.getAllTasksGlobal()).filter((task) =>
+      task.statusId === stagedStatusId
+      && (task.manusStatus === "waiting_for_available_agent" || task.manusStatus === "waiting_for_pinned_agent")
+    );
+
+    for (const task of tasks) {
+      try {
+        await SofiaOrchestrator.startTask(task.id);
+      } catch (error) {
+        console.warn(`[Heartbeat] Falha ao retomar missão aguardando ${task.id}:`, error instanceof Error ? error.message : error);
+      }
+    }
+  } catch (error) {
+    console.error("[Heartbeat] Erro ao despachar missões aguardando:", error);
   }
 }
 
