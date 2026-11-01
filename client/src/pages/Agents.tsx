@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { trpc } from "@/lib/trpc";
-import { Plus, Pause, Play, X, Zap, Shield, Activity, Settings, Cpu, Terminal, Info, History, Server, HardDrive, Loader2, CheckCircle2, AlertCircle, ListTodo, ExternalLink, Trash2, Edit, Eye, EyeOff } from "lucide-react";
+import { Plus, Pause, Play, X, Zap, Shield, Activity, Settings, Cpu, Terminal, Info, History, Server, HardDrive, Loader2, CheckCircle2, AlertCircle, ListTodo, ExternalLink, Trash2, Edit, Eye, EyeOff, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -118,6 +118,14 @@ export default function Agents() {
       setManusValidation({ ok: false, message: error.message });
       toast.error(`Falha na validação Manus: ${error.message}`);
     },
+  });
+
+  const refreshCreditsMutation = trpc.agents.refreshCredits.useMutation({
+    onSuccess: (result) => {
+      toast.success(`Créditos atualizados: ${result.creditsRemaining}`);
+      agentsQuery.refetch();
+    },
+    onError: (error) => toast.error(`Falha ao atualizar créditos: ${error.message}`),
   });
 
   // Form
@@ -308,6 +316,16 @@ export default function Agents() {
                       </div>
                     </div>
                     <div className="flex gap-2 ml-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-10 h-10 p-0 flex items-center justify-center border-2 border-foreground/20 hover:border-accent hover:text-accent"
+                        title="Atualizar créditos Manus"
+                        disabled={refreshCreditsMutation.isPending}
+                        onClick={() => refreshCreditsMutation.mutate({ id: agent.id })}
+                      >
+                        <RefreshCw className={`w-4 h-4 ${refreshCreditsMutation.isPending ? "animate-spin" : ""}`} />
+                      </Button>
                       <Button
                         size="sm"
                         variant="outline"

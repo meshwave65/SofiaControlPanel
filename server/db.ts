@@ -197,6 +197,24 @@ export async function getManusCredentialsForAgentForOwner(id: number, ownerId: n
     manusToken: decryptCredential(agent.manusToken),
   };
 }
+
+/** Internal server-only credential access for the execution worker. */
+export async function getManusCredentialsForAgent(id: number) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+
+  const [agent] = await database
+    .select({ manusAccount: agents.manusAccount, manusToken: agents.manusToken })
+    .from(agents)
+    .where(eq(agents.id, id))
+    .limit(1);
+
+  if (!agent) return null;
+  return {
+    manusAccount: agent.manusAccount,
+    manusToken: agent.manusToken ? decryptCredential(agent.manusToken) : null,
+  };
+}
 export async function updateAgentStatus(id: number, status: "online" | "offline" | "idle" | "paused") {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -209,6 +227,19 @@ export async function updateAgentHeartbeat(id: number) {
   if (!db) throw new Error("Database not available");
 
   return db.update(agents).set({ lastHeartbeat: new Date(), updatedAt: new Date() }).where(eq(agents.id, id));
+}
+
+export async function updateAgentCredits(id: number, creditsRemaining: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return db.update(agents).set({
+    creditsRemaining: String(Math.max(0, Math.trunc(creditsRemaining))),
+    creditsUpdatedAt: new Date(),
+    connectionStatus: "connected",
+    connectionError: null,
+    updatedAt: new Date(),
+  }).where(eq(agents.id, id));
 }
 
 export async function updateAgent(id: number, data: Partial<InsertAgent>) {
@@ -345,6 +376,18 @@ export async function updateTaskStatus(id: number, statusId: number) {
   if (!db) throw new Error("Database not available");
 
   return db.update(tasks).set({ statusId, updatedAt: new Date() }).where(eq(tasks.id, id));
+}
+
+export async function updateTaskExecution(id: number, data: {
+  manusTaskId?: string;
+  manusStatus?: string;
+  creditsUsed?: number | null;
+  completedAt?: Date | null;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return db.update(tasks).set({ ...data, lastSyncedAt: new Date(), updatedAt: new Date() }).where(eq(tasks.id, id));
 }
 
 // ============================================

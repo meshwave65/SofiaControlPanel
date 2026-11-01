@@ -1,5 +1,6 @@
 import * as db from "./db";
 import { Task } from "../drizzle/schema";
+import { createManusTask } from "./manusExecutionService";
 
 /**
  * Sofia Orchestrator v1.0
@@ -141,6 +142,49 @@ export class SofiaOrchestrator {
       started: true,
       factorized,
       subtaskIds,
+    };
+  }
+
+  /**
+   * Inicia a missão local e cria a execução correspondente na API Manus.
+   */
+  static async startTask(taskId: number) {
+    const task = await db.getTaskById(taskId);
+    if (!task) return null;
+    if (!task.agentId) throw new Error("A missão precisa de um agente responsável antes da execução.");
+
+    const stagedStatusId = await db.getTaskStatusIdByName(STATUS_STAGED);
+    const localResult = task.statusId === stagedStatusId
+      ? await this.processTask(taskId)
+      : {
+        task,
+        started: !task.manusTaskId,
+        factorized: false,
+        subtaskIds: [],
+      };
+    if (!localResult) return null;
+    if (!localResult.started) {
+      return { ...localResult, executionStarted: Boolean(task.manusTaskId), externalTaskIds: task.manusTaskId ? [task.manusTaskId] : [] };
+    }
+
+    const existingSubtasks = await db.getTasksByParentId(taskId);
+    const targetTaskIds = localResult.factorized
+      ? localResult.subtaskIds
+      : existingSubtasks.filter((subtask) => !subtask.manusTaskId).map((subtask) => subtask.id);
+    if (targetTaskIds.length === 0 && !task.manusTaskId) targetTaskIds.push(taskId);
+    const externalTaskIds: string[] = [];
+    for (const targetTaskId of targetTaskIds) {
+      const target = await db.getTaskById(targetTaskId);
+      if (!target) continue;
+      const execution = await createManusTask(target);
+      externalTaskIds.push(execution.manusTaskId);
+      await db.updateTaskStatus(targetTaskId, await db.getTaskStatusIdByName(STATUS_PROGRESS));
+    }
+
+    return {
+      ...localResult,
+      executionStarted: externalTaskIds.length > 0,
+      externalTaskIds,
     };
   }
 }

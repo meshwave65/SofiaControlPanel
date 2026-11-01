@@ -1,6 +1,7 @@
 import * as db from "./db";
 import { notifyOwner } from "./_core/notification";
 import { invokeLLM } from "./_core/llm";
+import { syncAllAgentCredits, syncRunningManusTasks } from "./manusExecutionService";
 
 /**
  * Sistema de Heartbeat e Monitoramento
@@ -33,7 +34,8 @@ export async function startHeartbeatSystem() {
   // Verificar créditos e gerar relatório a cada 5 minutos
   creditCheckInterval = setInterval(async () => {
     try {
-      await checkCreditsAndGenerateReport();
+      await syncAllAgentCredits();
+      await syncRunningManusTasks();
     } catch (error) {
       console.error("[Heartbeat] Erro ao verificar créditos:", error);
     }
@@ -90,11 +92,11 @@ async function checkAgentStatus() {
  */
 async function checkCreditsAndGenerateReport() {
   try {
-    // Simular verificação de créditos (em produção, viria de um serviço externo)
-    const estimatedCredits = Math.random() * 100;
+    const creditResults = await syncAllAgentCredits();
+    const lowCreditAgents = creditResults.filter((result) => result.ok && (result.creditsRemaining || 0) <= 40);
 
-    if (estimatedCredits <= 40) {
-      console.log(`[Heartbeat] Créditos baixos detectados: ${estimatedCredits.toFixed(2)}`);
+    if (lowCreditAgents.length > 0) {
+      console.log(`[Heartbeat] Créditos baixos detectados em ${lowCreditAgents.length} agente(s)`);
       await generateContextReport();
     }
   } catch (error) {

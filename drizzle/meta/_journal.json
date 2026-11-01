@@ -15,6 +15,13 @@
       "when": 1793289952902,
       "tag": "0001_fixed_eternity",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793478893061,
+      "tag": "0002_even_vindicator",
+      "breakpoints": true
     }
   ]
 }

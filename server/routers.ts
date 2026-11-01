@@ -7,6 +7,7 @@ import * as db from "./db";
 import { SofiaOrchestrator } from "./sofiaOrchestrator";
 import { TRPCError } from "@trpc/server";
 import { getConsolidatedTaskReport, uploadConsolidatedTaskReport } from "./controlPanelStorage";
+import { syncAgentCredits } from "./manusExecutionService";
 
 export const appRouter = router({
   system: systemRouter,
@@ -161,6 +162,25 @@ export const appRouter = router({
         };
       }),
 
+    refreshCredits: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ input, ctx }) => {
+        const agent = await db.getAgentByIdForOwner(input.id, ctx.user.id);
+        if (!agent && ctx.user.role !== "admin") {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Agente não encontrado." });
+        }
+        try {
+          const creditsRemaining = await syncAgentCredits(input.id);
+          return { ok: true, creditsRemaining };
+        } catch (error) {
+          throw new TRPCError({
+            code: "BAD_GATEWAY",
+            message: error instanceof Error ? error.message : "Não foi possível atualizar os créditos.",
+            cause: error,
+          });
+        }
+      }),
+
     updateStatus: adminProcedure
       .input(z.object({
         id: z.number(),
@@ -277,12 +297,12 @@ export const appRouter = router({
         }
 
         try {
-          return await SofiaOrchestrator.processTask(input.taskId);
+          return await SofiaOrchestrator.startTask(input.taskId);
         } catch (error) {
           console.error(`[Tasks] Failed to start task ${input.taskId}:`, error);
           throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Não foi possível iniciar a missão. Verifique o banco e tente novamente.",
+            code: "BAD_REQUEST",
+            message: error instanceof Error ? error.message : "Não foi possível iniciar a missão.",
             cause: error,
           });
         }

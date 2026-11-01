@@ -238,18 +238,30 @@ A criação exige sessão autenticada. Para o primeiro teste, usar campos Manus 
 
 ## 7. Integração Manus — estado e cautelas
 
+### Atualização de 31/10/2026 — execução real e créditos
+
+Foi implementado o primeiro ciclo real de integração por API key:
+
+- `tasks.start` chama `POST https://api.manus.ai/v2/task.create` usando a API key criptografada do agente.
+- O `task_id` externo é persistido em `sofia.tasks.manusTaskId`.
+- O heartbeat consulta `task.detail` e atualiza status, consumo e conclusão local.
+- O heartbeat e o botão **Atualizar créditos** consultam `usage.availableCredits` e persistem `total_credits` em `sofia.agents.creditsRemaining`.
+- A migration `drizzle/0002_even_vindicator.sql` adiciona os metadados de execução.
+
+O fluxo ainda exige que cada agente tenha uma API key Manus válida. A execução real não deve ser testada com senha; somente API key oficial. A validação ponta a ponta no Render permanece dependente de `DATABASE_URL`, API keys configuradas e deploy da migration.
+
 O backend registra inicialização OAuth com:
 
 ```text
 [OAuth] Initialized with baseURL: https://api.manus.im
 ```
 
-Porém, não considerar a integração de contas Manus concluída. Ainda é necessário definir e validar:
+O ciclo por API key agora está implementado, mas não deve ser considerado validado em produção até executar um teste controlado no Render. Ainda é necessário validar:
 
 - mecanismo oficial de login/API para contas Manus;
 - armazenamento e rotação de sessão/token;
 - tratamento de MFA e expiração;
-- leitura oficial de créditos;
+- leitura oficial de créditos no ambiente publicado;
 - limites e políticas de uso;
 - isolamento por agente;
 - auditoria de tarefas executadas;

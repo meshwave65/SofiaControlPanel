@@ -228,6 +228,8 @@ export default function TaskDetail() {
   }
 
   const operationalReports = messages.filter(m => m.typeId === 2); // OperationalReport type
+  const currentStatusName = statuses.find((status) => status.id === task.statusId)?.name.toUpperCase();
+  const canStartExecution = (currentStatusName === "STAGED" || currentStatusName === "PROGRESS") && !task.manusTaskId;
 
   return (
     <DashboardLayout>
@@ -277,7 +279,7 @@ export default function TaskDetail() {
                 <CardContent className="flex gap-3">
                   <Button
                     onClick={handleStart}
-                    disabled={isStarting || task.statusId !== statuses.find((status) => status.name.toUpperCase() === "STAGED")?.id}
+                    disabled={isStarting || !canStartExecution}
                     className="bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     {isStarting ? (
@@ -285,7 +287,7 @@ export default function TaskDetail() {
                     ) : (
                       <Play className="w-4 h-4 mr-2" />
                     )}
-                    {isStarting ? "Iniciando..." : "Iniciar missão"}
+                    {isStarting ? "Iniciando..." : currentStatusName === "PROGRESS" ? "Retomar execução" : "Iniciar missão"}
                   </Button>
                   <Button
                     onClick={handleFactorize}

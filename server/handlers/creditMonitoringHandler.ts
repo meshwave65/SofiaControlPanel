@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { sdk } from "../_core/sdk";
+import { syncAllAgentCredits } from "../manusExecutionService";
 
 /**
  * Endpoint reservado para o integrador oficial de créditos.
@@ -13,12 +14,8 @@ export async function creditMonitoringHandler(req: Request, res: Response) {
       return res.status(403).json({ error: "cron-only" });
     }
 
-    return res.json({
-      ok: true,
-      action: "no_source_configured",
-      creditsRemaining: null,
-      message: "Nenhuma fonte oficial de créditos Manus está configurada.",
-    });
+    const agents = await syncAllAgentCredits();
+    return res.json({ ok: true, action: "credits_synced", agents });
   } catch (error) {
     const err = error instanceof Error ? error : new Error(String(error));
     console.error("[creditMonitoringHandler] Error:", err);
