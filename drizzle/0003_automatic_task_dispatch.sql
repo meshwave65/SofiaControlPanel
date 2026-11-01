@@ -1,4 +1,5 @@
--- Automatically dispatch assigned STAGED tasks to the Sofia backend.
+-- Automatically dispatch every newly STAGED task to the Sofia backend.
+-- The orchestrator selects an agent when agentId is null.
 -- The URL and shared secret are stored encrypted in Supabase Vault:
 --   sofia_dispatch_url
 --   sofia_dispatch_secret
@@ -22,7 +23,7 @@ BEGIN
 
   IF staged_status_id IS NULL
      OR NEW."statusId" IS DISTINCT FROM staged_status_id
-     OR NEW."agentId" IS NULL THEN
+     THEN
     RETURN NEW;
   END IF;
 
