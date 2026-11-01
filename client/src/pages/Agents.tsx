@@ -128,6 +128,23 @@ export default function Agents() {
     onError: (error) => toast.error(`Falha ao atualizar créditos: ${error.message}`),
   });
 
+  const refreshAllCreditsMutation = trpc.agents.refreshAllCredits.useMutation({
+    onSuccess: (result) => {
+      agentsQuery.refetch();
+      const failures = result.results.filter((item) => !item.ok);
+      if (result.updated > 0) {
+        toast.success(`Saldos atualizados: ${result.updated} de ${result.total} agentes.`);
+      }
+      if (failures.length > 0) {
+        toast.error(`Não foi possível consultar ${failures.length} agente(s): ${failures.map((item) => item.name).join(", ")}.`);
+      }
+      if (result.total === 0) {
+        toast.info("Nenhum agente com credencial Manus configurada.");
+      }
+    },
+    onError: (error) => toast.error(`Falha ao atualizar saldos: ${error.message}`),
+  });
+
   // Form
   const form = useForm<any>({
     resolver: zodResolver(agentSchema) as any,
@@ -236,12 +253,24 @@ export default function Agents() {
               SISTEMA DE CONTROLE CENTRAL // AGENTES ATIVOS: <span className="text-accent font-bold">{displayAgents.length}</span> // OPERADOR: <span className="text-accent font-bold">{user?.name || "DESCONHECIDO"}</span>
             </p>
           </div>
-          <Button 
-            onClick={handleOpenCreate}
-            className="bg-accent text-accent-foreground hover:bg-accent/90 flex items-center gap-2 shadow-[0_0_15px_rgba(var(--accent-rgb),0.3)] font-bold uppercase tracking-widest text-xs h-11 px-6"
-          >
-            <Plus className="w-4 h-4" /> Inicializar Nova Unidade
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              onClick={() => refreshAllCreditsMutation.mutate()}
+              disabled={refreshAllCreditsMutation.isPending || displayAgents.filter((agent) => agent.hasCredential).length === 0}
+              className="flex items-center gap-2 font-bold uppercase tracking-widest text-xs h-11 px-4"
+              title="Consultar o saldo atual de todos os agentes Manus configurados"
+            >
+              <RefreshCw className={`w-4 h-4 ${refreshAllCreditsMutation.isPending ? "animate-spin" : ""}`} />
+              {refreshAllCreditsMutation.isPending ? "Consultando saldos..." : "Atualizar saldos"}
+            </Button>
+            <Button 
+              onClick={handleOpenCreate}
+              className="bg-accent text-accent-foreground hover:bg-accent/90 flex items-center gap-2 shadow-[0_0_15px_rgba(var(--accent-rgb),0.3)] font-bold uppercase tracking-widest text-xs h-11 px-6"
+            >
+              <Plus className="w-4 h-4" /> Inicializar Nova Unidade
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -308,8 +337,9 @@ export default function Agents() {
 
                     <div className="grid grid-cols-2 gap-3 mb-5 ml-2">
                       <div className="bg-foreground/5 p-2.5 rounded border border-foreground/10">
-                        <span className="text-[8px] uppercase text-muted-foreground font-bold tracking-tighter block">Crédito restante</span>
+                        <span className="text-[8px] uppercase text-muted-foreground font-bold tracking-tighter block">Saldo Manus disponível</span>
                         <span className={`text-sm font-mono font-black ${agent.creditsRemaining === null || agent.creditsRemaining === undefined ? "text-muted-foreground" : Number(agent.creditsRemaining) <= 0 ? "text-red-400" : "text-accent"}`}>{formatCredits(agent.creditsRemaining)}</span>
+                        <span className="text-[9px] text-muted-foreground mt-1">{agent.creditsUpdatedAt ? `Atualizado em ${new Date(agent.creditsUpdatedAt).toLocaleString("pt-BR")}` : "Ainda não consultado"}</span>
                       </div>
                       <div className="bg-foreground/5 p-2.5 rounded border border-foreground/10">
                         <span className="text-[8px] uppercase text-muted-foreground font-bold tracking-tighter block">Conexão Manus</span>
