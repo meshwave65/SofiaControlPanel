@@ -226,7 +226,7 @@ export class SofiaOrchestrator {
         await db.updateTaskStatus(taskId, await db.getTaskStatusIdByName("FAIL"));
         const eventType = await db.getOrCreateActivityEventType("task_execution_failed");
         await db.createActivityLog({
-          agentId: claimedTask.agentId,
+          agentId: task.agentId,
           taskId,
           eventTypeId: eventType.id,
           details: message,
