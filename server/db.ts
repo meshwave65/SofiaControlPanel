@@ -378,6 +378,20 @@ export async function updateTaskStatus(id: number, statusId: number) {
   return db.update(tasks).set({ statusId, updatedAt: new Date() }).where(eq(tasks.id, id));
 }
 
+/** Atomically reserves a STAGED task by moving it to PROGRESS. Only one caller can win. */
+export async function claimStagedTask(id: number, stagedStatusId: number, progressStatusId: number) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+
+  const [claimed] = await database
+    .update(tasks)
+    .set({ statusId: progressStatusId, updatedAt: new Date() })
+    .where(and(eq(tasks.id, id), eq(tasks.statusId, stagedStatusId)))
+    .returning();
+
+  return claimed ?? null;
+}
+
 export async function updateTaskExecution(id: number, data: {
   manusTaskId?: string;
   manusStatus?: string;
