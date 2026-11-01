@@ -1,4 +1,5 @@
 import postgres from "postgres";
+import { readFile } from "node:fs/promises";
 
 const url = process.env.DATABASE_URL || process.env.VITE_DATABASE_URL;
 if (!url) {
@@ -14,7 +15,13 @@ try {
   await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "manusStatus" varchar(32)`;
   await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "creditsUsed" integer`;
   await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "lastSyncedAt" timestamp`;
-  console.log("[Database] Execution columns verified successfully");
+  const dispatchMigration = await readFile(
+    new URL("../drizzle/0003_automatic_task_dispatch.sql", import.meta.url),
+    "utf8",
+  );
+  await sql.unsafe(dispatchMigration);
+  console.log("[Database] Automatic task dispatch trigger verified successfully");
+    console.log("[Database] Execution columns verified successfully");
 } catch (error) {
   console.error("[Database] Failed to verify execution columns:", error);
   process.exitCode = 1;
