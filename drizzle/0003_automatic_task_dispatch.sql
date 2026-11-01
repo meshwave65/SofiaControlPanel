@@ -26,10 +26,11 @@ BEGIN
     RETURN NEW;
   END IF;
 
-  IF TG_OP = 'UPDATE'
-     AND OLD."statusId" IS NOT DISTINCT FROM NEW."statusId"
-     AND OLD."agentId" IS NOT DISTINCT FROM NEW."agentId" THEN
-    RETURN NEW;
+  IF TG_OP = 'UPDATE' THEN
+    IF OLD."statusId" IS NOT DISTINCT FROM NEW."statusId"
+       AND OLD."agentId" IS NOT DISTINCT FROM NEW."agentId" THEN
+      RETURN NEW;
+    END IF;
   END IF;
 
   SELECT decrypted_secret
