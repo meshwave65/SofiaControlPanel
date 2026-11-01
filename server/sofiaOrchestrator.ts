@@ -1,6 +1,6 @@
 import * as db from "./db";
 import { Task } from "../drizzle/schema";
-import { createManusTask } from "./manusExecutionService";
+import { createManusTask, syncAgentCredits } from "./manusExecutionService";
 
 /**
  * Sofia Orchestrator v1.0
@@ -54,6 +54,7 @@ export class SofiaOrchestrator {
       const result = await db.createTask({
         createdBy: task.createdBy,
         agentId: task.agentId,
+        agentPinned: task.agentPinned,
         title: `${dim.title}: ${task.title}`,
         description: `${dim.suffix} ${task.description}`,
         statusId: await db.getTaskStatusIdByName(STATUS_STAGED),
@@ -151,11 +152,54 @@ export class SofiaOrchestrator {
   static async startTask(taskId: number) {
     const task = await db.getTaskById(taskId);
     if (!task) return null;
-    if (!task.agentId) throw new Error("A missão precisa de um agente responsável antes da execução.");
 
     const stagedStatusId = await db.getTaskStatusIdByName(STATUS_STAGED);
+    if (task.statusId !== stagedStatusId) {
+      return {
+        task,
+        started: false,
+        factorized: false,
+        subtaskIds: [],
+        executionStarted: Boolean(task.manusTaskId),
+        externalTaskIds: task.manusTaskId ? [task.manusTaskId] : [],
+      };
+    }
+
+    // Refresh the selected account, or all online configured accounts for automatic assignment.
+    // Cached balances older than one minute are not used to allocate a new mission.
+    const configuredAgents = await db.getAgentsByOwnerId(task.createdBy);
+    const refreshTargets = configuredAgents.filter((agent: any) =>
+      agent.hasCredential
+      && agent.status === "online"
+      && (!task.agentPinned || agent.id === task.agentId)
+      && (!agent.creditsUpdatedAt || Date.now() - new Date(agent.creditsUpdatedAt).getTime() > 60_000)
+    );
+    await Promise.all(refreshTargets.map(async (agent: any) => {
+      try {
+        await syncAgentCredits(agent.id);
+      } catch (error) {
+        console.warn(`[Orchestrator] Não foi possível atualizar créditos do agente ${agent.id} antes da alocação:`, error instanceof Error ? error.message : error);
+      }
+    }));
+
     const progressStatusId = await db.getTaskStatusIdByName(STATUS_PROGRESS);
-    const claimedTask = await db.claimStagedTask(taskId, stagedStatusId, progressStatusId);
+    const claimedTask = await db.claimStagedTaskWithAvailableAgent(taskId, stagedStatusId, progressStatusId);
+
+    // No eligible agent: keep the mission STAGED. Heartbeat retries when credits/status change.
+    if (!claimedTask) {
+      await db.updateTaskExecution(taskId, {
+        manusStatus: task.agentPinned ? "waiting_for_pinned_agent" : "waiting_for_available_agent",
+      });
+      return {
+        task: await db.getTaskById(taskId),
+        started: false,
+        factorized: false,
+        subtaskIds: [],
+        executionStarted: false,
+        externalTaskIds: [],
+        waitingForAgent: true,
+      };
+    }
 
     // Duplicate webhook/manual requests become harmless: only the STAGED -> PROGRESS
     // transition can reserve the mission.
