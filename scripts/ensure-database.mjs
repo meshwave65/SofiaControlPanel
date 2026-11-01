@@ -11,6 +11,7 @@ const sql = postgres(url, { max: 1, prepare: false, connect_timeout: 10 });
 
 try {
   await sql`CREATE SCHEMA IF NOT EXISTS "sofia"`;
+  await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "agentPinned" boolean NOT NULL DEFAULT false`;
   await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "manusTaskId" varchar(128)`;
   await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "manusStatus" varchar(32)`;
   await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "creditsUsed" integer`;
