@@ -20,8 +20,8 @@ try {
     "utf8",
   );
   await sql.unsafe(dispatchMigration);
+  console.log("[Database] Execution columns verified successfully");
   console.log("[Database] Automatic task dispatch trigger verified successfully");
-    console.log("[Database] Execution columns verified successfully");
 } catch (error) {
   console.error("[Database] Failed to verify execution columns:", error);
   process.exitCode = 1;
