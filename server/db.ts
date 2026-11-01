@@ -234,10 +234,24 @@ export async function updateAgentCredits(id: number, creditsRemaining: number) {
   if (!db) throw new Error("Database not available");
 
   return db.update(agents).set({
-    creditsRemaining: String(Math.max(0, Math.trunc(creditsRemaining))),
+    creditsRemaining: String(Math.max(0, creditsRemaining)),
     creditsUpdatedAt: new Date(),
     connectionStatus: "connected",
     connectionError: null,
+    updatedAt: new Date(),
+  }).where(eq(agents.id, id));
+}
+
+/**
+ * Records a failed balance refresh without changing the last known balance
+ * or its successful-update timestamp.
+ */
+export async function recordAgentCreditSyncError(id: number, message: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return db.update(agents).set({
+    connectionError: message,
     updatedAt: new Date(),
   }).where(eq(agents.id, id));
 }
@@ -407,9 +421,11 @@ export async function claimStagedTaskWithAvailableAgent(
         WHERE a.id = ${task.agentId}
           AND a."ownerId" = ${task.createdBy}
           AND a.status = 'online'
-          AND a."connectionStatus" = 'connected'
+          AND a."connectionStatus" IN ('configured', 'connected')
           AND a."manusToken" IS NOT NULL
-          AND COALESCE(a."creditsRemaining"::numeric, 0) > 0
+          AND a."creditsRemaining" IS NOT NULL
+          AND a."creditsRemaining"::numeric > 0
+          AND a."creditsUpdatedAt" >= NOW() - INTERVAL '60 seconds'
           AND NOT EXISTS (
             SELECT 1
             FROM sofia.tasks active_task
@@ -435,9 +451,11 @@ export async function claimStagedTaskWithAvailableAgent(
       FROM sofia.agents a
       WHERE a."ownerId" = ${task.createdBy}
         AND a.status = 'online'
-        AND a."connectionStatus" = 'connected'
+        AND a."connectionStatus" IN ('configured', 'connected')
         AND a."manusToken" IS NOT NULL
-        AND COALESCE(a."creditsRemaining"::numeric, 0) > 0
+        AND a."creditsRemaining" IS NOT NULL
+          AND a."creditsRemaining"::numeric > 0
+          AND a."creditsUpdatedAt" >= NOW() - INTERVAL '60 seconds'
         AND NOT EXISTS (
           SELECT 1
           FROM sofia.tasks active_task
