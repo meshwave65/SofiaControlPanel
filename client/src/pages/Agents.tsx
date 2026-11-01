@@ -203,6 +203,7 @@ export default function Agents() {
   };
 
   const isOnline = (agent: any) => {
+    if (agent.status === "online") return true;
     if (!agent.lastHeartbeat) return false;
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
     return new Date(agent.lastHeartbeat) > fiveMinutesAgo;
@@ -316,6 +317,16 @@ export default function Agents() {
                       </div>
                     </div>
                     <div className="flex gap-2 ml-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className={`w-10 h-10 p-0 flex items-center justify-center border-2 ${online ? "border-green-500/50 text-green-400 hover:border-red-400 hover:text-red-400" : "border-foreground/20 hover:border-green-500 hover:text-green-400"}`}
+                        title={online ? "Colocar agente offline" : "Colocar agente online"}
+                        disabled={updateStatusMutation.isPending}
+                        onClick={() => updateStatusMutation.mutate({ id: agent.id, status: online ? "offline" : "online" })}
+                      >
+                        {online ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                      </Button>
                       <Button
                         size="sm"
                         variant="outline"

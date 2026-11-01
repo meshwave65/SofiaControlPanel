@@ -181,12 +181,16 @@ export const appRouter = router({
         }
       }),
 
-    updateStatus: adminProcedure
+    updateStatus: protectedProcedure
       .input(z.object({
         id: z.number(),
         status: z.enum(["online", "offline", "idle", "paused"]),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
+        const agent = await db.getAgentByIdForOwner(input.id, ctx.user.id);
+        if (!agent && ctx.user.role !== "admin") {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Agente não encontrado." });
+        }
         return db.updateAgentStatus(input.id, input.status);
       }),
 
