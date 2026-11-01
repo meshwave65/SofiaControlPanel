@@ -181,6 +181,32 @@ export const appRouter = router({
         }
       }),
 
+    refreshAllCredits: protectedProcedure.mutation(async ({ ctx }) => {
+      const agents = await db.getAgentsByOwnerId(ctx.user.id);
+      const configuredAgents = agents.filter((agent) => agent.hasCredential);
+
+      const results = await Promise.all(configuredAgents.map(async (agent) => {
+        try {
+          const creditsRemaining = await syncAgentCredits(agent.id);
+          return { agentId: agent.id, name: agent.name, ok: true as const, creditsRemaining };
+        } catch (error) {
+          return {
+            agentId: agent.id,
+            name: agent.name,
+            ok: false as const,
+            error: error instanceof Error ? error.message : "Falha ao consultar saldo Manus.",
+          };
+        }
+      }));
+
+      return {
+        total: configuredAgents.length,
+        updated: results.filter((result) => result.ok).length,
+        failed: results.filter((result) => !result.ok).length,
+        results,
+      };
+    }),
+
     updateStatus: protectedProcedure
       .input(z.object({
         id: z.number(),
