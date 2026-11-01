@@ -42,7 +42,8 @@ A reprocessing batch must list every affected meeting and its state. If a meetin
 ## 2. Authority and mandatory inputs
 
 Before authoring, read:
-1. repository root instructions and the general agent workflow;
+1. the central governance/ARCHAEOLOGICAL_CONTEXT.md and relevant current operational guidance;
+2. repository root instructions and the general agent workflow;
 2. the specific Meeting Prep role protocol;
 3. the current authoritative project blueprint and product-stage documentation;
 4. the canonical contact mapping and source register;
@@ -268,6 +269,13 @@ If any essential item fails, status must be PARTIAL or BLOCKED, never COMPLETE.
 Report meeting, participant, project, logistics status, artifacts with exact paths, key sources/access dates, validations, complete/partial/blocked items, owner decisions, and next step.
 
 Create an OperationalReport under the active governance skill. Do not mark the mission task complete until the package is persisted, reviewed, and verifiable in the remote repository.
+
+
+## 16. Archaeological context and per-OR evolution
+
+The central governance/ARCHAEOLOGICAL_CONTEXT.md applies to this Skill. Read it before execution and do not create a separate competing archaeological history inside the meeting folder. When an OR identifies a reusable lesson, a procedural defect, a risk, or a justified optimization, the Oracle reviews it during the mission rather than waiting for the FOR. Corrections within delegated authority may be implemented, validated, and used by the next stage immediately. Preserve evidence, prior decisions, and version traceability. Changes beyond delegated authority remain subject to the applicable approval.
+
+Every meaningful execution stage must be reported through its OR and reviewed in the ongoing operational cycle. The final FOR consolidates all stage ORs and interventions; it does not replace per-OR review. This Skill remains DRAFT until the supervised pilot is evaluated and approved.
 
 ## 15. Success test
 
