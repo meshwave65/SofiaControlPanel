@@ -10,6 +10,7 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { creditMonitoringHandler } from "../handlers/creditMonitoringHandler";
 import publicRouter from "../publicEndpoints";
+import dispatchRouter from "../dispatchEndpoint";
 import { startHeartbeatSystem } from "../heartbeat";
 	
 async function isPortAvailable(port: number): Promise<boolean> {
@@ -49,6 +50,9 @@ async function startServer() {
   
   // Public API for external agents
   app.use("/api/public", publicRouter);
+
+  // Authenticated internal callback invoked by the Supabase task trigger.
+  app.use("/api/internal", dispatchRouter);
 
   // tRPC API
   app.use(
