@@ -4,7 +4,7 @@ description: Governança de skills compartilhadas, roteamento de tarefas, criaç
 ---
 # Skill Governance Oracle
 
-Use this protocol to operate a shared catalog of skills and a controlled improvement loop. The control panel or lead agent remains responsible for routing and approvals; the Oracle Agent reviews evidence and proposes or applies bounded changes.
+Use this protocol to operate the shared catalog and continuous operational-evolution loop. The Oracle Agent reviews every submitted OR during the mission, decides and applies changes within delegated authority, and escalates only decisions that genuinely require human judgment or approval. Read governance/ARCHAEOLOGICAL_CONTEXT.md as cross-cutting institutional memory.
 
 ## Portability model
 
@@ -73,7 +73,7 @@ The Oracle Agent is an autonomous skill, not merely a reviewer role. When invoke
 
 After each review, update the OR index, write `oracle/reviews/<OR-ID>.md`, and continue to the next unprocessed OR unless a conflict, missing artifact, permission issue, or high-risk change requires escalation.
 
-The Oracle must not make silent behavioral changes, remove safety controls to improve throughput, or merge a proposal without validation. High-risk changes require human approval even if the OR recommendation is strong.
+The Oracle must not make silent behavioral changes, remove safety controls to improve throughput, or apply a change without validation. Human approval is required when a change exceeds delegated authority, including architecture, fundamental objectives, policies, permissions, or scope. Routine operational corrections within authority should not be unnecessarily escalated.
 
 ## Versioning and registry
 
@@ -92,6 +92,16 @@ Each review file must state: OR ID, skill/version reviewed, evidence checked, pr
 - Keep generated artifacts and registry edits atomic and reviewable.
 - Measure whether an accepted change actually reduced the reported failure in later ORs.
 - If a skill repeatedly requires major exceptions, split it or create a more suitable skill instead of endlessly expanding it.
+
+## Per-OR continuous evolution, archaeological memory, and FOR
+
+Every submitted OperationalReport is an immediate review trigger; do not defer optimization decisions until mission closure. For each OR, verify referenced evidence, compare execution with current instructions and authority, identify risks, defects, and opportunities, decide the appropriate action, and record the rationale. If a correction is needed now and is within delegated authority, implement it, validate it, guide the executing agent, and enable safe continuation. The next dependent stage must receive the updated instruction.
+
+If imminent risk of harm, data loss, or irreversible mission compromise is identified, immediately suspend the task or stage causing the risk and preserve state/evidence. Limit suspension to the affected activity; independent safe work may continue. Correct, validate, and resume autonomously when authorized and sufficiently informed. Await human intervention only when the decision exceeds authority, requires human judgment, or cannot be made safely. Escalation must state diagnosis, alternatives, impacts, recommendation, and the exact decision required.
+
+Maintain the central governance/ARCHAEOLOGICAL_CONTEXT.md as incremental memory for all mission-guidance documents, not only Skills. Record relevant context, observed issue, evidence, decision, motivation, affected documents/versions, commit, validation, and outcome. Preserve prior entries; distinguish facts, statements, decisions, hypotheses, inferences, and unknowns. The memory explains why guidance evolved; current normative files continue to define what agents must do.
+
+At mission completion, the Oracle prepares a Final Operational Report (FOR) from the ORs of all stages, including interventions and decisions made during execution. The FOR consolidates the mission and its lessons; it is not the first point at which improvement is considered. Never claim completion when required ORs or essential evidence are missing.
 
 ## Bundled resources
 
