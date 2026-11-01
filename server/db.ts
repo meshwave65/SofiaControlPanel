@@ -380,11 +380,14 @@ export async function updateTaskStatus(id: number, statusId: number) {
 }
 
 /**
- * Assigns an eligible agent to an unassigned/automatically assigned STAGED task.
- * A user-selected agent is pinned and is never silently replaced.
- * The agent row is locked with SKIP LOCKED so concurrent missions cannot claim it twice.
+ * Atomically claims a STAGED task and reserves one eligible agent.
+ * Explicitly selected agents are pinned; automatic assignments may be changed.
  */
-export async function assignAvailableAgentToTask(taskId: number) {
+export async function claimStagedTaskWithAvailableAgent(
+  taskId: number,
+  stagedStatusId: number,
+  progressStatusId: number,
+) {
   const database = await getDb();
   if (!database) throw new Error("Database not available");
 
@@ -392,11 +395,11 @@ export async function assignAvailableAgentToTask(taskId: number) {
     const [task] = await tx.execute(sql`
       SELECT id, "createdBy", "agentId", "agentPinned"
       FROM sofia.tasks
-      WHERE id = ${taskId}
+      WHERE id = ${taskId} AND "statusId" = ${stagedStatusId}
       FOR UPDATE
     `) as any;
-
     if (!task) return null;
+
     if (task.agentId && task.agentPinned) {
       const [pinned] = await tx.execute(sql`
         SELECT a.id
@@ -415,8 +418,16 @@ export async function assignAvailableAgentToTask(taskId: number) {
               AND active_task.id <> ${taskId}
               AND active_status.name = 'PROGRESS'
           )
+        FOR UPDATE OF a
       `) as any;
-      return pinned ? Number(pinned.id) : null;
+      if (!pinned) return null;
+      const [claimed] = await tx.execute(sql`
+        UPDATE sofia.tasks
+        SET "statusId" = ${progressStatusId}, "updatedAt" = NOW()
+        WHERE id = ${taskId} AND "statusId" = ${stagedStatusId}
+        RETURNING *
+      `) as any;
+      return claimed ?? null;
     }
 
     const [candidate] = await tx.execute(sql`
@@ -439,15 +450,17 @@ export async function assignAvailableAgentToTask(taskId: number) {
       FOR UPDATE OF a SKIP LOCKED
       LIMIT 1
     `) as any;
-
     if (!candidate) return null;
-    const agentId = Number(candidate.id);
-    await tx.execute(sql`
+
+    const [claimed] = await tx.execute(sql`
       UPDATE sofia.tasks
-      SET "agentId" = ${agentId}, "updatedAt" = NOW()
-      WHERE id = ${taskId} AND "agentPinned" = false
-    `);
-    return agentId;
+      SET "agentId" = ${Number(candidate.id)},
+          "statusId" = ${progressStatusId},
+          "updatedAt" = NOW()
+      WHERE id = ${taskId} AND "statusId" = ${stagedStatusId} AND "agentPinned" = false
+      RETURNING *
+    `) as any;
+    return claimed ?? null;
   });
 }
 
