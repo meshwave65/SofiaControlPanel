@@ -294,6 +294,22 @@ export default function Tasks() {
         </div>
       </div>
 
+      {tasksQuery.isError && (
+        <div className="px-6 pt-6">
+          <Card role="alert" className="max-w-7xl mx-auto p-5 border-2 border-red-500/40 bg-red-500/5">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-400 mt-0.5" />
+              <div>
+                <h2 className="font-black uppercase tracking-widest text-sm text-red-300">Não foi possível carregar as missões</h2>
+                <p className="text-sm text-muted-foreground mt-1">O painel não deve tratar uma falha de banco como se houvesse zero missões.</p>
+                <p className="font-mono text-xs text-red-200/80 mt-2">{tasksQuery.error.message}</p>
+                <Button variant="outline" size="sm" className="mt-4" onClick={() => tasksQuery.refetch()}>Tentar novamente</Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
       {/* Filtros e Busca */}
       <div className="px-6 py-4 border-b border-foreground/20 bg-foreground/5">
         <div className="max-w-7xl mx-auto flex flex-wrap gap-6 items-center">

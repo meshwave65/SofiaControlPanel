@@ -149,7 +149,7 @@ function toPublicAgent(agent: any) {
 
 export async function getAgentsByOwnerId(ownerId: number) {
   const db = await getDb();
-  if (!db) return [];
+  if (!db) throw new Error("Banco de dados indisponível. Verifique DATABASE_URL no Render.");
   const rows = await db.select().from(agents).where(eq(agents.ownerId, ownerId));
   return rows.map(toPublicAgent);
 }
@@ -570,7 +570,7 @@ export async function getRecentActivityLogs(limit: number = 50) {
 
 export async function getAllTasks(ownerId: number) {
   const db = await getDb();
-  if (!db) return [];
+  if (!db) throw new Error("Banco de dados indisponível. Verifique DATABASE_URL no Render.");
 
   return db.select().from(tasks).where(eq(tasks.createdBy, ownerId)).orderBy(desc(tasks.createdAt));
 }
