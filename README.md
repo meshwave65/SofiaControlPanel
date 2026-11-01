@@ -98,6 +98,7 @@ Runtime configuration:
 - `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`: frontend Supabase Auth settings.
 - `OWNER_OPEN_ID`: Supabase Auth UUID for the owner/admin account (or the Manus `openId` when using legacy Manus OAuth).
 - `CREDENTIAL_ENCRYPTION_KEY`: required before saving non-empty Manus passwords/tokens for agents.
+- `SOFIA_DISPATCH_SECRET`: server-only shared secret used to authenticate Supabase automatic task-dispatch callbacks. Store the matching value in Supabase Vault as `sofia_dispatch_secret`; never commit it.
 - `JWT_SECRET`, `VITE_APP_ID`, `OAUTH_SERVER_URL`: required only for legacy Manus OAuth cookies.
 - `BUILT_IN_FORGE_API_URL`: Manus built-in apis (includes llm, storage, data_api, notification, etc...)
 - `BUILT_IN_FORGE_API_KEY`: Bearer token used by Manus built-in apis (server-side)
