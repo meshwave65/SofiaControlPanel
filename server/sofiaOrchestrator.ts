@@ -154,38 +154,88 @@ export class SofiaOrchestrator {
     if (!task.agentId) throw new Error("A missão precisa de um agente responsável antes da execução.");
 
     const stagedStatusId = await db.getTaskStatusIdByName(STATUS_STAGED);
-    const localResult = task.statusId === stagedStatusId
-      ? await this.processTask(taskId)
-      : {
-        task,
-        started: !task.manusTaskId,
+    const progressStatusId = await db.getTaskStatusIdByName(STATUS_PROGRESS);
+    const claimedTask = await db.claimStagedTask(taskId, stagedStatusId, progressStatusId);
+
+    // Duplicate webhook/manual requests become harmless: only the STAGED -> PROGRESS
+    // transition can reserve the mission.
+    if (!claimedTask) {
+      const currentTask = await db.getTaskById(taskId);
+      return {
+        task: currentTask,
+        started: false,
         factorized: false,
         subtaskIds: [],
+        executionStarted: Boolean(currentTask?.manusTaskId),
+        externalTaskIds: currentTask?.manusTaskId ? [currentTask.manusTaskId] : [],
       };
-    if (!localResult) return null;
-    if (!localResult.started) {
-      return { ...localResult, executionStarted: Boolean(task.manusTaskId), externalTaskIds: task.manusTaskId ? [task.manusTaskId] : [] };
     }
 
     const existingSubtasks = await db.getTasksByParentId(taskId);
-    const targetTaskIds = localResult.factorized
-      ? localResult.subtaskIds
-      : existingSubtasks.filter((subtask) => !subtask.manusTaskId).map((subtask) => subtask.id);
-    if (targetTaskIds.length === 0 && !task.manusTaskId) targetTaskIds.push(taskId);
-    const externalTaskIds: string[] = [];
-    for (const targetTaskId of targetTaskIds) {
-      const target = await db.getTaskById(targetTaskId);
-      if (!target) continue;
-      const execution = await createManusTask(target);
-      externalTaskIds.push(execution.manusTaskId);
-      await db.updateTaskStatus(targetTaskId, await db.getTaskStatusIdByName(STATUS_PROGRESS));
-    }
+    const factorized = this.shouldFactorize(claimedTask) && existingSubtasks.length === 0;
 
-    return {
-      ...localResult,
-      executionStarted: externalTaskIds.length > 0,
-      externalTaskIds,
-    };
+    try {
+      if (factorized) {
+        // Each new STAGED subtask is dispatched by the database trigger after insert.
+        const subtaskIds = await this.factorizeTask(claimedTask);
+        return {
+          task: claimedTask,
+          started: true,
+          factorized: true,
+          subtaskIds,
+          executionStarted: subtaskIds.length > 0,
+          externalTaskIds: [],
+        };
+      }
+
+      if (existingSubtasks.length > 0) {
+        // Backward compatibility: dispatch subtasks created before automatic dispatch
+        // was installed. Newly created subtasks are dispatched by their INSERT trigger.
+        const childResults = [];
+        for (const subtask of existingSubtasks) {
+          if (subtask.statusId !== stagedStatusId) continue;
+          childResults.push(await this.startTask(subtask.id));
+        }
+        const externalTaskIds = childResults.flatMap((result: any) => result?.externalTaskIds ?? []);
+        return {
+          task: claimedTask,
+          started: true,
+          factorized: false,
+          subtaskIds: existingSubtasks.map((item) => item.id),
+          executionStarted: externalTaskIds.length > 0 || childResults.some((result: any) => result?.executionStarted),
+          externalTaskIds,
+        };
+      }
+
+      const execution = await createManusTask(claimedTask);
+      return {
+        task: claimedTask,
+        started: true,
+        factorized: false,
+        subtaskIds: [],
+        executionStarted: true,
+        externalTaskIds: [execution.manusTaskId],
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      try {
+        await db.updateTaskExecution(taskId, {
+          manusStatus: "dispatch_failed",
+          completedAt: new Date(),
+        });
+        await db.updateTaskStatus(taskId, await db.getTaskStatusIdByName("FAIL"));
+        const eventType = await db.getOrCreateActivityEventType("task_execution_failed");
+        await db.createActivityLog({
+          agentId: claimedTask.agentId,
+          taskId,
+          eventTypeId: eventType.id,
+          details: message,
+        });
+      } catch (recordError) {
+        console.error(`[Orchestrator] Could not persist dispatch failure for task ${taskId}:`, recordError);
+      }
+      throw error;
+    }
   }
 }
 
