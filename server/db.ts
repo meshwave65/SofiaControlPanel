@@ -1,4 +1,4 @@
-import { eq, and, desc, isNull } from "drizzle-orm";
+import { eq, and, desc, isNull, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { InsertUser, InsertAgent, users, agents, tasks, messages, activityLogs, contextReports, taskStatuses, taskPriorities, messageTypes, activityEventTypes, arcPolicies, arcAssessments, arcEvidence } from "../drizzle/schema";
@@ -266,6 +266,7 @@ export async function deleteAgent(id: number) {
 
 export async function createTask(data: {
   agentId?: number;
+  agentPinned?: boolean;
   createdBy: number;
   title: string;
   description?: string;
@@ -278,7 +279,7 @@ export async function createTask(data: {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  return db.insert(tasks).values(data).returning({ id: tasks.id });
+  return db.insert(tasks).values({ ...data, agentPinned: data.agentPinned ?? data.agentId !== undefined }).returning({ id: tasks.id });
 }
 
 export async function getTasksByAgentId(agentId: number) {
@@ -376,6 +377,78 @@ export async function updateTaskStatus(id: number, statusId: number) {
   if (!db) throw new Error("Database not available");
 
   return db.update(tasks).set({ statusId, updatedAt: new Date() }).where(eq(tasks.id, id));
+}
+
+/**
+ * Assigns an eligible agent to an unassigned/automatically assigned STAGED task.
+ * A user-selected agent is pinned and is never silently replaced.
+ * The agent row is locked with SKIP LOCKED so concurrent missions cannot claim it twice.
+ */
+export async function assignAvailableAgentToTask(taskId: number) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+
+  return database.transaction(async (tx) => {
+    const [task] = await tx.execute(sql`
+      SELECT id, "createdBy", "agentId", "agentPinned"
+      FROM sofia.tasks
+      WHERE id = ${taskId}
+      FOR UPDATE
+    `) as any;
+
+    if (!task) return null;
+    if (task.agentId && task.agentPinned) {
+      const [pinned] = await tx.execute(sql`
+        SELECT a.id
+        FROM sofia.agents a
+        WHERE a.id = ${task.agentId}
+          AND a."ownerId" = ${task.createdBy}
+          AND a.status = 'online'
+          AND a."connectionStatus" = 'connected'
+          AND a."manusToken" IS NOT NULL
+          AND COALESCE(a."creditsRemaining"::numeric, 0) > 0
+          AND NOT EXISTS (
+            SELECT 1
+            FROM sofia.tasks active_task
+            JOIN sofia."taskStatuses" active_status ON active_status.id = active_task."statusId"
+            WHERE active_task."agentId" = a.id
+              AND active_task.id <> ${taskId}
+              AND active_status.name = 'PROGRESS'
+          )
+      `) as any;
+      return pinned ? Number(pinned.id) : null;
+    }
+
+    const [candidate] = await tx.execute(sql`
+      SELECT a.id
+      FROM sofia.agents a
+      WHERE a."ownerId" = ${task.createdBy}
+        AND a.status = 'online'
+        AND a."connectionStatus" = 'connected'
+        AND a."manusToken" IS NOT NULL
+        AND COALESCE(a."creditsRemaining"::numeric, 0) > 0
+        AND NOT EXISTS (
+          SELECT 1
+          FROM sofia.tasks active_task
+          JOIN sofia."taskStatuses" active_status ON active_status.id = active_task."statusId"
+          WHERE active_task."agentId" = a.id
+            AND active_task.id <> ${taskId}
+            AND active_status.name = 'PROGRESS'
+        )
+      ORDER BY a."creditsRemaining"::numeric DESC, a."creditsUpdatedAt" ASC NULLS FIRST, a.id
+      FOR UPDATE OF a SKIP LOCKED
+      LIMIT 1
+    `) as any;
+
+    if (!candidate) return null;
+    const agentId = Number(candidate.id);
+    await tx.execute(sql`
+      UPDATE sofia.tasks
+      SET "agentId" = ${agentId}, "updatedAt" = NOW()
+      WHERE id = ${taskId} AND "agentPinned" = false
+    `);
+    return agentId;
+  });
 }
 
 /** Atomically reserves a STAGED task by moving it to PROGRESS. Only one caller can win. */
