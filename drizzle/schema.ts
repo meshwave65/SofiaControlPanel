@@ -98,6 +98,7 @@ export const tasks = sofia.table(
   {
     id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
     agentId: integer("agentId"),
+    agentPinned: boolean("agentPinned").default(false).notNull(),
     createdBy: integer("createdBy").notNull(),
     title: varchar("title", { length: 255 }).notNull(),
     description: text("description"),
