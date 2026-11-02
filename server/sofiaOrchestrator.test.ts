@@ -6,6 +6,9 @@ const dbMock = vi.hoisted(() => ({
   getTasksByParentId: vi.fn(),
   updateTaskStatus: vi.fn(),
   claimStagedTask: vi.fn(),
+  claimStagedTaskWithAvailableAgent: vi.fn(),
+  getAgentsByOwnerId: vi.fn(),
+  recordAgentCreditSyncError: vi.fn(),
   updateTaskExecution: vi.fn(),
   createTask: vi.fn(),
   getOrCreateActivityEventType: vi.fn(),
@@ -14,6 +17,7 @@ const dbMock = vi.hoisted(() => ({
 
 const manusMock = vi.hoisted(() => ({
   createManusTask: vi.fn(),
+  syncAgentCredits: vi.fn(),
 }));
 
 vi.mock("./db", () => dbMock);
@@ -114,16 +118,18 @@ describe("SofiaOrchestrator.startTask", () => {
     dbMock.createActivityLog.mockResolvedValue(undefined);
     dbMock.updateTaskExecution.mockResolvedValue(undefined);
     dbMock.updateTaskStatus.mockResolvedValue(undefined);
+    dbMock.getAgentsByOwnerId.mockResolvedValue([{ id: 6, hasCredential: true, status: "online", creditsUpdatedAt: new Date() }]);
+    manusMock.syncAgentCredits.mockResolvedValue(100);
   });
 
   it("atomically claims a staged task and creates one Manus execution", async () => {
     dbMock.getTaskById.mockResolvedValueOnce(stagedTask);
-    dbMock.claimStagedTask.mockResolvedValueOnce(claimedTask);
+    dbMock.claimStagedTaskWithAvailableAgent.mockResolvedValueOnce(claimedTask);
     manusMock.createManusTask.mockResolvedValueOnce({ manusTaskId: "manus-123", status: "running" });
 
     const result = await SofiaOrchestrator.startTask(30);
 
-    expect(dbMock.claimStagedTask).toHaveBeenCalledWith(30, 1, 2);
+    expect(dbMock.claimStagedTaskWithAvailableAgent).toHaveBeenCalledWith(30, 1, 2);
     expect(manusMock.createManusTask).toHaveBeenCalledTimes(1);
     expect(result).toMatchObject({
       started: true,
@@ -136,7 +142,7 @@ describe("SofiaOrchestrator.startTask", () => {
     dbMock.getTaskById
       .mockResolvedValueOnce(stagedTask)
       .mockResolvedValueOnce(claimedTask);
-    dbMock.claimStagedTask.mockResolvedValueOnce(null);
+    dbMock.claimStagedTaskWithAvailableAgent.mockResolvedValueOnce(null);
 
     const result = await SofiaOrchestrator.startTask(30);
 

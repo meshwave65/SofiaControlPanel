@@ -508,6 +508,12 @@ export async function updateTaskExecution(id: number, data: {
   return db.update(tasks).set({ ...data, lastSyncedAt: new Date(), updatedAt: new Date() }).where(eq(tasks.id, id));
 }
 
+export async function reassignTaskAgent(id: number, agentId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.update(tasks).set({ agentId, agentPinned: false, updatedAt: new Date() }).where(eq(tasks.id, id));
+}
+
 // ============================================
 // ARC / PGC HELPERS
 // ============================================

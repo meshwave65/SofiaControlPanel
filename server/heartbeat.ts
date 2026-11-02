@@ -38,6 +38,7 @@ export async function startHeartbeatSystem() {
     try {
       await syncAllAgentCredits();
       await syncRunningManusTasks();
+      await SofiaOrchestrator.resumeCreditBlockedTasks();
     } catch (error) {
       console.error("[Heartbeat] Erro ao verificar créditos:", error);
     }

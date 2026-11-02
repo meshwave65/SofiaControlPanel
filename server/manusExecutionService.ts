@@ -15,6 +15,8 @@ type ManusTaskResponse = {
 };
 
 type LocalTask = Awaited<ReturnType<typeof db.getTaskById>>;
+type ManusMessageEvent = { type?: string; assistant_message?: { content?: string } };
+type ManusMessagesResponse = ManusTaskResponse & { messages?: ManusMessageEvent[] };
 
 function apiError(response: Response, payload: ManusTaskResponse) {
   const message = payload.error?.message || `Manus API retornou HTTP ${response.status}`;
@@ -37,7 +39,7 @@ async function manusRequest<T extends ManusTaskResponse>(token: string, path: st
   return payload;
 }
 
-export async function createManusTask(task: NonNullable<LocalTask>) {
+export async function createManusTask(task: NonNullable<LocalTask>, continuationContext?: string) {
   if (!task.agentId) throw new Error("A missão precisa de um agente responsável antes da execução.");
 
   const credentials = await db.getManusCredentialsForAgent(task.agentId);
@@ -48,6 +50,7 @@ export async function createManusTask(task: NonNullable<LocalTask>) {
   const prompt = [
     `Missão Sofia #${task.id}: ${task.title}`,
     task.description ? `\nInstruções:\n${task.description}` : "",
+    continuationContext ? `\nCheckpoint da execução anterior:\n${continuationContext}\nContinue desse ponto sem repetir o trabalho já concluído.` : "",
     "\nAo concluir, produza um relatório objetivo com resultado, evidências, limitações e próximos passos.",
   ].join("\n");
 
@@ -73,6 +76,28 @@ export async function createManusTask(task: NonNullable<LocalTask>) {
   });
 
   return { manusTaskId, status: "running" as const };
+}
+
+export async function sendManusMessage(task: NonNullable<LocalTask>, text: string) {
+  if (!task.agentId || !task.manusTaskId) throw new Error("A missão não possui execução Manus para retomar.");
+  const credentials = await db.getManusCredentialsForAgent(task.agentId);
+  if (!credentials?.manusToken) throw new Error("O agente não possui uma API key Manus configurada.");
+  return manusRequest<ManusTaskResponse>(credentials.manusToken, "/task.sendMessage", {
+    method: "POST",
+    body: JSON.stringify({ task_id: task.manusTaskId, message: { content: [{ type: "text", text, visibility: "visible" }] } }),
+  });
+}
+
+export async function getManusCheckpoint(task: NonNullable<LocalTask>) {
+  if (!task.agentId || !task.manusTaskId) return "";
+  const credentials = await db.getManusCredentialsForAgent(task.agentId);
+  if (!credentials?.manusToken) return "";
+  const response = await manusRequest<ManusMessagesResponse>(credentials.manusToken, `/task.listMessages?task_id=${encodeURIComponent(task.manusTaskId)}&order=desc&limit=20`, { method: "GET" });
+  return (response.messages || [])
+    .filter((item) => item.type === "assistant_message" && item.assistant_message?.content)
+    .map((item) => item.assistant_message!.content!)
+    .join("\n\n")
+    .slice(0, 18000);
 }
 
 export async function syncAgentCredits(agentId: number) {
@@ -127,21 +152,30 @@ async function syncRunningTask(task: NonNullable<LocalTask>) {
   if (!externalTask?.status) return null;
 
   const normalizedStatus = externalTask.status.toLowerCase();
-  const isDone = normalizedStatus === "stopped";
+  let isDone = normalizedStatus === "stopped";
   const isFailed = normalizedStatus === "error";
+  let waitingForCredits = false;
+  if (isDone) {
+    try {
+      const credits = await syncAgentCredits(task.agentId);
+      waitingForCredits = credits <= 0;
+      isDone = !waitingForCredits;
+    } catch { /* retry on the next heartbeat */ }
+  }
   const doneStatusId = isDone ? await db.getTaskStatusIdByName("DONE") : null;
+  const pausedStatusId = waitingForCredits ? await db.getTaskStatusIdByName("PAUSED") : null;
   const failStatusId = isFailed ? await db.getTaskStatusIdByName("FAIL") : null;
 
   await db.updateTaskExecution(task.id, {
-    manusStatus: normalizedStatus,
+    manusStatus: waitingForCredits ? "waiting_credit" : normalizedStatus,
     creditsUsed: typeof externalTask.credit_usage === "number" ? externalTask.credit_usage : undefined,
-    completedAt: isDone || isFailed ? new Date() : undefined,
+    completedAt: isDone || isFailed ? new Date() : waitingForCredits ? null : undefined,
   });
-  if (doneStatusId || failStatusId) {
-    await db.updateTaskStatus(task.id, doneStatusId || failStatusId!);
+  if (doneStatusId || failStatusId || pausedStatusId) {
+    await db.updateTaskStatus(task.id, doneStatusId || failStatusId || pausedStatusId!);
   }
 
-  return { taskId: task.id, manusStatus: normalizedStatus, creditsUsed: externalTask.credit_usage ?? null };
+  return { taskId: task.id, manusStatus: waitingForCredits ? "waiting_credit" : normalizedStatus, creditsUsed: externalTask.credit_usage ?? null };
 }
 
 export async function syncRunningManusTasks() {

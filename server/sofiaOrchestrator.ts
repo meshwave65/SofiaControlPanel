@@ -1,6 +1,6 @@
 import * as db from "./db";
 import { Task } from "../drizzle/schema";
-import { createManusTask, syncAgentCredits } from "./manusExecutionService";
+import { createManusTask, getManusCheckpoint, sendManusMessage, syncAgentCredits } from "./manusExecutionService";
 
 /**
  * Sofia Orchestrator v1.0
@@ -13,6 +13,38 @@ const STATUS_PROGRESS = "PROGRESS";
 const STATUS_DONE = "DONE";
 
 export class SofiaOrchestrator {
+  static async resumeCreditBlockedTasks() {
+    const waiting = (await db.getAllTasksGlobal()).filter((task) => task.manusStatus === "waiting_credit" && task.agentId);
+    const progressStatusId = await db.getTaskStatusIdByName(STATUS_PROGRESS);
+    const results: Array<{ taskId: number; action: string; agentId: number }> = [];
+    for (const task of waiting) {
+      const agents = await db.getAllAgentsGlobal();
+      const current = agents.find((agent) => agent.id === task.agentId);
+      if (!current) continue;
+      let currentCredits = 0;
+      try { currentCredits = await syncAgentCredits(current.id); } catch { continue; }
+      if (currentCredits > 0 && task.manusTaskId) {
+        await sendManusMessage(task, "Os créditos foram restaurados. Continue a missão a partir do último checkpoint, sem repetir o trabalho concluído.");
+        await db.updateTaskExecution(task.id, { manusStatus: "running", completedAt: null });
+        await db.updateTaskStatus(task.id, progressStatusId);
+        results.push({ taskId: task.id, action: task.agentPinned ? "resumed_pinned_agent" : "resumed_agent", agentId: current.id });
+        continue;
+      }
+      if (task.agentPinned || currentCredits > 0) continue;
+      const activeAgentIds = new Set((await db.getAllTasksGlobal()).filter((item) => item.statusId === progressStatusId && item.agentId).map((item) => item.agentId));
+      const replacement = agents.find((agent) => agent.id !== current.id && agent.ownerId === task.createdBy && agent.status === "online" && !activeAgentIds.has(agent.id));
+      if (!replacement) continue;
+      let replacementCredits = 0;
+      try { replacementCredits = await syncAgentCredits(replacement.id); } catch { continue; }
+      if (replacementCredits <= 0) continue;
+      const checkpoint = await getManusCheckpoint(task).catch(() => "");
+      await db.reassignTaskAgent(task.id, replacement.id);
+      await createManusTask({ ...task, agentId: replacement.id }, checkpoint);
+      await db.updateTaskStatus(task.id, progressStatusId);
+      results.push({ taskId: task.id, action: "transferred_after_credit_exhaustion", agentId: replacement.id });
+    }
+    return results;
+  }
   /**
    * Determina se uma tarefa deve ser fatorada (decomposta).
    */
@@ -149,7 +181,7 @@ export class SofiaOrchestrator {
   /**
    * Inicia a missão local e cria a execução correspondente na API Manus.
    */
-  static async startTask(taskId: number) {
+  static async startTask(taskId: number): Promise<any> {
     const task = await db.getTaskById(taskId);
     if (!task) return null;
 
@@ -232,7 +264,7 @@ export class SofiaOrchestrator {
           if (subtask.statusId !== stagedStatusId) continue;
           childResults.push(await this.startTask(subtask.id));
         }
-        const externalTaskIds = childResults.flatMap((result: any) => result?.externalTaskIds ?? []);
+        const externalTaskIds: string[] = childResults.flatMap((result: any) => result?.externalTaskIds ?? []);
         return {
           task: claimedTask,
           started: true,
@@ -262,7 +294,7 @@ export class SofiaOrchestrator {
         await db.updateTaskStatus(taskId, await db.getTaskStatusIdByName("FAIL"));
         const eventType = await db.getOrCreateActivityEventType("task_execution_failed");
         await db.createActivityLog({
-          agentId: task.agentId,
+          agentId: task.agentId ?? 0,
           taskId,
           eventTypeId: eventType.id,
           details: message,
