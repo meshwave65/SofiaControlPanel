@@ -1,9 +1,23 @@
 import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
+import { startGoogleLogin } from "@/lib/auth";
 
 export default function AuthCallback() {
   const [message, setMessage] = useState("Concluindo autenticação…");
+  const [hasError, setHasError] = useState(false);
+
+  const retryLogin = async () => {
+    setHasError(false);
+    setMessage("Abrindo a seleção de conta…");
+    await supabase.auth.signOut().catch(() => undefined);
+    try {
+      await startGoogleLogin();
+    } catch (error) {
+      setHasError(true);
+      setMessage(error instanceof Error ? `Não foi possível iniciar o login: ${error.message}` : "Não foi possível iniciar o login.");
+    }
+  };
 
   useEffect(() => {
     let active = true;
@@ -14,7 +28,10 @@ export default function AuthCallback() {
       const code = params.get("code");
 
       if (error) {
-        if (active) setMessage(`Não foi possível concluir o login: ${error}`);
+        if (active) {
+          setHasError(true);
+          setMessage(`Não foi possível concluir o login: ${error}. Tente novamente ou use outra conta.`);
+        }
         return;
       }
 
@@ -24,20 +41,24 @@ export default function AuthCallback() {
         const { data, error: exchangeError } =
           await supabase.auth.exchangeCodeForSession(code);
         if (exchangeError) {
-          if (active)
+          if (active) {
+            setHasError(true);
             setMessage(
               `Não foi possível concluir o login: ${exchangeError.message}`
             );
+          }
           return;
         }
         session = data.session;
       } else {
         const { data, error: sessionError } = await supabase.auth.getSession();
         if (sessionError) {
-          if (active)
+          if (active) {
+            setHasError(true);
             setMessage(
               `Não foi possível concluir o login: ${sessionError.message}`
             );
+          }
           return;
         }
         session = data.session;
@@ -45,6 +66,7 @@ export default function AuthCallback() {
 
       if (!session) {
         if (active) {
+          setHasError(true);
           setMessage(
             "A autenticação não retornou uma sessão válida. Inicie o login novamente."
           );
@@ -57,6 +79,7 @@ export default function AuthCallback() {
 
     completeOAuth().catch(callbackError => {
       if (active) {
+        setHasError(true);
         setMessage(
           callbackError instanceof Error
             ? `Não foi possível concluir o login: ${callbackError.message}`
@@ -80,13 +103,19 @@ export default function AuthCallback() {
         <p className="mt-4 text-sm leading-6 text-muted-foreground">
           {message}
         </p>
-        {message !== "Concluindo autenticação…" && (
-          <a
-            className="mt-6 inline-block text-sm font-bold text-accent underline"
-            href="/"
-          >
-            Voltar para a página inicial
-          </a>
+        {hasError && (
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <button
+              type="button"
+              className="border-2 border-accent bg-accent px-5 py-3 text-sm font-black uppercase tracking-wider text-accent-foreground"
+              onClick={() => void retryLogin()}
+            >
+              Tentar novamente / usar outra conta
+            </button>
+            <a className="border border-foreground/20 px-5 py-3 text-sm font-bold text-accent underline" href="/">
+              Voltar para a página inicial
+            </a>
+          </div>
         )}
       </section>
     </main>

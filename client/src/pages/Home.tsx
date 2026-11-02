@@ -1,4 +1,3 @@
-import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
@@ -28,6 +27,7 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { Link } from "wouter";
+import { startGoogleLogin } from "@/lib/auth";
 
 export default function Home() {
   const { user, isAuthenticated } = useAuth();
@@ -107,14 +107,7 @@ export default function Home() {
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-4">
               <button
-                onClick={() =>
-                  supabase.auth.signInWithOAuth({
-                    provider: "google",
-                    options: {
-                      redirectTo: `${window.location.origin}/auth/callback`,
-                    },
-                  })
-                }
+                onClick={() => void startGoogleLogin().catch(() => undefined)}
                 className="h-14 border-2 border-accent bg-accent px-7 font-black uppercase tracking-[0.15em] text-accent-foreground shadow-[0_0_20px_rgba(6,182,212,0.5)] hover:bg-accent/90"
               >
                 Inicializar Acesso
