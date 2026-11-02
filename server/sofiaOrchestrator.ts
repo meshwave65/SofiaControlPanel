@@ -186,7 +186,8 @@ export class SofiaOrchestrator {
     if (!task) return null;
 
     const stagedStatusId = await db.getTaskStatusIdByName(STATUS_STAGED);
-    if (task.statusId !== stagedStatusId) {
+    const alreadyClaimedWithoutExecution = task.statusId !== stagedStatusId && Boolean(task.agentId) && !task.manusTaskId;
+    if (task.statusId !== stagedStatusId && !alreadyClaimedWithoutExecution) {
       return {
         task,
         started: false,
@@ -221,7 +222,9 @@ export class SofiaOrchestrator {
     }));
 
     const progressStatusId = await db.getTaskStatusIdByName(STATUS_PROGRESS);
-    const claimedTask = await db.claimStagedTaskWithAvailableAgent(taskId, stagedStatusId, progressStatusId);
+    const claimedTask = alreadyClaimedWithoutExecution
+      ? task
+      : await db.claimStagedTaskWithAvailableAgent(taskId, stagedStatusId, progressStatusId);
 
     // No eligible agent: keep the mission STAGED. Heartbeat retries when credits/status change.
     if (!claimedTask) {

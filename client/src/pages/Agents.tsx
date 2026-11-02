@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -144,6 +144,15 @@ export default function Agents() {
     },
     onError: (error) => toast.error(`Falha ao atualizar saldos: ${error.message}`),
   });
+
+  useEffect(() => {
+    if (!isAuthenticated || !displayAgents.some((agent: any) => agent.hasCredential)) return;
+    if (refreshAllCreditsMutation.isPending) return;
+    void refreshAllCreditsMutation.mutateAsync().catch(() => undefined);
+    // A alteração do tamanho da lista evita um loop quando a query é invalidada após o refresh.
+    // A atualização manual continua disponível no cartão de cada agente.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, displayAgents.length]);
 
   // Form
   const form = useForm<any>({
