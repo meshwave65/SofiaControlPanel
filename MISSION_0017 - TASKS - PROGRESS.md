@@ -6,12 +6,12 @@ Atualizado: 2026-11-04
 
 | ID | Tarefa | Status | Instância | Artefato | Próxima ação |
 |---|---|---|---|---|---|
-| 17.1 | Reconciliar arquitetura, Auth, schema/RPCs, aquisição, referral e regra contábil; consolidar especificação técnica | PROGRESS | ChatGPT executor | SCP MISSION_0017; newsite baseline | Inspecionar componentes, migrations, funções, RLS/grants e requisito fiscal; checkpoint/OR |
-| 17.2 | Implementar persistência de referral, link pessoal e configuração de percentual por indicador em página própria da Administração | STAGED | — | newsite + Supabase | Preferir tabela segregada; autorização admin, trilha e snapshot; decisão sobre vigência temporal permanece aberta |
-| 17.3 | Implementar onboarding minimalista, exibir indicador e persistir atribuição | STAGED | — | newsite Auth/profile | Imutabilidade, bloquear autoindicação e contas já existentes |
-| 17.4 | Integrar pós-cadastro/login à aquisição e mostrar base e bônus elegível | STAGED | — | newsite UI | Preservar requisitos de aquisição |
-| 17.5 | Implementar os três eventos/transações UMS após validação, com débitos Genesis e ledger | STAGED | — | Supabase RPC/schema | Atomicidade, idempotência e integridade chain/ledger |
-| 17.6 | Testar segurança, RLS/grants, estados pendente/rejeitado/validado, reconciliação, documentação e handoff | STAGED | — | newsite + SCP | Não usar créditos reais em produção para testes |
+| 17.1 | Inspecionar e mapear referências visuais reais da carteira MeshWave para orientar os protótipos da missão | PROGRESS | ChatGPT executor | newsite UI baseline | Localizar componentes, tokens e telas existentes; documentar referência visual sem iniciar lógica |
+| 17.2 | Desenhar protótipo da página Admin para configurar percentual por indicador | STAGED | — | newsite UI | Mostrar estrutura, estados e edição; nenhuma persistência nesta etapa |
+| 17.3 | Desenhar protótipo do painel do indicador com link pessoal e chamada para compartilhar | STAGED | — | newsite UI | Usar padrão visual da carteira; link demonstrativo sem lógica |
+| 17.4 | Desenhar onboarding de indicação com indicador, percentual e campos básicos | STAGED | — | newsite UI | Estados visuais/validação simulados; sem integração Auth |
+| 17.5 | Desenhar fluxo visual pós-cadastro e página de aquisição com estimativa base/bonificação | STAGED | — | newsite UI | Prototipar; respeitar a referência visual da carteira |
+| 17.6 | Revisar e aprovar o conjunto de protótipos antes da lógica; depois iniciar arquitetura e implementação | STAGED | — | SCP + newsite | Gate explícito de aprovação do responsável; somente após aprovação avançar a lógica |
 
 ## Critérios transversais
 - Cada usuário pode gerar/copiar seu link; o onboarding indica o nome do indicador e percentual vigente.
@@ -23,7 +23,14 @@ Atualizado: 2026-11-04
 - Eventos e lançamentos são idempotentes e reconciliáveis; não duplicar em retry/concor­rência.
 - Manter 1 MWN = 1.000 UMS, precisão até 6 casas e UX mobile-first limpa.
 
-| 17.7 | Aplicar UI moderna consistente com a carteira MeshWave aos formulários de referral/onboarding/aquisição (mobile-first, validação e estados claros) | STAGED | — | newsite UI | Identificar componentes/tokens atuais; sem redesign fora do escopo |
-| 17.8 | Criar material de divulgação imprimível com QR de indicação e QR educativo secundário sobre UMS/MWN | STAGED | — | newsite + conteúdo público | Confirmar página educativa/destino oficial; QR verificável; uso em locais somente com autorização |
+| 17.7 | Consolidar padrões visuais e componentes aprovados dos formulários (mobile-first, estados e validação) | STAGED | — | newsite UI | Não alterar a carteira além de reutilizar seus padrões |
+| 17.8 | Criar material de divulgação imprimível com QR de indicação e QR educativo secundário sobre UMS/MWN | STAGED | — | newsite + conteúdo público | Após aprovar o visual; confirmar destino educativo oficial; testar QR e reservar uso em locais autorizados |
 
-| 17.9 | Implementar configuração administrativa individual do percentual de indicação, com persistência segregada do perfil e trilha de alterações | STAGED | — | Admin UI + Supabase | Estudar esquema e permissões; temporalidade será definida posteriormente |
+| 17.9 | Implementar configuração administrativa individual do percentual, persistência segregada e trilha de alterações | STAGED | — | Admin UI + Supabase | Somente após aprovação visual e início formal da etapa de lógica; vigência ainda será definida |
+
+
+## Ordem de execução — design-first
+1. Mapear a UI atual da carteira e construir protótipos visuais de todas as telas envolvidas.
+2. Apresentar os protótipos para revisão e ajustar conforme feedback; nenhuma lógica/Auth/schema nesta fase.
+3. Com aprovação explícita, consolidar os componentes visuais.
+4. Só então executar as tarefas de arquitetura, Supabase, Auth, referral, aquisição e lançamentos contábeis; documentar novo sequenciamento no próximo checkpoint.
