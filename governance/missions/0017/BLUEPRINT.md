@@ -37,3 +37,12 @@ Link próprio e onboarding com indicador/percentual; atribuição persistida; p�
 
 ## 8. Gates identificados
 O RPC create_ums_acquisition verificado no baseline exige mwc_meshwalker_profiles, em tensão com cadastro de 4 campos. Determinar necessidade e coleta mínima. Confirmar se configuração percentual será global administrável (hipótese inicial) ou individual/campanha. Confirmar UX de moeda/limites e atomicidade de três eventos. Nenhum lançamento real ou deploy sem aprovação.
+
+
+## 9. Padrão visual e material de divulgação (2026-11-04)
+- Formulários de indicação, onboarding e aquisição devem seguir o padrão visual moderno da carteira MeshWave: mobile-first, tipografia e espaçamento equilibrados, validação/estados claros e aparência de app financeiro atual. Evitar estética genérica/antiquada de formulário desktop/Windows. Inspecionar e reutilizar componentes/tokens reais da carteira; não criar outro design system nem refatorar a carteira fora do escopo.
+- Criar peça de divulgação imprimível, pronta para impressão e afixação em empresas, escolas e outros locais somente com autorização do responsável.
+- QR Code principal: link pessoal de indicação, com mensagem curta sobre benefício e esclarecimento de que a bonificação depende da validação da primeira aquisição elegível.
+- Rodapé: QR Code menor e secundário para página pública educativa sobre UMS, MWN e informações aos apoiadores. Não presumir URL; localizar destino oficial ou definir/criar destino dentro do escopo.
+- Material legível em papel (A4 e versão compacta se útil); testar ambos os QR Codes e os destinos. Evitar claims de retorno financeiro não aprovados.
+- Incluir critérios de aceite e testes de responsividade, link de indicação e QR educativo.
