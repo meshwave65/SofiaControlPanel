@@ -22,3 +22,6 @@ Atualizado: 2026-11-04
 - Após validação: aquisição-base para indicado, bônus ao indicado e bônus igual ao indicador. Cada crédito possui débito correspondente Genesis.
 - Eventos e lançamentos são idempotentes e reconciliáveis; não duplicar em retry/concor­rência.
 - Manter 1 MWN = 1.000 UMS, precisão até 6 casas e UX mobile-first limpa.
+
+| 17.7 | Aplicar UI moderna consistente com a carteira MeshWave aos formulários de referral/onboarding/aquisição (mobile-first, validação e estados claros) | STAGED | — | newsite UI | Identificar componentes/tokens atuais; sem redesign fora do escopo |
+| 17.8 | Criar material de divulgação imprimível com QR de indicação e QR educativo secundário sobre UMS/MWN | STAGED | — | newsite + conteúdo público | Confirmar página educativa/destino oficial; QR verificável; uso em locais somente com autorização |
