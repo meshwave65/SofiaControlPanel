@@ -468,6 +468,18 @@ export const appRouter = router({
   // ARC / PGC ROUTER
   // ============================================
   arc: router({
+    ensureAssessment: protectedProcedure
+      .input(z.object({ taskId: z.number().int().positive() }))
+      .mutation(async ({ input, ctx }) => {
+        const task = await db.getTaskById(input.taskId);
+        if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Tarefa não encontrada." });
+        }
+        const assessment = await db.ensureArcAssessment(input.taskId);
+        if (!assessment) throw new TRPCError({ code: "NOT_FOUND", message: "Tarefa não encontrada." });
+        return assessment;
+      }),
+
     evaluateTask: protectedProcedure
       .input(z.object({ taskId: z.number().int().positive() }))
       .mutation(async ({ input, ctx }) => {

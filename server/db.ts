@@ -386,6 +386,28 @@ export async function evaluateTaskInShadow(taskId: number) {
   });
 }
 
+/**
+ * Materializa o primeiro relatório ARC da tarefa sem duplicá-lo em cada
+ * abertura do painel. Reavaliações posteriores continuam explícitas.
+ */
+export async function ensureArcAssessment(taskId: number) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+
+  const existing = await database
+    .select({ id: arcAssessments.id })
+    .from(arcAssessments)
+    .where(eq(arcAssessments.taskId, taskId))
+    .orderBy(desc(arcAssessments.createdAt))
+    .limit(1);
+
+  if (existing.length > 0) {
+    return getArcAssessmentByTask(taskId, 0, true);
+  }
+
+  return evaluateTaskInShadow(taskId);
+}
+
 export async function updateTaskStatus(id: number, statusId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,6 +51,11 @@ export default function TaskDetail() {
   const evaluateArcMutation = trpc.arc.evaluateTask.useMutation({
     onSuccess: () => arcAssessmentQuery.refetch(),
   });
+  const ensureArcAssessmentMutation = trpc.arc.ensureAssessment.useMutation({
+    onSuccess: () => arcAssessmentQuery.refetch(),
+    onError: (error) => toast.error(error.message || "Não foi possível gerar o relatório ARC."),
+  });
+  const autoEnsureArcTaskRef = useRef<number | null>(null);
   const consolidatedReportQuery = trpc.tasks.getConsolidatedReport.useQuery(
     { taskId },
     { enabled: canLoadTask && Boolean(taskQuery.data), retry: false },
@@ -58,6 +63,24 @@ export default function TaskDetail() {
 
   const task = taskQuery.data;
   const messages = messagesQuery.data || [];
+
+  useEffect(() => {
+    const assessmentNotFound = arcAssessmentQuery.isError
+      && arcAssessmentQuery.error?.data?.code === "NOT_FOUND";
+    if (!canLoadTask || !taskQuery.data || arcAssessmentQuery.isLoading || !assessmentNotFound) return;
+    if (autoEnsureArcTaskRef.current === taskId || ensureArcAssessmentMutation.isPending) return;
+
+    autoEnsureArcTaskRef.current = taskId;
+    ensureArcAssessmentMutation.mutate({ taskId });
+  }, [
+    canLoadTask,
+    taskId,
+    taskQuery.data,
+    arcAssessmentQuery.isLoading,
+    arcAssessmentQuery.isError,
+    arcAssessmentQuery.error,
+    ensureArcAssessmentMutation.isPending,
+  ]);
 
   // Buscar subtarefas se a tarefa tiver parentTaskId = null (é uma tarefa gênesis)
   useEffect(() => {
