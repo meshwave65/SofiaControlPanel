@@ -21,3 +21,6 @@ Consulte MISSION_0017 - TASKS - PROGRESS.md para status e próximo passo.
 - Formulários usam a linguagem visual moderna da carteira MeshWave, mobile-first e enxuta; evitar estilo genérico de formulário desktop.
 - Incluir peça imprimível para empresas, escolas e outros espaços mediante autorização. QR principal direciona ao link de indicação; QR menor no rodapé leva à página pública explicativa de UMS, MWN e informações aos apoiadores.
 - Inspecionar referências visuais reais e localizar o destino educativo oficial durante 17.1. Não inventar endereço web.
+
+## Configuração de bonificação por indicador — 2026-11-04
+A bonificação será definida individualmente por MeshWalker indicador, em uma página própria da área de Administração. Persistência preferencial em tabela segregada dos dados de perfil, com controle de acesso e trilha de alterações. Ainda não foi decidido se cada configuração será temporária ou contínua; manter essa decisão aberta, sem presumir uma vigência fixa. O percentual aplicado deverá ser capturado como snapshot na aquisição elegível.
