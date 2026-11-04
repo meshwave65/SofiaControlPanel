@@ -22,4 +22,4 @@ O sistema de integração e Operational Reports é:
 
 Não iniciar trabalho pela conversa anterior. Confirmar `origin/main`, branch, status, commits e a linha `PROGRESS`/`STAGED` no arquivo de tarefas. Executar somente a próxima ação registrada no checkpoint remoto. Publicar código/documentação e checkpoint em commits separados; depois atualizar a tarefa e produzir o Operational Report no SCP.
 
-O estado atual da missão é `CONSOLIDATED` com o follow-up ARC-009 `BLOCKED`: ARC-001–ARC-008 concluídas para uso controlado em `shadow mode`, persistência Supabase criada, mas RLS das tabelas ARC ainda requer policies. O próximo agente não deve reabrir etapas anteriores; deve ler `governance/missions/0010/CHECKPOINT-ARC-009.md` e trabalhar somente no gate RLS/autenticação.
+O estado atual da missão é `CONSOLIDATED`: ARC-001–ARC-009 concluídas para uso controlado em `shadow mode`, persistência Supabase criada e RLS server-only aplicado. O próximo agente não deve reabrir etapas anteriores nem ativar `assisted`/`enforced`; qualquer exposição futura via cliente exige nova tarefa formal.

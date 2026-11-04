@@ -13,10 +13,10 @@
 
 ## Estado atual
 
-A missão foi auditada e consolidada. ARC-001 a ARC-008 estão concluídas conforme os checkpoints e artefatos publicados. O MVP funciona em `shadow mode`, com UI, API, coletor e inferência Bayesiana validados por código, testes e build. A persistência ARC foi provisionada no Supabase pela ARC-009 e uma política `arc_default_shadow` foi criada; o fechamento de segurança está bloqueado por RLS ainda não definido. `assisted` e `enforced` continuam não autorizados.
+A missão foi auditada e consolidada. ARC-001 a ARC-009 estão concluídas conforme os checkpoints e artefatos publicados. O MVP funciona em `shadow mode`, com UI, API, coletor e inferência Bayesiana validados por código, testes e build. A persistência ARC foi provisionada no Supabase pela ARC-009 e o gate de segurança foi fechado com RLS server-only. `assisted` e `enforced` continuam não autorizados.
 
 ## Handoff
 
 Para assumir a missão, leia este arquivo, o arquivo de tarefas, o blueprint da missão e depois sincronize o repositório `SofiaARC-PGC`. O último checkpoint técnico remoto é a autoridade; não use a conversa como estado.
 
-**Próxima ação:** não reabrir ARC-001–ARC-008. Assumir ARC-009 somente para definir/aplicar policies RLS e validar acesso autenticado no Supabase; ler `governance/missions/0010/CHECKPOINT-ARC-009.md` antes de qualquer alteração. Não mudar o modo `shadow`.
+**Próxima ação:** não reabrir ARC-001–ARC-009. Qualquer exposição futura via cliente Supabase exige nova tarefa formal, novo modelo de identidade/policies e revisão explícita. Não mudar o modo `shadow`.

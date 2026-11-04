@@ -33,6 +33,7 @@ A conversa não é fonte de estado. Um sucessor deve sempre sincronizar ambos os
 | ARC-006 | `DONE` | `SofiaControlPanel@3ba580c`; checkpoint ARC-006 | Avaliação real integrada em shadow; sem bloqueio |
 | ARC-007 | `DONE` | UI `d759954`; checkpoint `cce90ae`; OR `OR-20261030-0003` | UI preservada no estado atual `SCP@b303837` |
 | ARC-008 | `DONE` | checkpoint `CHECKPOINT-ARC-008.md`; OR desta consolidação | Fechamento do MVP somente para uso controlado em shadow |
+| ARC-009 | `DONE` | checkpoint `CHECKPOINT-ARC-009-RLS-CLOSED.md`; OR `OR-20261103-0002` | Persistência Supabase e RLS server-only aplicados e validados |
 
 ## Matriz de evidência consolidada
 
@@ -48,7 +49,7 @@ A conversa não é fonte de estado. Um sucessor deve sempre sincronizar ambos os
 ### Confirmado apenas estaticamente
 
 - A cadeia completa de avaliação e persistência foi verificada por código, schema, migration e testes unitários/server-side.
-- A execução da migration e a existência de `arc_default_shadow` foram confirmadas no Supabase; RLS ainda está pendente.
+- A execução da migration, a existência de `arc_default_shadow` e o RLS server-only foram confirmados no Supabase.
 - A UI foi compilada, mas não foi exercitada em navegador autenticado neste ambiente.
 
 ### Não alegar
@@ -71,16 +72,15 @@ A conversa não é fonte de estado. Um sucessor deve sempre sincronizar ambos os
 
 A missão não possui outra etapa ARC numerada automaticamente. Qualquer continuação deve ser uma nova tarefa formal, preferencialmente um pacote de validação de ambiente com:
 
-1. definição e aplicação de policies RLS para as três tabelas ARC;
-2. fluxo autenticado end-to-end de avaliação e consulta;
-3. métricas de comportamento e revisão de privacidade;
-4. decisão explícita, separada e aprovada antes de propor `assisted` ou `enforced`.
+1. fluxo server-side end-to-end de avaliação e consulta;
+2. métricas de comportamento e revisão de privacidade;
+3. decisão explícita, separada e aprovada antes de propor `assisted` ou `enforced`.
 
 Até que esse gate seja satisfeito, o estado operacional é `shadow-only`, sem bloqueio de tarefas.
 
 ## Supabase e armazenamento
 
-As tabelas ARC foram aplicadas no projeto Supabase `ufylccbdjfzydbwhpmpp` pela migration `20261031133650_create_arc_pgc_persistence`, e a política `arc_default_shadow` foi criada e habilitada. ARC/PGC persiste avaliações e evidências em PostgreSQL/JSONB e não precisa de bucket de arquivos. Buckets existentes no SCP atendem relatórios consolidados e não devem ser reutilizados para evidências ARC. O advisor Supabase detectou RLS desabilitado nas três tabelas ARC; nenhuma policy foi aplicada automaticamente. A continuidade está bloqueada até definir ownership/admin e acesso server-side.
+As tabelas ARC foram aplicadas no projeto Supabase `ufylccbdjfzydbwhpmpp` pela migration `20261031133650_create_arc_pgc_persistence`, a política `arc_default_shadow` foi criada e habilitada e a migration `20261104000020 / arc_server_only_rls` fechou o acesso direto com RLS/policies deny-all para clientes. ARC/PGC persiste avaliações e evidências em PostgreSQL/JSONB e não precisa de bucket de arquivos. Buckets existentes no SCP atendem relatórios consolidados e não devem ser reutilizados para evidências ARC. Qualquer exposição futura via cliente requer nova tarefa formal.
 
 ## Instrução de continuidade
 

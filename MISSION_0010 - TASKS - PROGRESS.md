@@ -2,7 +2,7 @@
 
 **Repositório canônico:** `https://github.com/meshwave65/SofiaARC-PGC`
 **Blueprint:** `governance/missions/0010/BLUEPRINT.md`
-**Último checkpoint técnico confirmado:** `CHECKPOINT-ARC-009.md`
+**Último checkpoint técnico confirmado:** `CHECKPOINT-ARC-009-RLS-CLOSED.md`
 **Atualizado em:** 2026-10-31
 
 | ID | Tarefa | Status | Instância | Repositório/artefato | Próxima ação |
@@ -15,7 +15,7 @@
 | ARC-006 | Integrar no orquestrador em shadow mode | DONE | Manus AI (sandbox:Tq8FCw5EEQC8s4y2kvJrrc) | `SofiaControlPanel` — código `3ba580c`, checkpoint `CHECKPOINT-ARC-006.md`, OR-20261029-0008 | Avaliação real usa task/agente/activity, policy habilitada e Bayes heurístico; não bloqueia tarefas; banco real/migration ainda pendentes |
 | ARC-007 | Criar UI mínima de avaliação na tarefa | DONE | Manus ARC-PGC Agent | `SofiaControlPanel` — UI `d759954`, checkpoint `cce90ae`, OR-20261030-0003 | Concluída; posterior, decisão, modo e evidências sem metadata sensível; check/test/build aprovados |
 | ARC-008 | Validar, fechar MVP e emitir handoff final | DONE | Manus ARC-PGC Agent | `SofiaControlPanel` — checkpoint `456900a`, OR-20261031-0001 | MVP consolidado para uso controlado em shadow; não reabrir |
-| ARC-009 | Provisionar persistência Supabase e fechar gate de segurança | PROGRESS | Manus ARC-PGC Agent | `SofiaControlPanel` — checkpoints `CHECKPOINT-ARC-009.md`, `CHECKPOINT-ARC-009-RLS-DRAFT.md`; OR `OR-20261031-0002`, `OR-20261103-0001`; projeto `ufylccbdjfzydbwhpmpp` | Proposta server-only versionada em `drizzle/0004_arc_server_only_rls.sql`; aguarda aprovação explícita antes de aplicar no Supabase |
+| ARC-009 | Provisionar persistência Supabase e fechar gate de segurança | DONE | Manus ARC-PGC Agent | `SofiaControlPanel` — checkpoint `CHECKPOINT-ARC-009-RLS-CLOSED.md`; OR `OR-20261103-0002`; projeto `ufylccbdjfzydbwhpmpp` | RLS server-only aplicado e validado; não ativar assisted/enforced |
 
 ## Regra de assunção
 
