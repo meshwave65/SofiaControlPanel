@@ -15,7 +15,9 @@ Após signup/login, direcionar ao fluxo de aquisição e mostrar quantidade base
 - Link pessoal único por MeshWalker e referral persistido server-authoritatively.
 - Uma conta indicada pode ter somente um indicador; atribuição imutável após criação.
 - Bloquear autoindicação e vinculação de contas existentes como novos indicados.
-- Percentual configurável; onboarding exibe a regra vigente. Snapshot percentual/regra no pedido elegível impede retroatividade.
+- O percentual de bonificação é configurado **por MeshWalker indicador** em página própria na área de Administração. A configuração é separada dos dados do perfil; preferir tabela dedicada com relação ao usuário, trilha/auditoria e regras de acesso, em vez de adicionar o percentual ao perfil.
+- A configuração pode ser temporária ou permanecer vigente; a decisão sobre validade temporal ainda está em aberto. Modelar sem assumir agora uma duração fixa. Se forem adotadas vigências, permitir datas/estado e preservar histórico.
+- O onboarding exibe o percentual efetivo do indicador. Snapshot do percentual e da regra no pedido elegível impede retroatividade; mudanças futuras não alteram aquisições já registradas.
 - Elegibilidade é a primeira aquisição cujo depósito seja validado. Pedido pendente/rejeitado não bonifica; primeiro depósito validado consome elegibilidade.
 - Base: quantidade efetiva UMS da aquisição confirmada. Bônus de cada lado = base × percentual, arredondado segundo regra UMS de até 6 casas decimais.
 
@@ -36,7 +38,7 @@ Mobile-first e UI financeira enxuta. Reutilizar Auth e aquisição atuais quando
 Link próprio e onboarding com indicador/percentual; atribuição persistida; pós-login para aquisição; percentual configurável aplicado somente na primeira aquisição validada; três créditos e três débitos Genesis em eventos distintos; nenhuma entrada em pendente/rejeitado; retries/concor­rência sem duplicar; validação de ledger/chain; revisão de RLS/grants; testes/build e docs; OR por etapa.
 
 ## 8. Gates identificados
-O RPC create_ums_acquisition verificado no baseline exige mwc_meshwalker_profiles, em tensão com cadastro de 4 campos. Determinar necessidade e coleta mínima. Confirmar se configuração percentual será global administrável (hipótese inicial) ou individual/campanha. Confirmar UX de moeda/limites e atomicidade de três eventos. Nenhum lançamento real ou deploy sem aprovação.
+O RPC create_ums_acquisition verificado no baseline exige mwc_meshwalker_profiles, em tensão com cadastro de 4 campos. Determinar necessidade e coleta mínima. Definir, após análise, se a configuração por indicador terá vigência temporal (ainda não decidido). Confirmar UX de moeda/limites e atomicidade de três eventos. Nenhum lançamento real ou deploy sem aprovação.
 
 
 ## 9. Padrão visual e material de divulgação (2026-11-04)
