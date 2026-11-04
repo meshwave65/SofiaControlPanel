@@ -356,10 +356,10 @@ export default function TaskDetail() {
                     <div>
                       <CardTitle className="text-lg flex items-center gap-2">
                         <ShieldCheck className="w-5 h-5 text-accent" />
-                        Avaliação ARC/PGC
+                        Relatório ARC/PGC
                       </CardTitle>
                       <CardDescription className="mt-2">
-                        Sinais contextuais heurísticos da tarefa e do agente.
+                        Relatório contextual heurístico da tarefa e do agente, em shadow mode.
                       </CardDescription>
                     </div>
                     <Badge variant="outline" className="shrink-0">SHADOW</Badge>
@@ -450,10 +450,15 @@ export default function TaskDetail() {
                         </Button>
                       </div>
                     </div>
+                  ) : ensureArcAssessmentMutation.isPending ? (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground" role="status" aria-live="polite">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Gerando relatório ARC automaticamente...
+                    </div>
                   ) : (
                     <div className="flex flex-col items-start gap-3">
                       <p className="text-sm text-muted-foreground">
-                        Ainda não existe uma avaliação persistida para esta tarefa.
+                        Ainda não existe um relatório ARC persistido para esta tarefa.
                       </p>
                       <Button
                         onClick={handleArcEvaluation}
