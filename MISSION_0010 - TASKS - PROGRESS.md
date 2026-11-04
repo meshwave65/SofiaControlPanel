@@ -2,7 +2,7 @@
 
 **Repositório canônico:** `https://github.com/meshwave65/SofiaARC-PGC`
 **Blueprint:** `governance/missions/0010/BLUEPRINT.md`
-**Último checkpoint técnico confirmado:** `CHECKPOINT-ARC-009-RLS-CLOSED.md`
+**Último checkpoint técnico confirmado:** `CHECKPOINT-ARC-010.md`
 **Atualizado em:** 2026-10-31
 
 | ID | Tarefa | Status | Instância | Repositório/artefato | Próxima ação |
@@ -16,6 +16,7 @@
 | ARC-007 | Criar UI mínima de avaliação na tarefa | DONE | Manus ARC-PGC Agent | `SofiaControlPanel` — UI `d759954`, checkpoint `cce90ae`, OR-20261030-0003 | Concluída; posterior, decisão, modo e evidências sem metadata sensível; check/test/build aprovados |
 | ARC-008 | Validar, fechar MVP e emitir handoff final | DONE | Manus ARC-PGC Agent | `SofiaControlPanel` — checkpoint `456900a`, OR-20261031-0001 | MVP consolidado para uso controlado em shadow; não reabrir |
 | ARC-009 | Provisionar persistência Supabase e fechar gate de segurança | DONE | Manus ARC-PGC Agent | `SofiaControlPanel` — checkpoint `CHECKPOINT-ARC-009-RLS-CLOSED.md`; OR `OR-20261103-0002`; projeto `ufylccbdjfzydbwhpmpp` | RLS server-only aplicado e validado; não ativar assisted/enforced |
+| ARC-010 | Integrar geração automática do relatório ARC no painel de tarefas | DONE | Manus ARC-PGC Agent | `SofiaControlPanel` — commits `aceb3b3`, `92544d7`; checkpoint `CHECKPOINT-ARC-010.md`; OR `OR-20261103-0003` | Relatório criado automaticamente ao abrir tarefa sem assessment; shadow mode preservado |
 
 ## Regra de assunção
 
