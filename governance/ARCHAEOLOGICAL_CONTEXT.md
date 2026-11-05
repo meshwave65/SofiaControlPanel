@@ -29,3 +29,15 @@ A Skill meeting-preparation-dossier v0.1.1 permanece DRAFT e ainda não foi vali
 
 ## Integridade
 Registrar cada nova entrada com data, OR/FOR, missão/etapa, orientação anterior, fato/evidência, classificação (fato, declaração, decisão, hipótese, inferência ou pendência), decisão, autoridade, documentos/versões afetados, commit e validação. Não inventar dados nem reescrever histórico. A existência desta memória não significa que o Oráculo autônomo já esteja implementado.
+
+
+### AC-005 — 2026-11-05 — OR_MEETING_PREP_2026-11-05_GONCALGO_PILOT
+
+- **Missão/etapa:** operações contínuas MeshWave Network; reprocessamento supervisionado do dossiê MWC/UMS de Gonçalo / NW-LI-0031.
+- **Orientação anterior:** Skill meeting-preparation-dossier v0.1.1 em DRAFT; piloto Gonçalo; não iniciar Renato antes da avaliação/aprovação do piloto.
+- **Fato/evidência:** o pacote foi reaberto e validado contra v0.1.1. Os seis materiais obrigatórios existem; 21 links relativos válidos, zero quebrados; claims/maturidade, demo/fallback, limites e fontes estão explicitados. O relatório operacional `meshwave65/network: docs/reports/OPERATIONAL_REPORT_MEETING_PREP_2026-11-05_GONCALGO_PILOT.md` registra a QA. A data 03/11/2026 passou, mas ocorrência/resultado não foi verificado; minutos/follow-up permanecem em branco.
+- **Classificação:** fato de execução + decisão operacional + pendências humanas.
+- **Decisão:** quality gate do piloto **passou com revisão do responsável pendente**. A Skill permanece DRAFT e não é promovida. A instrução explícita do responsável em 05/11 inclui o encontro separado de Renato Barros / NW-LI-0023 em 06/11; isso autoriza continuar a reprocessar esse dossiê existente como piloto supervisionado, não aprovar/promover a Skill. Não criar pasta duplicada, não enviar mensagens, não alterar calendário.
+- **Autoridade:** instrução explícita atual do responsável, dentro do escopo de Meeting Prep.
+- **Documentos/versões:** Skill v0.1.1 (file SHA `c373642329208881ea5c2b7bc1d9c061f3530543`); contexto anterior AC-004 (file SHA `11cd52a7b6034ae32a78afc17895ac35e206b1b5`); OR commit `eb8563b52e05e13949a68b8ed7d4ae64c56308f1`; Gonçalo README commit `f7dae41698b1c3c424ed8774a320d6beb3b4b613`; meeting_prep commit `9636d341e73d2c377ae001eb602ca4f9c32ae882`.
+- **Validação:** os arquivos foram relidos remotamente; qualidade/links aprovados; blueprints não alterados; lab de duas VMs continua congelado. A referência do usuário a Renato em 03/11 conflita com a correção explícita de 31/10 (“somente Gonçalo”); identidade não atribuída e exige esclarecimento humano.
