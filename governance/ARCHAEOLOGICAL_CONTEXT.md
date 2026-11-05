@@ -41,3 +41,15 @@ Registrar cada nova entrada com data, OR/FOR, missão/etapa, orientação anteri
 - **Autoridade:** instrução explícita atual do responsável, dentro do escopo de Meeting Prep.
 - **Documentos/versões:** Skill v0.1.1 (file SHA `c373642329208881ea5c2b7bc1d9c061f3530543`); contexto anterior AC-004 (file SHA `11cd52a7b6034ae32a78afc17895ac35e206b1b5`); OR commit `eb8563b52e05e13949a68b8ed7d4ae64c56308f1`; Gonçalo README commit `f7dae41698b1c3c424ed8774a320d6beb3b4b613`; meeting_prep commit `9636d341e73d2c377ae001eb602ca4f9c32ae882`.
 - **Validação:** os arquivos foram relidos remotamente; qualidade/links aprovados; blueprints não alterados; lab de duas VMs continua congelado. A referência do usuário a Renato em 03/11 conflita com a correção explícita de 31/10 (“somente Gonçalo”); identidade não atribuída e exige esclarecimento humano.
+
+
+### AC-006 — 2026-11-05 — OR_MEETING_PREP_2026-11-05_RENATO_1106
+
+- **Missão/etapa:** reprocessamento supervisionado do dossiê SOFIA/SWE de Renato Barros / NW-LI-0023 para 06/11/2026, após a avaliação do piloto Gonçalo (AC-005).
+- **Orientação anterior:** Skill v0.1.1 permanece DRAFT; o responsável explicitamente incluiu Renato 06/11 na instrução atual. A continuação é um piloto supervisionado, não promoção da Skill.
+- **Fato/evidência:** identidade resolvida por placeholder existente, evento “VIDEOCONF RENATO BARROS”, registro Secretary de 23/10 e correção de 31/10. O pacote foi reprocessado; seis materiais obrigatórios criados; 22 links relativos válidos, zero quebrados. O relatório `meshwave65/network: docs/reports/OPERATIONAL_REPORT_MEETING_PREP_2026-11-05_RENATO_1106.md` registra QA. Reunião registrada para 06/11, 16:00–16:45 America/Sao_Paulo; não houve leitura nova de calendário.
+- **Classificação:** fato de execução + decisão operacional + pendências humanas.
+- **Decisão:** quality gate passou com revisão do responsável pendente. Skill continua DRAFT, sem promoção. Não enviar mensagem, não alterar calendário, não executar teste/demo/latência, não mudar blueprint. A mensagem de 17/10 não foi reenviada.
+- **Autoridade:** instrução explícita atual do responsável, após a avaliação do piloto AC-005.
+- **Documentos/versões:** Skill v0.1.1 (file SHA `c373642329208881ea5c2b7bc1d9c061f3530543`); contexto anterior AC-005 (file SHA `cded377e06f147a18af096deef637abc45d62310`); OR final commit `37d35b788765ed723ee1b16a51a443928cbe24ba`; Renato README `320431b31b0ebc7f85005f0568d817db8ec8ef38`; main dossier `4deb3fb3c1cf93d283bf2a8159defbd8500e2012`; materials README `073aec930a55c22d4068c7434857e366e8e1afb8`; link fix `e991f4d218796b8d96e7cd501e42c833961b5845`.
+- **Validação:** arquivos relidos; 22/22 links válidos; blueprints não alterados; lab de duas VMs continua congelado. A referência do usuário a Renato em 03/11 ainda conflita com a correção explícita de 31/10; nenhuma identidade foi atribuída.
