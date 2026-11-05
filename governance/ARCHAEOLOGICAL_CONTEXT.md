@@ -53,3 +53,15 @@ Registrar cada nova entrada com data, OR/FOR, missão/etapa, orientação anteri
 - **Autoridade:** instrução explícita atual do responsável, após a avaliação do piloto AC-005.
 - **Documentos/versões:** Skill v0.1.1 (file SHA `c373642329208881ea5c2b7bc1d9c061f3530543`); contexto anterior AC-005 (file SHA `cded377e06f147a18af096deef637abc45d62310`); OR final commit `37d35b788765ed723ee1b16a51a443928cbe24ba`; Renato README `320431b31b0ebc7f85005f0568d817db8ec8ef38`; main dossier `4deb3fb3c1cf93d283bf2a8159defbd8500e2012`; materials README `073aec930a55c22d4068c7434857e366e8e1afb8`; link fix `e991f4d218796b8d96e7cd501e42c833961b5845`.
 - **Validação:** arquivos relidos; 22/22 links válidos; blueprints não alterados; lab de duas VMs continua congelado. A referência do usuário a Renato em 03/11 ainda conflita com a correção explícita de 31/10; nenhuma identidade foi atribuída.
+
+
+### AC-007 — 2026-11-05 — OR_MEETING_PREP_BLOCKER_2026-11-05_RENATO_0311
+
+- **Missão/etapa:** resolver sem inferência a identidade do Renato reportado para 03/11/2026.
+- **Orientação anterior:** AC-005/AC-006 distinguem o piloto Gonçalo 03/11 e o encontro Renato Barros / NW-LI-0023 em 06/11; o placeholder de 03/11 Renato permanece com nove candidatos.
+- **Fato/evidência:** a correção de 31/10 diz que somente Gonçalo estava confirmado e que referências anteriores a Renato eram erro material; a atualização de 02/11 reativa um encontro com Renato como reportado pelo responsável, mas sem identidade canônica; a instrução atual de 05/11 volta a listar Renato e Gonçalo. A identidade não é resolvida por esses registros. O encontro de 06/11 é separado e explicitamente NW-LI-0023.
+- **Classificação:** conflito de evidência / bloqueio humano.
+- **Decisão:** manter `MEETING_REPORTED_BY_OWNER / BLOCKED_IDENTITY`; não escolher entre os nove registros, não atribuir NW-LI-0023, não duplicar/mover placeholder, não personalizar briefing, não enviar mensagem ou alterar calendário. Solicitar ao responsável qual ID canônico corresponde ao Renato de 03/11.
+- **Autoridade:** instrução explícita atual do responsável, com protocolo de não inferência.
+- **Documentos:** blocker report `meshwave65/network: docs/reports/MEETING_PREP_BLOCKER_2026-11-05_RENATO_0311.md`, commit `8c04332049239180508b00d2d8261be15bd62f09`; README existente, commit `524c17bd4f941871b95f42d2b22e5cf74ca86d4b`; briefing preliminar, commit `2b3f91d82661a0ff47abcdd1776d5f16882dfe61`; esclarecimento no OR Renato 06/11, commit `6d29ef3e00fd38ad46827238bb9bc6c6927d8177`.
+- **Validação:** placeholder e report relidos; nenhuma blueprint ou network_master alterada; nenhum envio ou ação externa.
