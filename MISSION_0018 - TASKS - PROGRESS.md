@@ -32,3 +32,11 @@
 - Não prometer valorização, liquidez, listagem, conversibilidade atual ou geração de caixa sem comprovação.
 - Não executar outreach, compromisso comercial, deployment ou ação em exchange sem autorização específica.
 - Seguir AGENTS.md, GOVERNANCE.md e skill operacional aplicável.
+
+
+### Checkpoint 18.1 — 2026-11-07
+
+- Inventário inicial persistido em governance/missions/0018/EVIDENCE_INVENTORY_INITIAL.md.
+- Consultadas árvores de repositórios e fontes primárias: MeshWave-Core, Foundation_MeshWave, meshwave-blockchain, mwc-ums-sim, network, SOFIA/SWE e Condenser.
+- Evidência importante: documentação declara ledger piloto MWC operacional e centralizado (não canonical/distribuído), simulador econômico local e protótipo de armazenamento com limites explícitos. Não extrapolar para rede produtiva, UMS real ou adoção.
+- Status 18.1 permanece PROGRESS: falta reconciliar missões e obter/validar evidências de execução recentes (CI, deployments, testes, demonstrações) por componente.
