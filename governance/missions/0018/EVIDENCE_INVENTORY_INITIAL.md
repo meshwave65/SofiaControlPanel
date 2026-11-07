@@ -46,3 +46,25 @@
 ## Conclusão provisória
 
 O repositório de governança comprova que existe uma estratégia estruturada e um portfólio de missões em andamento; ele não basta para provar, sozinho, que cada componente do ecossistema está operacional. O pitch deve usar a distinção explícita entre entregas documentadas, declarações, desenvolvimento e propostas. A tese de “base funcional” precisa ser demonstrada com evidência primária de cada componente antes de ser usada como afirmação pública.
+
+
+## Complemento — presença de repositórios canônicos (consulta de árvore GitHub)
+
+Em 2026-11-07 foram consultadas as árvores de diretório na branch padrão `main` dos seguintes repositórios. **A existência de arquivos/estrutura é evidência de artefato de desenvolvimento, não de execução em produção.** Os links permitem inspeção da fonte:
+
+| Frente | Repositório e sinais documentais observados | Classificação conservadora |
+|---|---|---|
+| Núcleo MeshWave | [MeshWave-Core](https://github.com/meshwave65/MeshWave-Core): documentação arquitetural, app Android, app_engine, clients, tasks e relatórios | Artefatos de desenvolvimento; funcionalidade/atividade de runtime não validada nesta consulta |
+| Arquitetura e documentação da rede | [Foundation_MeshWave](https://github.com/meshwave65/Foundation_MeshWave): documentação de arquitetura, integração, rede mesh, armazenamento/processamento, segurança e BCE | Base documental e de desenvolvimento; módulos precisam de evidência funcional individual |
+| Blockchain / camada MWN | [meshwave-blockchain](https://github.com/meshwave65/meshwave-blockchain): ARCHITECTURE.md, README, src, tests e diretório Supabase | Implementação de software presente; deploy, contratos/ledger efetivo, testes executados e estado operacional não validados |
+| Simulador MWC/UMS | [mwc-ums-sim](https://github.com/meshwave65/mwc-ums-sim): documentação técnica, src, node-agent, projects, Supabase e tests | Simulador/artefatos de desenvolvimento; não prova economia UMS em produção ou conversão real |
+| Aplicação SOFIA MIA | [sofia-mia](https://github.com/meshwave65/sofia-mia): app web com src, package.json e configuração Vite | Aplicação de desenvolvimento; build/deployment/uso não validados |
+| SOFIA legado/monorepo | [sofia](https://github.com/meshwave65/sofia): código Python, documentação/arquitetura, scripts, módulos e relatórios | Código e documentação existentes; estado de operação e atualidade heterogêneos, necessitam auditoria por componente |
+| SWE / extração | [SofiaWebExtractor](https://github.com/meshwave65/SofiaWebExtractor): backend e projetos Vite; [engines](https://github.com/meshwave65/engines): extractor universal, workers, downloader e requirements | Componentes de software identificados; não validar funcionamento de ponta a ponta apenas pela árvore |
+| Condenser | [condenser-pro-poc](https://github.com/meshwave65/condenser-pro-poc) e [sofia-condenser-pro](https://github.com/meshwave65/sofia-condenser-pro): aplicações Vite com src/view | POCs/projetos de software; não provar MIA-D validado nem benefício ambiental medido |
+| App MeshWave | [AppMeshWave](https://github.com/meshwave65/AppMeshWave): projeto Android (app/, Gradle) | Artefato de desenvolvimento; versão distribuída, testes e usuários não validados |
+| Inventário/gestão de rede | [network](https://github.com/meshwave65/network): AGENTS.md, INDEX.md, NETWORK_INVENTORY.md, projects, docs, governance e validation | Inventário e governança persistidos; não presumir que todos os projetos listados estejam ativos |
+
+### Limite desta rodada
+
+Foi feita consulta de presença e estrutura em nível de raiz, não leitura integral dos READMEs, histórico de commits, CI, testes, deployments, stores, blockchain explorers ou demonstrações. Portanto, os rótulos acima permanecem conservadores. O próximo trabalho deve aprofundar repositórios e localizar evidência de execução verificável antes de promover qualquer item a “funcional/ativo” ou “implementado e validado”.
