@@ -1,6 +1,8 @@
 # MISSION_0017 — TASKS — STAGED
 
 **Missão:** 0017 — Estudo de potencial econômico e geração de caixa da MeshWave  
+**Missão-base:** 0018 — Estratégia-base de lançamento da criptomoeda MeshWave (MWN)  
+**Papel:** submissão econômica secundária; resultados apoiam o modelo integrado de valor e geração potencial de caixa.
 **Blueprint:** `governance/missions/0017/BLUEPRINT.md`
 
 | ID | Tarefa | Status | Instância | Critério/saída |
