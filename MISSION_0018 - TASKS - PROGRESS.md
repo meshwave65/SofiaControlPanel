@@ -73,3 +73,12 @@
 - Contexto Vercel consultado para 5 repositórios web; a conexão consultada não retornou vínculo direto destes repositórios. Isso não exclui deploy em outro provedor/conta.
 - Inventário atualizado; nenhuma afirmação de runtime foi elevada. 18.1 continua PROGRESS.
 - OR-20261108-0002 submetido; Oracle pendente.
+
+
+### Checkpoint 18.1 — validação read-only dos registros Gmail MISSION_0013 (2026-11-08)
+
+- Resolvida uma divergência temporal: o arquivo canônico MISSION_0013 traz declarações antigas “nenhum envio” e atualização posterior com dois contatos enviados.
+- Consultados os dois IDs Gmail que a missão registra; ambos retornam metadados com label SENT, remetente oficial e destinatários OKX Ventures e Blockchain Founders Fund. A evidência confirma envio/estado SENT, não entrega/leitura/resposta.
+- MISSION_0013 TASKS PROGRESS.md ainda contém checkpoints antigos que dizem “sem contato”; registrar como stale/superseded, sem editar a missão subordinada nesta tarefa.
+- Nenhum follow-up ou outreach adicional realizado.
+- OR-20261108-0003 submetido; Oracle pendente. 18.1 segue PROGRESS.
