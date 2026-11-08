@@ -1,0 +1,54 @@
+# MISSION_0018 / Task 18.6 — Jurisdictional review and professional gates
+
+**Purpose:** identify regulatory topics to review for a potential MWN/UMS offering and MW-Ex; not a legal opinion and not a determination that the project is authorized or prohibited.
+
+## Jurisdiction matrix
+
+| Jurisdiction / market | Primary framework identified | Potentially relevant activities | Required analysis / gate | Current project status |
+|---|---|---|---|---|
+| **Brazil (home market)** | Lei 14.478/2022; Decree 11.563/2023; BCB Res. 519, 520, 521 and 589 (2025/2026); CVM PO 40; LGPD/ANPD; AML/CFT framework | Brokerage/intermediation, custody, exchange, primary sale, fiat rails, international transfers, asset offer/listing, customer data | Determine if each activity qualifies as SPSVA; legal entity, authorization, capital/viability, governance, risk, custody, AML, cybersecurity, data protection and reporting. Assess BCB 520 art. 91 amended by Res. 589 with effective marker 06/11/2026. Res. 521 may classify specific crypto services as FX/capital operations and requires flow-specific data. | **Blocking.** No authorization/entity scope established in the reviewed evidence. |
+| **Brazil — CVM/securities** | CVM Parecer de Orientação 40 and FAQ (updated 06/02/2026) | Token issuance/distribution, investment solicitation, public offer, trading in securities or collective investment contracts | Classification is functional and depends on rights, use, economic arrangement and promises; categories are not mutually exclusive. Review whether any offer/transaction is a security/collective investment; determine registration/exemption and disclosure path. | **Blocking before public offer/investor solicitation.** MWN classification not approved. |
+| **Brazil — data/privacy** | LGPD (Lei 13.709/2018); ANPD Res. 15/2024 (incident communication); ANPD rights framework | Account profile, KYC, financial/payment proof, wallet metadata, telemetry, QoS opt-in, support and marketing | Data inventory, controller/operator roles, purpose/legal basis, required/optional fields, minimization, retention/deletion, access audit, rights workflow, security, vendor agreements and cross-border transfers. For confirmed incident with relevant risk/damage, ANPD states 3 business days for communication; records of incident and response must be retained per regulation. | **Blocking for production.** No full DPIA/data lifecycle evidence found in this task. |
+| **Brazil — AML/CFT and Travel Rule** | BCB Res. 520 art. 43–44; Res. 521; applicable AML rules; FATF R.15/INR.15 and Recommendation 16/Travel Rule | Customer onboarding, exchange, custody, transfers, unhosted wallets, international flows, withdrawals, suspicious activity | Risk assessment, CDD/KYC, beneficial owner, PEP/sanctions screening, monitoring, records, suspicious reporting, source/destination verification and originator/beneficiary data. Determine how Travel Rule information is securely sent before/with transfers and how unhosted-wallet risk is managed. | **Blocking.** Program and compliance owner not established. |
+| **European Economic Area (EEA)** | MiCA Regulation (EU) 2023/1114; ESMA interim register (last update 05/11/2026); transfer-of-funds/crypto-asset transfer rules | CASP exchange/custody services; public offer of MWN; marketing and cross-border access | CASP services generally require authorization under MiCA Art. 59/63 or an applicable existing-institution route. Public offers of crypto-assets other than ART/EMT have white-paper notification/publication and offeror obligations under Art. 4/6/8/9, subject to exceptions. Review token classification, white paper, issuer/offeror and marketing. | **Not selected as target jurisdiction.** No CASP or white paper status established. |
+| **United States** | SEC 2026 interpretive release and staff FAQs; FinCEN BSA/MSB guidance; state money-transmitter laws; CFTC rules for derivatives | Token offering, exchange/admin/exchanger, custody, money transmission, derivatives, investor solicitation | Determine whether the asset/offer involves an investment contract/security; determine FinCEN/MSB registration and state licensing; CFTC analysis if derivatives; sanctions and AML obligations. SEC “Regulation Crypto Assets” Aug. 2026 is a **proposal**, not final law. | **Not selected as target jurisdiction.** No U.S. solicitation/operation authorized. |
+| **External CEX / offshore markets** | Venue's home-country licensing, local rules, contractual listing terms, sanctions and AML requirements; FATF standards | Listing, deposit/withdrawal, custody, market making, market data, marketing, access by residents of various countries | Verify contracting entity, authorization/registration, beneficial ownership, custody, audits/PoR and liabilities, withdrawal reliability, fees, market quality, delisting/termination, sanctions and jurisdictions served. Listing on a CEX does not itself authorize MWN's issuer or every user geography. | **No venue selected.** LBank/CoinW are only conditional diligence candidates from 18.3; no application or payment. |
+| **Other jurisdictions / global access** | FATF standards and each jurisdiction's local VASP/offer/privacy rules | Public website, wallet, market access, token sale, transfers and marketing | Do not assume global availability. Set jurisdiction matrix, eligibility/geofencing where appropriate, local counsel and service restrictions before opening access. FATF's 2026 targeted update reports progress but continuing gaps in Travel Rule/licensing/supervision. | **Open.** Target markets must be selected by owner. |
+
+## Current Brazilian regulatory flags to escalate immediately
+
+1. BCB Res. 520 regulates formation/operation of SPSVAs and services by other authorized institutions; Res. 519 defines authorization processes. Determine whether planned MW-Ex, custody, exchange and intermediation activities require an SPSVA authorization and which modality applies.
+2. BCB Res. 520's current text includes governance, risk, fraud, custody/private-key protection, AML/CFT, cybersecurity, cloud and personal-data policies. These are operational requirements, not optional product features.
+3. BCB Res. 589 amends art. 91. The current text sets a 06/11/2026 effective marker for restrictions on authorized banks/payment institutions and other BCB-authorized institutions facilitating certain operations with counterpart VASPs that are not authorized/in process, except expressly permitted forms. Counsel must analyze exact applicability and transition/exception; do not assume the banking rails are available.
+4. BCB Res. 521 includes certain crypto services in the FX/capital framework, including international transfers, transfers to/from self-custodied wallets, and purchases/sales/swaps of fiat-referenced crypto-assets; it includes owner identification and origin/destination processes for self-custody and purpose/counterparty reporting in applicable flows.
+5. BCB Res. 520 annex minimum asset-selection criteria include purpose, use cases, technical description, economic value, traceability, protocol and market attributes (return, volatility, liquidity, maturity, capitalization). These criteria should become the MWN dossier checklist.
+6. CVM classification is not determined solely by ticker or “utility” label. Rights, promises, distribution and economic arrangement need a documented legal classification.
+7. RFB consultation status is not a tax opinion; request formal follow-up through qualified counsel and preserve the exact submission scope.
+
+## Professional review package — before any public offer or operation
+
+- **Regulatory counsel (Brazil):** activity map, entity, authorization, BCB 519/520/521/589, banking rails, cross-border flows and capital requirements.
+- **Securities/offer counsel:** MWN rights/classification, primary distribution, investor outreach, disclosures, any security/collective investment issue, and target-country offers.
+- **Tax/accounting:** UMS accounting, MWN issuance, primary sales, conversion, customer assets, treasury, transaction reporting and RFB consultation.
+- **AML/CFT lead:** risk assessment, KYC/CDD, beneficial owner, PEP/sanctions, transaction monitoring, Travel Rule, record retention and suspicious reporting.
+- **Privacy/DPO:** LGPD data map, legal basis, minimization, optional telemetry, rights, retention/deletion, cross-border data, incident notification and vendors.
+- **Independent security/custody reviewer:** chain/consensus, Genesis/supply, key lifecycle, custody, wallet, API/RLS, matching, reconciliation, pen test and recovery.
+- **Market-integrity/liquidity expert:** orderbook rules, MeshWalker priority, market maker/treasury conflicts, surveillance, market-quality and disclosure.
+- **Local counsel for EEA/U.S./other selected markets:** CASP, white paper, securities, MSB/state licensing, marketing and local access.
+
+## Sources (official)
+
+- BCB 519: https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?numero=519&tipo=Resolu%C3%A7%C3%A3o+BCB
+- BCB 520 current text: https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?numero=520&tipo=resolu%C3%A7%C3%A3o+bcb
+- BCB 521: https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?numero=521&tipo=Resolu%C3%A7%C3%A3o+BCB
+- BCB 589: https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?numero=589&tipo=Resolu%C3%A7%C3%A3o+BCB
+- CVM PO 40: https://www.gov.br/cvm/pt-br/assuntos/noticias/2022/cvm-divulga-parecer-de-orientacao-sobre-criptoativos-e-o-mercado-de-valores-mobiliarios
+- CVM FAQ: https://www.gov.br/cvm/pt-br/acesso-a-informacao-cvm/perguntas-frequentes-da-cvm/criptoativos-quando-se-aplicam-as
+- ANPD incident communication: https://www.gov.br/anpd/pt-br/canais_atendimento/agente-de-tratamento/comunicado-de-incidente-de-seguranca-cis
+- ESMA MiCA register: https://www.esma.europa.eu/esmas-activities/digital-finance-and-innovation/markets-crypto-assets-regulation-mica
+- ESMA Art. 59: https://www.esma.europa.eu/publications-and-data/interactive-single-rulebook/mica/article-59-authorisation
+- ESMA Art. 4: https://www.esma.europa.eu/publications-and-data/interactive-single-rulebook/mica/article-4-offers-public-crypto-assets-other
+- FATF 2026 VASP update: https://www.fatf-gafi.org/en/publications/Fatfrecommendations/targeted-updated-virtualassets-vasps-2026.html
+- FATF Travel Rule guidance: https://www.fatf-gafi.org/content/dam/fatf/documents/recommendations/Updated-Guidance-VA-VASP.pdf
+- SEC 2026 interpretation: https://www.sec.gov/rules-regulations/2026/03/s7-2026-09
+- FinCEN virtual currency guidance: https://www.fincen.gov/resources/statutes-regulations/guidance/application-fincens-regulations-persons-administering

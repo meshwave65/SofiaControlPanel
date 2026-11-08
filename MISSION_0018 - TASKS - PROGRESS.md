@@ -10,7 +10,7 @@
 | 18.3 | Definir estratégia de mercado e opções de lançamento/listagem | DONE | ChatGPT | Comparação de mercado interno, candidatura Binance e alternativas; requisitos, custos, riscos e sequência |
 | 18.4 | Definir escopo mínimo, operação e gates de prontidão da MW-Ex | DONE | ChatGPT | Requisitos do mercado interno: modelo operacional, conversão, ordens/transações, controles, segurança, monitoramento, liquidez e dependências |
 | 18.5 | Consolidar projetos do ecossistema como submissões estratégicas | DONE | ChatGPT | Mapa de Jardim do Éden, SOFIA, MIA-D/Condenser, processamento/armazenamento federado e demais frentes; vínculo com demanda/valor MWN |
-| 18.6 | Analisar segurança, conformidade e riscos do lançamento | PROGRESS | ChatGPT | Matriz de risco e requisitos por jurisdição/mercado, incluindo LGPD, AML/KYC quando aplicável, exchange, fraude, custódia e governança; indicar revisão profissional |
+| 18.6 | Analisar segurança, conformidade e riscos do lançamento | DONE | ChatGPT | Matriz de risco e requisitos por jurisdição/mercado, incluindo LGPD, AML/KYC quando aplicável, exchange, fraude, custódia e governança; indicar revisão profissional |
 | 18.7 | Construir roadmap integrado com fases e gates | STAGED | — | Plano com entregáveis, dependências, indicadores, responsáveis sugeridos, estimativas justificadas e critérios de avanço/pausa |
 | 18.8 | Consolidar tese de lançamento e proposta ROB para decisão do responsável | STAGED | — | Documento executivo e detalhado demonstrando o ecossistema funcionalmente ativo como base da MWN, seu encadeamento de utilidade, evolução necessária, evidências, cenários e decisões pendentes; fontes e ORs referenciados |
 | 18.9 | Revisão cruzada e governança de continuidade | STAGED | — | Revisão independente, divergências resolvidas/registradas, índice e submissões atualizados |
@@ -217,3 +217,14 @@
 - 18.6 assumida por ChatGPT para construir matriz de riscos e requisitos por jurisdição/mercado, incluindo LGPD, AML/KYC quando aplicável, exchange, fraude, custódia, segurança técnica, governança e marketing.
 - Limite: análise documental e triagem; não é parecer jurídico, fiscal, de securities, de custody, nem aprovação regulatória. Requisitos específicos precisam de advogado/consultor qualificado nas jurisdições de operação e oferta.
 - Próxima ação: consultar fontes oficiais atuais de Brasil (BCB/CVM/ANPD), EEE (MiCA/ESMA) e outros mercados apenas como cenários, mantendo geografia final em aberto.
+
+
+### Fechamento 18.6 — matriz de risco e revisão jurisdicional (2026-11-08)
+
+- Critério atendido: matriz de riscos de segurança, compliance, lançamento, fraude, custody, AML/KYC, LGPD, exchange, market integrity, governance e jurisdiction requirements; professional review identified.
+- Publicados `RISK_AND_COMPLIANCE_MATRIX_18_6.md` e `JURISDICTIONAL_REVIEW_GATES_18_6.md` como análise documental para revisão profissional, não parecer jurídico/fiscal/regulatório.
+- Brasil foi destacado como gate crítico: BCB 519/520/521/589, incluindo art. 91 com marco 06/11/2026; CVM classification, AML/CFT, custody, privacy and cross-border flows require qualified review.
+- EEA, U.S. and offshore CEX are scenarios, not selected jurisdictions; MiCA/CASP, whitepaper, SEC/FinCEN and venue rules are captured with current official sources and caveats.
+- No legal classification, authorization, launch approval, KYC policy, custody model, exchange venue, payment rail or transaction was approved/executed.
+- 18.6 marcada DONE como matriz e lista de gates/revisões profissionais; o risco de operação pública permanece HIGH/BLOCKED até os gates serem fechados.
+- Operational Report: OR-20261108-0024 (`SUBMITTED`; Oracle pendente). Próxima tarefa elegível: 18.7 — roadmap integrado, milestones e gates.
