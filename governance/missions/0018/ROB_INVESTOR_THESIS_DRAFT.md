@@ -10,7 +10,7 @@ A tese de investimento parte desse ponto: o ecossistema já existe e avança. O 
 
 A imagem que traduz a visão internamente é a de uma criança que já nasceu e está crescendo: há algo real e em desenvolvimento. Sem recursos e estrutura suficientes, seu crescimento pode ficar limitado ou até ser interrompido; com apoio adequado, poderá desenvolver plenamente suas capacidades e tornar-se produtiva. Essa metáfora não é uma previsão de sucesso — ela comunica o estágio e a necessidade de construção.
 
-**ROB (Return on Building)** é a lente estratégica para essa conversa: avaliar o que pode ser desenvolvido, integrado e colocado em operação com recursos adicionais, em vez de centrar a narrativa em promessas de ROI. ROB é uma narrativa, não uma métrica financeira padronizada nem uma garantia de valorização. A tese deve ser sustentada por entregas, utilidade verificável, governança, evidências e execução.
+**ROB (Return On Believe — retorno por acreditar)** é a lente estratégica para essa conversa: o retorno potencial associado à decisão de acreditar em uma realidade já existente e apoiar sua evolução. Não significa retorno financeiro assegurado nem substitui análise de risco, diligência ou avaliação de resultados. ROB é uma narrativa de posicionamento, não uma métrica financeira padronizada nem uma garantia de valorização. A tese deve ser sustentada por entregas, utilidade verificável, governança, evidências e execução.
 
 ## Uma base existente, com maturidade desigual
 
