@@ -82,3 +82,31 @@ Gates documentais não equivalem automaticamente a aprovação operacional.
 - Roadmap com fases, dependências, indicadores e gates objetivos.
 - Segurança, conformidade, operação e riscos tratados explicitamente.
 - Estratégia e estudos persistidos, referenciados e colaboráveis no SCP com OR por tarefa.
+
+
+## 8. Context persistence and mandatory new-session orientation
+
+This mission spans multiple chats and execution agents. Its strategic definitions and decisions must not depend on conversational memory.
+
+**Mandatory orientation before any MISSION_0018 work in a new chat/session:**
+1. Read `governance/missions/0018/README.md` in full. It is the canonical context/handoff layer and records strategic decisions, ROB terminology, priorities, boundaries and owner-reported facts.
+2. Read this `BLUEPRINT.md` in full for formal mission purpose, scope, criteria and gates.
+3. Read `ROB_INVESTOR_THESIS_DRAFT.md` for the current investor narrative.
+4. Check the latest relevant Operational Reports and `governance/operational_reports/INDEX.csv`; then reconcile current repo/task state and evidence.
+5. Do not ask the owner to repeat context already captured in these documents. Do not assume prior chat history is accessible.
+6. Treat the README as a context record, not proof of current runtime status. Confirm implementation claims against current canonical artifacts.
+7. Where a conflict exists, prioritize the latest explicit owner decision, particularly when recorded in a later OR or artifact. Do not silently reconcile material conflicts by inference; surface and resolve them.
+
+### Canonical strategic definitions and decisions
+
+- **ROB means “Return On Believe” — “retorno por acreditar”.** Do not expand it as “Return on Building” or substitute a different phrase. ROB is a positioning narrative, not a standardized financial metric, a valuation formula, ROI or a guarantee of financial return.
+- MeshWave is framed as an **existing, partially built, rudimentary but evolving ecosystem**, predominantly developed solo under severe financial, material and structural constraints, as reported by its owner. Capital is framed as enabling professionalization, structure, integration and acceleration—not as funding the birth of an abstract idea. This does not imply all components are operational or validated.
+- **Immediate priority: operationalize MW-Ex** and create investor materials for risk-tolerant audiences using the ROB narrative.
+- **External exchange selection is deferred.** Do not research, compare or choose an exchange as a presumed next step unless the owner explicitly reopens that decision.
+- Owner-reported MW-Ex icon/interface in the MWN wallet website/PWA is not evidence of complete trade execution, financial operation, custody/security, liquidity or production readiness.
+- Owner-reported Binance application submission is a context fact only. Exact response/current status remain unverified; do not infer acceptance, rejection or active review.
+- Capital ranges are strategic targets, not projections, approved budgets, fundraising promises or guarantees: organic phase R$50k–100k; later external venue phase R$250k–500k; later prestige/scale phase “some millions”. External venue is not currently selected.
+- Prior outreach/e-mails are channel-opening attempts, not evidence of investor interest, partnership, commitment or investment.
+- The owner's internal child-growth metaphor is a context metaphor, not a success prediction and should not be used as manipulative public fundraising language.
+
+These decisions are expanded in the mission README. The README and thesis do not authorize outreach, offers, deployment, listing, financial activity or public distribution; all mission gates and human approval requirements remain in force.
