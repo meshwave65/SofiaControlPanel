@@ -42,12 +42,12 @@ Distinção:
 ## 3. Estratégia de mercado: decisões explícitas
 
 ### Prioridade atual
-O foco imediato é **tornar a MW-Ex (exchange própria) operacional** e desenvolver materiais para interlocutores/investidores que aceitem risco elevado. O responsável relata que um ícone de acesso e uma tela rudimentar da MW-Ex já aparecem na carteira MWN do website e PWA. Isso é uma declaração do responsável sobre presença de interface; não prova trade execution, operação financeira ponta a ponta, custódia, segurança, liquidez ou prontidão de produção.
+O foco de produto é **MW-Ex própria como canal primário inicial planejado**, com a carteira/ecossistema próprio como canal inicial de negócios. O responsável relata que um ícone de acesso e uma tela rudimentar aparecem na carteira MWN do website/PWA; isso prova apenas presença declarada de interface, não trade execution, operação financeira ponta a ponta, custódia, segurança, liquidez ou prontidão de produção.
 
-A carteira/ecossistema próprio é o canal primário inicial planejado para negócios. O trabalho atual é transformar presença rudimentar em fluxo de produto verificável, com escopo, controles, segurança, testes, operação e responsabilidade claramente definidos.
+**Gate de execução:** antes de comprometer desenvolvimento ou custos, validar interesse externo/investimento e aprovar escopo, orçamento, responsáveis e marcos. Até esse gate, o trabalho permanece no conceito, na especificação, na evidência e nos materiais para decisão. Depois do gate, a evolução deve seguir o roadmap e os readiness gates da MW-Ex.
 
 ### Exchange externa
-A seleção de exchange externa **foi deliberadamente postergada**. Não pesquisar, comparar, recomendar ou selecionar venues como etapa automática do trabalho atual. Não assumir que Binance será escolhida nem que outra exchange já foi definida. Uma exchange externa menor/menos exigente pode vir a ser considerada como porta pública em uma fase futura, mas não é a prioridade atual.
+A seleção de exchange externa foi postergada inicialmente, mas o responsável **explicitamente reabriu a comparação** na MISSION_0018, tarefa 18.3. A estratégia atual é MW-Ex/carteira própria como canal primário e uma CEX externa de menor atrito como porta pública posterior, sem Binance-first. A comparação está publicada em `ESTRATEGIA_MERCADO_E_LISTAGEM_18_3.md`; LBank e CoinW são apenas candidatos condicionais de diligência. **Nenhuma venue foi selecionada, contatada ou paga.** Não reabrir pesquisa, seleção ou outreach sem decisão explícita do responsável.
 
 ### Candidatura Binance
 O responsável confirmou que uma candidatura de listagem foi submetida pelo formulário dedicado no website da Binance. Houve uma resposta associada ao formulário, mas o conteúdo exato e o estado atual não foram verificados de forma independente. Não inferir aprovação, rejeição, análise em curso ou qualquer status. A candidatura é um fato de contexto declarado pelo responsável; a estratégia posterior mudou e não depende de Binance.
@@ -104,10 +104,10 @@ Este mapa serve para contextualizar conexões. Não significa que todas as frent
 
 Sequência estratégica atual:
 1. Preservar e demonstrar a base existente por evidências.
-2. Tornar MW-Ex operacional e verificável dentro de um escopo mínimo.
-3. Preparar tese e materiais para investidores de risco sob ROB.
-4. Avaliar capital, plano de uso e marcos com base em fatos.
-5. Considerar venues externos somente em fase futura, mediante decisão expressa.
+2. Preparar tese e materiais para investidores de risco sob ROB.
+3. Validar interesse externo e investimento/capital antes de comprometer desenvolvimento/custos.
+4. Após o gate de capital/escopo, tornar MW-Ex operacional e verificável dentro de um escopo mínimo.
+5. Considerar uma venue externa como porta pública posterior, somente após readiness, diligência e decisão expressa.
 
 Gates a respeitar: produto, segurança, economia, conformidade legal/regulatória, operação, mercado e comunicação. Nenhum documento substitui auditoria de segurança ou assessoria jurídica/fiscal/regulatória. Não executar deploy, alteração de contratos, integração financeira, listagem, outreach ou publicação externa sem autorização específica.
 
@@ -140,15 +140,16 @@ Em divergência material, não misturar versões nem atualizar a memória silenc
 ## 10. Estado conhecido ao consolidar este README
 
 Data de consolidação: 08/11/2026.
-- ROB foi corrigido para **Return On Believe — retorno por acreditar** no documento de tese (commit `973eee5`; OR-20261108-0013).
-- A tese atual declara MeshWave como ecossistema existente, construído sob restrições severas e em evolução, e trata capital como aceleração/profissionalização, sem promessa.
-- MW-Ex é prioridade imediata; exchange externa adiada.
+- ROB foi corrigido para **Return On Believe — retorno por acreditar** no documento canônico de tese (commit `973eee5`; OR-20261108-0013).
+- MeshWave é enquadrada pelo responsável como ecossistema existente, parcialmente construído, rudimentar em operação e em evolução; a evidência por componente não demonstra integração completa em produção.
+- Tarefas 18.1–18.8 estão documentalmente concluídas; a revisão cruzada 18.9 está em execução. O pacote inclui matriz de evidências, arquitetura UMS↔MWN, estratégia de mercado, readiness MW-Ex, mapa de portfólio, riscos/regulação, roadmap e tese executiva/detalhada para decisão.
+- MW-Ex permanece preview visual não funcional; nenhum trade, custody, conversão, preço ou liquidez foi comprovado.
+- A estratégia de exchange externa foi explicitamente reaberta e comparada em 18.3; venue não selecionada. LBank/CoinW são candidatos condicionais, sem contato ou pagamento.
 - Candidatura Binance foi submetida segundo declaração do responsável; status não confirmado.
-- Os marcos de capital são metas conceituais, não previsões.
-- UI rudimentar da MW-Ex em carteira web/PWA é declarada pelo responsável; operação ponta a ponta permanece por validar.
+- As faixas de capital R$50k–100k, R$250k–500k e “alguns milhões” são metas estratégicas declaradas, não orçamento, previsão ou promessa.
 - E-mails de abertura de canal foram enviados; interesse externo não está confirmado.
-- MISSION_0018 possui inventário de evidências em andamento; conferir artefato mais recente para estado atual.
+- Nenhuma oferta, listing, outreach, desenvolvimento financiado, deploy ou operação financeira foi autorizado por estes drafts.
 
 ## 11. Retomada mínima — se houver pouco contexto/token
 
-Não comece do zero. Primeiro identifique o pedido atual do responsável. Leia este README e o Blueprint. Consulte ORs mais recentes. Preserve o ROB correto, o foco MW-Ex e a decisão de não selecionar exchange externa agora. Separe fatos, declarações e hipóteses. Execute o trabalho documental seguro e reporte somente resultados realmente verificados, com commit e OR quando alterar o repositório.
+Não comece do zero. Primeiro identifique o pedido atual do responsável. Leia este README, o Blueprint e a tese ROB vigente. Consulte ORs mais recentes e o estado do repositório. Preserve ROB = Return On Believe, a estratégia MW-Ex própria como canal primário e o estado não selecionado da venue externa. Separe fatos, declarações e hipóteses. Após o pacote MISSION_0018, a próxima ação é revisão/aprovação humana dos drafts para circulação; não iniciar desenvolvimento, listing, outreach ou oferta sem autorização.

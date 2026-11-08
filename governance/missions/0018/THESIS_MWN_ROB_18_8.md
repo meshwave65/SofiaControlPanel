@@ -1,10 +1,10 @@
 # MeshWave / MWN — Tese de lançamento e proposta ROB
 
-**Versão:** 0.1.0-DRAFT_FOR_OWNER_DECISION | **Data:** 2026-11-08 | **Status:** documento de decisão; não é oferta pública, investment solicitation, aprovação de tokenomics ou previsão financeira.
+**Versão:** 0.1.1-DRAFT_FOR_OWNER_DECISION | **Data:** 2026-11-08 | **Status:** documento de decisão; não é oferta pública, investment solicitation, aprovação de tokenomics ou previsão financeira.
 
 ## 1. Resumo da tese
 
-MeshWave é uma proposta de ecossistema de rede e serviços cujo ativo de mercado pretendido é MWN. A arquitetura distingue **UMS**, unidade interna de contabilização de contribuição útil e consumo de serviços, de **MWN**, camada planejada de circulação/mercado. O ecossistema inclui a rede/infraestrutura MeshWalker, a camada cognitiva SOFIA, o produto SWE, Condenser, MIA-D e opções de adoção/impacto como Jardim do Éden, aferição opcional de qualidade de serviços (QoS) e ORP.
+MeshWave é um ecossistema existente, parcialmente construído, rudimentar em sua operação e em evolução, conforme a definição canônica do responsável. O responsável relata que a base foi desenvolvida predominantemente em esforço solo sob restrições financeiras, materiais e estruturais severas. A arquitetura distingue **UMS**, unidade interna de contabilização de contribuição útil e consumo de serviços, de **MWN**, camada planejada de circulação/mercado. O ecossistema inclui a rede/infraestrutura MeshWalker, a camada cognitiva SOFIA, o produto SWE, Condenser, MIA-D e opções de adoção/impacto como Jardim do Éden, aferição opcional de qualidade de serviços (QoS) e ORP.
 
 A tese de investimento não é “um token já operacional”. É a possibilidade de profissionalizar e integrar uma base parcialmente construída: portal público, wallet frontend autenticada, ledger/piloto UMS, código de software e protótipos. A integração completa, o mercado próprio e a demanda recorrente ainda dependem de execução, capital, decisões econômicas, segurança, conformidade, adoção e liquidez.
 
@@ -79,16 +79,16 @@ Esses elementos são os drivers da tese; nenhum é garantido ou completamente im
 
 ## 6. Estratégia de mercado
 
-- **Canal primário pretendido:** carteira e MW-Ex próprias, com controle da experiência e do relacionamento MeshWalker.
+- **Canal primário pretendido:** carteira e MW-Ex próprias, com controle da experiência e do relacionamento MeshWalker; desenvolvimento/custos são condicionados a interesse externo/investimento e orçamento aprovado.
 - **Porta pública posterior:** uma exchange externa de menor atrito pode servir de gateway, mesmo que tenha menos alcance/liquidez que Binance.
 - **Binance:** candidatura histórica reportada; status atual não verificado e não é estratégia primária.
-- **Venue externa:** não selecionada. LBank e CoinW são apenas candidatos condicionais de diligência; não recomendação, listing ou aprovação.
+- **Venue externa:** comparação documental foi explicitamente reaberta e concluída na tarefa 18.3. Não selecionada. LBank e CoinW são apenas candidatos condicionais de diligência; não recomendação, listing ou aprovação. Não houve contato ou pagamento.
 - **DEX:** alternativa futura, distinta de CEX; requer chain/contract, audit, pool/liquidity and legal/technical review.
 - **Sem promessa de preço, listing, liquidity, volume, redemption, buyback or ROI.**
 
-## 7. ROB — Return on Belief
+## 7. ROB — Return On Believe
 
-ROB é um conceito narrativo para uma tese de investimento de risco: o investidor acredita que a integração de uma rede de serviços, produtos de software, economia UMS/MWN e mercado próprio pode gerar valor se os milestones forem executados e houver adoção.
+ROB (Return On Believe — retorno por acreditar) é um conceito narrativo para uma tese de investimento de risco: o investidor acredita que a integração de uma rede de serviços, produtos de software, economia UMS/MWN e mercado próprio pode gerar valor se os milestones forem executados e houver adoção.
 
 ROB não é uma fórmula de retorno, valuation, ROI forecast, token price target or guarantee. O investidor precisa considerar:
 
@@ -102,7 +102,7 @@ ROB não é uma fórmula de retorno, valuation, ROI forecast, token price target
 
 ### Linguagem recomendada
 
-“ROB (Return on Belief) descreve o caráter de investimento em uma tese de execução e integração de alto risco. O potencial de retorno depende de milestones, adoção, utilidade, mercado e decisões futuras; não é ROI garantido nem promessa de valorização.”
+“ROB (Return On Believe) descreve o caráter de investimento em uma tese de execução e integração de alto risco. O potencial de retorno depende de milestones, adoção, utilidade, mercado e decisões futuras; não é ROI garantido nem promessa de valorização.”
 
 ## 8. Cenários qualitativos — sem projeção financeira
 
@@ -114,7 +114,19 @@ ROB não é uma fórmula de retorno, valuation, ROI forecast, token price target
 
 Os cenários são narrativos para decisão; não incluem preço, supply, valuation, market cap, revenue forecast or ROI.
 
-## 9. Uso potencial de capital — prioridades, não orçamento
+## 9. Objetivos de capital relatados — não orçamento ou previsão
+
+O responsável registrou três faixas estratégicas conceituais, que devem permanecer explicitamente atribuídas e não podem ser apresentadas como orçamento aprovado, valuation, promessa de captação ou previsão:
+
+| Fase conceitual | Objetivo declarado | Faixa de capital pretendida |
+|---|---|---:|
+| Orgânica inicial | Amadurecer o ecossistema, com MW-Ex como canal inicial, após validação externa | R$ 50 mil–R$ 100 mil |
+| Acesso público externo, futuro | Avaliar exchange externa como porta pública após MW-Ex/readiness | R$ 250 mil–R$ 500 mil |
+| Escala/prestígio, futura | Considerar venue de maior alcance e desenvolvimento mais significativo | Alguns milhões de reais |
+
+A segunda e terceira fases dependem de execução, elegibilidade, segurança, conformidade, mercado, liquidez e decisão humana. Não há alocação percentual ou destinação detalhada aprovada.
+
+## 10. Uso potencial de capital — prioridades, não orçamento
 
 ### Prioridade proposta para revisão
 
@@ -173,6 +185,7 @@ These are target profiles, not identified investors or evidence of interest.
 
 ## 13. Sources and traceability
 
+- [Canonical investor thesis draft](ROB_INVESTOR_THESIS_DRAFT.md)
 - [Executive summary](EXECUTIVE_SUMMARY_MWN_ROB_18_8.md)
 - [18.1 evidence matrix](EVIDENCE_MATRIX_18_1.md) and detailed inventory.
 - [18.2 UMS↔MWN architecture](ARCHITECTURA_ECONOMICA_UMS_MWN_DECISION_DRAFT.md) and decision matrix.

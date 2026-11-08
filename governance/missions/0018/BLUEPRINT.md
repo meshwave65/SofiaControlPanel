@@ -1,14 +1,14 @@
 # Blueprint da Missão 0018 — Estratégia-base de lançamento da criptomoeda MeshWave (MWN)
 
 **Missão:** `MISSION_0018`  
-**Estado:** STAGED  
+**Estado:** PROGRESS — pacote estratégico/documental em revisão cruzada final; decisões do responsável e gates de lançamento permanecem abertos.  
 **Orquestrador:** SofiaControlPanel (SCP)  
 **Projeto-alvo:** MeshWave Network (MWN)  
 **Tipo:** missão-base estratégica
 
 ## 1. Propósito
 
-O objetivo demonstrativo prioritário é tornar visível e verificável que MeshWave já é um ecossistema funcionalmente ativo, não apenas um conjunto de promessas sobre um token. A estratégia deve mostrar que MWN se apoia em aplicações, utilidades, economia e frentes técnicas existentes ou em desenvolvimento, e que o capital e o trabalho de evolução podem integrar, amadurecer e ampliar essa base.
+O objetivo demonstrativo prioritário é tornar visível e verificável que MeshWave já possui uma base funcional por componente e é um ecossistema existente, parcialmente construído, rudimentar em operação e em evolução — não apenas um conjunto de promessas sobre um token. A estratégia deve mostrar aplicações, utilidades, economia e frentes técnicas existentes ou em desenvolvimento sem afirmar que o conjunto está integrado em produção.
 
 A consistência e potencial de continuidade devem ser argumentados a partir de utilidade, relações entre componentes, capacidade de evolução, diversificação e evidências. Não afirmar perenidade garantida nem confundir potencial com certeza.
 
@@ -34,7 +34,7 @@ A evidência deve sustentar a tese; a missão não deve converter toda possibili
 - **MWN:** criptoativo central destinado à eventual integração com mercados externos, conforme arquitetura e decisões validadas.
 - **UMS:** unidade de serviço/utilidade interna. A arquitetura discutida prevê carteiras individuais segregadas e ausência de transferências diretas entre MeshWalkers; confirmar implementação nas fontes canônicas.
 - **MW-Ex:** exchange própria inicialmente proposta como mercado interno. Definir escopo mínimo, operação, fluxo UMS→MWN, transações permitidas, controles, segurança, liquidez e responsabilidades.
-- **Mercado externo:** candidatura Binance informada pelo responsável; auditar evidência e estado. Avaliar alternativas sem depender de uma única exchange.
+- **Mercado externo:** candidatura Binance informada pelo responsável; status atual não verificado. O responsável explicitamente reabriu a comparação de CEX externa de menor atrito como porta pública posterior; tarefa 18.3 concluiu comparação documental. LBank/CoinW são candidatos condicionais, nenhuma venue selecionada, contato ou pagamento. Qualquer seleção futura exige decisão do responsável.
 
 ## 4. Submissões de ecossistema
 
@@ -101,12 +101,12 @@ This mission spans multiple chats and execution agents. Its strategic definition
 
 - **ROB means “Return On Believe” — “retorno por acreditar”.** Do not expand it as “Return on Building” or substitute a different phrase. ROB is a positioning narrative, not a standardized financial metric, a valuation formula, ROI or a guarantee of financial return.
 - MeshWave is framed as an **existing, partially built, rudimentary but evolving ecosystem**, predominantly developed solo under severe financial, material and structural constraints, as reported by its owner. Capital is framed as enabling professionalization, structure, integration and acceleration—not as funding the birth of an abstract idea. This does not imply all components are operational or validated.
-- **Immediate priority: operationalize MW-Ex** and create investor materials for risk-tolerant audiences using the ROB narrative.
-- **External exchange selection is deferred.** Do not research, compare or choose an exchange as a presumed next step unless the owner explicitly reopens that decision.
+- **Product priority: MW-Ex própria como canal primário inicial**, e materiais para investidores de risco sob ROB. Desenvolvimento/custos ficam condicionados a validação externa/investimento e escopo/orçamento aprovados; até esse gate, trabalho é documental/conceitual.
+- **External exchange remains unselected.** O responsável explicitamente reabriu a pesquisa/comparação na tarefa 18.3, agora concluída. LBank/CoinW são candidatos condicionais, não recomendação; não realizar nova seleção, outreach ou pagamento sem aprovação explícita.
 - Owner-reported MW-Ex icon/interface in the MWN wallet website/PWA is not evidence of complete trade execution, financial operation, custody/security, liquidity or production readiness.
 - Owner-reported Binance application submission is a context fact only. Exact response/current status remain unverified; do not infer acceptance, rejection or active review.
 - Capital ranges are strategic targets, not projections, approved budgets, fundraising promises or guarantees: organic phase R$50k–100k; later external venue phase R$250k–500k; later prestige/scale phase “some millions”. External venue is not currently selected.
 - Prior outreach/e-mails are channel-opening attempts, not evidence of investor interest, partnership, commitment or investment.
 - The owner's internal child-growth metaphor is a context metaphor, not a success prediction and should not be used as manipulative public fundraising language.
 
-These decisions are expanded in the mission README. The README and thesis do not authorize outreach, offers, deployment, listing, financial activity or public distribution; all mission gates and human approval requirements remain in force.
+These decisions are expanded in the mission README. The README and thesis do not authorize outreach, offers, deployment, listing, financial activity or public distribution; all mission gates and human approval requirements remain in force. The current documentary package is to be reviewed by the owner before external circulation.
