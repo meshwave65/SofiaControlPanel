@@ -101,3 +101,12 @@
 - Catálogo PostgreSQL confirmou RLS em 13 tabelas públicas, função de conversão UMS↔MWC com SECURITY DEFINER/grants authenticated e service_role, e trigger habilitado contra transferências diretas de UMS. A tabela de migrations tem IDs até 20261103200629; os arquivos 20261024... do repo não aparecem sob os mesmos IDs, então a proveniência do deploy continua a reconciliar.
 - Atualizado inventário com leitura direta, sem dados de identificação. Métricas classificadas como piloto, não volume de mercado/receita/liquidez/adoção.
 - OR-20261108-0005 submetido; Oracle pendente. 18.1 permanece PROGRESS para fechar as demais fontes e a lacuna Binance/MW-Ex.
+
+### Checkpoint 18.1 — auditoria documental focalizada de componentes (2026-11-08)
+
+- Releitura read-only de fontes primárias: MeshWave-Core (README/Project C3 Blueprint), blockchain (README/snapshot piloto), mwc-ums-sim (README/relatório técnico/node-agent), AppMeshWave, network/Jardim do Éden e READMEs Condenser/POC.
+- Evidência documental sustenta software/arquitetura histórica, ledger piloto controlado, simulador em memória e protótipo/laboratório de armazenamento; não sustenta ecossistema integrado em produção, consenso descentralizado, UMS real emitida por PoUW independente ou adoção.
+- O repo privado meshwave65/MeshWave retornou vazio; fonte canônica do website/PWA/carteira/MW-Ex não foi identificada nesta rodada. Tratar a presença da UI como declaração do responsável, sem concluir que inexiste em outro local.
+- Jardim do Éden README em network mantém escopo/objetivos ainda não definidos; Condenser/MIA-D não possui validação de impacto demonstrada pelas fontes lidas.
+- Inventário atualizado com proveniência e limites. 18.1 continua PROGRESS; próxima lacuna única: localizar e auditar a fonte canônica do wallet web/PWA/MW-Ex e obter evidência específica de runtime/deploy antes de consolidar material executivo.
+- Operational Report: OR-20261108-0015 (SUBMITTED; Oracle pendente).
