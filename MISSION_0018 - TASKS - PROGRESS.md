@@ -119,3 +119,11 @@
 - Build de produção CI passou no commit `3d523ae2` (05/11/2026). Isso não comprova deploy ativo. PWA instalável não foi confirmada: manifest/service worker ausentes nos caminhos consultados.
 - Inventário atualizado. 18.1 permanece `PROGRESS`: ainda exige consolidação final da cobertura dos demais componentes e revisão das divergências/documentos datados; MW-Ex operacional é um gate futuro, não requisito para descrever com precisão seu estado atual.
 - Operational Report: OR-20261108-0016 (`SUBMITTED`; Oracle pendente).
+### Checkpoint 18.1 — auditoria SOFIA/SWE, Condenser e MIA-D (2026-11-08)
+
+- Inspecionados arquivos de implementação de SofiaWebExtractor, engines, SOFIA Condenser API, Condenser Pro frontend e Sofia MIA/GlobalAquometer; commits recentes confirmados por repo.
+- SWE possui código FastAPI para tarefas/arquivos/busca e extractor online Selenium com upload de artefatos ao Supabase; classificação permanece desenvolvimento concreto, sem validação E2E/deploy atual nesta rodada.
+- Condenser tem frontend que chama API e serviço FastAPI/Groq com modos de resumo e otimização; não houve chamada real nem benchmark. A avaliação de maturidade próxima de MVP é declaração do responsável, não validação independente.
+- MIA-D/GlobalAquometer é contador visual com taxa fixa (6,52 L/s), não telemetria/impacto medido; metodologia permanece evolutiva e sem validação científica/certificação demonstrada nos arquivos consultados.
+- Inventário atualizado; 18.1 continua PROGRESS enquanto se consolida cobertura de projetos e se prepara a matriz final de evidências/gaps para a tese MWN. Nenhum serviço/endpoint foi executado.
+- Operational Report: OR-20261108-0017 (SUBMITTED; Oracle pendente).
