@@ -173,3 +173,20 @@ Consulta read-only do contexto de projetos Vercel retornou a equipe e os projeto
 - CI aprovado permanece ligado a revisões e testes específicos (blockchain, simulador e laboratório MWC), não é atestado global de saúde do ecossistema.
 - Foundation_MeshWave tem evidência atual de falhas em workflows utilitários e não pode ser categorizado como “CI verde” com base no run de sucesso isolado.
 - Nenhum deploy, produção, usuários, receita, conversão, liquidez ou operação de rede foi confirmado nesta consulta.
+
+
+## Complemento — reconciliação do estado de prospecção MISSION_0013 (2026-11-08)
+
+A documentação canônica da MISSION_0013 apresenta atualização cronológica divergente: seções anteriores afirmam “nenhum envio”, enquanto a atualização mais recente descreve dois primeiros contatos enviados em 29/30 de outubro. O arquivo da missão já contém os IDs Gmail, que foram verificados em modo somente leitura por metadados na caixa autenticada:
+
+- Registro OKX Ventures: remetente info@meshwave.com.br, destinatário ventures@okx.com, data 2026-10-30T00:54:17Z, label SENT, ID registrado 1a18a4ce5645ca3f.
+- Registro Blockchain Founders Fund: remetente info@meshwave.com.br, destinatário contact@bff.com, data 2026-10-30T00:54:21Z, label SENT, ID registrado 1a18a4cf39ef2210.
+
+Conclusão reconciliada: os registros Gmail corroboram que dois emails foram enviados e estão marcados como SENT. Isso não comprova entrega, leitura, resposta, interesse, reunião ou negociação. O texto “nenhum envio” em blocos anteriores da missão e do task board 13.6 está desatualizado em relação ao registro posterior; deve ser mantido como histórico com indicação explícita de supersessão, não como status corrente. Nenhum follow-up foi enviado nesta auditoria.
+
+### Estado de tarefas cruzadas
+
+- MISSION_0012 continua STAGED; o registro diz que não houve campanha ou solicitação de contribuição.
+- MISSION_0013 está PROGRESS; 13.5/13.6 permanecem em andamento segundo o arquivo da missão, e 13.6 já tem dois envios verificados por metadados Gmail, com entrega/leitura não confirmadas.
+- MISSION_0017 continua STAGED; contribuição de 1% é premissa declarada para estudo, não capacidade instalada/medida ou receita.
+- MISSION_0018 permanece PROGRESS; 18.1 não fecha até reconciliar os estados, o inventário e as lacunas de runtime.
