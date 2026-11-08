@@ -40,3 +40,11 @@
 - Consultadas árvores de repositórios e fontes primárias: MeshWave-Core, Foundation_MeshWave, meshwave-blockchain, mwc-ums-sim, network, SOFIA/SWE e Condenser.
 - Evidência importante: documentação declara ledger piloto MWC operacional e centralizado (não canonical/distribuído), simulador econômico local e protótipo de armazenamento com limites explícitos. Não extrapolar para rede produtiva, UMS real ou adoção.
 - Status 18.1 permanece PROGRESS: falta reconciliar missões e obter/validar evidências de execução recentes (CI, deployments, testes, demonstrações) por componente.
+
+
+### Checkpoint 18.1 — CI evidence (2026-11-07)
+
+- Audited GitHub Actions run status and job-step summaries for blockchain code (run 40085064692), MWC/UMS simulator (41635964106), storage-node tests (40104678215), and single-VM storage lab smoke test (40104678212); each queried run completed successfully.
+- Updated evidence inventory to classify these as passing automated CI/test evidence for specific revisions—not proof of production deployment, decentralized consensus, real UMS issuance/conversion, or user adoption.
+- Operational Report: OR-20261107-0005 (SUBMITTED; Oracle pending).
+- Task 18.1 remains PROGRESS pending broader runtime/deployment and mission-record reconciliation.
