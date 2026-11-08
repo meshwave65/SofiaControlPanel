@@ -48,3 +48,11 @@
 - Updated evidence inventory to classify these as passing automated CI/test evidence for specific revisions—not proof of production deployment, decentralized consensus, real UMS issuance/conversion, or user adoption.
 - Operational Report: OR-20261107-0005 (SUBMITTED; Oracle pending).
 - Task 18.1 remains PROGRESS pending broader runtime/deployment and mission-record reconciliation.
+
+
+### Checkpoint 18.1 — missão cruzada / snapshots (2026-11-07)
+
+- Reconciled MISSION_0012 (STAGED; no supporter campaign/contact/contribution), MISSION_0013 (PROGRESS; dated 29-Oct acquisition snapshot and two exploratory contacts recorded), MISSION_0017 (STAGED subordinate economic study), and MISSION_0018 (18.1 active; dependent tasks staged).
+- Identified differing 24-Oct and 29-Oct pilot snapshots; preserve their dates and do not conflate. Also flagged a stale “no contacts sent” sentence contradicted by the later MISSION_0013 update.
+- Added inventory notes on MWN/MWC legacy terminology and missing concrete equity/token rights documentation.
+- Operational Report OR-20261107-0006 submitted; Oracle pending. Task 18.1 remains PROGRESS.
