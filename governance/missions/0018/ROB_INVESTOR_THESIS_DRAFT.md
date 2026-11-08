@@ -13,7 +13,7 @@ Metáfora interna do responsável: uma criança que já nasceu e está crescendo
 
 ## ROB — Return On Believe — retorno por acreditar
 
-**ROB = Return On Believe — “retorno por acreditar”.** Esta é a definição explícita do responsável. Não usar “Return on Building”, “Return on Belief” ou outra expansão como se fosse a definição oficial.
+**ROB = Return On Believe — “retorno por acreditar”.** Esta é a definição explícita do responsável. Não usar “Return on Building” ou qualquer expansão diferente como se fosse a definição oficial.
 
 ROB expressa a tese de retorno potencial associada à decisão de acreditar e apoiar a evolução de uma realidade existente. É uma lente narrativa/de posicionamento para investidores de risco, não uma métrica financeira padronizada, modelo de valuation, ROI ou promessa/garantia de retorno financeiro. O termo deve vir acompanhado de risco, diligência, evidências e ausência de garantias.
 

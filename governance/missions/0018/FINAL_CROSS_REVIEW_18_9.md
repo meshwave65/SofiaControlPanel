@@ -8,7 +8,7 @@ Revisados os artefatos 18.1–18.8, README/Blueprint canônicos, ROB investor dr
 
 ### Correções realizadas
 
-1. ROB nas drafts 18.8 foi alinhado à definição canônica **Return On Believe — retorno por acreditar**; a expansão “Return on Belief” foi removida.
+1. ROB nas drafts 18.8 foi alinhado à definição canônica **Return On Believe — retorno por acreditar**; a expansão não canônica foi retirada da tese.
 2. Os objetivos de capital do responsável (R$50k–100k, R$250k–500k e alguns milhões) foram reintegrados como metas estratégicas atribuídas, não orçamento, previsão ou promessa.
 3. README/Blueprint foram reconciliados com a decisão posterior: MW-Ex própria como canal primário; CEX externa de menor atrito como porta pública posterior; comparação 18.3 concluída; LBank/CoinW apenas candidatos condicionais; nenhuma venue selecionada, contatada ou paga.
 4. O gate de validação externa/investimento antes de desenvolvimento/custos foi incorporado ao contexto canônico.

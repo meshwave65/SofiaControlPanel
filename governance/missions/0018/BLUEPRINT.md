@@ -1,7 +1,7 @@
 # Blueprint da Missão 0018 — Estratégia-base de lançamento da criptomoeda MeshWave (MWN)
 
 **Missão:** `MISSION_0018`  
-**Estado:** PROGRESS — pacote estratégico/documental em revisão cruzada final; decisões do responsável e gates de lançamento permanecem abertos.  
+**Estado:** PROGRESS — entregáveis 18.1–18.8 completos; self-review 18.9 publicado, tarefa BLOCKED até revisão independente Oracle e Final Operational Report (FOR). Decisões do responsável e gates de lançamento permanecem abertos.  
 **Orquestrador:** SofiaControlPanel (SCP)  
 **Projeto-alvo:** MeshWave Network (MWN)  
 **Tipo:** missão-base estratégica
