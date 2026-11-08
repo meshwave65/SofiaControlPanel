@@ -8,7 +8,7 @@
 | 18.1 | Reconciliar estado factual e montar inventário de evidências da base funcional | DONE | ChatGPT | Inventário rastreável de projetos, repositórios, missões, entregas, evidências, nível de funcionamento, atividade, dependências e lacunas; distinguir ativo/funcional, desenvolvimento, piloto, conceito e proposta |
 | 18.2 | Definir arquitetura econômica UMS ↔ MWN e tokenomics para decisão | DONE | ChatGPT | Fluxos, utilidades, emissão/suprimento, conversão, carteiras, transferibilidade, incentivos, riscos e parâmetros abertos; sem fixar decisões não autorizadas |
 | 18.3 | Definir estratégia de mercado e opções de lançamento/listagem | DONE | ChatGPT | Comparação de mercado interno, candidatura Binance e alternativas; requisitos, custos, riscos e sequência |
-| 18.4 | Definir escopo mínimo, operação e gates de prontidão da MW-Ex | STAGED | — | Requisitos do mercado interno: modelo operacional, conversão, ordens/transações, controles, segurança, monitoramento, liquidez e dependências |
+| 18.4 | Definir escopo mínimo, operação e gates de prontidão da MW-Ex | PROGRESS | ChatGPT | Requisitos do mercado interno: modelo operacional, conversão, ordens/transações, controles, segurança, monitoramento, liquidez e dependências |
 | 18.5 | Consolidar projetos do ecossistema como submissões estratégicas | STAGED | — | Mapa de Jardim do Éden, SOFIA, MIA-D/Condenser, processamento/armazenamento federado e demais frentes; vínculo com demanda/valor MWN |
 | 18.6 | Analisar segurança, conformidade e riscos do lançamento | STAGED | — | Matriz de risco e requisitos por jurisdição/mercado, incluindo LGPD, AML/KYC quando aplicável, exchange, fraude, custódia e governança; indicar revisão profissional |
 | 18.7 | Construir roadmap integrado com fases e gates | STAGED | — | Plano com entregáveis, dependências, indicadores, responsáveis sugeridos, estimativas justificadas e critérios de avanço/pausa |
@@ -175,3 +175,11 @@
 - Nenhuma candidatura, contato, pagamento, abertura de conta, listing, negociação ou ação financeira foi executada.
 - 18.3 marcada DONE como comparação documental e definição de sequência; escolha de venue e autorização de contato são decisões humanas separadas.
 - Operational Report: OR-20261108-0021 (`SUBMITTED`; Oracle pendente). Próxima tarefa elegível: 18.4 — escopo mínimo, operação e gates de prontidão MW-Ex.
+
+### Abertura 18.4 — escopo mínimo e readiness gates MW-Ex (2026-11-08)
+
+- 18.1–18.3 foram concluídas documentalmente; estratégia definida pelo responsável é MW-Ex própria como canal primário pretendido, exchange externa posterior como gateway, venue não selecionada.
+- 18.4 assumida por ChatGPT para especificar escopo mínimo, modelo operacional, conversão, ordens/transações, controles, segurança, monitoramento, liquidez e dependências.
+- Limite: especificação para decisão, não autorização para desenvolvimento/lançamento. Não escolher custodial/non-custodial, par, taxa, market-maker, liquidity reserve, KYC/AML thresholds ou conversão final sem aprovação.
+- Estado comprovado: rota e preview visual existem; código declara que MW-Ex não consulta preços, não recebe ordens e não executa compra/venda/conversão. O ledger de aquisição atual não é ledger de exchange.
+- Próxima ação: ler as fontes canônicas de readiness, governança de mercado, wallet/ledger e security; preparar MVP de spot com critérios de aceite e gates bloqueantes.
