@@ -220,3 +220,38 @@ O [registro BCE de PoUW/UMS/MWN](https://github.com/meshwave65/Foundation_MeshWa
 ### Conclusão de maturidade
 
 A evidência fortalece a descrição de uma base em evolução com código, controles e pilotos delimitados; não sustenta a afirmação de uma economia UMS/MWN plenamente operacional. A próxima validação de alto valor seria obter uma evidência read-only datada do estado atual do Supabase e uma fonte primária do status Binance, sem expor dados pessoais ou credenciais. A decisão de parâmetros econômicos permanece humana.
+
+
+## Complemento — consulta read-only do Supabase mwn (2026-11-08)
+
+### Estado observado no banco conectado
+
+Foi feita consulta SQL somente leitura ao projeto Supabase `mwn` (`vkjurxxrlchnytnkkrvq`), limitada a agregados e metadados técnicos; nenhum identificador de usuário/carteira foi retornado no inventário.
+
+| Métrica | Resultado observado |
+|---|---:|
+| Chain ID | `meshwave-genesis-v1` |
+| Network | `pilot` |
+| Latest block number / total blocks | 17 / 18 (blocos 0–17) |
+| Total transactions | 18 |
+| Timestamp do bloco mais recente | 2026-11-03 20:03:52 UTC |
+| Wallet records | 8 |
+| Acquisition records | 9: 8 validated, 1 rejected |
+| BRL agregado de aquisições validated | R$ 13,02 |
+| MWC agregado nas aquisições validated | 602,63827817 MWC |
+| Tipos de transação | 1 Genesis UMS allocation; 1 UMS→MWC conversion; 8 MWC acquisition transfers; 1 Genesis MWN→UMS reconversion; 7 MeshWalker MWN→UMS reconversions |
+| Account-ledger entries | 35: 25 MWC, 10 UMS |
+
+Os valores são agregados de registros do piloto e não representam volume de exchange, mercado secundário, receita recorrente, capitalização, preço de mercado, liquidez ou adoção ampla. O banco contém eventos de reconversão, mas isso não torna a economia normativa MWN aprovada nem comprova que todos os fluxos propostos estejam disponíveis ao usuário em produção.
+
+### Estado do controle técnico consultado
+
+- A listagem atual de tabelas mostra 13 tabelas públicas com RLS habilitado.
+- A consulta de catálogo PostgreSQL encontrou funções `mw_convert_ums_to_mwc` e `mw_convert_mwc_to_ums` com `SECURITY DEFINER`; grants retornados incluem `authenticated` e `service_role`. A função de append `mw_append_event` aparece restrita a `postgres`/`service_role`.
+- O trigger `mw_guard_ums_ledger_transfer` está habilitado na tabela `mw_account_ledger`.
+- A tabela de migrations do projeto conectado lista versões até `20261103200629` (`phase1_add_ums_quantity_to_acquisitions`). As migrations com timestamp `20261024...` citadas no repositório de código não aparecem com esses mesmos IDs na tabela de migrations consultada. O controle/trigger existe no catálogo; a proveniência exata de implantação deve ser reconciliada antes de alegar correspondência um-a-um entre arquivos e histórico do Supabase.
+- O último timestamp de bloco observado é 03/11, embora a consulta tenha sido feita em 08/11. Isso é um sinal de que o piloto não apresentou novos blocos no período observado; não é prova de indisponibilidade, pois nenhuma transação de teste foi submetida.
+
+### Revisão de classificação
+
+A fonte anteriormente usada (snapshot de 24/10) está agora complementada por uma leitura direta read-only do banco conectado em 08/11. O estado do ledger pode ser classificado como **piloto Supabase ativo/documentado com 18 blocos e registros agregados de aquisição/conversão**. Permanecem fora do que a evidência sustenta: blockchain distribuída, consenso independente, Genesis canônico, mercado MW-Ex, listagem, liquidez externa, receita de mercado, tokenomics aprovada ou atividade contínua após 03/11.
