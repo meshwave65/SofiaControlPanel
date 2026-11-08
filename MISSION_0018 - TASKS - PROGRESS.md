@@ -12,7 +12,7 @@
 | 18.5 | Consolidar projetos do ecossistema como submissões estratégicas | DONE | ChatGPT | Mapa de Jardim do Éden, SOFIA, MIA-D/Condenser, processamento/armazenamento federado e demais frentes; vínculo com demanda/valor MWN |
 | 18.6 | Analisar segurança, conformidade e riscos do lançamento | DONE | ChatGPT | Matriz de risco e requisitos por jurisdição/mercado, incluindo LGPD, AML/KYC quando aplicável, exchange, fraude, custódia e governança; indicar revisão profissional |
 | 18.7 | Construir roadmap integrado com fases e gates | DONE | ChatGPT | Plano com entregáveis, dependências, indicadores, responsáveis sugeridos, estimativas justificadas e critérios de avanço/pausa |
-| 18.8 | Consolidar tese de lançamento e proposta ROB para decisão do responsável | STAGED | — | Documento executivo e detalhado demonstrando o ecossistema funcionalmente ativo como base da MWN, seu encadeamento de utilidade, evolução necessária, evidências, cenários e decisões pendentes; fontes e ORs referenciados |
+| 18.8 | Consolidar tese de lançamento e proposta ROB para decisão do responsável | PROGRESS | ChatGPT | Documento executivo e detalhado demonstrando o ecossistema funcionalmente ativo como base da MWN, seu encadeamento de utilidade, evolução necessária, evidências, cenários e decisões pendentes; fontes e ORs referenciados |
 | 18.9 | Revisão cruzada e governança de continuidade | STAGED | — | Revisão independente, divergências resolvidas/registradas, índice e submissões atualizados |
 
 ## Dependências iniciais
@@ -247,3 +247,12 @@
 - Gate principal preservado: investor validation/capital before development spending; no public exchange/offer before economics, legal, custody/security, AML, privacy, market integrity and liquidity gates.
 - 18.7 marcada DONE como roadmap para decisão; nenhuma data, budget, owner individual, capital, development or launch is approved.
 - Operational Report: OR-20261108-0025 (`SUBMITTED`; Oracle pendente). Próxima tarefa elegível: 18.8 — tese de lançamento e proposta ROB para decisão do responsável.
+
+
+### Abertura 18.8 — tese de lançamento e proposta ROB (2026-11-08)
+
+- 18.1–18.7 foram concluídas documentalmente; evidência, arquitetura, mercado, readiness, portfólio, riscos e roadmap estão publicados.
+- 18.8 assumida por ChatGPT para consolidar a tese de lançamento MWN e o conceito ROB em documento executivo e detalhado para decisão do responsável.
+- O documento demonstrará atividade funcional por componente, não ecossistema integrado em produção. Deve separar estado atual, hipótese de demanda, plano de evolução, cenários e decisões pendentes.
+- Limite: sem valuation, supply, price, ROI, listing, liquidity, rights, investment amount, token offer or guarantee. ROB é framing de tese/risco, não métrica financeira aprovada.
+- Próxima ação: construir resumo executivo e tese detalhada com referências às fontes e ORs; depois submeter à revisão cruzada 18.9.
