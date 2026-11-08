@@ -82,3 +82,13 @@
 - MISSION_0013 TASKS PROGRESS.md ainda contém checkpoints antigos que dizem “sem contato”; registrar como stale/superseded, sem editar a missão subordinada nesta tarefa.
 - Nenhum follow-up ou outreach adicional realizado.
 - OR-20261108-0003 submetido; Oracle pendente. 18.1 segue PROGRESS.
+
+
+### Checkpoint 18.1 — reconciliação técnica UMS/MWN (2026-11-08)
+
+- Cruzados os registros de reconciliação MWN↔MWC, protótipo local G4 UMS, migrations de não-transferibilidade/conversão e snapshot do piloto blockchain de 24/10.
+- Separados: piloto Supabase MWC documentado; controles UMS aplicados segundo snapshot do projeto; ledger experimental local; economia UMS↔MWN/PoUW e mercado ainda conceituais/decisões abertas.
+- Identificada divergência de parâmetro no simulador (`1.000 UMS = 1 MWN = R$1,00`) frente ao controle documental que não reconhece equivalência/preço normativo. Não alterada a fonte subordinada.
+- MW-Ex continua proposta; status atual da candidatura Binance sem evidência primária suficiente nesta rodada.
+- Inventário atualizado. 18.1 permanece PROGRESS: faltam confirmação read-only atual do runtime/banco, status primário Binance e cobertura/validação suficiente de outros componentes.
+- OR-20261108-0004 submetido; Oracle pendente.
