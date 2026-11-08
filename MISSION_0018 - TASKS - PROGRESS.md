@@ -7,7 +7,7 @@
 |---|---|---|---|---|
 | 18.1 | Reconciliar estado factual e montar inventário de evidências da base funcional | DONE | ChatGPT | Inventário rastreável de projetos, repositórios, missões, entregas, evidências, nível de funcionamento, atividade, dependências e lacunas; distinguir ativo/funcional, desenvolvimento, piloto, conceito e proposta |
 | 18.2 | Definir arquitetura econômica UMS ↔ MWN e tokenomics para decisão | DONE | ChatGPT | Fluxos, utilidades, emissão/suprimento, conversão, carteiras, transferibilidade, incentivos, riscos e parâmetros abertos; sem fixar decisões não autorizadas |
-| 18.3 | Definir estratégia de mercado e opções de lançamento/listagem | STAGED | — | Comparação de mercado interno, candidatura Binance e alternativas; requisitos, custos, riscos e sequência |
+| 18.3 | Definir estratégia de mercado e opções de lançamento/listagem | PROGRESS | ChatGPT | Comparação de mercado interno, candidatura Binance e alternativas; requisitos, custos, riscos e sequência |
 | 18.4 | Definir escopo mínimo, operação e gates de prontidão da MW-Ex | STAGED | — | Requisitos do mercado interno: modelo operacional, conversão, ordens/transações, controles, segurança, monitoramento, liquidez e dependências |
 | 18.5 | Consolidar projetos do ecossistema como submissões estratégicas | STAGED | — | Mapa de Jardim do Éden, SOFIA, MIA-D/Condenser, processamento/armazenamento federado e demais frentes; vínculo com demanda/valor MWN |
 | 18.6 | Analisar segurança, conformidade e riscos do lançamento | STAGED | — | Matriz de risco e requisitos por jurisdição/mercado, incluindo LGPD, AML/KYC quando aplicável, exchange, fraude, custódia e governança; indicar revisão profissional |
@@ -157,3 +157,11 @@
 - Conflitos 1.000:1 e referências BRL permanecem explícitos; D-005/D-006 não foram alterados. Genesis oficial, supply, emissão, conversão, rights, custody e liquidity continuam pendentes de aprovação.
 - 18.2 marcada DONE porque a saída solicitada é framework para decisão com parâmetros abertos, não aprovação dos parâmetros. Próxima tarefa elegível: 18.3, estratégia de mercado e opções de lançamento/listagem.
 - Operational Report: OR-20261108-0020 (`SUBMITTED`; Oracle pendente).
+
+### Abertura 18.3 — estratégia de mercado e opções de lançamento/listagem (2026-11-08)
+
+- 18.1 e 18.2 foram concluídas documentalmente; 18.2 mantém parâmetros econômicos não aprovados.
+- 18.3 assumida por ChatGPT para comparar canal próprio MW-Ex, candidatura histórica Binance e alternativas externas com requisitos/atrito menores, registrando custos, riscos, requisitos e sequência.
+- Estratégia registrada pelo responsável: MW-Ex/carteira própria como canal primário inicial; exchange externa de menor exigência como porta pública posterior, sem priorizar Binance. A venue não está selecionada.
+- Não enviar candidaturas, pagar taxas, abrir contas, emitir ativos ou contatar exchanges nesta tarefa. A pesquisa será documental e comparativa; requisitos atuais serão citados e marcados como estimativas/declarações públicas.
+- Próxima ação: consultar páginas oficiais atualizadas de listing e critérios de exchange candidates; separar exigências publicadas, fees divulgadas, custos não transparentes e due diligence.
