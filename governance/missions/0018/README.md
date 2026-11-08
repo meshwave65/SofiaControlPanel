@@ -142,7 +142,8 @@ Em divergência material, não misturar versões nem atualizar a memória silenc
 Data de consolidação: 08/11/2026.
 - ROB foi corrigido para **Return On Believe — retorno por acreditar** no documento canônico de tese (commit `973eee5`; OR-20261108-0013).
 - MeshWave é enquadrada pelo responsável como ecossistema existente, parcialmente construído, rudimentar em operação e em evolução; a evidência por componente não demonstra integração completa em produção.
-- Tarefas 18.1–18.8 estão documentalmente concluídas; a revisão cruzada 18.9 está em execução. O pacote inclui matriz de evidências, arquitetura UMS↔MWN, estratégia de mercado, readiness MW-Ex, mapa de portfólio, riscos/regulação, roadmap e tese executiva/detalhada para decisão.
+- Tarefas 18.1–18.8 estão documentalmente concluídas; o self-review 18.9 está concluído, mas revisão independente do Oracle e Final Operational Report (FOR) permanecem pendentes. MISSION_0018 não está formalmente encerrada.
+- O pacote inclui matriz de evidências, arquitetura UMS↔MWN, estratégia de mercado, readiness MW-Ex, mapa de portfólio, riscos/regulação, roadmap e tese executiva/detalhada para decisão.
 - MW-Ex permanece preview visual não funcional; nenhum trade, custody, conversão, preço ou liquidez foi comprovado.
 - A estratégia de exchange externa foi explicitamente reaberta e comparada em 18.3; venue não selecionada. LBank/CoinW são candidatos condicionais, sem contato ou pagamento.
 - Candidatura Binance foi submetida segundo declaração do responsável; status não confirmado.

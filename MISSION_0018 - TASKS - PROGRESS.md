@@ -13,7 +13,7 @@
 | 18.6 | Analisar segurança, conformidade e riscos do lançamento | DONE | ChatGPT | Matriz de risco e requisitos por jurisdição/mercado, incluindo LGPD, AML/KYC quando aplicável, exchange, fraude, custódia e governança; indicar revisão profissional |
 | 18.7 | Construir roadmap integrado com fases e gates | DONE | ChatGPT | Plano com entregáveis, dependências, indicadores, responsáveis sugeridos, estimativas justificadas e critérios de avanço/pausa |
 | 18.8 | Consolidar tese de lançamento e proposta ROB para decisão do responsável | DONE | ChatGPT | Documento executivo e detalhado demonstrando o ecossistema funcionalmente ativo como base da MWN, seu encadeamento de utilidade, evolução necessária, evidências, cenários e decisões pendentes; fontes e ORs referenciados |
-| 18.9 | Revisão cruzada e governança de continuidade | STAGED | — | Revisão independente, divergências resolvidas/registradas, índice e submissões atualizados |
+| 18.9 | Revisão cruzada e governança de continuidade | BLOCKED | ChatGPT | Revisão independente, divergências resolvidas/registradas, índice e submissões atualizados |
 
 ## Dependências iniciais
 
@@ -274,3 +274,12 @@
 - Escopo: verificar estados e critérios, referências, links internos, consistência de maturidade, parâmetros não aprovados, OR index, commits e handoff; corrigir falhas documentais identificadas.
 - Limite: revisão read-only dos documentos e fontes já publicadas, com correções documentais mínimas. Não aprovar tokenomics, oferta, listing, investimento, lançamento ou decisões do responsável.
 - Próxima ação: auditoria cruzada dos artefatos 18.1–18.8, task file, mission README/Blueprint e OR index; publicar final review e status da missão.
+
+
+### Checkpoint 18.9 — self-review concluído; Oracle pendente (2026-11-08)
+
+- Revisão cruzada dos artefatos 18.1–18.8, README/Blueprint/ROB canônicos, links internos, status e OR index concluída; correções documentais publicadas em `FINAL_CROSS_REVIEW_18_9.md`.
+- ROB corrigido para Return On Believe; capital targets owner-reported reintegrados; estratégia externa atualizada conforme decisão posterior; links relativos quebrados corrigidos; evidence matrix reconciliado.
+- O critério de revisão independente não pode ser marcado DONE: a governança exige Oracle Agent e Final Operational Report (FOR). Não há dispatcher/reviewer autorizado disponível nesta execução; nenhuma revisão foi simulada.
+- 18.9 marcada BLOCKED, atribuição ChatGPT, aguardando Oracle. MISSION_0018 permanece PROGRESS até revisão Oracle/FOR. Tasks 18.1–18.8 permanecem DONE como entregáveis documentais para decisão do responsável.
+- Operational Report: OR-20261108-0027 (`SUBMITTED`; Oracle pendente).
