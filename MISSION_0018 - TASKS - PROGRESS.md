@@ -266,3 +266,11 @@
 - Não foram fixados valuation, investment instrument, rights, supply, price, budget, capital allocation percentages, venue, launch date or public offer.
 - 18.8 marcada DONE como documento de tese para decisão. Próxima tarefa elegível: 18.9 — revisão cruzada e governança de continuidade.
 - Operational Report: OR-20261108-0026 (`SUBMITTED`; Oracle pendente).
+
+
+### Abertura 18.9 — revisão cruzada e handoff final (2026-11-08)
+
+- 18.1–18.8 foram concluídas documentalmente; 18.9 assumida por ChatGPT como revisão final da missão.
+- Escopo: verificar estados e critérios, referências, links internos, consistência de maturidade, parâmetros não aprovados, OR index, commits e handoff; corrigir falhas documentais identificadas.
+- Limite: revisão read-only dos documentos e fontes já publicadas, com correções documentais mínimas. Não aprovar tokenomics, oferta, listing, investimento, lançamento ou decisões do responsável.
+- Próxima ação: auditoria cruzada dos artefatos 18.1–18.8, task file, mission README/Blueprint e OR index; publicar final review e status da missão.
