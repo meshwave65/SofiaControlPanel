@@ -27,3 +27,8 @@ Para o procedimento completo de seleção/criação de skill, execução, regist
 - Em bancos Supabase consolidados, a presença de tabelas de múltiplas frentes é intencional conforme o contexto do responsável. Determine a origem e relevância de uma tabela antes de usá-la; nomes iguais em projetos diferentes não significam fontes equivalentes.
 - Não transforme contagem isolada de tabelas sem RLS em conclusão global de segurança. Avalie RLS apenas para as tabelas/caminhos que a tarefa realmente toca, com contexto de sensibilidade, placeholders e exposição; qualquer revisão mais ampla exige escopo próprio.
 - Se uma tabela ou dado não for necessário à missão, **ignore-o e não o inspecione**. Não amplie o escopo por curiosidade. Preserve as decisões humanas e não faça alterações de schema, dados, RLS ou migração sem autorização específica.
+
+## Continuidade de contexto entre chats
+
+Quando uma tarefa pertencer a uma missão com documentação canônica de contextualização (por exemplo, `governance/missions/<ID>/README.md`), **se a sessão/chat for novo ou o contexto estiver incompleto, leia esse README integralmente antes de agir**, além do Blueprint aplicável, da definição da tarefa e dos ORs recentes. O README de missão é handoff persistente: não dependa de conversas anteriores que podem não estar disponíveis e não peça ao responsável para repetir decisões já documentadas. Confira o estado atual do repositório antes de tratar informações de contextualização como status atual de implementação. Em caso de divergência material, consulte a decisão explícita mais recente do responsável; não invente uma reconciliação. Para MISSION_0018, a ordem mínima de leitura está definida em `governance/missions/0018/README.md` e `BLUEPRINT.md`.
+
