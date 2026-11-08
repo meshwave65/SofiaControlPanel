@@ -7,7 +7,7 @@
 |---|---|---|---|---|
 | 18.1 | Reconciliar estado factual e montar inventário de evidências da base funcional | DONE | ChatGPT | Inventário rastreável de projetos, repositórios, missões, entregas, evidências, nível de funcionamento, atividade, dependências e lacunas; distinguir ativo/funcional, desenvolvimento, piloto, conceito e proposta |
 | 18.2 | Definir arquitetura econômica UMS ↔ MWN e tokenomics para decisão | DONE | ChatGPT | Fluxos, utilidades, emissão/suprimento, conversão, carteiras, transferibilidade, incentivos, riscos e parâmetros abertos; sem fixar decisões não autorizadas |
-| 18.3 | Definir estratégia de mercado e opções de lançamento/listagem | PROGRESS | ChatGPT | Comparação de mercado interno, candidatura Binance e alternativas; requisitos, custos, riscos e sequência |
+| 18.3 | Definir estratégia de mercado e opções de lançamento/listagem | DONE | ChatGPT | Comparação de mercado interno, candidatura Binance e alternativas; requisitos, custos, riscos e sequência |
 | 18.4 | Definir escopo mínimo, operação e gates de prontidão da MW-Ex | STAGED | — | Requisitos do mercado interno: modelo operacional, conversão, ordens/transações, controles, segurança, monitoramento, liquidez e dependências |
 | 18.5 | Consolidar projetos do ecossistema como submissões estratégicas | STAGED | — | Mapa de Jardim do Éden, SOFIA, MIA-D/Condenser, processamento/armazenamento federado e demais frentes; vínculo com demanda/valor MWN |
 | 18.6 | Analisar segurança, conformidade e riscos do lançamento | STAGED | — | Matriz de risco e requisitos por jurisdição/mercado, incluindo LGPD, AML/KYC quando aplicável, exchange, fraude, custódia e governança; indicar revisão profissional |
@@ -165,3 +165,13 @@
 - Estratégia registrada pelo responsável: MW-Ex/carteira própria como canal primário inicial; exchange externa de menor exigência como porta pública posterior, sem priorizar Binance. A venue não está selecionada.
 - Não enviar candidaturas, pagar taxas, abrir contas, emitir ativos ou contatar exchanges nesta tarefa. A pesquisa será documental e comparativa; requisitos atuais serão citados e marcados como estimativas/declarações públicas.
 - Próxima ação: consultar páginas oficiais atualizadas de listing e critérios de exchange candidates; separar exigências publicadas, fees divulgadas, custos não transparentes e due diligence.
+
+### Fechamento 18.3 — estratégia de mercado e triagem atualizada de venues (2026-11-08)
+
+- Critério atendido: comparação entre canal próprio MW-Ex, candidatura histórica Binance, CEXs alternativas e DEX; requisitos públicos, custos publicados/não publicados, riscos e sequência registrados.
+- A estratégia do responsável foi preservada: MW-Ex/carteira própria como canal primário; exchange externa de menor atrito como porta pública posterior; Binance não é prioridade inicial; venue não selecionada.
+- Pesquisa atualizada de 08/11/2026 encontrou cessação/wind-down ou ações regulatórias recentes em várias venues que poderiam parecer de menor barreira (XT, BitMart, MEXC, CoinEx, ProBit status não confirmado, KCEX, WEEX, Bitget). Não foram recomendadas.
+- LBank e CoinW ficam apenas como candidatos condicionais de diligência, não como recomendação ou seleção; exigem confirmação escrita de entidade, fees, alcance regional, custody, segurança, liquidez e condições de listing.
+- Nenhuma candidatura, contato, pagamento, abertura de conta, listing, negociação ou ação financeira foi executada.
+- 18.3 marcada DONE como comparação documental e definição de sequência; escolha de venue e autorização de contato são decisões humanas separadas.
+- Operational Report: OR-20261108-0021 (`SUBMITTED`; Oracle pendente). Próxima tarefa elegível: 18.4 — escopo mínimo, operação e gates de prontidão MW-Ex.
