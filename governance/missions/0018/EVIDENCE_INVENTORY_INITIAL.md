@@ -280,3 +280,23 @@ Sobre RLS, o responsável informa que 29 tabelas estão sem RLS de forma deliber
 ## Binance application — submission route and confirmation anomaly (owner statement, 2026-11-08)
 
 The responsible user clarified that the MeshWave application was submitted through a dedicated form on Binance's own website. A response appeared in relation to the submission, but the user found it unusual that no separate email or message confirming the application was received. This is an owner-reported fact; the exact response text, its meaning, and the application's current review status have not been independently verified. **Do not describe the application as unsubmitted, rejected, accepted, or under active review based only on the missing email.** Treat the web-form submission and response as a reported evidence lead; if status verification is required, inspect the exact submission response or ask the owner for the relevant screenshot/text, without exploring unrelated project data.
+
+
+## Estratégia faseada de MW-Ex e acesso externo — declaração do responsável (2026-11-08)
+
+O responsável esclareceu a mudança de foco após a submissão anterior da candidatura Binance. A candidatura foi realmente enviada, mas a estratégia subsequente passou a priorizar a carteira e a exchange próprias (**MW-Ex**) como canal primário inicial de negócios, construindo uma entrada gradual no mercado externo. A Binance deve ser tratada como uma iniciativa anterior, não como o canal primário assumido na estratégia atual.
+
+### Sequência estratégica relatada
+
+1. **Fase inicial — canal orgânico/MW-Ex:** desenvolver carteira e exchange próprias para conduzir os negócios iniciais do ecossistema. A meta de captação orgânica declarada é de **R$ 50 mil a R$ 100 mil**, destinada ao desenvolvimento do ecossistema.
+2. **Fase intermediária — primeira porta pública externa:** buscar listagem em uma exchange externa de menor prestígio e, potencialmente, com menor alcance, liquidez e volume que uma exchange top 10, privilegiando exigências de listagem mais simples. A intenção é tornar o token acessível publicamente fora do ecossistema e ampliar possibilidades de negociação. A meta de captação declarada para essa etapa é de **R$ 250 mil a R$ 500 mil**.
+3. **Fase posterior — exchange de maior prestígio:** usar a etapa intermediária como preparação para uma possível listagem em exchange de maior prestígio, com uma meta aspiracional de captação de **alguns milhões de reais** para desenvolvimento mais significativo do ecossistema.
+
+O responsável esclareceu que os cenários de lançamento previamente estudados poderiam envolver milhões ou bilhões de reais, mas esse volume não é uma necessidade do ecossistema na fase atual; a necessidade de capital declarada é muito menor. As faixas acima são **metas estratégicas relatadas**, não previsões, garantias de captação, ofertas, compromissos de listagem, avaliação de mercado ou demonstração de viabilidade.
+
+### Classificação e validações ainda necessárias
+
+- A existência/operacionalidade de MW-Ex e carteira própria, o modelo de negócios, a custódia, a segurança, a liquidez e os fluxos UMS/MWN precisam ser confirmados por evidência técnica e operacional pertinente; esta declaração não os comprova.
+- Nenhuma exchange externa foi identificada ou selecionada nesta declaração. Requisitos simplificados, elegibilidade, custos e probabilidade de aceitação ainda precisam de pesquisa e validação.
+- A estratégia exige gates próprios para conformidade legal/regulatória, segurança, custódia, divulgação de riscos, economia, liquidez, operação e autorização humana. A progressão para qualquer listagem, captação ou comunicação externa não é autorizada por este registro.
+- Manter a candidatura Binance histórica no inventário sem inferir seu estado atual, e separar explicitamente **plano estratégico** de **estado implementado/validado**.
