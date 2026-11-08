@@ -56,3 +56,11 @@
 - Identified differing 24-Oct and 29-Oct pilot snapshots; preserve their dates and do not conflate. Also flagged a stale “no contacts sent” sentence contradicted by the later MISSION_0013 update.
 - Added inventory notes on MWN/MWC legacy terminology and missing concrete equity/token rights documentation.
 - Operational Report OR-20261107-0006 submitted; Oracle pending. Task 18.1 remains PROGRESS.
+
+
+### Checkpoint 18.1 — auditoria de commits recentes (2026-11-08)
+
+- Consultados os três commits mais recentes em 11 repositórios de ecossistema; aberto o commit mais recente de cada para confirmar mensagem/data.
+- Atualizado o inventário com datas, links diretos e limites de inferência. Atividade de versionamento não foi usada como prova de runtime.
+- Encontradas frentes com atividade recente de documentação/registro e outras com último commit de 2025; nenhuma classificação foi elevada somente com base nisso.
+- Operational Report OR-20261108-0001 submetido; Oracle pendente. 18.1 continua PROGRESS, pois deployment/runtime e as definições canônicas ainda exigem evidência.
