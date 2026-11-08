@@ -6,7 +6,7 @@
 | ID | Tarefa | Status | Instância | Critério/saída |
 |---|---|---|---|---|
 | 18.1 | Reconciliar estado factual e montar inventário de evidências da base funcional | DONE | ChatGPT | Inventário rastreável de projetos, repositórios, missões, entregas, evidências, nível de funcionamento, atividade, dependências e lacunas; distinguir ativo/funcional, desenvolvimento, piloto, conceito e proposta |
-| 18.2 | Definir arquitetura econômica UMS ↔ MWN e tokenomics para decisão | PROGRESS | ChatGPT | Fluxos, utilidades, emissão/suprimento, conversão, carteiras, transferibilidade, incentivos, riscos e parâmetros abertos; sem fixar decisões não autorizadas |
+| 18.2 | Definir arquitetura econômica UMS ↔ MWN e tokenomics para decisão | DONE | ChatGPT | Fluxos, utilidades, emissão/suprimento, conversão, carteiras, transferibilidade, incentivos, riscos e parâmetros abertos; sem fixar decisões não autorizadas |
 | 18.3 | Definir estratégia de mercado e opções de lançamento/listagem | STAGED | — | Comparação de mercado interno, candidatura Binance e alternativas; requisitos, custos, riscos e sequência |
 | 18.4 | Definir escopo mínimo, operação e gates de prontidão da MW-Ex | STAGED | — | Requisitos do mercado interno: modelo operacional, conversão, ordens/transações, controles, segurança, monitoramento, liquidez e dependências |
 | 18.5 | Consolidar projetos do ecossistema como submissões estratégicas | STAGED | — | Mapa de Jardim do Éden, SOFIA, MIA-D/Condenser, processamento/armazenamento federado e demais frentes; vínculo com demanda/valor MWN |
@@ -150,3 +150,10 @@
 - Criadas alternativas para mensuração/PoUW, supply/Genesis, conversão, transferibilidade e mercado; risks/gates e decisões humanas listados.
 - Documento em `governance/missions/0018/ARCHITECTURA_ECONOMICA_UMS_MWN_DECISION_DRAFT.md`; 18.2 permanece PROGRESS e não fixa parâmetros finais.
 - Operational Report: OR-20261108-0019 (SUBMITTED; Oracle pendente).
+### Fechamento 18.2 — arquitetura e matriz de decisão UMS ↔ MWN (2026-11-08)
+
+- Critério atendido: fluxos, utilidades, emissão/supply, conversão, carteira/DID, transferibilidade, incentivos, riscos e parâmetros abertos foram organizados em draft e matriz compacta.
+- Publicados `ARCHITECTURA_ECONOMICA_UMS_MWN_DECISION_DRAFT.md` e `DECISION_MATRIX_18_2.md` como documentos `DRAFT_FOR_OWNER_DECISION`; nenhuma decisão final ou parâmetro numérico foi fixado.
+- Conflitos 1.000:1 e referências BRL permanecem explícitos; D-005/D-006 não foram alterados. Genesis oficial, supply, emissão, conversão, rights, custody e liquidity continuam pendentes de aprovação.
+- 18.2 marcada DONE porque a saída solicitada é framework para decisão com parâmetros abertos, não aprovação dos parâmetros. Próxima tarefa elegível: 18.3, estratégia de mercado e opções de lançamento/listagem.
+- Operational Report: OR-20261108-0020 (`SUBMITTED`; Oracle pendente).

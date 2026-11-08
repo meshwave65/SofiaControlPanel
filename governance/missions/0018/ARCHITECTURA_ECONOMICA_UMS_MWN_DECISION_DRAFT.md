@@ -151,3 +151,7 @@ Base conceitual a preservar:
 ## 10. Estado
 
 **DRAFT_FOR_OWNER_DECISION.** This document proposes architecture and options only. No final tokenomics parameter has been selected. Any decision must be registered in the normative source with owner/approver, date, evidence, impact, version and explicit approval; do not modify historical documents by blanket renaming.
+
+## 11. Matriz compacta de decisão (2026-11-08)
+
+A matriz completa de decisão está em [DECISION_MATRIX_18_2.md](DECISION_MATRIX_18_2.md). Ela apresenta um baseline conceitual para revisão e mantém todos os parâmetros não aprovados como decisões humanas pendentes.
