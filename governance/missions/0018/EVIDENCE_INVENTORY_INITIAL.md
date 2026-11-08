@@ -190,3 +190,33 @@ Conclusão reconciliada: os registros Gmail corroboram que dois emails foram env
 - MISSION_0013 está PROGRESS; 13.5/13.6 permanecem em andamento segundo o arquivo da missão, e 13.6 já tem dois envios verificados por metadados Gmail, com entrega/leitura não confirmadas.
 - MISSION_0017 continua STAGED; contribuição de 1% é premissa declarada para estudo, não capacidade instalada/medida ou receita.
 - MISSION_0018 permanece PROGRESS; 18.1 não fecha até reconciliar os estados, o inventário e as lacunas de runtime.
+
+
+## Complemento — reconciliação técnica de UMS, MWN e fronteira de especificação (2026-11-08)
+
+### Identidade da moeda e limites de migração
+
+O crosswalk de [network — MWN↔MWC, 29/10/2026](https://github.com/meshwave65/network/blob/main/docs/blueprints/MWN_MWC_RECONCILIATION_2026-10-29.md) registra a instrução do responsável de que **MWN é o nome atual da criptomoeda** e MWC permanece como legado. O mesmo documento delimita que a renomeação não aprova supply, direitos, emissão, utilidade, circulação, preço, conversão ou estado operacional, e preserva o workspace histórico `projects/mwc/` sem migração textual destrutiva. Registra ainda uma divergência explícita: o simulador possui relação paramétrica `1.000 UMS = 1 MWN = R$ 1,00`, que não pode ser apresentada como especificação normativa ou preço.
+
+### UMS: evidência de protótipo e controle implementado no piloto
+
+- [Relatório G4 — reconciliação UMS](https://github.com/meshwave65/network/blob/main/docs/blueprints/G4_UMS_RECONCILIATION_REPORT.md) classifica o ledger experimental como `PROTOTYPE_TESTED_LOCAL`; coeficientes são provisórios, não benchmark aprovado nem preço. A fonte registra 23 testes executados localmente em 22/10/2026.
+- [Migração blockchain 20261024080000](https://github.com/meshwave65/meshwave-blockchain/blob/main/supabase/migrations/20261024080000_enforce_ums_nontransferability_via_mwc.sql) contém guardas para impedir transferências diretas de UMS entre participantes e exigir evento de protocolo associado. [Migração 20261024081000](https://github.com/meshwave65/meshwave-blockchain/blob/main/supabase/migrations/20261024081000_allow_authenticated_own_ums_conversion.sql) concede execução autenticada à conversão própria UMS→MWC e restringe anon/public.
+- [Estado do piloto de 24/10/2026](https://github.com/meshwave65/meshwave-blockchain/blob/main/docs/PILOT_STATE_2026-10-24.md) relata aplicação e verificação dessas migrations em ambiente Supabase, teste negativo rejeitado e cadeia de dois blocos/dois eventos naquele snapshot; o documento marca `canonical=false`, operador único, e deixa a cerimônia Genesis formal independente pendente. Trata-se de estado reportado por documentação do projeto, não leitura live de banco realizada nesta tarefa.
+- O estado de piloto documentado ainda usa MWC, inclui parâmetros de referência e dados de carteira do fundador. Esses valores não devem ser reutilizados como tokenomics aprovada, reserva fiat, valuation auditado, oferta pública ou parâmetros MWN atuais.
+
+### Arquitetura conceitual versus implementação
+
+O [registro BCE de PoUW/UMS/MWN](https://github.com/meshwave65/Foundation_MeshWave/blob/main/BCE/temas/economia-ums-mwn-pouw-liquidez-distribuida.md) declara expressamente que é conceitual/arquitetural, não especificação final nem comprovação de implementação. A [governança do mercado MWN](https://github.com/meshwave65/Foundation_MeshWave/blob/main/BCE/temas/governanca-mercado-mwn-prioridade-meshwalkers.md) registra fases e requisitos de mercado propostos; não comprova MW-Ex ativa. A [reconciliação documental MWN/MWC](https://github.com/meshwave65/network/blob/main/docs/blueprints/MWN_MWC_RECONCILIATION_2026-10-29.md) indica que o blueprint normativo permanece `DRAFT_FOR_VALIDATION` e decisões econômicas relevantes seguem abertas.
+
+**Classificação consolidada:**
+- Ledger Supabase MWC: **piloto controlado documentado**; não cadeia pública/descentralizada ou Genesis canônico.
+- Conversão e não-transferibilidade UMS no piloto: **controles de banco descritos como aplicados/verificados no snapshot do projeto**, mas não comprovados em consulta live nesta tarefa nem migrados automaticamente para um protocolo MWN final.
+- Ledger UMS experimental em `network`: **protótipo local testado**, fatores experimentais.
+- Relação UMS↔MWN, PoUW, suprimento, liquidez e regras de mercado: **conceito/decisão pendente**.
+- MW-Ex: **proposta**, sem evidência de operação.
+- Binance: a missão-base alega candidatura prévia, mas nesta rodada não foi encontrado documento primário suficiente para afirmar estado atual, recebimento, análise, aprovação ou listagem. **Status de candidatura permanece não verificado.**
+
+### Conclusão de maturidade
+
+A evidência fortalece a descrição de uma base em evolução com código, controles e pilotos delimitados; não sustenta a afirmação de uma economia UMS/MWN plenamente operacional. A próxima validação de alto valor seria obter uma evidência read-only datada do estado atual do Supabase e uma fonte primária do status Binance, sem expor dados pessoais ou credenciais. A decisão de parâmetros econômicos permanece humana.
