@@ -300,3 +300,20 @@ O responsável esclareceu que os cenários de lançamento previamente estudados 
 - Nenhuma exchange externa foi identificada ou selecionada nesta declaração. Requisitos simplificados, elegibilidade, custos e probabilidade de aceitação ainda precisam de pesquisa e validação.
 - A estratégia exige gates próprios para conformidade legal/regulatória, segurança, custódia, divulgação de riscos, economia, liquidez, operação e autorização humana. A progressão para qualquer listagem, captação ou comunicação externa não é autorizada por este registro.
 - Manter a candidatura Binance histórica no inventário sem inferir seu estado atual, e separar explicitamente **plano estratégico** de **estado implementado/validado**.
+
+
+## Prioridade imediata: MW-Ex operacional e materiais de investidores sob a tese ROB — complemento do responsável (2026-11-08)
+
+O responsável esclareceu que **não é objetivo escolher ou pesquisar agora qual exchange externa receberá a listagem**. A prioridade de execução é tornar a MW-Ex operacional e desenvolver materiais destinados a potenciais investidores de risco, apresentados sob a visão de **ROB (Return on Building), não ROI (Return on Investment)**. A intenção é comunicar que o capital buscado serve para construir e ampliar o ecossistema, e que podem existir investidores procurando projetos desta natureza, mas a MeshWave ainda precisa criar meios efetivos de encontrá-los e estabelecer contato.
+
+Segundo o responsável, na carteira MWN do website e do PWA já aparecem um ícone de acesso à MW-Ex e uma tela rudimentar que representa a interface planejada. Isso é **evidência declarada de presença de elementos de interface**, não demonstração de que exchange esteja operacional, de que ordens sejam executadas, nem de custódia, liquidez, segurança ou integração ponta a ponta. Esses aspectos requerem validação técnica e testes específicos.
+
+As tentativas anteriores de contato, incluindo dois e-mails enviados, devem ser entendidas como **iniciativas de criação de pontes/canais com potenciais interessados**, não como evidência de interesse, resposta, investimento ou validação externa. Não iniciar contato externo nem escolher exchanges sem autorização específica. A pesquisa de venues/listagem fica fora da prioridade imediata e poderá ser retomada em fase posterior.
+
+### Consequência para o trabalho da missão
+
+- Priorizar a coleta de evidências e a definição do caminho de entrega para MW-Ex operacional, incluindo a experiência de acesso pela carteira web/PWA e critérios verificáveis de funcionamento.
+- Preparar a tese e os materiais para investidores de risco com a narrativa ROB, distinguindo construção de capacidade/infraestrutura de promessas de ROI, retorno financeiro, captação ou valorização de token.
+- Fazer das tentativas de outreach um histórico de canalização/ponte; medir resposta e interesse apenas quando houver evidência objetiva.
+- Manter as faixas de captação previamente declaradas como objetivos estratégicos, não previsões ou garantias.
+- Não selecionar exchange externa nesta etapa. Preservar gates de conformidade, segurança, custódia, liquidez, disclosure e aprovação humana antes de qualquer execução ou comunicação financeira externa.
