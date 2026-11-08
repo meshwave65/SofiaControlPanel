@@ -5,7 +5,7 @@
 
 | ID | Tarefa | Status | Instância | Critério/saída |
 |---|---|---|---|---|
-| 18.1 | Reconciliar estado factual e montar inventário de evidências da base funcional | PROGRESS | ChatGPT (sessão atual) | Inventário rastreável de projetos, repositórios, missões, entregas, evidências, nível de funcionamento, atividade, dependências e lacunas; distinguir ativo/funcional, desenvolvimento, piloto, conceito e proposta |
+| 18.1 | Reconciliar estado factual e montar inventário de evidências da base funcional | DONE | ChatGPT | Inventário rastreável de projetos, repositórios, missões, entregas, evidências, nível de funcionamento, atividade, dependências e lacunas; distinguir ativo/funcional, desenvolvimento, piloto, conceito e proposta |
 | 18.2 | Definir arquitetura econômica UMS ↔ MWN e tokenomics para decisão | STAGED | — | Fluxos, utilidades, emissão/suprimento, conversão, carteiras, transferibilidade, incentivos, riscos e parâmetros abertos; sem fixar decisões não autorizadas |
 | 18.3 | Definir estratégia de mercado e opções de lançamento/listagem | STAGED | — | Comparação de mercado interno, candidatura Binance e alternativas; requisitos, custos, riscos e sequência |
 | 18.4 | Definir escopo mínimo, operação e gates de prontidão da MW-Ex | STAGED | — | Requisitos do mercado interno: modelo operacional, conversão, ordens/transações, controles, segurança, monitoramento, liquidez e dependências |
@@ -127,3 +127,10 @@
 - MIA-D/GlobalAquometer é contador visual com taxa fixa (6,52 L/s), não telemetria/impacto medido; metodologia permanece evolutiva e sem validação científica/certificação demonstrada nos arquivos consultados.
 - Inventário atualizado; 18.1 continua PROGRESS enquanto se consolida cobertura de projetos e se prepara a matriz final de evidências/gaps para a tese MWN. Nenhum serviço/endpoint foi executado.
 - Operational Report: OR-20261108-0017 (SUBMITTED; Oracle pendente).
+### Fechamento 18.1 — matriz consolidada de evidências (2026-11-08)
+
+- Critério de aceite atendido documentalmente: o inventário rastreável e a matriz consolidada cobrem projetos/repositórios, fontes, entregas, maturidade, atividade, dependências, limitações e lacunas, distinguindo código, piloto, desenvolvimento, declaração e conceito.
+- Criado `governance/missions/0018/EVIDENCE_MATRIX_18_1.md` como síntese compacta para o próximo material executivo; o inventário detalhado permanece a fonte de proveniência.
+- A formulação probatória é: ecossistema existente, parcialmente construído e em evolução, com software/pilotos/protótipos concretos; não se comprovou o conjunto como produção integrada. MW-Ex é preview visual não funcional; PWA instalável, listing, liquidez e impacto MIA-D validado não foram comprovados.
+- Pendências listadas na matriz permanecem gates futuros; não impedem o fechamento da tarefa de inventário, pois foram explicitamente classificados como lacunas e não como funcionalidades existentes.
+- Operational Report: OR-20261108-0018 (`SUBMITTED`; Oracle pendente). 18.2 continua STAGED; nenhuma decisão definitiva de tokenomics foi tomada nesta unidade.
