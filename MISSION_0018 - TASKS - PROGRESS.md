@@ -6,7 +6,7 @@
 | ID | Tarefa | Status | Instância | Critério/saída |
 |---|---|---|---|---|
 | 18.1 | Reconciliar estado factual e montar inventário de evidências da base funcional | DONE | ChatGPT | Inventário rastreável de projetos, repositórios, missões, entregas, evidências, nível de funcionamento, atividade, dependências e lacunas; distinguir ativo/funcional, desenvolvimento, piloto, conceito e proposta |
-| 18.2 | Definir arquitetura econômica UMS ↔ MWN e tokenomics para decisão | STAGED | — | Fluxos, utilidades, emissão/suprimento, conversão, carteiras, transferibilidade, incentivos, riscos e parâmetros abertos; sem fixar decisões não autorizadas |
+| 18.2 | Definir arquitetura econômica UMS ↔ MWN e tokenomics para decisão | PROGRESS | ChatGPT | Fluxos, utilidades, emissão/suprimento, conversão, carteiras, transferibilidade, incentivos, riscos e parâmetros abertos; sem fixar decisões não autorizadas |
 | 18.3 | Definir estratégia de mercado e opções de lançamento/listagem | STAGED | — | Comparação de mercado interno, candidatura Binance e alternativas; requisitos, custos, riscos e sequência |
 | 18.4 | Definir escopo mínimo, operação e gates de prontidão da MW-Ex | STAGED | — | Requisitos do mercado interno: modelo operacional, conversão, ordens/transações, controles, segurança, monitoramento, liquidez e dependências |
 | 18.5 | Consolidar projetos do ecossistema como submissões estratégicas | STAGED | — | Mapa de Jardim do Éden, SOFIA, MIA-D/Condenser, processamento/armazenamento federado e demais frentes; vínculo com demanda/valor MWN |
@@ -134,3 +134,10 @@
 - A formulação probatória é: ecossistema existente, parcialmente construído e em evolução, com software/pilotos/protótipos concretos; não se comprovou o conjunto como produção integrada. MW-Ex é preview visual não funcional; PWA instalável, listing, liquidez e impacto MIA-D validado não foram comprovados.
 - Pendências listadas na matriz permanecem gates futuros; não impedem o fechamento da tarefa de inventário, pois foram explicitamente classificados como lacunas e não como funcionalidades existentes.
 - Operational Report: OR-20261108-0018 (`SUBMITTED`; Oracle pendente). 18.2 continua STAGED; nenhuma decisão definitiva de tokenomics foi tomada nesta unidade.
+
+### Abertura 18.2 — arquitetura econômica UMS ↔ MWN (2026-11-08)
+
+- Tarefa 18.1 foi concluída e sua matriz consolidada publicada no commit `b0e254a22b6a5555da59134fbb19bf0aa747d83f`.
+- 18.2 assumida por ChatGPT para estruturar arquitetura de fluxos, utilidades, emissão/suprimento, conversão, carteiras, transferibilidade, incentivos, riscos e parâmetros abertos.
+- Limite explícito: não decidir ou publicar emissão, supply, preço, direitos, transferibilidade externa, conversão final, incentivos ou liquidez sem aprovação do responsável. O resultado deve separar estado implementado, arquitetura declarada, proposta e decisão humana pendente.
+- Próxima ação: reconciliar fontes canônicas MWN/MWC/UMS/PoUW, ledger piloto, modelo contábil atual e decisões documentadas antes de elaborar alternativas.
