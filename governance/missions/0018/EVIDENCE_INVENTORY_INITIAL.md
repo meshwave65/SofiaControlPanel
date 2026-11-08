@@ -149,3 +149,27 @@ Consulta read-only dos três commits mais recentes em cada repositório listado,
 - A atividade recente é desigual: Foundation_MeshWave, network, simulator e blockchain têm commits recentes, enquanto MeshWave-Core, SOFIA MIA, Condenser e POC têm commits de 2025 ou anteriores/menos recentes na consulta. O SWE e engines apresentam alterações de 2026, mas o estado online e o caminho ponta a ponta continuam sem prova nesta rodada.
 - As classificações anteriores permanecem conservadoras. Não há promoção para “funcional/ativo” baseada apenas em commit.
 - O item de maior valor para fechar 18.1 agora é validar deployments/runtime por serviço e reconciliar os estados canônicos de token, UMS, MW-Ex, candidatura Binance e evidências de uso, sem extrapolar snapshots.
+
+
+## Complemento — CI e vínculo de deployments (2026-11-08)
+
+### Workflow observado em Foundation_MeshWave
+
+Na revisão de Actions para o commit `7e8b3864414f2ce8810dcea5ca67d2036bf65b8e` (06 nov 2026), foram encontrados múltiplos workflows acionados simultaneamente pelo mesmo push. Há pelo menos um workflow de estrutura com sucesso e outros com falha. Inspeção dos jobs/logs confirmou causas distintas:
+
+- [Run 42229976423](https://github.com/meshwave65/Foundation_MeshWave/actions/runs/42229976423): workflow “Create Directory Structure” concluiu com sucesso.
+- [Run 42229976417](https://github.com/meshwave65/Foundation_MeshWave/actions/runs/42229976417): passo de criação de diretórios falhou com erro shell na linha 17; o caminho `Estrutura/Armazenamento_Processamento/FASE1` foi interpretado como comando inexistente, indicando quebra/continuação incorreta da linha de shell.
+- [Run 42229976425](https://github.com/meshwave65/Foundation_MeshWave/actions/runs/42229976425): etapa de commit/push falhou com HTTP 403, “Permission to ... denied to github-actions[bot]”; o job tentou push mesmo sem mudanças.
+- [Run 42229976254](https://github.com/meshwave65/Foundation_MeshWave/actions/runs/42229976254): commit/push também falhou por permissão 403 do `github-actions[bot]`.
+
+Interpretação: os workflows automatizados de estruturação do Foundation não devem ser apresentados como processo CI saudável/estável. A execução bem-sucedida de um workflow separado não elimina as falhas paralelas; estas são tarefas de automação documental/estrutura, não testes de produto. O estado de correção posterior não foi verificado.
+
+### Vínculo Vercel
+
+Consulta read-only do contexto de projetos Vercel retornou a equipe e os projetos Git vinculados disponíveis, mas não identificou os repositórios consultados `sofia-mia`, `sofia-condenser-pro`, `condenser-pro-poc`, `SofiaWebExtractor` ou `AppMeshWave` entre os projetos Vercel vinculados. Isto **não prova ausência de deployment** em outras plataformas ou contas; significa apenas que a conexão consultada não forneceu um vínculo Vercel direto para estes repositórios. Deployment/runtime deve continuar como “não validado” até fonte específica.
+
+### Ajuste de leitura da evidência
+
+- CI aprovado permanece ligado a revisões e testes específicos (blockchain, simulador e laboratório MWC), não é atestado global de saúde do ecossistema.
+- Foundation_MeshWave tem evidência atual de falhas em workflows utilitários e não pode ser categorizado como “CI verde” com base no run de sucesso isolado.
+- Nenhum deploy, produção, usuários, receita, conversão, liquidez ou operação de rede foi confirmado nesta consulta.
