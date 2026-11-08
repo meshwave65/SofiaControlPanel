@@ -92,3 +92,12 @@
 - MW-Ex continua proposta; status atual da candidatura Binance sem evidência primária suficiente nesta rodada.
 - Inventário atualizado. 18.1 permanece PROGRESS: faltam confirmação read-only atual do runtime/banco, status primário Binance e cobertura/validação suficiente de outros componentes.
 - OR-20261108-0004 submetido; Oracle pendente.
+
+
+### Checkpoint 18.1 — snapshot read-only do banco conectado (2026-11-08)
+
+- Consultado Supabase project `mwn` em modo read-only, apenas agregados: 18 blocos (0–17), 18 transações, 8 carteiras, 9 aquisições (8 validadas/1 rejeitada), R$13,02 agregado validado, 602,63827817 MWC agregado validado e 35 entradas de ledger (25 MWC/10 UMS).
+- O bloco mais recente tem timestamp 2026-11-03 20:03:52 UTC; não houve novos blocos observados entre esse timestamp e a consulta de 08/11. Não foi submetida transação de teste.
+- Catálogo PostgreSQL confirmou RLS em 13 tabelas públicas, função de conversão UMS↔MWC com SECURITY DEFINER/grants authenticated e service_role, e trigger habilitado contra transferências diretas de UMS. A tabela de migrations tem IDs até 20261103200629; os arquivos 20261024... do repo não aparecem sob os mesmos IDs, então a proveniência do deploy continua a reconciliar.
+- Atualizado inventário com leitura direta, sem dados de identificação. Métricas classificadas como piloto, não volume de mercado/receita/liquidez/adoção.
+- OR-20261108-0005 submetido; Oracle pendente. 18.1 permanece PROGRESS para fechar as demais fontes e a lacuna Binance/MW-Ex.
