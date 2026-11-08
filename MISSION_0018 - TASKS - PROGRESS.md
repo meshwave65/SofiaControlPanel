@@ -110,3 +110,12 @@
 - Jardim do Éden README em network mantém escopo/objetivos ainda não definidos; Condenser/MIA-D não possui validação de impacto demonstrada pelas fontes lidas.
 - Inventário atualizado com proveniência e limites. 18.1 continua PROGRESS; próxima lacuna única: localizar e auditar a fonte canônica do wallet web/PWA/MW-Ex e obter evidência específica de runtime/deploy antes de consolidar material executivo.
 - Operational Report: OR-20261108-0015 (SUBMITTED; Oracle pendente).
+### Checkpoint 18.1 — localização e auditoria de carteira web / MW-Ex (2026-11-08)
+
+- Localizado o repositório canônico `meshwave65/newsite` (HEAD observado `3d523ae2`, 05/11/2026), corrigindo a lacuna de localização registrada no checkpoint anterior sem reescrever o histórico do OR-0015.
+- Fonte examinada: rotas `src/main.jsx`; `MeshwalkerWallet.jsx`; `MwcWallet.jsx`; `MwEx.jsx`; auditoria de prontidão de 01/11; modelo contábil de 04/11; workflows e configuração de deploy.
+- Website e página MWN são públicos; rotas de carteira são protegidas por autenticação. O frontend integrado consulta Supabase ledger/acquisitions e calcula UMS efetivo/MWN potencial. Não houve login nem teste de aquisição.
+- MW-Ex é uma prévia estática marcada “Em breve”; a fonte declara que não consulta preços, não recebe ordens e não executa compra/venda/conversão. Não há evidência de matching, liquidação, custódia ou exchange operacional.
+- Build de produção CI passou no commit `3d523ae2` (05/11/2026). Isso não comprova deploy ativo. PWA instalável não foi confirmada: manifest/service worker ausentes nos caminhos consultados.
+- Inventário atualizado. 18.1 permanece `PROGRESS`: ainda exige consolidação final da cobertura dos demais componentes e revisão das divergências/documentos datados; MW-Ex operacional é um gate futuro, não requisito para descrever com precisão seu estado atual.
+- Operational Report: OR-20261108-0016 (`SUBMITTED`; Oracle pendente).
