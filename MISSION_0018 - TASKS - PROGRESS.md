@@ -11,7 +11,7 @@
 | 18.4 | Definir escopo mínimo, operação e gates de prontidão da MW-Ex | DONE | ChatGPT | Requisitos do mercado interno: modelo operacional, conversão, ordens/transações, controles, segurança, monitoramento, liquidez e dependências |
 | 18.5 | Consolidar projetos do ecossistema como submissões estratégicas | DONE | ChatGPT | Mapa de Jardim do Éden, SOFIA, MIA-D/Condenser, processamento/armazenamento federado e demais frentes; vínculo com demanda/valor MWN |
 | 18.6 | Analisar segurança, conformidade e riscos do lançamento | DONE | ChatGPT | Matriz de risco e requisitos por jurisdição/mercado, incluindo LGPD, AML/KYC quando aplicável, exchange, fraude, custódia e governança; indicar revisão profissional |
-| 18.7 | Construir roadmap integrado com fases e gates | STAGED | — | Plano com entregáveis, dependências, indicadores, responsáveis sugeridos, estimativas justificadas e critérios de avanço/pausa |
+| 18.7 | Construir roadmap integrado com fases e gates | PROGRESS | ChatGPT | Plano com entregáveis, dependências, indicadores, responsáveis sugeridos, estimativas justificadas e critérios de avanço/pausa |
 | 18.8 | Consolidar tese de lançamento e proposta ROB para decisão do responsável | STAGED | — | Documento executivo e detalhado demonstrando o ecossistema funcionalmente ativo como base da MWN, seu encadeamento de utilidade, evolução necessária, evidências, cenários e decisões pendentes; fontes e ORs referenciados |
 | 18.9 | Revisão cruzada e governança de continuidade | STAGED | — | Revisão independente, divergências resolvidas/registradas, índice e submissões atualizados |
 
@@ -228,3 +228,12 @@
 - No legal classification, authorization, launch approval, KYC policy, custody model, exchange venue, payment rail or transaction was approved/executed.
 - 18.6 marcada DONE como matriz e lista de gates/revisões profissionais; o risco de operação pública permanece HIGH/BLOCKED até os gates serem fechados.
 - Operational Report: OR-20261108-0024 (`SUBMITTED`; Oracle pendente). Próxima tarefa elegível: 18.7 — roadmap integrado, milestones e gates.
+
+
+### Abertura 18.7 — roadmap integrado com fases e gates (2026-11-08)
+
+- 18.1–18.6 foram concluídas documentalmente: evidências, arquitetura econômica para decisão, estratégia de mercado, readiness MW-Ex, portfólio e riscos/regulação.
+- 18.7 assumida por ChatGPT para consolidar fases, entregáveis, dependências, indicadores, responsáveis sugeridos, estimativas justificadas e critérios de avanço/pausa.
+- A regra de execução do responsável permanece: validar interesse externo/investimento antes de comprometer desenvolvimento/custos; roadmap será faseado e não representa cronograma aprovado.
+- Estimativas serão em faixas de esforço pós-financiamento (não datas-calendário), com incerteza declarada; tarefas legais, listing, investimento e liquidez terão duração não estimável sem terceiros/decisões.
+- Próxima ação: integrar 18.1–18.6 e separar critical path MWN/MW-Ex, produtos de serviço paralelos e opções de adoção/impacto.
