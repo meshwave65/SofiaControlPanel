@@ -101,3 +101,26 @@ Foram consultados os registros de GitHub Actions (status e etapas dos jobs). Ist
 | Laboratório storage | [VM Lab smoke test — run 40104678212 (24/10/2026)](https://github.com/meshwave65/mwc-ums-sim/actions/runs/40104678212) | Smoke test de runner/VM única, testes e upload de evidência concluíram com sucesso | Não valida topologia distribuída |
 
 **Maturidade ajustada:** estes componentes podem ser descritos como “CI de build/testes automatizados aprovado em revisões específicas”. MWC segue “piloto controlado/documentado”; storage, “laboratório/protótipo”. Nada aqui comprova rede produtiva, economia real, adoção ou produção descentralizada.
+
+
+## Complemento — reconciliação de missões estratégicas e snapshots de atividade (07/11/2026)
+
+A leitura dos registros de missão e dos dossiês factuais acrescenta contexto necessário à estratégia MWN. Os dados abaixo são **snapshots datados**, não consultas ao banco ao vivo nesta sessão.
+
+| Frente | Status nos registros canônicos | Evidência e limites |
+|---|---|---|
+| MISSION_0012 — apoiadores voluntários | STAGED | Registro declara que nenhuma campanha foi publicada, contribuição solicitada/recebida ou pessoa/grupo contatado; o fluxo precisa de auditoria e enquadramento. Esta trilha é expressamente distinta de investimento ou venda de MWN. |
+| MISSION_0013 — investidores | PROGRESS | O dossiê factual de 29/10/2026 documenta consulta read-only ao Supabase com snapshot de 10 blocos, 10 transações, 8 aquisições validadas e 1 rejeitada, 8 carteiras e valor agregado de R$13,02. É atividade piloto registrada, não volume de mercado, receita recorrente, valuation, adoção ampla ou liquidez. A seção de progresso registra envio de dois contatos exploratórios; entrega/leitura não foram confirmadas independentemente. |
+| MISSION_0013 — oferta e direitos | Parcial / dependente de definição | A matriz de lacunas não localizou documentos suficientes para definir entidade/instrumento de equity, direitos do ativo, supply, transferibilidade externa, liquidez ou termos completos. Não há oferta concreta sustentada por esses registros. |
+| MISSION_0017 — capacidade distribuída/economia | STAGED | Missão subordinada à MISSION_0018. 17.1 deve recuperar cálculo histórico de storage/AWS; cenário de contribuição de 1% é premissa declarada, não capacidade ativa mensurada nem caixa/receita. |
+| MISSION_0018 — estratégia MWN | PROGRESS | 18.1 continua em curso; 18.2–18.9 permanecem STAGED, sem decisões finais sobre tokenomics, MW-Ex, lançamento, compliance ou mercado. |
+
+### Divergências que exigem reconciliação antes de material externo
+
+- O dossiê MISSION_0013, datado 29/10, registra 10 blocos/10 transações e atividade de aquisição. O snapshot do blockchain consultado em outro documento, datado 24/10, descreve apenas dois blocos/dois eventos. As datas e versões explicam que podem ser snapshots diferentes; não devem ser fundidos nem apresentados como um único estado. Priorizar os registros mais recentes e realizar consulta direta ao banco quando a comunicação depender do estado atual.
+- O arquivo de progresso da MISSION_0013 contém uma seção anterior dizendo que nenhum envio ocorreu, seguida de atualizações posteriores registrando dois contatos enviados. O estado mais recente indica envios, mas o registro deve ser limpo/reconciliado cronologicamente para evitar contradição documental.
+- O histórico técnico permanece com código/ledger legado MWC apesar da designação atual MWN informada pelo responsável. Não declarar migração integral, equivalência técnica ou mudança de contrato/supply apenas com base na renomeação.
+
+### Formulação permitida para a tese
+
+Existe evidência documental de um ledger piloto e de aquisições registradas em ambiente controlado, além de protótipos e software com CI aprovado em revisões específicas. O valor demonstrativo é a **base técnica em evolução**, não prova de blockchain pública, liquidez, usuários em escala, caixa gerado, preço de mercado ou prontidão para listagem.
