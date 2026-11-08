@@ -141,3 +141,12 @@
 - 18.2 assumida por ChatGPT para estruturar arquitetura de fluxos, utilidades, emissão/suprimento, conversão, carteiras, transferibilidade, incentivos, riscos e parâmetros abertos.
 - Limite explícito: não decidir ou publicar emissão, supply, preço, direitos, transferibilidade externa, conversão final, incentivos ou liquidez sem aprovação do responsável. O resultado deve separar estado implementado, arquitetura declarada, proposta e decisão humana pendente.
 - Próxima ação: reconciliar fontes canônicas MWN/MWC/UMS/PoUW, ledger piloto, modelo contábil atual e decisões documentadas antes de elaborar alternativas.
+
+### Checkpoint 18.2 — reconciliação inicial de fontes e alternativas (2026-11-08)
+
+- Reconciliadas fontes canônicas de network (MWN↔MWC crosswalk, normative blueprint DRAFT, D-005/D-006), newsite accounting model, blockchain Genesis/runbook e BCE econômico.
+- Conflito quantitativo preservado: 1.000 UMS:1 MWN/MWC em alguns documentos de piloto; simulador inclui uma referência BRL demonstrativa; normative D-005 nega caráter normativo/preço. Nenhuma relação foi escolhida.
+- Definida em rascunho a separação de papéis UMS (contabilização/utilidade), MWN (ativo de circulação/mercado), fiduciário (liquidação real), carteira DID e MW-Ex (mercado futuro).
+- Criadas alternativas para mensuração/PoUW, supply/Genesis, conversão, transferibilidade e mercado; risks/gates e decisões humanas listados.
+- Documento em `governance/missions/0018/ARCHITECTURA_ECONOMICA_UMS_MWN_DECISION_DRAFT.md`; 18.2 permanece PROGRESS e não fixa parâmetros finais.
+- Operational Report: OR-20261108-0019 (SUBMITTED; Oracle pendente).
