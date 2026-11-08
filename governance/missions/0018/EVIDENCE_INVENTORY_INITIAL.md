@@ -255,3 +255,14 @@ Os valores são agregados de registros do piloto e não representam volume de ex
 ### Revisão de classificação
 
 A fonte anteriormente usada (snapshot de 24/10) está agora complementada por uma leitura direta read-only do banco conectado em 08/11. O estado do ledger pode ser classificado como **piloto Supabase ativo/documentado com 18 blocos e registros agregados de aquisição/conversão**. Permanecem fora do que a evidência sustenta: blockchain distribuída, consenso independente, Genesis canônico, mercado MW-Ex, listagem, liquidez externa, receita de mercado, tokenomics aprovada ou atividade contínua após 03/11.
+
+
+## Corrective source-selection control — Supabase acquisition records (OR-20261108-0006)
+
+**Authoritative project for this acquisition history:** MeshWave65 Supabase project `ufylccbdjfzydbwhpmpp`, table `public.mwc_acquisitions`.
+
+A prior snapshot (OR-20261108-0005) selected project `mwn` (`vkjurxxrlchnytnkkrvq`) by mistake. That separate project contained 9 rows and returned R$13.02 across 8 validated records; it does **not** represent the full MeshWave65 acquisition history and must not be used as the total for this task. The error was project/source selection and coverage, not a discrepancy in the same records.
+
+Read-only aggregate on MeshWave65: **20 validated BRL acquisitions totaling R$136.03**, recorded quantity **6,296.22772505 MWC**. The 20 values are enumerated in OR-20261108-0006. User reported that omitted acquisitions included those associated with Marcos Vita, Dinelson, Gustavo, and Tatiane; this report does not perform identity-level retrieval.
+
+**Agent instruction (mandatory):** For future acquisition totals, verify the Supabase project ref before querying. Use MeshWave65 `ufylccbdjfzydbwhpmpp` for this history; do not select `mwn` `vkjurxxrlchnytnkkrvq` merely because it has a same-named table. Confirm project, table, currency, status filter, and row coverage before summing. Do not merge the two projects. If sources conflict, pause and document the project refs and coverage instead of asserting a total. OR-0005 remains in the audit trail but is superseded for acquisition totals by OR-0006.
