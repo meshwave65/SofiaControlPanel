@@ -9,7 +9,7 @@
 | 18.2 | Definir arquitetura econômica UMS ↔ MWN e tokenomics para decisão | DONE | ChatGPT | Fluxos, utilidades, emissão/suprimento, conversão, carteiras, transferibilidade, incentivos, riscos e parâmetros abertos; sem fixar decisões não autorizadas |
 | 18.3 | Definir estratégia de mercado e opções de lançamento/listagem | DONE | ChatGPT | Comparação de mercado interno, candidatura Binance e alternativas; requisitos, custos, riscos e sequência |
 | 18.4 | Definir escopo mínimo, operação e gates de prontidão da MW-Ex | DONE | ChatGPT | Requisitos do mercado interno: modelo operacional, conversão, ordens/transações, controles, segurança, monitoramento, liquidez e dependências |
-| 18.5 | Consolidar projetos do ecossistema como submissões estratégicas | STAGED | — | Mapa de Jardim do Éden, SOFIA, MIA-D/Condenser, processamento/armazenamento federado e demais frentes; vínculo com demanda/valor MWN |
+| 18.5 | Consolidar projetos do ecossistema como submissões estratégicas | PROGRESS | ChatGPT | Mapa de Jardim do Éden, SOFIA, MIA-D/Condenser, processamento/armazenamento federado e demais frentes; vínculo com demanda/valor MWN |
 | 18.6 | Analisar segurança, conformidade e riscos do lançamento | STAGED | — | Matriz de risco e requisitos por jurisdição/mercado, incluindo LGPD, AML/KYC quando aplicável, exchange, fraude, custódia e governança; indicar revisão profissional |
 | 18.7 | Construir roadmap integrado com fases e gates | STAGED | — | Plano com entregáveis, dependências, indicadores, responsáveis sugeridos, estimativas justificadas e critérios de avanço/pausa |
 | 18.8 | Consolidar tese de lançamento e proposta ROB para decisão do responsável | STAGED | — | Documento executivo e detalhado demonstrando o ecossistema funcionalmente ativo como base da MWN, seu encadeamento de utilidade, evolução necessária, evidências, cenários e decisões pendentes; fontes e ORs referenciados |
@@ -192,3 +192,10 @@
 - G0–G8 estão explicitados. G0 asset/economics, custody/security, legal/compliance, liquidity and operations remain blocking gates; nenhuma implementação ou lançamento autorizado.
 - 18.4 marcada DONE como especificação de escopo/gates para decisão; escolhas de custody, pair, conversion, fees, liquidity budget, KYC/AML and launch approval remain human decisions.
 - Operational Report: OR-20261108-0022 (`SUBMITTED`; Oracle pendente). Próxima tarefa elegível: 18.5 — mapa de projetos como submissões estratégicas e vínculo com demanda/valor MWN.
+
+### Abertura 18.5 — portfólio de projetos como submissões estratégicas (2026-11-08)
+
+- 18.1–18.4 foram concluídas como inventário, frameworks e especificações para decisão; não houve implementação/launch de funcionalidades não comprovadas.
+- 18.5 assumida por ChatGPT para mapear Jardim do Éden, SOFIA/SWE, Condenser/MIA-D, processamento/armazenamento federado e outras frentes como submissões estratégicas, separando estágio, evidência, potencial de utilidade/demanda MWN e lacunas.
+- O vínculo projeto → demanda/valor será apresentado como hipótese/caminho econômico, não como adoção, receita, consumo de UMS, demanda de MWN ou valorização atual.
+- Próxima ação: reconciliar a matriz de evidências 18.1 com os blueprints e artefatos canônicos de cada frente; classificar o potencial em direto, indireto ou opcional e preservar os gates de 18.2–18.4.
