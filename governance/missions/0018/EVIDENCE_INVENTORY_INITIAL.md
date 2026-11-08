@@ -87,3 +87,17 @@ A leitura dos READMEs e documentos de estado dos repositórios revelou evidênci
 ### Evidência positiva versus maturidade
 
 Há base documental e software concreto — inclusive um ledger piloto operacional documentado e um protótipo de armazenamento —, mas esses são estados específicos e limitados. A tese executiva adequada é que **MeshWave já possui artefatos e pilotos que podem sustentar evolução**, não que todo o ecossistema ou a economia UMS/MWN estejam plenamente operacionais. Jardim do Éden permanece uma frente de conceito/proposta nesta auditoria; SimCity é somente referência reconhecível, sem parceria/licença afirmada.
+
+
+## Complemento — evidência CI de testes e build (consulta 2026-11-07)
+
+Foram consultados os registros de GitHub Actions (status e etapas dos jobs). Isto comprova que workflows específicos terminaram com sucesso na revisão associada; **não comprova deploy em produção, uso por usuários, auditoria de segurança ou validade operacional além do escopo dos testes**.
+
+| Componente | Workflow/run verificado | Resultado | Limite |
+|---|---|---|---|
+| Software blockchain | [tests — run 40085064692 (24/10/2026)](https://github.com/meshwave65/meshwave-blockchain/actions/runs/40085064692) | Job test, instalação e etapa Run tests concluíram com sucesso | Não valida ledger em produção, consenso distribuído ou estado financeiro |
+| Simulador MWC/UMS | [CI — run 41635964106 (03/11/2026)](https://github.com/meshwave65/mwc-ums-sim/actions/runs/41635964106) | Build e Regression tests concluíram com sucesso | Não prova emissão/conversão UMS real |
+| Agente de armazenamento | [Storage Node tests — run 40104678215 (24/10/2026)](https://github.com/meshwave65/mwc-ums-sim/actions/runs/40104678215) | unit-tests e Run storage node tests concluíram com sucesso | Não comprova rede multi-nó independente ou produção |
+| Laboratório storage | [VM Lab smoke test — run 40104678212 (24/10/2026)](https://github.com/meshwave65/mwc-ums-sim/actions/runs/40104678212) | Smoke test de runner/VM única, testes e upload de evidência concluíram com sucesso | Não valida topologia distribuída |
+
+**Maturidade ajustada:** estes componentes podem ser descritos como “CI de build/testes automatizados aprovado em revisões específicas”. MWC segue “piloto controlado/documentado”; storage, “laboratório/protótipo”. Nada aqui comprova rede produtiva, economia real, adoção ou produção descentralizada.
