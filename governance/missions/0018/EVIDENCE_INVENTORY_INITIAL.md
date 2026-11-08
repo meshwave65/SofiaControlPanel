@@ -124,3 +124,28 @@ A leitura dos registros de missão e dos dossiês factuais acrescenta contexto n
 ### Formulação permitida para a tese
 
 Existe evidência documental de um ledger piloto e de aquisições registradas em ambiente controlado, além de protótipos e software com CI aprovado em revisões específicas. O valor demonstrativo é a **base técnica em evolução**, não prova de blockchain pública, liquidez, usuários em escala, caixa gerado, preço de mercado ou prontidão para listagem.
+
+
+## Complemento — auditoria de atividade recente dos repositórios (2026-11-08)
+
+Consulta read-only dos três commits mais recentes em cada repositório listado, com abertura do commit mais recente por frente para confirmar data e mensagem. **Commit recente prova atividade de versionamento, não funcionamento em runtime.** Datas em UTC; o conteúdo deve ser lido conforme o escopo do commit.
+
+| Frente | Último commit observado | Data | O que sinaliza / limite |
+|---|---|---|---|
+| [MeshWave-Core](https://github.com/meshwave65/MeshWave-Core/commit/726b9e4bfde4c61e798867462b96ebf875876f37) | “Congela estado do projeto antes da migração para arquitetura SOFIA” | 2025-07-29 | Base congelada/documentação de transição; não evidência de execução atual. |
+| [Foundation_MeshWave](https://github.com/meshwave65/Foundation_MeshWave/commit/7e8b3864414f2ce8810dcea5ca67d2036bf65b8e) | “index phased investment proposal” | 2026-11-06 | Atualização documental recente; não comprova capital captado ou operação. |
+| [meshwave-blockchain](https://github.com/meshwave65/meshwave-blockchain/commit/f6785f54bdbd7d8c016f21f2989797beed207ac2) | “specify wallet-level and automatic MWC reconversion” | 2026-10-24 | Especificação de fluxo/carteira; confirmar implementação e execução antes de afirmar reconversão operacional. |
+| [mwc-ums-sim](https://github.com/meshwave65/mwc-ums-sim/commit/3517623a8376dc1ea4327b695e6da2d9137581a0) | “Update MWC reference to MWN in briefing.md” | 2026-11-03 | Atualização terminológica em briefing; não altera por si só o estado do piloto MWC. |
+| [SofiaWebExtractor](https://github.com/meshwave65/SofiaWebExtractor/commit/51783f82be05cc87845b0b72c7b2d90aed66da10) | “Add supabase to requirements” | 2026-09-22 | Alteração de dependências; não valida ponta a ponta. |
+| [engines](https://github.com/meshwave65/engines/commit/febe5446bdfa80dc2959167768c35713fa67c0c4) | “continue monitoring delegated tasks” | 2026-10-19 | Ajuste no worker online; deployment/serviço em runtime não confirmado nesta consulta. |
+| [sofia-mia](https://github.com/meshwave65/sofia-mia/commit/eac2860ced958f1c9745ec9a767eaa2c3340ef7f) | “Update GlobalAquometer.vue” | 2025-10-13 | Commit de UI; atividade atual/build/deploy não comprovados. |
+| [sofia-condenser-pro](https://github.com/meshwave65/sofia-condenser-pro/commit/a66dbc32ac68b5e06f3cbd32098e88fd0bad5e4c) | “Update App.vue” | 2025-10-12 | Commit de aplicação; não comprova métrica MIA-D validada. |
+| [condenser-pro-poc](https://github.com/meshwave65/condenser-pro-poc/commit/8967b5de6e92ba437f96fd675c652ef1f6d2ba1f) | “Forçando sincronização completa a partir do ambiente local funcional” | 2025-10-10 | A mensagem registra alegação de ambiente local funcional, mas não há teste independente nesta auditoria. |
+| [AppMeshWave](https://github.com/meshwave65/AppMeshWave/commit/38b6f7450205f0349f98f3320731d02470e7da8b) | “Add project files and CC-BY-NC-SA-4.0 license” | 2026-04-16 | Publicação inicial de arquivos/licença; sem prova de distribuição ou usuários. |
+| [network](https://github.com/meshwave65/network/commit/6e499e0d9b4f3f01ce1b3b21afb452d2ae5f7dcb) | “map Joana Marçal B Prime Office Agency” | 2026-11-06 | Atividade de inventário/OCINT; não deve ser interpretada como parceria contratada. |
+
+### Reavaliação de evidência
+
+- A atividade recente é desigual: Foundation_MeshWave, network, simulator e blockchain têm commits recentes, enquanto MeshWave-Core, SOFIA MIA, Condenser e POC têm commits de 2025 ou anteriores/menos recentes na consulta. O SWE e engines apresentam alterações de 2026, mas o estado online e o caminho ponta a ponta continuam sem prova nesta rodada.
+- As classificações anteriores permanecem conservadoras. Não há promoção para “funcional/ativo” baseada apenas em commit.
+- O item de maior valor para fechar 18.1 agora é validar deployments/runtime por serviço e reconciliar os estados canônicos de token, UMS, MW-Ex, candidatura Binance e evidências de uso, sem extrapolar snapshots.
