@@ -10,7 +10,7 @@
 | 18.3 | Definir estratégia de mercado e opções de lançamento/listagem | DONE | ChatGPT | Comparação de mercado interno, candidatura Binance e alternativas; requisitos, custos, riscos e sequência |
 | 18.4 | Definir escopo mínimo, operação e gates de prontidão da MW-Ex | DONE | ChatGPT | Requisitos do mercado interno: modelo operacional, conversão, ordens/transações, controles, segurança, monitoramento, liquidez e dependências |
 | 18.5 | Consolidar projetos do ecossistema como submissões estratégicas | DONE | ChatGPT | Mapa de Jardim do Éden, SOFIA, MIA-D/Condenser, processamento/armazenamento federado e demais frentes; vínculo com demanda/valor MWN |
-| 18.6 | Analisar segurança, conformidade e riscos do lançamento | STAGED | — | Matriz de risco e requisitos por jurisdição/mercado, incluindo LGPD, AML/KYC quando aplicável, exchange, fraude, custódia e governança; indicar revisão profissional |
+| 18.6 | Analisar segurança, conformidade e riscos do lançamento | PROGRESS | ChatGPT | Matriz de risco e requisitos por jurisdição/mercado, incluindo LGPD, AML/KYC quando aplicável, exchange, fraude, custódia e governança; indicar revisão profissional |
 | 18.7 | Construir roadmap integrado com fases e gates | STAGED | — | Plano com entregáveis, dependências, indicadores, responsáveis sugeridos, estimativas justificadas e critérios de avanço/pausa |
 | 18.8 | Consolidar tese de lançamento e proposta ROB para decisão do responsável | STAGED | — | Documento executivo e detalhado demonstrando o ecossistema funcionalmente ativo como base da MWN, seu encadeamento de utilidade, evolução necessária, evidências, cenários e decisões pendentes; fontes e ORs referenciados |
 | 18.9 | Revisão cruzada e governança de continuidade | STAGED | — | Revisão independente, divergências resolvidas/registradas, índice e submissões atualizados |
@@ -209,3 +209,11 @@
 - O vínculo projeto → demanda/valor é hipotético e condicionado a uso real, regras aprovadas, UMS consumption/PoUW, conversão, mercado e adoção. Nenhum projeto é declarado como gerador atual de demanda, receita, liquidez ou valorização MWN.
 - 18.5 marcada DONE como mapa estratégico; nenhuma submissão externa, contato, valuation ou ROI foi criado/aprovado.
 - Operational Report: OR-20261108-0023 (`SUBMITTED`; Oracle pendente). Próxima tarefa elegível: 18.6 — segurança, conformidade e riscos do lançamento.
+
+
+### Abertura 18.6 — segurança, conformidade e riscos do lançamento (2026-11-08)
+
+- 18.1–18.5 foram concluídas documentalmente; MW-Ex segue preview e nenhuma venue/asset/tokenomics final foi aprovada.
+- 18.6 assumida por ChatGPT para construir matriz de riscos e requisitos por jurisdição/mercado, incluindo LGPD, AML/KYC quando aplicável, exchange, fraude, custódia, segurança técnica, governança e marketing.
+- Limite: análise documental e triagem; não é parecer jurídico, fiscal, de securities, de custody, nem aprovação regulatória. Requisitos específicos precisam de advogado/consultor qualificado nas jurisdições de operação e oferta.
+- Próxima ação: consultar fontes oficiais atuais de Brasil (BCB/CVM/ANPD), EEE (MiCA/ESMA) e outros mercados apenas como cenários, mantendo geografia final em aberto.
