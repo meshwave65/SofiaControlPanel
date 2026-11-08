@@ -2,22 +2,26 @@
 **Documento de trabalho | MISSION_0018 | 08/11/2026**  
 **Estado: DRAFT — narrativa para discussão; não é oferta, prospecto, projeção financeira nem material autorizado para distribuição externa.**
 
-## A ideia central: ROB, não ROI
+## A ideia central: uma realidade em construção — ROB, não ROI
 
-A MeshWave propõe uma visão de construção de ecossistema. O foco desta etapa não é apresentar uma promessa de retorno financeiro (ROI), mas mostrar o que pode ser construído, integrado e colocado em operação com capital de risco: **Return on Building (ROB)**.
+**A MeshWave não é um investimento em um sonho abstrato. É um ecossistema real, já construído e em evolução, com operação ainda rudimentar, mas uma base que o responsável considera sólida e desenvolvida sob restrições financeiras, materiais e estruturais severas, em esforço predominantemente solo.**
 
-ROB é aqui uma lente estratégica e narrativa — não uma métrica financeira padronizada, nem uma garantia de valorização. A tese precisa ser sustentada por entregas, utilidade verificável, governança, evidências e execução.
+A tese de investimento parte desse ponto: o ecossistema já existe e avança. O aporte potencial não seria para descobrir se a ideia pode existir, mas para permitir que uma base já construída amadureça, seja profissionalizada e estruturada, e avance com maior velocidade, capacidade e consistência.
 
-## O que estamos construindo
+A imagem que traduz a visão internamente é a de uma criança que já nasceu e está crescendo: há algo real e em desenvolvimento. Sem recursos e estrutura suficientes, seu crescimento pode ficar limitado ou até ser interrompido; com apoio adequado, poderá desenvolver plenamente suas capacidades e tornar-se produtiva. Essa metáfora não é uma previsão de sucesso — ela comunica o estágio e a necessidade de construção.
 
-MeshWave é concebida como um ecossistema de aplicações, utilidades e infraestrutura conectadas à economia interna UMS/MWN. A visão inclui produtos e frentes como:
+**ROB (Return on Building)** é a lente estratégica para essa conversa: avaliar o que pode ser desenvolvido, integrado e colocado em operação com recursos adicionais, em vez de centrar a narrativa em promessas de ROI. ROB é uma narrativa, não uma métrica financeira padronizada nem uma garantia de valorização. A tese deve ser sustentada por entregas, utilidade verificável, governança, evidências e execução.
+
+## Uma base existente, com maturidade desigual
+
+MeshWave é um ecossistema em desenvolvimento contínuo de aplicações, utilidades e infraestrutura conectadas à economia interna UMS/MWN. A afirmação central não é que todos os componentes estejam prontos; é que já existe uma base concreta, construída com recursos restritos, sobre a qual as próximas fases podem trabalhar. A visão inclui produtos e frentes como:
 
 - carteira MWN e ferramentas do ecossistema;
 - MW-Ex como canal próprio para os negócios iniciais e integração progressiva com mercados externos;
 - aplicações e projetos que podem gerar utilidade e demanda interna;
 - capacidades de processamento, armazenamento e interconexão federada em evolução.
 
-**Maturidade:** essas frentes não devem ser apresentadas como um todo já operacional. A base técnica reúne implementações, pilotos, projetos em desenvolvimento e conceitos; cada componente deve ser identificado com sua evidência e estado específico.
+**Maturidade e honestidade probatória:** o ecossistema deve ser apresentado como real, sem nivelar todos os componentes como operacionais. A base técnica reúne funcionalidades existentes, implementações, pilotos, projetos em desenvolvimento e conceitos. Cada afirmação concreta deve ser acompanhada de evidência e classificação específica. O estado rudimentar não apaga o que já foi construído; tampouco substitui validação de funcionamento.
 
 ## Por que priorizar MW-Ex
 
