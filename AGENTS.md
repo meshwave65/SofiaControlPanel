@@ -19,3 +19,11 @@ Um commit de Operational Report pode ser detectado pelo GitHub Actions, mas a ac
 ## Fonte operacional detalhada
 
 Para o procedimento completo de seleção/criação de skill, execução, registro de OR e salvaguardas, consulte [`governance/skills/operational-task-lifecycle/SKILL.md`](governance/skills/operational-task-lifecycle/SKILL.md). A governança de missão/tarefa existente em `GOVERNANCE.md` continua aplicável.
+
+
+## Escopo de dados e bancos por missão
+
+- **Consulte somente tabelas, registros, arquivos e serviços que sejam pertinentes ao objetivo e ao critério de aceite da missão/tarefa ativa.** Não faça inventário amplo de schemas/tabelas nem analise dados de outros projetos apenas porque estão no mesmo banco ou conexão.
+- Em bancos Supabase consolidados, a presença de tabelas de múltiplas frentes é intencional conforme o contexto do responsável. Determine a origem e relevância de uma tabela antes de usá-la; nomes iguais em projetos diferentes não significam fontes equivalentes.
+- Não transforme contagem isolada de tabelas sem RLS em conclusão global de segurança. Avalie RLS apenas para as tabelas/caminhos que a tarefa realmente toca, com contexto de sensibilidade, placeholders e exposição; qualquer revisão mais ampla exige escopo próprio.
+- Se uma tabela ou dado não for necessário à missão, **ignore-o e não o inspecione**. Não amplie o escopo por curiosidade. Preserve as decisões humanas e não faça alterações de schema, dados, RLS ou migração sem autorização específica.
