@@ -11,7 +11,7 @@
 | 18.4 | Definir escopo mínimo, operação e gates de prontidão da MW-Ex | DONE | ChatGPT | Requisitos do mercado interno: modelo operacional, conversão, ordens/transações, controles, segurança, monitoramento, liquidez e dependências |
 | 18.5 | Consolidar projetos do ecossistema como submissões estratégicas | DONE | ChatGPT | Mapa de Jardim do Éden, SOFIA, MIA-D/Condenser, processamento/armazenamento federado e demais frentes; vínculo com demanda/valor MWN |
 | 18.6 | Analisar segurança, conformidade e riscos do lançamento | DONE | ChatGPT | Matriz de risco e requisitos por jurisdição/mercado, incluindo LGPD, AML/KYC quando aplicável, exchange, fraude, custódia e governança; indicar revisão profissional |
-| 18.7 | Construir roadmap integrado com fases e gates | PROGRESS | ChatGPT | Plano com entregáveis, dependências, indicadores, responsáveis sugeridos, estimativas justificadas e critérios de avanço/pausa |
+| 18.7 | Construir roadmap integrado com fases e gates | DONE | ChatGPT | Plano com entregáveis, dependências, indicadores, responsáveis sugeridos, estimativas justificadas e critérios de avanço/pausa |
 | 18.8 | Consolidar tese de lançamento e proposta ROB para decisão do responsável | STAGED | — | Documento executivo e detalhado demonstrando o ecossistema funcionalmente ativo como base da MWN, seu encadeamento de utilidade, evolução necessária, evidências, cenários e decisões pendentes; fontes e ORs referenciados |
 | 18.9 | Revisão cruzada e governança de continuidade | STAGED | — | Revisão independente, divergências resolvidas/registradas, índice e submissões atualizados |
 
@@ -237,3 +237,13 @@
 - A regra de execução do responsável permanece: validar interesse externo/investimento antes de comprometer desenvolvimento/custos; roadmap será faseado e não representa cronograma aprovado.
 - Estimativas serão em faixas de esforço pós-financiamento (não datas-calendário), com incerteza declarada; tarefas legais, listing, investimento e liquidez terão duração não estimável sem terceiros/decisões.
 - Próxima ação: integrar 18.1–18.6 e separar critical path MWN/MW-Ex, produtos de serviço paralelos e opções de adoção/impacto.
+
+
+### Fechamento 18.7 — roadmap integrado com fases e gates (2026-11-08)
+
+- Critério atendido: fases, entregáveis, dependências, indicadores, responsáveis sugeridos, estimativas relativas justificadas e critérios de avanço/pausa estão documentados.
+- Roadmap publicado em `ROADMAP_INTEGRATED_PHASES_GATES_18_7.md` com critical path MWN/MW-Ex e lanes paralelas SWE/Condenser, MeshWalker compute/storage e opções Jardim/MIA-D/QoS/ORP.
+- Estimativas são S/M/L/XL de esforço pós-financiamento, não calendário; legal, listing, investment, liquidity and adoption schedules are external/unknown. Re-estimate after team/budget/scope are approved.
+- Gate principal preservado: investor validation/capital before development spending; no public exchange/offer before economics, legal, custody/security, AML, privacy, market integrity and liquidity gates.
+- 18.7 marcada DONE como roadmap para decisão; nenhuma data, budget, owner individual, capital, development or launch is approved.
+- Operational Report: OR-20261108-0025 (`SUBMITTED`; Oracle pendente). Próxima tarefa elegível: 18.8 — tese de lançamento e proposta ROB para decisão do responsável.
