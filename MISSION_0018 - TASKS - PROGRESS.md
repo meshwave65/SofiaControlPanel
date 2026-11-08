@@ -64,3 +64,12 @@
 - Atualizado o inventário com datas, links diretos e limites de inferência. Atividade de versionamento não foi usada como prova de runtime.
 - Encontradas frentes com atividade recente de documentação/registro e outras com último commit de 2025; nenhuma classificação foi elevada somente com base nisso.
 - Operational Report OR-20261108-0001 submetido; Oracle pendente. 18.1 continua PROGRESS, pois deployment/runtime e as definições canônicas ainda exigem evidência.
+
+
+### Checkpoint 18.1 — verificação de workflows e contexto Vercel (2026-11-08)
+
+- Consultados GitHub Actions nos 11 repositórios do inventário. Encontrados resultados de CI relevantes: sucessos já registrados para blockchain/simulador/lab; em Foundation_MeshWave, quatro execuções no mesmo commit, com um sucesso e falhas em criação de diretórios e push.
+- Abertos logs de três jobs falhos: causa shell/path e permissionamento 403 do github-actions[bot], inclusive tentativa de push sem mudanças.
+- Contexto Vercel consultado para 5 repositórios web; a conexão consultada não retornou vínculo direto destes repositórios. Isso não exclui deploy em outro provedor/conta.
+- Inventário atualizado; nenhuma afirmação de runtime foi elevada. 18.1 continua PROGRESS.
+- OR-20261108-0002 submetido; Oracle pendente.
