@@ -269,3 +269,24 @@ Esta seção registra a orientação explícita mais recente do fundador e preva
 - Master atualizado para v0.5.
 - Derivados 18.13 e 18.14 sincronizados para v0.2-DRAFT.
 - O conteúdo permanece DRAFT até aprovação explícita do fundador. Esta autorização para avançar na revisão não autoriza distribuição externa.
+
+
+## Correção de hierarquia da tese ROB — MWN-first (2026-11-09)
+
+**Esta é a diretriz de prioridade narrativa vigente e prevalece sobre qualquer redação anterior que coloque a venda do ecossistema no centro da apresentação.**
+
+- **Objeto central da apresentação e da tese ROB: MWN**, o ativo de mercado da economia MeshWave.
+- **Papel do ecossistema MeshWave:** fundamento tecnológico e econômico da MWN. O ecossistema demonstra que o ativo não está sendo apresentado isoladamente: há serviços, aplicações, infraestrutura e mecanismos de participação/contabilização que podem sustentar utilidade e atividade econômica.
+- Não apresentar SOFIA, AppAndroid, SWE, Condenser, MIA-D, MeshWalker, Jardim do Éden ou demais frentes como um catálogo de produtos independentes que se pretende vender ao investidor. Eles entram como evidência e componentes da base que fundamenta a MWN.
+- **UMS:** unidade interna de contabilização de contribuição útil e consumo de serviços. **MWN:** ativo de mercado e gateway asset entre a economia interna e a circulação externa. A arquitetura não prevê rota direta de conversão UMS↔outro criptoativo; a conexão ao mercado ocorre por MWN, com MW-Ex como canal próprio pretendido.
+- Não afirmar que cada projeto gera automaticamente demanda por MWN. Apresentar o ecossistema como base e fonte potencial de utilidade/atividade, sem prometer demanda, preço ou liquidez.
+- A capacidade de execução do fundador e o histórico de construção são elementos de credibilidade que sustentam a tese, não o objeto principal da oferta.
+- O foco de capital e evolução deve estar na consolidação da economia UMS/MWN, no avanço da MW-Ex e no fortalecimento da infraestrutura e dos serviços que dão suporte à MWN.
+
+### Artefatos sincronizados
+- Master ROB v0.5.1.
+- Derivados executivos 18.13 v0.3-DRAFT.
+- FAQ 18.14 v0.3-DRAFT.
+- Tese detalhada 18.8 e resumo executivo 18.8 alinhados à mesma hierarquia.
+
+A revisão textual não aprova tokenomics, direitos, supply, preço, listagem, liquidez ou distribuição externa. Aprovação do conteúdo e autorização de distribuição permanecem decisões separadas do fundador.
