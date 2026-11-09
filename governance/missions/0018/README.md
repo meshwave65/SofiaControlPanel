@@ -238,3 +238,34 @@ A matriz de alegações é documental e se baseia no inventário de 08/11; não 
 ## Checkpoint editorial — 2026-11-09 (OR-20261109-0012)
 
 O master ROB foi atualizado para v0.4 após revisão editorial integral. A alteração elimina o plural ambíguo ao descrever o limite da estrutura individual do fundador. Permanecem expressos os fatos declarados sobre construção por uma única pessoa, uso exclusivo de ferramentas/serviços gratuitos da internet e equipamento próprio extremamente limitado. A revisão prévia de comunicação é interna e documental; não equivale à aprovação do fundador nem autoriza distribuição. 18.10 permanece PROGRESS; 18.15 BLOCKED — OWNER REVIEW; 18.16 BLOCKED — DEPENDENCY. CTA com contato e páginas públicas summary/stage requer destinos confirmados e não foram inventados.
+
+
+## Atualização de diretriz narrativa e estágio funcional — revisão do fundador (2026-11-09)
+
+Esta seção registra a orientação explícita mais recente do fundador e prevalece sobre descrições anteriores incompatíveis nos drafts e nos resumos históricos desta missão.
+
+### Capacidade demonstrada e significado de sucesso
+- A trajetória do fundador não deve ser apresentada como promessa ou garantia de sucesso futuro. Sucesso não é permanente: exige movimento, adaptação e execução contínua.
+- Para esta tese ROB, a pergunta sobre capacidade de execução já tem resposta demonstrada pelo que foi construído. O fundador não está prometendo que um dia será capaz de criar o ecossistema: já criou sua base e seus componentes.
+- A oportunidade de investimento está em aperfeiçoar, expandir, integrar, consolidar e escalar essa realidade. A pergunta narrativa central é: **“Se foi possível realizar tanto com nada, o que se poderia realizar com alguma coisa?”**
+- A retrospectiva de realizações é evidência da capacidade demonstrada, não garantia de resultado futuro.
+
+### Estágio funcional que deve ser reconhecido
+- **SOFIA:** sistema funcional de orquestração de inteligências artificiais.
+- **AppAndroid:** aplicação Android desenvolvida e funcional, frontend do SOFIA Core.
+- **SWE:** módulo funcional de captura e extração de conhecimento.
+- **Condenser:** sistema funcional de condensação e otimização.
+- **MIA-D:** já possui estrutura mínima de medição e avaliação; metodologia em evolução.
+- Esses componentes podem ser rudimentares e ainda exigir aperfeiçoamento, integração, otimização e ampliação de escala. Não os rebaixar a conceitos ou protótipos apenas porque não alcançaram maturidade ou escala maiores.
+- Distinguir funcionalidade, maturidade e escala. A operação do ecossistema como conjunto pode permanecer rudimentar mesmo quando componentes individuais são funcionais.
+
+### Linguagem de comunicação
+- Não inserir expressões defensivas ou caveats repetitivos como “segundo declarações” e “não validado” para fatos de funcionamento que o fundador já esclareceu e que podem ser examinados nos sistemas, repositórios e deployments disponíveis.
+- Verificar tecnicamente quando a afirmação exigir evidência adicional; não usar ausência de auditoria independente como motivo automático para rebaixar uma funcionalidade já estabelecida.
+- A comunicação para investidores deve começar pelo que foi construído, pela capacidade demonstrada, pelos diferenciais e pela oportunidade de expansão. Riscos e limitações materiais continuam tratados com precisão, mas não devem dominar nem enfraquecer gratuitamente a apresentação.
+- Não converter esta orientação em promessa de sucesso, tração, adoção, receita, integração total ou produção em escala.
+
+### Estado editorial decorrente
+- Master atualizado para v0.5.
+- Derivados 18.13 e 18.14 sincronizados para v0.2-DRAFT.
+- O conteúdo permanece DRAFT até aprovação explícita do fundador. Esta autorização para avançar na revisão não autoriza distribuição externa.
