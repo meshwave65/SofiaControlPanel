@@ -110,3 +110,15 @@ This mission spans multiple chats and execution agents. Its strategic definition
 - The owner's internal child-growth metaphor is a context metaphor, not a success prediction and should not be used as manipulative public fundraising language.
 
 These decisions are expanded in the mission README. The README and thesis do not authorize outreach, offers, deployment, listing, financial activity or public distribution; all mission gates and human approval requirements remain in force. The current documentary package is to be reviewed by the owner before external circulation.
+
+
+## 9. Fechamento preliminar por override humano
+
+O responsável pode autorizar expressamente um **fechamento preliminar** quando a missão não deva permanecer em PROGRESS apenas pela indisponibilidade do Oracle Agent ou do Final Operational Report (FOR). Esse override:
+
+- permite atualizar a missão e a tarefa final para DONE — PRELIMINARY;
+- não simula revisão independente, não altera Oracle status de ORs e não substitui o FOR;
+- mantém os drafts sujeitos à revisão do responsável e não autoriza distribuição externa, oferta, listing, desenvolvimento, transação ou lançamento;
+- exige que o FOR, quando produzido, seja incorporado à versão definitiva, com correções e divergências documentadas.
+
+A distinção entre fechamento preliminar e versão definitiva deve constar no README da missão, no cross-review e no Operational Report.
