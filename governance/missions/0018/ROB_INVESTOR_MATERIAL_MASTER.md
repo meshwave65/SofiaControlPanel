@@ -104,11 +104,11 @@ Há uma prévia visual integrada à experiência da carteira no website, mas ela
 
 Sua evolução representa uma das frentes relevantes de estruturação do ecossistema.
 
-## Por que a oportunidade existe neste momento
+## Por que a oportunidade MWN existe neste momento
 
-A MeshWave chegou a um ponto em que o principal limitador deixou de ser apenas a capacidade de conceber e desenvolver soluções. O limite passou a ser a estrutura disponível para transformar o trabalho acumulado em produtos integrados, serviços sustentáveis e capacidade operacional.
+A MWN foi concebida para ser o ativo de mercado da economia MeshWave. O momento da oportunidade está ligado à necessidade de consolidar a arquitetura econômica que conecta a unidade interna UMS ao ativo de circulação externa, estruturar a MW-Ex como canal próprio e ampliar a base tecnológica e de serviços que poderá sustentar a utilidade e a atividade econômica associadas à MWN.
 
-A estrutura que permitiu formar essa base já não dispõe de capacidade suficiente para sustentar a próxima fase. O desafio agora é ampliar os meios de execução:
+A base já existe em diferentes graus de maturidade, mas a estrutura disponível — construída individualmente pelo fundador — chegou ao limite de sua capacidade. O desafio agora é ampliar os meios necessários para consolidar a economia e a infraestrutura da MWN:
 
 - **Recursos materiais e computacionais:** equipamentos, infraestrutura, ambientes de desenvolvimento, testes e operação.
 - **Recursos financeiros:** capacidade de sustentar desenvolvimento, serviços, infraestrutura e atividades de estruturação.
@@ -116,17 +116,17 @@ A estrutura que permitiu formar essa base já não dispõe de capacidade suficie
 - **Estrutura organizacional:** processos, responsabilidades, suporte, governança e capacidade de execução contínua.
 - **Integração e validação:** transformar componentes independentes em soluções utilizáveis, testadas e progressivamente conectadas.
 
-O investimento representa a possibilidade de ampliar a capacidade de execução de uma iniciativa que já possui uma base construída, mas ainda não dispõe dos meios necessários para realizar todo o seu potencial.
+O investimento representa a possibilidade de fortalecer o ativo central da proposta: consolidar a economia UMS/MWN, avançar a MW-Ex e ampliar o ecossistema que fundamenta a MWN.
 
 ## ROB — Return On Believe
 
 **ROB significa Return On Believe — retorno por acreditar.**
 
-A expressão representa a tese de que apoiar uma iniciativa em estágio anterior à sua maturidade pode criar uma oportunidade de participação em sua evolução.
+A expressão representa a tese de acreditar na evolução da MWN: um ativo de mercado que possui como fundamento um ecossistema tecnológico e econômico já construído em seus componentes, mas que ainda precisa de consolidação, integração e escala.
 
-Não se trata de uma métrica financeira padronizada, de uma fórmula de valuation ou de uma versão alternativa de ROI. ROB não quantifica retorno nem assegura valorização. É o posicionamento que traduz a natureza desta oportunidade: reconhecer uma realidade já iniciada, avaliar o que foi construído, compreender o que ainda precisa ser feito e considerar participar de sua próxima etapa.
+Não se trata de uma métrica financeira padronizada, de uma fórmula de valuation ou de uma versão alternativa de ROI. ROB não quantifica retorno nem assegura valorização. É o posicionamento que traduz a natureza desta oportunidade: reconhecer a MWN como ativo de mercado, compreender o ecossistema que a fundamenta, avaliar a arquitetura econômica e a infraestrutura necessárias e considerar participar de sua consolidação.
 
-A proposta não é pedir que alguém financie a tentativa de criar algo que ainda não existe. É apresentar uma base tecnológica que já foi construída, mostrar a capacidade de execução demonstrada pelo fundador e permitir que investidores avaliem se desejam apoiar sua evolução, ampliação e escala.
+A proposta não é vender isoladamente os produtos do ecossistema. É apresentar a MWN e demonstrar que ela possui uma base tecnológica, de serviços e de participação por trás — uma fundamentação que distingue a tese de um criptoativo apresentado apenas por seu ticker.
 
 ## Estratégia de desenvolvimento e acesso ao mercado
 
@@ -142,7 +142,7 @@ A estratégia de acesso ao mercado é parte de uma evolução mais ampla: a exis
 
 ## Capital pretendido e evolução por etapas
 
-O fundador estabeleceu faixas estratégicas de capital para diferentes momentos da evolução da MeshWave:
+O fundador estabeleceu faixas estratégicas de capital para diferentes momentos da evolução da MWN e da infraestrutura econômica e tecnológica que a sustenta:
 
 | Etapa | Objetivo estratégico | Faixa pretendida |
 |---|---|---:|
@@ -152,11 +152,11 @@ O fundador estabeleceu faixas estratégicas de capital para diferentes momentos 
 
 Essas faixas representam objetivos estratégicos preliminares, não orçamentos aprovados, projeções financeiras, valuation ou compromissos de captação. A destinação detalhada dos recursos, a estrutura de participação e os instrumentos possíveis dependem de definição própria e negociação.
 
-O propósito da primeira etapa é ampliar a capacidade que hoje está concentrada no fundador e criar condições para que as frentes prioritárias avancem com recursos humanos, materiais e financeiros adequados.
+O propósito da primeira etapa é consolidar a arquitetura econômica UMS/MWN, avançar a MW-Ex e ampliar a capacidade tecnológica e operacional que sustenta a MWN.
 
 ## O que pode ser construído com uma estrutura ampliada
 
-Uma estrutura ampliada poderá permitir que a MeshWave avance em frentes complementares:
+Uma estrutura ampliada poderá permitir que a MWN e sua economia avancem em frentes complementares:
 
 1. **Profissionalização da base tecnológica:** reforço de infraestrutura, documentação, testes, segurança, qualidade e continuidade.
 2. **Formação de equipe:** incorporação de competências técnicas, operacionais, econômicas, comerciais e de conformidade.
@@ -187,11 +187,12 @@ O investimento em ativos digitais e iniciativas em estágio inicial envolve alto
 
 A oportunidade deve ser examinada a partir de elementos concretos:
 
-- a base tecnológica e os componentes já desenvolvidos;
-- o estágio real de cada produto e iniciativa;
-- a arquitetura econômica UMS/MWN e suas decisões ainda pendentes;
-- o escopo técnico e os requisitos para tornar MW-Ex operacional;
-- as possibilidades de utilidade e demanda associadas aos serviços;
+- a proposta e o papel da MWN como ativo de mercado da economia MeshWave;
+- a arquitetura UMS/MWN e a função exclusiva da MWN na conexão entre a economia interna e o mercado;
+- a base tecnológica, os serviços e as aplicações que fundamentam a tese;
+- o estágio real de cada componente do ecossistema;
+- o escopo técnico e os requisitos para tornar a MW-Ex operacional;
+- as possibilidades de utilidade e atividade econômica que poderão sustentar a MWN;
 - as necessidades de capital, equipe, infraestrutura e governança;
 - os riscos técnicos, econômicos, jurídicos, regulatórios e de mercado.
 
@@ -199,15 +200,15 @@ A documentação de apoio permite aprofundar cada frente sem confundir protótip
 
 ## O convite
 
-A MeshWave busca investidores e parceiros estratégicos interessados em conhecer a base tecnológica já construída, compreender suas diferentes frentes e avaliar a oportunidade de participar de sua evolução.
+A proposta ROB busca investidores e parceiros estratégicos interessados em avaliar a MWN como ativo de mercado fundamentado pela economia e pelo ecossistema MeshWave.
 
-O objetivo é reunir capacidade financeira, humana, material e institucional para ampliar o desenvolvimento, profissionalizar a operação, integrar as diferentes frentes e criar condições para que o ecossistema alcance uma escala compatível com sua proposta.
+O objetivo é reunir capacidade financeira, humana, material e institucional para consolidar a arquitetura UMS/MWN, avançar a MW-Ex e fortalecer a base tecnológica e de serviços que poderá sustentar a utilidade e a circulação da MWN. Os projetos do ecossistema são apresentados para demonstrar essa fundamentação — não como uma lista de produtos independentes à venda.
 
 **A oportunidade não está em financiar uma ideia que ainda precisa nascer. Está em participar da evolução da MWN — um ativo de mercado apoiado por uma base tecnológica e de serviços que o fundador já conseguiu construir individualmente e com recursos mínimos. Se foi possível construir essa base com tão pouco, o que poderá ser realizado com recursos para consolidar a economia e ampliar a MWN?**
 
-**MESHWAVE**  
+**MWN — O ativo de mercado da economia MeshWave**  
 **ROB — Return On Believe**  
-*Uma realidade em construção. Uma oportunidade para quem acredita no que ainda pode se tornar.*
+*Um ativo com um ecossistema tecnológico e econômico como fundamento.*
 
 ---
 
