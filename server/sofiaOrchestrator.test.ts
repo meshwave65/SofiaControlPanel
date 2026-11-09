@@ -85,7 +85,12 @@ describe("SofiaOrchestrator.processTask", () => {
 
     const result = await SofiaOrchestrator.processTask(20);
 
-    expect(result).toEqual({ task: progressTask, started: false, factorized: false, subtaskIds: [] });
+    expect(result).toEqual({
+      task: progressTask,
+      started: false,
+      factorized: false,
+      subtaskIds: [],
+    });
     expect(dbMock.updateTaskStatus).not.toHaveBeenCalled();
     expect(dbMock.createTask).not.toHaveBeenCalled();
   });
@@ -118,18 +123,32 @@ describe("SofiaOrchestrator.startTask", () => {
     dbMock.createActivityLog.mockResolvedValue(undefined);
     dbMock.updateTaskExecution.mockResolvedValue(undefined);
     dbMock.updateTaskStatus.mockResolvedValue(undefined);
-    dbMock.getAgentsByOwnerId.mockResolvedValue([{ id: 6, hasCredential: true, status: "online", creditsUpdatedAt: new Date() }]);
+    dbMock.getAgentsByOwnerId.mockResolvedValue([
+      {
+        id: 6,
+        hasCredential: true,
+        status: "online",
+        creditsUpdatedAt: new Date(),
+      },
+    ]);
     manusMock.syncAgentCredits.mockResolvedValue(100);
   });
 
   it("atomically claims a staged task and creates one Manus execution", async () => {
     dbMock.getTaskById.mockResolvedValueOnce(stagedTask);
     dbMock.claimStagedTaskWithAvailableAgent.mockResolvedValueOnce(claimedTask);
-    manusMock.createManusTask.mockResolvedValueOnce({ manusTaskId: "manus-123", status: "running" });
+    manusMock.createManusTask.mockResolvedValueOnce({
+      manusTaskId: "manus-123",
+      status: "running",
+    });
 
     const result = await SofiaOrchestrator.startTask(30);
 
-    expect(dbMock.claimStagedTaskWithAvailableAgent).toHaveBeenCalledWith(30, 1, 2);
+    expect(dbMock.claimStagedTaskWithAvailableAgent).toHaveBeenCalledWith(
+      30,
+      1,
+      2
+    );
     expect(manusMock.createManusTask).toHaveBeenCalledTimes(1);
     expect(result).toMatchObject({
       started: true,
@@ -147,6 +166,44 @@ describe("SofiaOrchestrator.startTask", () => {
     const result = await SofiaOrchestrator.startTask(30);
 
     expect(result).toMatchObject({ started: false, executionStarted: false });
+    expect(manusMock.createManusTask).not.toHaveBeenCalled();
+  });
+
+  it("keeps a staged mission waiting when credit sync fails before agent allocation", async () => {
+    const creditError = "A API Manus não retornou total_credits válido.";
+    const staleAgent = {
+      id: 6,
+      hasCredential: true,
+      status: "online",
+      creditsUpdatedAt: new Date(Date.now() - 120_000),
+    };
+    dbMock.getTaskById
+      .mockResolvedValueOnce(stagedTask)
+      .mockResolvedValueOnce(stagedTask);
+    dbMock.getAgentsByOwnerId.mockResolvedValueOnce([staleAgent]);
+    manusMock.syncAgentCredits.mockRejectedValueOnce(new Error(creditError));
+    dbMock.claimStagedTaskWithAvailableAgent.mockResolvedValueOnce(null);
+
+    const result = await SofiaOrchestrator.startTask(30);
+
+    expect(manusMock.syncAgentCredits).toHaveBeenCalledWith(6);
+    expect(dbMock.recordAgentCreditSyncError).toHaveBeenCalledWith(
+      6,
+      creditError
+    );
+    expect(dbMock.claimStagedTaskWithAvailableAgent).toHaveBeenCalledWith(
+      30,
+      1,
+      2
+    );
+    expect(dbMock.updateTaskExecution).toHaveBeenCalledWith(30, {
+      manusStatus: "waiting_for_available_agent",
+    });
+    expect(result).toMatchObject({
+      started: false,
+      executionStarted: false,
+      waitingForAgent: true,
+    });
     expect(manusMock.createManusTask).not.toHaveBeenCalled();
   });
 });
