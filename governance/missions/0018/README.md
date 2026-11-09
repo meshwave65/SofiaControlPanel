@@ -233,3 +233,8 @@ A execução documental autônoma concluiu 18.11–18.14, com artefatos e ORs pr
 - 18.14: DUE_DILIGENCE_FAQ_ROB_18_14.md — OR-20261109-0011.
 
 A matriz de alegações é documental e se baseia no inventário de 08/11; não houve nova validação de runtime, dados financeiros ou auditoria técnica independente. O master ROB v0.3 e os derivados permanecem DRAFT para revisão do fundador. 18.10 segue PROGRESS para revisão do texto integral; 18.15 está BLOCKED aguardando aprovação humana do conteúdo e decisão separada sobre autorização de distribuição; 18.16 está BLOCKED até aprovação textual. A missão permanece PROGRESS e nenhuma ação externa foi executada.
+
+
+## Checkpoint editorial — 2026-11-09 (OR-20261109-0012)
+
+O master ROB foi atualizado para v0.4 após revisão editorial integral. A alteração elimina o plural ambíguo ao descrever o limite da estrutura individual do fundador. Permanecem expressos os fatos declarados sobre construção por uma única pessoa, uso exclusivo de ferramentas/serviços gratuitos da internet e equipamento próprio extremamente limitado. A revisão prévia de comunicação é interna e documental; não equivale à aprovação do fundador nem autoriza distribuição. 18.10 permanece PROGRESS; 18.15 BLOCKED — OWNER REVIEW; 18.16 BLOCKED — DEPENDENCY. CTA com contato e páginas públicas summary/stage requer destinos confirmados e não foram inventados.
