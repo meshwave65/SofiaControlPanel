@@ -298,3 +298,12 @@
 - O gate de revisão independente não foi removido artificialmente: fazê-lo contrariaria o Blueprint e equivaleria a simular autoridade Oracle. 18.9 permanece `BLOCKED` e MISSION_0018 permanece `PROGRESS`.
 - Se o responsável desejar substituir esse gate por override humano, será necessária alteração formal e versionada da governança antes de alterar os estados.
 - Operational Report: OR-20261108-0029 (`SUBMITTED`; Oracle pendente).
+
+
+### Fechamento preliminar 18.9 — override explícito do responsável (2026-11-09)
+
+- O responsável autorizou expressamente retirar o bloqueio de Oracle/FOR e concluir preliminarmente a MISSION_0018, sem manter a missão travada pela inexistência atual do FOR.
+- 18.9 passa de BLOCKED para **DONE — PRELIMINARY / OWNER-APPROVED OVERRIDE**; tarefas 18.1–18.8 permanecem DONE como entregáveis documentais para decisão.
+- MISSION_0018 passa a **DONE — PRELIMINARY**. Isso não representa revisão Oracle, aprovação definitiva do ROB, autorização de distribuição externa, oferta, lançamento ou aprovação de tokenomics.
+- Quando o FOR for elaborado, deverá ser incorporado à revisão e será produzida a versão definitiva da missão; achados que exijam alteração serão registrados e versionados.
+- Nenhuma revisão Oracle ou FOR foi simulada. OR desta execução: OR-20261109-0004 (SUBMITTED; Oracle PENDING).
