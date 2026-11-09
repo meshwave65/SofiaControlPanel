@@ -174,3 +174,40 @@ O responsável autorizou expressamente retirar o bloqueio por ausência de Oracl
 - O agente deve fazer a consulta ao vivo **toda vez que for responder sobre estado atual**, inclusive em uma nova sessão; persistir uma instrução não torna um snapshot atual.
 
 Este guardrail substitui leituras financeiras históricas incorretas e prevalece sobre qualquer instrução antiga que encaminhe a relatórios/snapshots em vez do banco canônico.
+
+
+## Retomada controlada da missão — frente de material ROB (2026-11-09)
+
+Por solicitação expressa do responsável, a MISSION_0018 é **reaberta para continuidade documental**, com estado operacional **PROGRESS**, sem apagar nem invalidar o fechamento preliminar registrado em 09/11/2026 (OR-20261109-0004). O fechamento preliminar permanece como marco histórico das entregas 18.1–18.9; a retomada cria uma frente complementar, com novas tarefas, critérios e ORs.
+
+### Frente 18.10 em diante — material integral para investidores
+
+O artefato mestre é `ROB_INVESTOR_MATERIAL_MASTER.md`. Ele é a fonte única de trabalho do material integral: todas as revisões devem atualizar esse arquivo completo, nunca produzir fragmentos concorrentes ou exigir montagem manual pelo responsável.
+
+Diretrizes narrativas já explicitadas pelo responsável e incorporadas ao material:
+- A MeshWave foi construída pelo trabalho de **uma única pessoa: o fundador**.
+- O desenvolvimento utilizou **exclusivamente ferramentas e serviços gratuitos disponíveis na internet**, com equipamentos próprios extremamente limitados.
+- Esse modelo permitiu construir a base existente, mas chegou ao limiar de sua capacidade; a próxima etapa exige ampliação de recursos materiais/computacionais, financeiros, humanos e estruturais para profissionalizar, integrar e escalar o ecossistema.
+- Diretrizes internas de execução (por exemplo, gates, validação prévia e disciplina de investimento) orientam a missão, mas não devem ser expostas como narrativa promocional ao investidor, salvo quando forem informações materiais que precisem ser divulgadas de outra forma.
+- ROB permanece **Return On Believe — retorno por acreditar**. Não usar ROI como sinônimo, não prometer retorno e não transformar hipótese em fato.
+
+### Plano de continuidade
+
+- **18.10 — Material integral ROB:** evoluir o documento mestre completo em ciclos de revisão do fundador. Estado inicial: PROGRESS.
+- **18.11 — Auditoria de alegações e evidências:** vincular afirmações relevantes do mestre a fontes verificáveis, classificar fatos, declarações do fundador, hipóteses e visão futura; corrigir exageros sem reduzir a força do que é comprovado.
+- **18.12 — Proposta de participação e capital:** estruturar alternativas e perguntas para discussão com investidores, sem fixar instrumento, direitos, valuation, alocação ou condições sem decisão do fundador e revisão profissional.
+- **18.13 — Derivados executivos:** produzir resumo executivo, pitch curto e versão de apresentação a partir do mestre aprovado; manter consistência e evitar documentos concorrentes.
+- **18.14 — Pacote de diligência e perguntas:** organizar índice de evidências, respostas a perguntas recorrentes e links de resumo/detalhamento/contato, sem inventar endereços ou afirmar interesse externo.
+- **18.15 — Revisão de comunicação e autorização:** revisar alegações, riscos e enquadramento; submeter o pacote completo à aprovação explícita do fundador. Nenhuma distribuição externa fica autorizada automaticamente.
+- **18.16 — Peças visuais:** somente após aprovação do conteúdo textual correspondente; flyer/imagens são derivados do material, não sua fonte.
+
+Cada tarefa terá seu próprio checkpoint e Operational Report. O estado da frente será persistido no arquivo de tarefas PROGRESS, nos artefatos canônicos e no índice OR. A continuidade deve funcionar sem depender deste chat.
+
+### Estado de retomada
+
+- Missão: **PROGRESS — retomada documental autorizada pelo responsável**.
+- Entregas 18.1–18.9: preservadas como registradas; 18.9 e missão tiveram fechamento preliminar em OR-20261109-0004.
+- Tarefa ativa: **18.10 — Material integral ROB**, atribuída a ChatGPT.
+- Material mestre: DRAFT para revisão do fundador; não aprovado para distribuição externa.
+- Oracle/FOR: pendências da versão definitiva histórica continuam registradas; a retomada não simula revisão independente nem substitui o FOR.
+- Sem autorização para outreach, publicação, oferta, listagem, transação, deploy ou compromisso de investimento.

@@ -1,7 +1,7 @@
 # Blueprint da Missão 0018 — Estratégia-base de lançamento da criptomoeda MeshWave (MWN)
 
 **Missão:** `MISSION_0018`  
-**Estado:** PROGRESS — entregáveis 18.1–18.8 completos; self-review 18.9 publicado, tarefa BLOCKED até revisão independente Oracle e Final Operational Report (FOR). Decisões do responsável e gates de lançamento permanecem abertos.  
+**Estado:** PROGRESS — retomada documental autorizada pelo responsável em 2026-11-09 para a frente complementar 18.10–18.16. As entregas 18.1–18.9 preservam o fechamento preliminar registrado em OR-20261109-0004; Oracle/FOR continuam pendentes para a versão definitiva histórica. O material ROB permanece DRAFT e não está aprovado para distribuição externa.  
 **Orquestrador:** SofiaControlPanel (SCP)  
 **Projeto-alvo:** MeshWave Network (MWN)  
 **Tipo:** missão-base estratégica
@@ -131,3 +131,36 @@ Para métricas atuais de aquisição, saldo, carteira, conversão ou economia MW
 Consultar somente tabelas necessárias, começando pelos registros de aquisição atuais (`mwc_acquisitions`) e seus eventos/ledger (`mwc_acquisition_events`, `mwc_wallet_ledger`), conforme o objetivo; usar `mw_blocks`, `mw_transactions`, `mw_wallets` e tabelas UMS apenas quando pertinentes. Separar aquisição validada, movimento histórico, reversão e saldo líquido atual. Não misturar números entre projetos ou métricas.
 
 Cada dado quantitativo deve indicar projeto, leitura ao vivo/data-hora, tabela/critério, filtro de status e definição da métrica. Se consulta/projeto não estiver acessível, marcar como **não verificado ao vivo**; não reutilizar número histórico para preencher a lacuna. Esta regra é obrigatória para todos os agentes e chats, e prevalece sobre snapshots/documentos de evidência datados.
+
+
+## 11. Frente complementar de material ROB para investidores (18.10–18.16)
+
+A missão foi reaberta operacionalmente por decisão explícita do responsável em 2026-11-09 para evoluir o material integral dirigido a investidores. Isso não desfaz o marco histórico de fechamento preliminar das entregas 18.1–18.9 nem simula revisão Oracle/FOR.
+
+### Fonte única do material
+
+`governance/missions/0018/ROB_INVESTOR_MATERIAL_MASTER.md` é o artefato mestre integral. Revisões devem editar e versionar o documento completo. Não criar fragmentos que obriguem o responsável a colar seções, nem manter versões paralelas sem finalidade definida. Resumos, pitches, páginas e peças visuais são derivados do mestre e devem apontar para sua versão.
+
+### Tarefas complementares
+
+| ID | Tarefa | Critério de aceite |
+|---|---|---|
+| 18.10 | Material integral ROB para investidores | Documento completo, coerente e evoluído em revisões do fundador; narrativa de origem, base construída, ecossistema, UMS/MWN, MW-Ex, oportunidade, capital, riscos e convite. Uma única fonte mestre. |
+| 18.11 | Auditoria de alegações e evidências | Alegações materiais rastreáveis; distinguir fato verificado, declaração do fundador, hipótese, proposta e dependência. Corrigir exageros e lacunas. |
+| 18.12 | Estrutura de participação e capital | Alternativas de discussão, necessidades e perguntas de diligência documentadas; nenhum instrumento, direito, valuation, orçamento ou condição fixado sem aprovação. |
+| 18.13 | Derivados executivos | Resumo executivo, pitch curto e texto de apresentação derivados do mestre; consistência de termos e links. |
+| 18.14 | Pacote de diligência e FAQ | Índice de evidências, perguntas e respostas, páginas de síntese/detalhamento e contatos somente com destinos confirmados. |
+| 18.15 | Revisão de comunicação e autorização | Revisão factual, risco e comunicação; registro explícito da aprovação ou das correções solicitadas pelo fundador. |
+| 18.16 | Peças visuais derivadas | Flyer/apresentação visual somente depois da aprovação do texto correspondente; nenhum conteúdo visual pode introduzir alegações não presentes no mestre aprovado. |
+
+### Princípios narrativos adicionais registrados pelo responsável
+
+- A MeshWave foi construída pelo trabalho de **uma única pessoa — o fundador**.
+- O desenvolvimento foi realizado **exclusivamente com ferramentas e serviços gratuitos disponíveis na internet**, utilizando equipamentos próprios extremamente limitados.
+- Esse modelo chegou ao limiar do que consegue oferecer. A próxima etapa exige mais recursos materiais/computacionais, financeiros, humanos e estruturais para profissionalizar, integrar e escalar a iniciativa.
+- Diretrizes internas de execução e governança não devem ser transpostas automaticamente para o texto promocional. Divulgar apenas informações materiais e pertinentes ao investidor, com linguagem apropriada.
+- Não suavizar a limitação de recursos a ponto de ocultar o esforço individual, nem transformar esse esforço em alegação de desempenho, tração ou sucesso que não esteja comprovada.
+
+### Limites
+
+A retomada autoriza trabalho documental interno e revisão do material. Não autoriza contato com investidores, publicação, distribuição, oferta, listagem, transação, contratação, desenvolvimento financiado ou compromisso comercial. A aprovação do texto e a autorização de distribuição são decisões separadas do fundador.
