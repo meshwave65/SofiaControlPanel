@@ -16,7 +16,7 @@
 | 18.7 | Roadmap integrado | DONE | ChatGPT | Fases e gates para decisão; não é cronograma/budget aprovado. |
 | 18.8 | Tese MWN/ROB | DONE | ChatGPT | Draft executivo e detalhado preservado. |
 | 18.9 | Revisão cruzada e fechamento preliminar | DONE — PRELIMINARY | ChatGPT | Override humano registrado em OR-20261109-0004; Oracle/FOR pendentes para versão definitiva histórica. |
-| 18.10 | Material integral ROB para investidores | PROGRESS | ChatGPT | Evoluir o documento mestre completo em ciclos de revisão do fundador; narrativa integral, consistente e pronta para auditoria factual. **Checkpoint 2026-11-09:** kickoff executado; versão 0.3 publicada, com título e fechamento mais diretos e redução de repetição narrativa. Aguardando revisão do fundador para próxima iteração. |
+| 18.10 | Material integral ROB para investidores | PROGRESS | ChatGPT | Evoluir o documento mestre completo em ciclos de revisão do fundador; narrativa integral, consistente e pronta para auditoria factual. **Checkpoint 2026-11-09:** kickoff executado; versão 0.4 publicada após revisão editorial de continuidade, com título e fechamento mais diretos e redução de repetição narrativa. Aguardando revisão e aprovação do fundador do texto integral; OR-20261109-0012 registra a revisão editorial e seus limites. |
 | 18.11 | Auditoria de alegações e evidências | DONE | ChatGPT | Auditoria documental e limites de formulação em CLAIM_EVIDENCE_AUDIT_18_11.md; OR-20261109-0008. |
 | 18.12 | Estrutura de participação e capital | DONE | ChatGPT | Framework de alternativas e diligência em CAPITAL_PARTICIPATION_FRAMEWORK_18_12.md; nenhuma opção escolhida; OR-20261109-0009. |
 | 18.13 | Derivados executivos | DONE | ChatGPT | Resumo, pitch e apresentação em EXECUTIVE_DERIVATIVES_ROB_18_13.md; DRAFT interno; OR-20261109-0010. |
@@ -48,3 +48,12 @@
 - 18.15 está BLOCKED — OWNER REVIEW: requer decisão explícita do fundador sobre o texto e, separadamente, autorização de distribuição.
 - 18.16 está BLOCKED — DEPENDENCY: peças visuais só podem derivar de conteúdo aprovado em 18.15.
 - A missão permanece PROGRESS. Nenhum contato, envio, publicação, oferta, listing ou transação foi executado.
+
+
+## Checkpoint editorial 2026-11-09 — OR-20261109-0012
+
+- Master atualizado para v0.4: ajuste editorial elimina o plural ambíguo sobre quem atingiu o limite da estrutura individual; preserva a construção por uma única pessoa, com ferramentas/serviços gratuitos e equipamento extremamente limitado.
+- Revisão documental de comunicação concluída como pré-flight interno. Não equivale à aprovação do fundador nem à autorização de distribuição.
+- 18.10 segue PROGRESS aguardando revisão/aprovação do fundador.
+- 18.15 segue BLOCKED — OWNER REVIEW; 18.16 segue BLOCKED — DEPENDENCY.
+- CTA com contatos e páginas públicas de resumo/detalhamento permanece pendente de destinos confirmados; nenhum contato foi inventado.
