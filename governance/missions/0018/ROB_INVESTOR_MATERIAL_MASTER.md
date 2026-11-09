@@ -1,10 +1,10 @@
 # MESHWAVE
-## Uma infraestrutura tecnológica em construção. Uma oportunidade de participar da sua evolução.
+## Da construção individual à escala de um ecossistema tecnológico.
 
 **ROB — Return On Believe | Retorno por acreditar**
 
 **Material integral para investidores — MISSION_0018 / frente complementar 18.10**  
-**Versão 0.2 — DRAFT ativo para revisão iterativa do fundador**  
+**Versão 0.3 — DRAFT ativo para revisão iterativa do fundador**  
 **Não constitui oferta pública, prospecto, recomendação de investimento ou autorização para distribuição externa.**
 
 ---
@@ -94,9 +94,7 @@ Sua evolução representa uma das frentes relevantes de estruturação do ecossi
 
 A MeshWave chegou a um ponto em que o principal limitador deixou de ser apenas a capacidade de conceber e desenvolver soluções. O limite passou a ser a estrutura disponível para transformar o trabalho acumulado em produtos integrados, serviços sustentáveis e capacidade operacional.
 
-O desenvolvimento individual, realizado com ferramentas e serviços gratuitos e equipamentos limitados, permitiu estabelecer uma base sem depender de uma estrutura de capital externa. Mas o mesmo modelo não oferece os recursos necessários para avançar na velocidade e na escala que a proposta exige.
-
-A próxima etapa demanda:
+A estrutura que permitiu formar essa base já não dispõe de capacidade suficiente para sustentar a próxima fase. O desafio agora é ampliar os meios de execução:
 
 - **Recursos materiais e computacionais:** equipamentos, infraestrutura, ambientes de desenvolvimento, testes e operação.
 - **Recursos financeiros:** capacidade de sustentar desenvolvimento, serviços, infraestrutura e atividades de estruturação.
@@ -187,11 +185,11 @@ A documentação de apoio permite aprofundar cada frente sem confundir protótip
 
 ## O convite
 
-A MeshWave busca investidores e parceiros estratégicos interessados em conhecer uma iniciativa tecnológica construída até aqui pelo trabalho individual de seu fundador, com ferramentas e serviços gratuitos e equipamentos extremamente limitados, e avaliar o que poderá ser alcançado com uma estrutura adequada.
+A MeshWave busca investidores e parceiros estratégicos interessados em conhecer a base tecnológica já construída, compreender suas diferentes frentes e avaliar a oportunidade de participar de sua evolução.
 
-O objetivo é reunir capacidade financeira, humana, material e institucional para ampliar o desenvolvimento, profissionalizar a operação, integrar as diferentes frentes e construir condições reais de escala.
+O objetivo é reunir capacidade financeira, humana, material e institucional para ampliar o desenvolvimento, profissionalizar a operação, integrar as diferentes frentes e criar condições para que o ecossistema alcance uma escala compatível com sua proposta.
 
-**A oportunidade não está em financiar uma ideia que ainda precisa nascer. Está em avaliar uma base que já foi construída em condições extraordinariamente limitadas e decidir se vale a pena participar da próxima etapa de sua evolução.**
+**A oportunidade não está em financiar uma ideia que ainda precisa nascer. Está em participar da transformação de uma iniciativa construída individualmente e com recursos mínimos em uma estrutura tecnológica capaz de avançar para sua próxima dimensão.**
 
 **MESHWAVE**  
 **ROB — Return On Believe**  

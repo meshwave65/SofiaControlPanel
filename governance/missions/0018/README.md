@@ -211,3 +211,14 @@ Cada tarefa terá seu próprio checkpoint e Operational Report. O estado da fren
 - Material mestre: DRAFT para revisão do fundador; não aprovado para distribuição externa.
 - Oracle/FOR: pendências da versão definitiva histórica continuam registradas; a retomada não simula revisão independente nem substitui o FOR.
 - Sem autorização para outreach, publicação, oferta, listagem, transação, deploy ou compromisso de investimento.
+
+
+### Checkpoint 18.10 — início efetivo da execução (2026-11-09)
+
+Após a retomada formal da missão em OR-20261109-0006, o responsável confirmou: “inicie a missão”. A tarefa 18.10 permanece PROGRESS e sua execução editorial foi iniciada. O documento mestre passou da versão 0.2 para 0.3:
+- título reposicionado para comunicar a transição da construção individual para a escala;
+- seção “Por que a oportunidade existe neste momento” teve repetição da narrativa de origem reduzida, mantendo foco no limite de capacidade e nos recursos necessários;
+- convite final foi reescrito para evitar repetição literal da abertura e reforçar a transição para a próxima dimensão;
+- fatos e limites sobre estágio de maturidade, UMS/MWN, MW-Ex e riscos foram preservados, sem introduzir promessa ou status novo.
+
+Próximo passo dentro de 18.10: receber a avaliação do fundador sobre o documento mestre integral e iterar diretamente nele. Não solicitar que o fundador monte ou cole fragmentos.

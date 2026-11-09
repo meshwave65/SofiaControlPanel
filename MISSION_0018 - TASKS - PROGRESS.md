@@ -16,7 +16,7 @@
 | 18.7 | Roadmap integrado | DONE | ChatGPT | Fases e gates para decisão; não é cronograma/budget aprovado. |
 | 18.8 | Tese MWN/ROB | DONE | ChatGPT | Draft executivo e detalhado preservado. |
 | 18.9 | Revisão cruzada e fechamento preliminar | DONE — PRELIMINARY | ChatGPT | Override humano registrado em OR-20261109-0004; Oracle/FOR pendentes para versão definitiva histórica. |
-| 18.10 | Material integral ROB para investidores | PROGRESS | ChatGPT | Evoluir o documento mestre completo em ciclos de revisão do fundador; narrativa integral, consistente e pronta para auditoria factual. |
+| 18.10 | Material integral ROB para investidores | PROGRESS | ChatGPT | Evoluir o documento mestre completo em ciclos de revisão do fundador; narrativa integral, consistente e pronta para auditoria factual. **Checkpoint 2026-11-09:** kickoff executado; versão 0.3 publicada, com título e fechamento mais diretos e redução de repetição narrativa. Aguardando revisão do fundador para próxima iteração. |
 | 18.11 | Auditoria de alegações e evidências | STAGED | — | Vincular alegações materiais a fontes; separar fato verificado, declaração do fundador, hipótese, proposta e dependência; corrigir exageros. |
 | 18.12 | Estrutura de participação e capital | STAGED | — | Alternativas e perguntas para discussão com investidores; sem fixar instrumento, direitos, valuation, orçamento ou condições sem aprovação. |
 | 18.13 | Derivados executivos | STAGED | — | Resumo executivo, pitch curto e texto de apresentação derivados do mestre, após revisão suficiente do texto integral. |
