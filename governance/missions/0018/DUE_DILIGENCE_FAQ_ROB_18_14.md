@@ -1,7 +1,9 @@
 # MISSION_0018 / 18.14 — Pacote de diligência e FAQ ROB
 
-**Versão:** 0.1.0-DRAFT | **Data:** 2026-11-09  
-**Base textual:** master ROB v0.3; matriz 18.1; tarefas 18.2–18.8; auditoria 18.11; framework 18.12; derivados 18.13.  
+**Versão:** 0.1.1-DRAFT | **Data:** 2026-11-09  
+**Base textual:** master ROB v0.4; matriz 18.1; tarefas 18.2–18.8; auditoria 18.11; framework 18.12; derivados 18.13.
+
+**Sincronização:** referências de versão atualizadas após conferência com o master v0.4. FAQ e checklist permanecem alinhados; nenhum contato, link ou dado novo foi presumido.  
 **Status:** pacote interno; sem autorização para envio externo.
 
 ## 1. Rota de leitura
