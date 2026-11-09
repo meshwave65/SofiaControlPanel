@@ -4,7 +4,7 @@
 **ROB — Return On Believe | Retorno por acreditar**
 
 **Material integral para investidores — MISSION_0018 / frente complementar 18.10**  
-**Versão 0.3 — DRAFT ativo para revisão iterativa do fundador**  
+**Versão 0.4 — DRAFT ativo para revisão iterativa do fundador**  
 **Não constitui oferta pública, prospecto, recomendação de investimento ou autorização para distribuição externa.**
 
 ---
@@ -19,7 +19,7 @@ Esse trabalho foi realizado utilizando exclusivamente ferramentas e serviços gr
 
 A dimensão desse esforço precisa ser compreendida junto com seu estágio atual: a MeshWave existe, possui componentes desenvolvidos e está em evolução, mas sua operação ainda é rudimentar e suas diferentes frentes apresentam níveis distintos de maturidade.
 
-O modelo individual e de recursos mínimos permitiu chegar até aqui. Entretanto, alcançamos o limiar do que essa estrutura consegue oferecer. A continuidade e a expansão exigem mais capacidade material e computacional, recursos financeiros, participação de profissionais e uma estrutura organizacional e operacional compatível com a dimensão do projeto.
+O modelo individual e de recursos mínimos permitiu chegar até aqui. Entretanto, o fundador chegou ao limite do que essa estrutura consegue oferecer individualmente. A continuidade e a expansão exigem mais capacidade material e computacional, recursos financeiros, participação de profissionais e uma estrutura organizacional e operacional compatível com a dimensão do projeto.
 
 **A oportunidade está em participar da transformação de uma base construída individualmente, com recursos extremamente limitados, em um ecossistema tecnológico estruturado, integrado e capaz de escalar.**
 
