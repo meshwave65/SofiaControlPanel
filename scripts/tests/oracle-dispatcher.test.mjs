@@ -6,11 +6,13 @@ import test from "node:test";
 import {
   INDEX_COLUMNS,
   LOCK_RELATIVE_PATH,
+  TRANSACTION_RELATIVE_PATH,
   parseCsvStrict,
   parseFrontmatter,
   runDispatcher,
   serializeCsv,
 } from "../oracle-dispatcher.mjs";
+import { prepareTransaction } from "../oracle-dispatcher-transaction.mjs";
 
 function makeRow({
   orId = "OR-20261108-9001",
@@ -88,25 +90,38 @@ function readIndexRows(root) {
     .map(({ fields }) => fields);
 }
 
-test("strict CSV preserves quoted commas and the schema-aware worker rejects unescaped legacy notes", t => {
+test("dry-run catalogs legacy note overflow with a hash and leaves source bytes unchanged", t => {
   assert.deepEqual(parseCsvStrict('a,b\n1,"x,y"\n')[1].fields, ["1", "x,y"]);
   const root = fixture(t, [makeRow()]);
   const indexPath = path.join(root, "governance/operational_reports/INDEX.csv");
-  const malformed = fs
-    .readFileSync(indexPath, "utf8")
-    .replace(",fixture\n", ",legacy,unescaped,notes\n");
-  fs.writeFileSync(indexPath, malformed);
-  assert.throws(
-    () =>
-      runDispatcher({
-        repoRoot: root,
-        mission: "MISSION_0019",
-        max: 1,
-        write: false,
-      }),
-    /INDEX.csv inconsistente/
-  );
-  assert.equal(fs.readFileSync(indexPath, "utf8"), malformed);
+  const before = fs.readFileSync(indexPath, "utf8");
+  const lines = before.trimEnd().split("\n");
+  const legacy = makeRow({
+    orId: "OR-20261108-8999",
+    taskId: "MISSION_0018-18.9",
+    status: "BLOCKED",
+    notes: "historic note",
+  });
+  const legacyLine = [
+    ...legacy.slice(0, 10),
+    "historic note",
+    " legacy comma tail",
+  ].join(",");
+  const source = `${lines[0]}\n${legacyLine}\n${lines.slice(1).join("\n")}\n`;
+  fs.writeFileSync(indexPath, source);
+
+  const result = runDispatcher({
+    repoRoot: root,
+    mission: "MISSION_0019",
+    max: 1,
+    write: false,
+  });
+  assert.equal(result.csv_anomalies.length, 1);
+  assert.equal(result.csv_anomalies[0].or_id, legacy[0]);
+  assert.match(result.csv_anomalies[0].raw_sha256, /^[a-f0-9]{64}$/);
+  assert.equal(result.selected[0].decision, "PARTIALLY_ACCEPTED");
+  assert.equal(fs.readFileSync(indexPath, "utf8"), source);
+  assert.ok(source.includes(`${legacyLine}\n`));
 });
 
 test("frontmatter rejects duplicate keys and non-scalar mappings", () => {
@@ -196,38 +211,85 @@ test("write mode creates a traceable review and updates only the indexed Oracle 
   assert.equal(fs.existsSync(path.join(root, LOCK_RELATIVE_PATH)), false);
 });
 
-test("malformed legacy CSV row blocks both dry-run and writes without normalization", t => {
+test("write patches only canonical fields and preserves the targeted legacy note tail byte for byte", t => {
   const root = fixture(t, [makeRow()]);
   const indexPath = path.join(root, "governance/operational_reports/INDEX.csv");
-  const malformed = fs
-    .readFileSync(indexPath, "utf8")
-    .replace("fixture\n", "legacy,unescaped,notes\n");
-  fs.writeFileSync(indexPath, malformed);
-  assert.throws(
-    () =>
-      runDispatcher({
-        repoRoot: root,
-        mission: "MISSION_0019",
-        max: 1,
-        write: false,
-      }),
-    /INDEX.csv inconsistente/
+  const base = fs.readFileSync(indexPath, "utf8").trimEnd().split("\n");
+  const unrelated = makeRow({
+    orId: "OR-20261108-8999",
+    taskId: "MISSION_0018-18.9",
+    status: "BLOCKED",
+  });
+  const unrelatedLine = [
+    ...unrelated.slice(0, 10),
+    "historical note",
+    " untouched tail",
+  ].join(",");
+  const targetLine = base[1].replace(
+    ",fixture",
+    ",legacy note, second fragment, third fragment"
   );
-  assert.throws(
-    () =>
-      runDispatcher({
-        repoRoot: root,
-        mission: "MISSION_0019",
-        max: 1,
-        write: true,
-      }),
-    /INDEX.csv inconsistente/
+  const before = `${base[0]}\n${unrelatedLine}\n${targetLine}\n`;
+  fs.writeFileSync(indexPath, before);
+  const rawBefore = before
+    .split("\n")
+    .find(line => line.startsWith("OR-20261108-9001,"));
+  const noteTailBefore = rawBefore.split(",").slice(10).join(",");
+
+  const result = runDispatcher({
+    repoRoot: root,
+    mission: "MISSION_0019",
+    max: 1,
+    write: true,
+  });
+
+  assert.equal(result.selected[0].decision, "PARTIALLY_ACCEPTED");
+  assert.equal(result.csv_anomalies.length, 2);
+  const after = fs.readFileSync(indexPath, "utf8");
+  const rawAfter = after
+    .split("\n")
+    .find(line => line.startsWith("OR-20261108-9001,"));
+  assert.equal(rawAfter.split(",").slice(10).join(","), noteTailBefore);
+  assert.ok(after.includes(`${unrelatedLine}\n`));
+  const beforePrefix = rawBefore.split(",");
+  const afterPrefix = rawAfter.split(",");
+  for (const index of [0, 1, 2, 3, 4, 6, 7, 9])
+    assert.equal(afterPrefix[index], beforePrefix[index]);
+  const updated = parseCsvStrict(after).find(
+    record => record.fields[0] === "OR-20261108-9001"
+  ).fields;
+  assert.equal(updated[5], "PARTIALLY_ACCEPTED");
+  assert.ok(updated[8]);
+  const review = fs.readFileSync(
+    path.join(root, "governance/oracle/reviews/OR-20261108-9001.md"),
+    "utf8"
   );
-  assert.equal(fs.readFileSync(indexPath, "utf8"), malformed);
-  assert.deepEqual(
-    fs.readdirSync(path.join(root, "governance/oracle/reviews")),
-    []
+  assert.match(review, /CSV legado/);
+  assert.match(review, /SHA-256 bruto/);
+  assert.equal(
+    fs.existsSync(path.join(root, TRANSACTION_RELATIVE_PATH)),
+    false
   );
+  assert.equal(fs.existsSync(path.join(root, LOCK_RELATIVE_PATH)), false);
+});
+
+test("lossless field patch preserves UTF-8 BOM and CRLF record endings", t => {
+  const root = fixture(t, [makeRow()]);
+  const indexPath = path.join(root, "governance/operational_reports/INDEX.csv");
+  const original = fs.readFileSync(indexPath, "utf8");
+  fs.writeFileSync(indexPath, `\uFEFF${original.replaceAll("\n", "\r\n")}`);
+
+  runDispatcher({
+    repoRoot: root,
+    mission: "MISSION_0019",
+    max: 1,
+    write: true,
+  });
+
+  const after = fs.readFileSync(indexPath, "utf8");
+  assert.ok(after.startsWith("\uFEFF"));
+  assert.equal((after.match(/(?<!\r)\n/g) ?? []).length, 0);
+  assert.equal(parseCsvStrict(after)[1].fields[5], "ACCEPTED");
 });
 
 test("missing local artifact produces NEEDS_MORE_EVIDENCE and is not accepted", t => {
@@ -364,5 +426,107 @@ test("index duplicate IDs and invalid row width are fatal", t => {
         write: false,
       }),
     /OR duplicado/
+  );
+});
+
+test("legacy overflow outside a schema-valid notes tail stays fail-closed", t => {
+  const root = fixture(t, [makeRow()]);
+  const indexPath = path.join(root, "governance/operational_reports/INDEX.csv");
+  const before = fs.readFileSync(indexPath, "utf8");
+  const lines = before.trimEnd().split("\n");
+  const ambiguous = [
+    "OR-20261108-8998",
+    "MISSION_0018-18.9",
+    "operational-task-lifecycle",
+    "0.2.0-DRAFT",
+    "BLOCKED",
+    "PENDING",
+    "NONE",
+    "not-a-date",
+    "",
+    "",
+    "legacy note",
+    "ambiguous tail",
+  ].join(",");
+  const source = `${lines[0]}\n${ambiguous}\n${lines.slice(1).join("\n")}\n`;
+  fs.writeFileSync(indexPath, source);
+  assert.throws(
+    () =>
+      runDispatcher({
+        repoRoot: root,
+        mission: "MISSION_0019",
+        max: 1,
+        write: true,
+      }),
+    error => error.code === "INDEX_LEGACY_AMBIGUOUS"
+  );
+  assert.equal(fs.readFileSync(indexPath, "utf8"), source);
+  assert.deepEqual(
+    fs.readdirSync(path.join(root, "governance/oracle/reviews")),
+    []
+  );
+});
+
+test("invalid UTF-8 index bytes are rejected rather than normalized", t => {
+  const root = fixture(t, [makeRow()]);
+  const indexPath = path.join(root, "governance/operational_reports/INDEX.csv");
+  const before = fs.readFileSync(indexPath);
+  const invalid = Buffer.concat([before, Buffer.from([0xff])]);
+  fs.writeFileSync(indexPath, invalid);
+  assert.throws(
+    () =>
+      runDispatcher({
+        repoRoot: root,
+        mission: "MISSION_0019",
+        max: 1,
+        write: false,
+      }),
+    error => error.code === "INDEX_ENCODING_INVALID"
+  );
+  assert.deepEqual(fs.readFileSync(indexPath), invalid);
+});
+
+test("--recover completes a journaled transaction after a partial review rename and is idempotent", t => {
+  const root = fixture(t, [makeRow()]);
+  const indexPath = path.join(root, "governance/operational_reports/INDEX.csv");
+  const beforeIndex = fs.readFileSync(indexPath, "utf8");
+  const updated = [...makeRow()];
+  updated[5] = "ACCEPTED";
+  updated[8] = "2026-11-08T21:00:00.000Z";
+  const afterIndex = serializeCsv([INDEX_COLUMNS, updated]);
+  const reviewDir = path.join(root, "governance/oracle/reviews");
+  const reviews = [
+    {
+      destination: path.join(reviewDir, "OR-20261108-9001.md"),
+      contents: "review 9001\n",
+    },
+  ];
+  const prepared = prepareTransaction(root, {
+    indexPath,
+    beforeIndex,
+    afterIndex,
+    indexMode: 0o644,
+    reviews,
+  });
+
+  const first = prepared.journal.reviews[0];
+  fs.renameSync(
+    path.join(root, ...first.temporary.split("/")),
+    path.join(root, ...first.destination.split("/"))
+  );
+  assert.equal(fs.readFileSync(indexPath, "utf8"), beforeIndex);
+
+  const recovered = runDispatcher({ repoRoot: root, recover: true });
+  assert.equal(recovered.recovered, true);
+  assert.equal(recovered.review_count, 1);
+  assert.equal(fs.readFileSync(indexPath, "utf8"), afterIndex);
+  assert.equal(
+    fs.existsSync(path.join(root, TRANSACTION_RELATIVE_PATH)),
+    false
+  );
+  assert.equal(fs.existsSync(path.join(root, LOCK_RELATIVE_PATH)), false);
+  assert.equal(
+    runDispatcher({ repoRoot: root, recover: true }).recovered,
+    false
   );
 });

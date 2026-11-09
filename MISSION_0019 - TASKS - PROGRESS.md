@@ -10,7 +10,7 @@
 |---|---|---|---|---|
 | 19.1 | Especificar contrato, autoridade e modelo de execução do Oracle Dispatcher | DONE | ChatGPT | Contrato CLI/worker, estados, decisões, permissões, lock, idempotência, falhas e handoff documentados |
 | 19.2 | Implementar worker determinístico de fila e revisão estrutural de ORs | DONE | Manus (sandbox) | Worker funcional em dry-run/escrita por fixtures; valida OR, frontmatter, artefatos e referências; bloqueia índice legado real sem normalização |
-| 19.3 | Implementar atualização atômica do índice, locks e recuperação | STAGED | — | CSV preservado, IDs únicos, concorrência protegida, reexecução segura e falhas recuperáveis |
+| 19.3 | Implementar atualização atômica do índice, locks e recuperação | DONE | Manus (sandbox) | Patch por spans preserva bytes; anomalias hashadas; lock/manifesto/recovery fail-closed exercitados em fixtures; OR-20261109-0001 pendente de Oracle |
 | 19.4 | Implementar geração condicional de FOR e integração de missão | STAGED | — | FOR só é produzido quando a cobertura/aceite permite; missões incompletas permanecem abertas com pendências explícitas |
 | 19.5 | Testar o dispatcher com fixtures, ORs válidos/inválidos e cenários de falha | STAGED | — | Testes automatizados reproduzíveis cobrem sucesso, bloqueio, CSV legado, lock, idempotência e ausência de evidência |
 | 19.6 | Documentar operação, segurança, handoff e integração futura | STAGED | — | Guia para outro agente executar/retomar; limites e integração SCP/GitHub Actions claramente separados |
@@ -45,3 +45,18 @@
 - Validações: `node --check`; 10/10 testes específicos; `pnpm check`; `pnpm test` (3 arquivos, 9 testes); `git diff --check` — todos passaram.
 - Dry-run no repo real bloqueou sem escrita em `INDEX.csv`, linha 14: 12 colunas em vez de 11; foram identificadas 9 linhas históricas fora do schema. Não houve normalização automática, review Oracle real, nem atualização do status de OR real.
 - OR-20261108-0033 submetido como `PENDING`; ver revisão independente. 19.3–19.7 continuam `STAGED`; 19.3 é o próximo passo para definir preservação/normalização auditável do CSV legado e recuperação de escrita.
+
+## Assunção 19.3 — Manus (sandbox), 2026-11-08 23:43 (-03:00)
+
+- Tarefa 19.3 atribuída antes da edição; branch `main`, HEAD base `6923056645369ba55b549d4eef1ca4bcf64e2e94`, sincronizado com `origin/main`, árvore limpa e sem lock ativo do dispatcher.
+- OR-20261108-0033 e o contrato 19.1 foram consultados. O índice contém nove linhas legadas com vírgulas não escapadas na coluna de notas; não será feita migração nem correção textual automática como parte da leitura.
+- Objetivo desta unidade: definir uma leitura schema-aware que reconheça apenas cauda de notas legadas quando as dez colunas anteriores forem válidas, preserve os bytes das linhas e altere somente campos de estado explicitamente visados; anomalias ambíguas devem continuar bloqueantes.
+
+## Checkpoint 19.3 — preservação lossless e recuperação (2026-11-09)
+
+- Tarefa 19.3 concluída em implementação e validação; a MISSION_0019 permanece `PROGRESS`. OR-20261109-0001 foi criado como `SUBMITTED` / `PENDING` para revisão independente.
+- `scripts/oracle-dispatcher.mjs` agora identifica e hash as nove caudas legadas sem reconstruir o CSV; altera somente spans de `oracle_status` e `reviewed_at`. Linhas ambíguas e UTF-8 inválido falham fechadas.
+- `scripts/oracle-dispatcher-transaction.mjs` implementa lock exclusivo, journal durável, staging/hash, publicação sem overwrite, índice por último e `--recover` explícito/idempotente. A política completa está em `governance/missions/0019/CSV_LEGACY_PRESERVATION_19_3.md`.
+- Validações: 14/14 testes específicos; `pnpm check`; `pnpm test` (3 arquivos/9 testes); `node --check` nos dois módulos; Prettier e `git diff --check` — todos passaram.
+- Dry-run real pré-publicação selecionou OR-20261108-0033 como `PARTIALLY_ACCEPTED`, listou nove anomalias e preservou o SHA-256 do índice (`6549c6ceef11c269b1a223dc8c47dcd260770fd80081631cdccf75214686d684`). A linha única do OR-20261109-0001 foi anexada preservando todos os bytes anteriores; dry-run posterior validou o próprio OR como `PARTIALLY_ACCEPTED`, sem erros estruturais, e manteve o SHA-256 `7ec6dca650511d40ebd56e33b5aa913f31aa85584a1e547e0454b2d839dafe02` idêntico antes/depois. Nenhum OR da fila foi escrito.
+- 19.4–19.7 permanecem `STAGED`; nenhum FOR foi gerado. Próximo desbloqueio: revisão Oracle deste OR e execução autônoma da próxima tarefa somente após nova atribuição.

@@ -21,12 +21,12 @@ A missão foi criada como `STAGED` e agora foi assumida como `PROGRESS` pela ins
 
 ## Execução atual
 
-- **Última tarefa:** 19.2 — Implementar worker determinístico de fila e revisão estrutural de ORs.
+- **Última tarefa concluída:** 19.3 — Implementar atualização atômica do índice, locks e recuperação.
 - **Instância:** Manus (sandbox).
-- **Status da tarefa:** DONE; OR-20261108-0033 submetido para revisão independente.
-- **Checkpoint:** 2026-11-08 23:40 (-03:00); implementação e testes locais concluídos.
-- **Reconciliação:** o protótipo mencionado no histórico não existe no HEAD remoto reconciliado. O worker foi criado conforme blueprint/contrato, mas o dry-run real bloqueia fail-closed em 9 linhas de `INDEX.csv` fora do schema; nenhum OR real foi processado e nenhuma normalização foi feita.
+- **Status da tarefa 19.3:** DONE em implementação/validação; OR-20261109-0001 submetido para revisão independente (`PENDING`).
+- **Próxima tarefa:** 19.4 — Implementar geração condicional de FOR e integração de missão; permanece `STAGED` e não foi assumida nesta unidade.
+- **Reconciliação:** o worker agora reconhece as nove caudas legadas somente quando os campos precedentes são válidos, registra hashes e faz patch lossless dos dois campos autorizados. Anomalias ambíguas continuam bloqueantes; nenhuma normalização histórica foi executada.
 
 ## Handoff
 
-Tarefas 19.1 e 19.2 estão concluídas em seus respectivos escopos; a MISSION_0019 permanece `PROGRESS`. O OR-20261108-0033 aguarda revisão. Próximo passo elegível: tarefa 19.3, com estratégia explícita, lossless e testável para CSV legado, IDs, atomicidade, locks e recuperação. Até esse gate, o worker não consegue percorrer o índice real; não executar reescrita automática ou FOR.
+Tarefas 19.1, 19.2 e 19.3 estão concluídas em seus respectivos escopos; a MISSION_0019 permanece `PROGRESS`. OR-20261108-0033 e OR-20261109-0001 aguardam revisão independente. 19.4–19.7 continuam `STAGED`; nenhum FOR foi gerado. A leitura e a escrita lossless de 19.3 não normalizam notas históricas, e a revisão real do dispatcher permaneceu em dry-run.
