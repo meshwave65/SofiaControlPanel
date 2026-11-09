@@ -4,7 +4,7 @@
 **ROB — Return On Believe | Retorno por acreditar**
 
 **Material integral para investidores — MISSION_0018 / frente complementar 18.10**  
-**Versão 0.4 — DRAFT ativo para revisão iterativa do fundador**  
+**Versão 0.5 — DRAFT atualizado após revisão narrativa do fundador**  
 **Não constitui oferta pública, prospecto, recomendação de investimento ou autorização para distribuição externa.**
 
 ---
@@ -17,11 +17,19 @@ Sua construção não começou com uma equipe financiada, uma estrutura empresar
 
 Esse trabalho foi realizado utilizando exclusivamente ferramentas e serviços gratuitos disponíveis na internet, com equipamentos próprios extremamente limitados em capacidade e recursos. Mesmo nessas condições, foi possível desenvolver componentes de software, aplicações, interfaces, protótipos, simuladores e estruturas que hoje formam uma base tecnológica concreta para o ecossistema.
 
-A dimensão desse esforço precisa ser compreendida junto com seu estágio atual: a MeshWave existe, possui componentes desenvolvidos e está em evolução, mas sua operação ainda é rudimentar e suas diferentes frentes apresentam níveis distintos de maturidade.
+A dimensão desse esforço precisa ser compreendida junto com o que já foi efetivamente construído. A MeshWave possui sistemas funcionais, aplicações, módulos e estruturas técnicas em operação, ainda que com graus distintos de maturidade e acabamento. A operação do ecossistema como conjunto permanece rudimentar e as frentes ainda precisam avançar em integração, profissionalização e escala.
 
 O modelo individual e de recursos mínimos permitiu chegar até aqui. Entretanto, o fundador chegou ao limite do que essa estrutura consegue oferecer individualmente. A continuidade e a expansão exigem mais capacidade material e computacional, recursos financeiros, participação de profissionais e uma estrutura organizacional e operacional compatível com a dimensão do projeto.
 
-**A oportunidade está em participar da transformação de uma base construída individualmente, com recursos extremamente limitados, em um ecossistema tecnológico estruturado, integrado e capaz de escalar.**
+**A oportunidade está em participar da evolução de um ecossistema que já foi criado e demonstrado em seus componentes: aperfeiçoar, expandir, integrar, consolidar e escalar aquilo que o fundador já conseguiu construir com recursos mínimos.**
+
+## Capacidade demonstrada e significado de sucesso nesta oportunidade
+
+A trajetória da MeshWave não é apresentada como garantia de sucesso futuro. Nenhuma empresa, por maior que seja, tem sucesso permanente assegurado: permanecer relevante exige movimento, adaptação e capacidade contínua de execução. Interromper esse movimento pode significar perder espaço e deixar de avançar.
+
+Nesta proposta, a pergunta central é mais objetiva: o fundador já demonstrou capacidade de conceber e construir o ecossistema que está apresentando? A resposta está no próprio conjunto de sistemas, aplicações, módulos e estruturas já desenvolvidos. A base não é uma promessa de que um dia será criada; ela já existe. O que se busca agora é aperfeiçoar, expandir, integrar e consolidar essa realidade — em uma palavra, escalar.
+
+A retrospectiva do que foi realizado sob condições individuais e extremamente limitadas é evidência da capacidade de execução demonstrada até aqui, não uma promessa de resultado futuro. A pergunta que orienta a oportunidade é: **se foi possível realizar tanto com nada, o que poderá ser realizado com alguma coisa?**
 
 ## O que é a MeshWave
 
@@ -64,17 +72,17 @@ Essa capacidade poderá apoiar serviços e workloads do ecossistema, com mecanis
 
 ### SOFIA e SWE — inteligência e preservação de conhecimento
 
-SOFIA representa a camada de inteligência e orquestração de soluções de IA. Entre as aplicações está o SWE (Sofia Web Extractor), concebido para capturar, organizar, preservar e recuperar conhecimento produzido em conversas e fluxos de trabalho com diferentes inteligências artificiais.
+SOFIA é um sistema funcional de orquestração de inteligências artificiais. O AppAndroid é uma aplicação Android desenvolvida e funcional que atua como frontend do SOFIA Core. O SWE (Sofia Web Extractor) é um módulo funcional de captura e extração de conhecimento, concebido para capturar, organizar, preservar e recuperar conhecimento produzido em conversas e fluxos de trabalho com diferentes inteligências artificiais.
 
-A proposta responde a um problema crescente: a perda de contexto e conhecimento entre ferramentas, sessões e ambientes digitais. Existem componentes de software e código de backend associados a essa frente, mas deployment, confiabilidade em produção, adoção e desempenho comercial precisam ser avaliados de acordo com evidências próprias.
+Esses componentes já materializam a camada de inteligência e preservação de conhecimento da MeshWave. Seu estágio atual é funcional, embora ainda rudimentar e sujeito a aperfeiçoamento, integração, otimização e ampliação de capacidade. O desafio da próxima etapa não é provar que esses sistemas podem ser construídos, mas amadurecê-los e ampliar sua capacidade de atender a mais usuários, operações e demandas.
 
 ### Condenser e MIA-D — eficiência e avaliação de impacto
 
-Condenser é uma iniciativa voltada à otimização e condensação de consultas e conteúdos utilizados em processamento de inteligência artificial.
+Condenser é um sistema funcional de condensação e otimização de consultas e conteúdos utilizados em processamento de inteligência artificial.
 
-MIA-D é uma metodologia em evolução destinada a avaliar impactos associados a operações digitais e ao uso de recursos. Não se limita à contabilidade de carbono: pretende relacionar eficiência e impacto às condições reais de utilização.
+MIA-D já possui uma estrutura mínima de medição e avaliação, além de metodologia em evolução para avaliar impactos associados a operações digitais e ao uso de recursos. Não se limita à contabilidade de carbono: busca relacionar eficiência e impacto às condições reais de utilização.
 
-Essas iniciativas possuem componentes e materiais de desenvolvimento, mas benchmarks, economia efetivamente obtida e impactos medidos ainda não devem ser tratados como resultados comerciais comprovados.
+Condenser e MIA-D já ultrapassaram a etapa de mera concepção. O trabalho seguinte é aperfeiçoar os sistemas, ampliar a consistência das medições, consolidar a metodologia e desenvolver avaliações e demonstrações cada vez mais abrangentes.
 
 ### Jardim do Éden — experiência e participação
 
@@ -112,7 +120,7 @@ A expressão representa a tese de que apoiar uma iniciativa em estágio anterior
 
 Não se trata de uma métrica financeira padronizada, de uma fórmula de valuation ou de uma versão alternativa de ROI. ROB não quantifica retorno nem assegura valorização. É o posicionamento que traduz a natureza desta oportunidade: reconhecer uma realidade já iniciada, avaliar o que foi construído, compreender o que ainda precisa ser feito e considerar participar de sua próxima etapa.
 
-A proposta não é pedir que alguém invista apenas em uma promessa. É permitir que investidores conheçam a base existente, examinem seus componentes e evidências, avaliem riscos e possibilidades e decidam se desejam apoiar sua evolução.
+A proposta não é pedir que alguém financie a tentativa de criar algo que ainda não existe. É apresentar uma base tecnológica que já foi construída, mostrar a capacidade de execução demonstrada pelo fundador e permitir que investidores avaliem se desejam apoiar sua evolução, ampliação e escala.
 
 ## Estratégia de desenvolvimento e acesso ao mercado
 
@@ -189,7 +197,7 @@ A MeshWave busca investidores e parceiros estratégicos interessados em conhecer
 
 O objetivo é reunir capacidade financeira, humana, material e institucional para ampliar o desenvolvimento, profissionalizar a operação, integrar as diferentes frentes e criar condições para que o ecossistema alcance uma escala compatível com sua proposta.
 
-**A oportunidade não está em financiar uma ideia que ainda precisa nascer. Está em participar da transformação de uma iniciativa construída individualmente e com recursos mínimos em uma estrutura tecnológica capaz de avançar para sua próxima dimensão.**
+**A oportunidade não está em financiar uma ideia que ainda precisa nascer. Está em participar da evolução de um ecossistema que o fundador já conseguiu construir individualmente e com recursos mínimos. Se foi possível realizar tanto com nada, o que poderá ser realizado com alguma coisa?**
 
 **MESHWAVE**  
 **ROB — Return On Believe**  
