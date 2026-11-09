@@ -1,6 +1,6 @@
 # MISSION_0018 / Task 18.9 — Revisão cruzada e handoff
 
-**Estado:** self-review concluído; revisão independente do Oracle e Final Operational Report (FOR) pendentes. Não equivale a aprovação Oracle nem encerra formalmente a missão.
+**Estado:** self-review concluído; **fechamento preliminar autorizado pelo responsável em 2026-11-09**. A revisão Oracle e o FOR continuam pendentes para a versão definitiva; não equivalem a aprovação Oracle nem a liberação externa.
 
 ## Escopo e resultado
 
@@ -30,13 +30,16 @@ Revisados os artefatos 18.1–18.8, README/Blueprint canônicos, ROB investor dr
 - OR-20261108-0015 a OR-20261108-0026 existem no repositório. O índice foi verificado e não havia IDs não vazios duplicados no intervalo revisado.
 - URLs externas não foram revalidadas exaustivamente nesta revisão; sua proveniência consta nos documentos/ORs de pesquisa.
 
-## Bloqueio de fechamento
+## Fechamento preliminar — override explícito do responsável (2026-11-09)
 
-A governança exige revisão do Oracle Agent dos ORs submetidos e um Final Operational Report (FOR) ao concluir a missão. Não há dispatcher/reviewer autorizado disponível nesta execução. Nenhuma revisão foi simulada e nenhum OR foi marcado como aceito.
+O responsável autorizou retirar o bloqueio que mantinha a missão em PROGRESS exclusivamente pela ausência do FOR. A missão é encerrada preliminarmente, sem simular autoridade Oracle:
 
 - Tasks 18.1–18.8: DONE como entregáveis documentais para decisão.
-- Task 18.9: **BLOCKED**; self-review feito, mas critério de revisão independente pendente.
-- MISSION_0018: permanece PROGRESS até Oracle/FOR. A aprovação humana dos drafts para circulação externa é uma decisão separada.
+- Task 18.9: **DONE — PRELIMINARY / OWNER-APPROVED OVERRIDE**; self-review concluído.
+- MISSION_0018: **DONE — PRELIMINARY**.
+- Oracle independent review: PENDING; não foi realizada nem marcada como aceita.
+- FOR: PENDING; quando elaborado, será incorporado para preparar a versão definitiva e registrar correções eventualmente necessárias.
+- Aprovação humana dos drafts para circulação externa, oferta, listing, lançamento, tokenomics e decisões de investimento: separadas e não concedidas por este override.
 
 ## Decisões do responsável ainda abertas
 
@@ -44,4 +47,4 @@ ROB/investor thesis approval; target investors and public/private evidence scope
 
 ## Handoff
 
-Próximo desbloqueio exato: Oracle Agent autorizado revisa a fila de ORs pendentes, verifica os artefatos e prepara o FOR. Se houver pedido de evidência ou escalada humana, resolver antes da conclusão formal. O responsável pode revisar os drafts em paralelo; não há autorização para desenvolvimento, listing, outreach, oferta ou publicação externa.
+Próximo passo de maturação: quando o Oracle Agent e o FOR estiverem disponíveis, incorporá-los à missão e produzir a versão definitiva. O responsável pode revisar os drafts em paralelo; não há autorização para desenvolvimento, listing, outreach, oferta ou publicação externa.
