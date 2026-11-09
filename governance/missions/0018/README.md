@@ -154,3 +154,8 @@ Data de consolidação: 08/11/2026.
 ## 11. Retomada mínima — se houver pouco contexto/token
 
 Não comece do zero. Primeiro identifique o pedido atual do responsável. Leia este README, o Blueprint e a tese ROB vigente. Consulte ORs mais recentes e o estado do repositório. Preserve ROB = Return On Believe, a estratégia MW-Ex própria como canal primário e o estado não selecionado da venue externa. Separe fatos, declarações e hipóteses. O self-review 18.9 está concluído; a tarefa permanece BLOCKED aguardando revisão independente Oracle e FOR. O responsável pode revisar os drafts em paralelo; não iniciar desenvolvimento, listing, outreach ou oferta sem autorização.
+
+
+## Atualização de estado — fechamento preliminar autorizado (2026-11-09)
+
+O responsável autorizou expressamente retirar o bloqueio por ausência de Oracle/FOR e concluir a MISSION_0018 de forma **preliminar**. Estado corrente: **DONE — PRELIMINARY / OWNER-APPROVED OVERRIDE**. A revisão independente Oracle e o FOR continuam pendentes, mas não bloqueiam esta conclusão preliminar. Quando o FOR estiver disponível, deverá ser incorporado e será preparada a versão definitiva da missão, registrando-se eventuais correções. Esta conclusão não equivale a aprovação Oracle, aprovação final da tese ROB, liberação para circulação externa, oferta, listing, lançamento ou decisão final de tokenomics. Consulte OR-20261109-0004.
