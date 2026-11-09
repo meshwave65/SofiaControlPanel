@@ -1,9 +1,9 @@
 # MISSION_0018 / 18.14 — Pacote de diligência e FAQ ROB
 
-**Versão:** 0.2-DRAFT | **Data:** 2026-11-09  
+**Versão:** 0.3-DRAFT | **Data:** 2026-11-09  
 **Base textual:** master ROB v0.5; matriz 18.1; tarefas 18.2–18.8; auditoria 18.11; framework 18.12; derivados 18.13.
 
-**Sincronização:** FAQ revisado para refletir o master v0.5, a capacidade de execução já demonstrada e os componentes funcionais identificados pelo fundador.  
+**Sincronização:** FAQ revisado para refletir a hierarquia MWN-first: MWN é o ativo central; MeshWave é a base tecnológica e econômica que o fundamenta.  
 **Status:** pacote interno; sem autorização para envio externo.
 
 ## 1. Rota de leitura
@@ -21,13 +21,13 @@
 12. THESIS_MWN_ROB_18_8.md e EXECUTIVE_SUMMARY_MWN_ROB_18_8.md — tese detalhada e executiva anteriores.
 
 ## 2. FAQ preliminar
-**O que é MeshWave?** Um ecossistema tecnológico já construído em parte, com sistemas e módulos funcionais. Sua operação como conjunto ainda é rudimentar e as frentes têm maturidades distintas; a necessidade atual é aperfeiçoar, expandir, integrar, consolidar e escalar a base existente.
+**Qual é o objeto central desta proposta ROB?** MWN, o ativo de mercado da economia MeshWave. O ecossistema MeshWave é a base tecnológica e econômica que fundamenta a tese da MWN; não é um catálogo de produtos independentes que se pretende vender ao investidor.
 
-**O que significa ROB?** Return On Believe — retorno por acreditar. É tese narrativa de risco, não métrica financeira padronizada, ROI ou promessa de retorno.
+**Qual é o papel do ecossistema MeshWave?** Dar contexto, estrutura e possibilidades de utilidade à MWN por meio de serviços, aplicações, infraestrutura distribuída e mecanismos internos de contabilização e participação. Os componentes são apresentados como fundamento da tese do ativo, não como ofertas separadas.
 
-**Quem construiu a base?** O trabalho de concepção, arquitetura e implementação foi conduzido por uma única pessoa: o fundador, utilizando exclusivamente ferramentas e serviços gratuitos disponíveis na internet e equipamentos próprios extremamente limitados. O resultado inclui sistemas e módulos funcionais, não apenas conceitos.
+**Como se relacionam UMS e MWN?** UMS é a unidade interna de contabilização de contribuição útil e consumo de serviços. MWN é o ativo que conecta essa economia interna à circulação externa. A arquitetura define MWN como gateway asset: a conversão entre o ambiente UMS e o mercado externo ocorre por meio de MWN, com MW-Ex como canal próprio pretendido; não há rota direta UMS↔outro criptoativo.
 
-**Por que buscar recursos agora?** Porque o fundador já demonstrou capacidade de construir a base do ecossistema, mas chegou ao limite do que consegue realizar individualmente com os recursos disponíveis. A próxima fase exige ampliar recursos materiais e computacionais, financeiros, humanos e organizacionais para aperfeiçoar, expandir, integrar, consolidar e escalar o que já existe.
+**Por que buscar recursos agora?** Para consolidar a arquitetura econômica e a infraestrutura que sustentam a MWN, aperfeiçoar os componentes da base MeshWave, avançar a MW-Ex e ampliar os recursos materiais, computacionais, financeiros e humanos necessários à evolução do ativo e de seu ecossistema.
 
 **A MeshWave já está em produção?** É necessário distinguir os componentes do ecossistema integrado. SOFIA, AppAndroid, SWE e Condenser são funcionais; MIA-D já possui estrutura mínima de medição e avaliação. A operação conjunta do ecossistema ainda é rudimentar e sua integração e escala precisam avançar. Funcionalidade de componentes não significa que todas as frentes estejam integradas em uma única operação madura.
 
