@@ -23,9 +23,9 @@ A missão foi criada como `STAGED` e agora foi assumida como `PROGRESS` pela ins
 
 - **Tarefa ativa:** 19.1 — Especificar contrato, autoridade e modelo de execução do Oracle Dispatcher.
 - **Instância:** ChatGPT.
-- **Status da tarefa:** PROGRESS.
+- **Status da tarefa:** DONE.
 - **Checkpoint:** 2026-11-08 23:14 (-03:00).
 
 ## Handoff
 
-Tarefa 19.1 foi assumida formalmente. O agente executor deve produzir o contrato, registrar o OR próprio e decidir se o protótipo será aproveitado, corrigido ou descartado após revisão. As tarefas 19.2–19.7 permanecem `STAGED` para continuidade por outros agentes.
+Tarefa 19.1 foi assumida formalmente e concluída com contrato versionado e auditoria de injeções. As tarefas 19.2–19.7 permanecem `STAGED` para continuidade por outros agentes. O protótipo continua preliminar e não aceito até a execução da 19.2.
