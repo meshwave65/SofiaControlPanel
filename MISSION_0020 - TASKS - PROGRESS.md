@@ -8,7 +8,7 @@
 | ID | Tarefa | Status | Instância | Critério/saída |
 |---|---|---|---|---|
 | 20.1 | Inventariar funcionalidades, contratos e evidências do runtime; localizar a primeira fronteira de falha | DONE | Manus (sandbox) | Matriz baseline de módulos/ações e hipótese testável; logs/config apenas pertinentes e sanitizados; nenhuma causa conjecturada como fato |
-| 20.2 | Reproduzir falha de missão em ambiente local/de teste e fechar causa-raiz do ciclo de execução | PROGRESS | Manus (sandbox) | Reprodução mínima do caminho UI/tRPC, claim/despacho, chamada externa mockada/controlada, polling, persistência e estados; causa ou gate ambiental demonstrado |
+| 20.2 | Reproduzir falha de missão em ambiente local/de teste e fechar causa-raiz do ciclo de execução | DONE | Manus (sandbox) | Reprodução mínima do caminho UI/tRPC, claim/despacho, chamada externa mockada/controlada, polling, persistência e estados; causa ou gate ambiental demonstrado |
 | 20.3 | Corrigir causas-raiz confirmadas no fluxo de execução e adicionar regressões | STAGED | — | Correções pequenas, atribuídas e testadas antes/depois; idempotência/concorrência/erros cobertos sem chamada real não autorizada |
 | 20.4 | Auditar as funcionalidades do produto constantes do inventário e resolver falhas prioritárias independentes | STAGED | — | Matriz atualizada com PASS/FAIL/BLOCKED/NOT_APPLICABLE por critério e evidência; sem duplicar MISSION_0019 |
 | 20.5 | Executar validação integrada e, somente se autorizado, smoke test externo de baixo impacto | STAGED | — | `pnpm check`, `pnpm test`, `pnpm build`, integração repetível; gate externo comprovado ou explicitamente bloqueado |
