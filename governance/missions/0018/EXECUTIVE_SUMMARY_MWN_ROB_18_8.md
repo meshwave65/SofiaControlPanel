@@ -1,16 +1,19 @@
-# MeshWave / MWN — Tese executiva para decisão do responsável
+# MWN — Tese executiva ROB
+## Ativo de mercado fundamentado pelo ecossistema MeshWave
 
 **Status:** draft for owner decision; not a public offer, investment solicitation, tokenomics approval or financial forecast.
 
 ## A tese em uma página
 
-MeshWave é um ecossistema existente, parcialmente construído, rudimentar em sua operação e em evolução. O responsável relata que a base foi desenvolvida predominantemente em esforço solo sob restrições financeiras, materiais e estruturais severas. A tese não é financiar o nascimento de uma ideia abstrata, mas apoiar sua profissionalização, integração e aceleração, mantendo a maturidade de cada componente separada.
+**MWN é o ativo de mercado da economia MeshWave e o foco da proposta ROB.** A MeshWave é o ecossistema tecnológico e econômico que fundamenta esse ativo — não um catálogo de produtos independentes que se pretende vender ao investidor. A base reúne serviços, aplicações, infraestrutura distribuída e mecanismos de participação e contabilização interna.
+
+A arquitetura separa **UMS**, unidade interna de contabilização de contribuição útil e consumo de serviços, de **MWN**, ativo de circulação externa e gateway da economia MeshWave. A conexão entre a economia interna e o mercado ocorre por meio da MWN, com a MW-Ex como canal próprio pretendido; não há rota direta UMS↔outro criptoativo.
+
+O ecossistema já inclui componentes funcionais e iniciativas em diferentes estágios. Foi construído pelo trabalho individual do fundador, com ferramentas gratuitas da internet e equipamentos extremamente limitados. A tese é consolidar a arquitetura econômica e a infraestrutura que dão suporte à MWN, ampliar a utilidade potencial do ecossistema e criar condições para sua circulação. Isso não significa que cada frente gere automaticamente demanda por MWN, nem garante preço ou liquidez.
 
 **ROB = Return On Believe — retorno por acreditar.** É uma narrativa de investimento de risco, não uma métrica financeira padronizada, ROI, valuation ou garantia de retorno.
 
-MeshWave propõe uma economia em que UMS é a unidade interna destinada a reconhecer contribuição útil e consumo de serviços, enquanto MWN é o ativo de mercado pretendido para conectar essa atividade a uma camada de circulação externa. A visão reúne infraestrutura de rede/serviços, SOFIA, produtos de software como SWE e Condenser, processamento/armazenamento MeshWalker e opções de adoção/impacto como Jardim do Éden e MIA-D.
-
-Há evidência concreta de trabalho: portal público, frontend de carteira autenticada, ledger/piloto controlado, código de software e protótipos. O conjunto **não está comprovado como ecossistema integrado em produção**. MW-Ex é atualmente uma prévia visual não funcional. Não há listing, liquidez, preço, supply ou conversão final aprovados.
+MW-Ex permanece preview visual não funcional; direitos, supply, emissão, Genesis e parâmetros finais de conversão da MWN ainda dependem de aprovação.
 
 ## Por que a oportunidade existe
 
