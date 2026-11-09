@@ -1,9 +1,9 @@
 # MISSION_0018 / 18.14 — Pacote de diligência e FAQ ROB
 
-**Versão:** 0.1.1-DRAFT | **Data:** 2026-11-09  
-**Base textual:** master ROB v0.4; matriz 18.1; tarefas 18.2–18.8; auditoria 18.11; framework 18.12; derivados 18.13.
+**Versão:** 0.2-DRAFT | **Data:** 2026-11-09  
+**Base textual:** master ROB v0.5; matriz 18.1; tarefas 18.2–18.8; auditoria 18.11; framework 18.12; derivados 18.13.
 
-**Sincronização:** referências de versão atualizadas após conferência com o master v0.4. FAQ e checklist permanecem alinhados; nenhum contato, link ou dado novo foi presumido.  
+**Sincronização:** FAQ revisado para refletir o master v0.5, a capacidade de execução já demonstrada e os componentes funcionais identificados pelo fundador.  
 **Status:** pacote interno; sem autorização para envio externo.
 
 ## 1. Rota de leitura
@@ -21,15 +21,15 @@
 12. THESIS_MWN_ROB_18_8.md e EXECUTIVE_SUMMARY_MWN_ROB_18_8.md — tese detalhada e executiva anteriores.
 
 ## 2. FAQ preliminar
-**O que é MeshWave?** Um ecossistema tecnológico existente, parcialmente construído, rudimentar em sua operação e em evolução. As frentes têm maturidades distintas; não se afirma integração completa em produção.
+**O que é MeshWave?** Um ecossistema tecnológico já construído em parte, com sistemas e módulos funcionais. Sua operação como conjunto ainda é rudimentar e as frentes têm maturidades distintas; a necessidade atual é aperfeiçoar, expandir, integrar, consolidar e escalar a base existente.
 
 **O que significa ROB?** Return On Believe — retorno por acreditar. É tese narrativa de risco, não métrica financeira padronizada, ROI ou promessa de retorno.
 
-**Quem construiu a base?** Segundo declaração expressa do fundador, uma única pessoa — o próprio fundador — usando exclusivamente ferramentas e serviços gratuitos disponíveis na internet e equipamentos próprios extremamente limitados.
+**Quem construiu a base?** O trabalho de concepção, arquitetura e implementação foi conduzido por uma única pessoa: o fundador, utilizando exclusivamente ferramentas e serviços gratuitos disponíveis na internet e equipamentos próprios extremamente limitados. O resultado inclui sistemas e módulos funcionais, não apenas conceitos.
 
-**Por que buscar recursos agora?** Porque o modelo individual e de recursos mínimos chegou ao limite do que consegue oferecer. A próxima fase exige recursos materiais/computacionais, financeiros, humanos e organizacionais para profissionalizar, integrar e validar o ecossistema.
+**Por que buscar recursos agora?** Porque o fundador já demonstrou capacidade de construir a base do ecossistema, mas chegou ao limite do que consegue realizar individualmente com os recursos disponíveis. A próxima fase exige ampliar recursos materiais e computacionais, financeiros, humanos e organizacionais para aperfeiçoar, expandir, integrar, consolidar e escalar o que já existe.
 
-**A MeshWave já está em produção?** Não como ecossistema integrado. Há portal, código, frontend, piloto controlado e protótipos documentados; cada componente deve ser avaliado por sua evidência e maturidade.
+**A MeshWave já está em produção?** É necessário distinguir os componentes do ecossistema integrado. SOFIA, AppAndroid, SWE e Condenser são funcionais; MIA-D já possui estrutura mínima de medição e avaliação. A operação conjunta do ecossistema ainda é rudimentar e sua integração e escala precisam avançar. Funcionalidade de componentes não significa que todas as frentes estejam integradas em uma única operação madura.
 
 **A MW-Ex já funciona?** Não. A evidência disponível classifica MW-Ex como preview visual não funcional. Não há prova de ordens, matching, trades, custódia, liquidez ou operação de exchange.
 
@@ -39,9 +39,9 @@
 
 **Há usuários, clientes, receita ou investidores confirmados?** O pacote revisado não contém comprovação suficiente para declarar adoção comercial, receita recorrente, investidores interessados ou compromissos de parceria. Tentativas de contato não provam interesse.
 
-**Quais produtos têm código?** A matriz 18.1 registra código para SOFIA/SWE e Condenser, além de interfaces e protótipos em outras frentes. Runtime, benchmark, adoção e prontidão comercial não foram validados de forma independente nesta rodada.
+**Quais sistemas já são funcionais?** SOFIA é um sistema funcional de orquestração de inteligências artificiais. AppAndroid é uma aplicação Android funcional que atua como frontend do SOFIA Core. SWE é um módulo funcional de captura e extração de conhecimento. Condenser é um sistema funcional de condensação e otimização. MIA-D já possui uma estrutura mínima de medição e avaliação. Esses componentes ainda podem ser rudimentares e demandar aperfeiçoamento, integração, otimização e escala; isso não elimina sua funcionalidade atual.
 
-**O que é MIA-D?** Metodologia em evolução, segundo o fundador, voltada à avaliação de impactos de operações digitais. A demonstração visual não prova impacto evitado medido, certificação ou validação científica.
+**O que é MIA-D?** É uma estrutura mínima já existente de medição e avaliação, acompanhada de metodologia em evolução para avaliar impactos associados a operações digitais. Não se limita à contabilidade de carbono. A consolidação metodológica e a ampliação das medições são etapas de evolução; não se deve confundir estrutura existente com certificação ou validação científica independente.
 
 **Quais valores estão sendo considerados?** Faixas estratégicas relatadas de R$ 50 mil–R$ 100 mil na etapa inicial, R$ 250 mil–R$ 500 mil para acesso externo futuro e alguns milhões para escala futura. Não são orçamento aprovado, valuation, projeção ou compromisso.
 
