@@ -63,3 +63,19 @@ A matriz 18.1 foi consolidada em 08/11/2026. Esta rodada não repetiu testes nos
 
 ## 6. Referências canônicas
 EVIDENCE_MATRIX_18_1.md; ARCHITECTURA_ECONOMICA_UMS_MWN_DECISION_DRAFT.md; ESTRATEGIA_MERCADO_E_LISTAGEM_18_3.md; MWEX_MVP_SCOPE_OPERATION_READINESS_18_4.md; PORTFOLIO_STRATEGIC_SUBMISSIONS_18_5.md; RISK_AND_COMPLIANCE_MATRIX_18_6.md; ROADMAP_INTEGRATED_PHASES_GATES_18_7.md; THESIS_MWN_ROB_18_8.md; ROB_INVESTOR_MATERIAL_MASTER.md.
+
+
+## Adendo — revisão explícita do fundador (2026-11-09)
+
+A revisão narrativa posterior à auditoria esclareceu o estágio funcional dos seguintes componentes, que deve ser refletido no material ROB:
+- SOFIA: sistema funcional de orquestração de inteligências artificiais.
+- AppAndroid: aplicação Android funcional que atua como frontend do SOFIA Core.
+- SWE: módulo funcional de captura e extração de conhecimento.
+- Condenser: sistema funcional de condensação e otimização.
+- MIA-D: estrutura mínima de medição e avaliação existente, com metodologia em evolução.
+
+A classificação funcional não implica, por si só, integração completa entre frentes, maturidade comercial, operação em escala, adoção, receita ou validação independente de benchmarks. **Não confundir essas dimensões nem rebaixar os componentes a meros conceitos/protótipos por ainda serem rudimentares.** O fundador também esclareceu que a base foi construída individualmente com ferramentas e serviços gratuitos da internet e equipamentos extremamente limitados; o que se busca agora é aperfeiçoar, expandir, integrar, consolidar e escalar o que já existe.
+
+A tese de capacidade deve ser formulada como capacidade já demonstrada pela construção realizada, não como garantia de sucesso futuro. A pergunta narrativa aprovada pelo fundador é: “Se foi possível realizar tanto com nada, o que se poderia realizar com alguma coisa?”
+
+Este adendo registra a orientação factual e editorial do fundador para a versão ROB v0.5. Não substitui inspeção técnica específica quando uma diligência exigir evidência de runtime, benchmarks ou integração.
