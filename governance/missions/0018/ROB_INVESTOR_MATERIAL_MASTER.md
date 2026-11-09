@@ -23,6 +23,15 @@ A existência desse ecossistema oferece uma base para desenvolver utilidade e at
 
 A MeshWave conecta serviços digitais, inteligência artificial, infraestrutura distribuída e uma economia própria de participação e circulação de valor. É essa base que sustenta a tese de MWN.
 
+A visão reúne quatro dimensões:
+
+- **Economia digital:** arquitetura que distingue a unidade interna de utilidade e contribuição do ativo destinado à circulação no mercado.
+- **Serviços e aplicações:** produtos de software e soluções que podem oferecer utilidade concreta a usuários, empresas e participantes.
+- **Infraestrutura distribuída:** proposta de participação voluntária em recursos computacionais e armazenamento, com possibilidades de expansão.
+- **Camada de inteligência:** ferramentas e sistemas voltados à captura, preservação, organização, recuperação e otimização de conhecimento e processamento digital.
+
+Essas dimensões não estão todas no mesmo estágio. Algumas possuem sistemas funcionais; outras permanecem em desenvolvimento, laboratório ou concepção. A proposta de ecossistema está na possibilidade de conectá-las progressivamente, preservando a identidade e a utilidade de cada frente.
+
 Sua construção não começou com uma equipe financiada, uma estrutura empresarial robusta ou acesso a infraestrutura profissional. Até aqui, a MeshWave foi construída pelo trabalho de uma única pessoa: seu fundador, que conduziu individualmente a concepção, a arquitetura e a implementação de suas diferentes frentes.
 
 Esse trabalho foi realizado utilizando exclusivamente ferramentas e serviços gratuitos disponíveis na internet, com equipamentos próprios extremamente limitados em capacidade e recursos. Mesmo nessas condições, foi possível desenvolver componentes de software, aplicações, interfaces, protótipos, simuladores e estruturas que hoje formam uma base tecnológica concreta para o ecossistema.
@@ -44,15 +53,6 @@ A retrospectiva do que foi realizado sob condições individuais e extremamente 
 ## A arquitetura econômica: UMS e MWN
 
 A arquitetura econômica da MeshWave distingue duas unidades com funções diferentes.
-
-A visão reúne quatro dimensões:
-
-- **Economia digital:** arquitetura que distingue a unidade interna de utilidade e contribuição do ativo destinado à circulação no mercado.
-- **Serviços e aplicações:** produtos de software e soluções que podem oferecer utilidade concreta a usuários, empresas e participantes.
-- **Infraestrutura distribuída:** proposta de participação voluntária em recursos computacionais e armazenamento, com possibilidades de expansão.
-- **Camada de inteligência:** ferramentas e sistemas voltados à captura, preservação, organização, recuperação e otimização de conhecimento e processamento digital.
-
-Essas dimensões não estão todas no mesmo estágio. Algumas possuem código e protótipos; outras permanecem em desenvolvimento, laboratório ou concepção. A proposta de ecossistema está na possibilidade de conectá-las progressivamente, preservando a identidade e a utilidade de cada frente.
 
 **UMS — unidade interna de serviço e utilidade**
 
