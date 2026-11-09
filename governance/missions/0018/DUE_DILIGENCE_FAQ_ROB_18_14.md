@@ -1,7 +1,7 @@
 # MISSION_0018 / 18.14 — Pacote de diligência e FAQ ROB
 
 **Versão:** 0.3-DRAFT | **Data:** 2026-11-09  
-**Base textual:** master ROB v0.5; matriz 18.1; tarefas 18.2–18.8; auditoria 18.11; framework 18.12; derivados 18.13.
+**Base textual:** master ROB v0.5.1; matriz 18.1; tarefas 18.2–18.8; auditoria 18.11; framework 18.12; derivados 18.13.
 
 **Sincronização:** FAQ revisado para refletir a hierarquia MWN-first: MWN é o ativo central; MeshWave é a base tecnológica e econômica que o fundamenta.  
 **Status:** pacote interno; sem autorização para envio externo.
