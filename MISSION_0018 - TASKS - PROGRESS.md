@@ -283,3 +283,10 @@
 - O critério de revisão independente não pode ser marcado DONE: a governança exige Oracle Agent e Final Operational Report (FOR). Não há dispatcher/reviewer autorizado disponível nesta execução; nenhuma revisão foi simulada.
 - 18.9 marcada BLOCKED, atribuição ChatGPT, aguardando Oracle. MISSION_0018 permanece PROGRESS até revisão Oracle/FOR. Tasks 18.1–18.8 permanecem DONE como entregáveis documentais para decisão do responsável.
 - Operational Report: OR-20261108-0027 (`SUBMITTED`; Oracle pendente).
+
+### Retomada 18.9 — execução segura e handoff (2026-11-08)
+
+- Retomada no repositório `meshwave65/SofiaControlPanel` confirmou branch `main` sincronizada, artefatos 18.1–18.8 presentes e self-review 18.9 já publicado.
+- Foram revalidados o estado documental, referências internas, índice de ORs e fila Oracle; não há dispatcher/reviewer Oracle autorizado disponível nesta execução.
+- Nenhuma aprovação foi simulada. 18.9 permanece `BLOCKED` e MISSION_0018 permanece `PROGRESS`; o próximo desbloqueio é a revisão independente Oracle e o FOR.
+- Operational Report: OR-20261108-0028 (`SUBMITTED`; Oracle pendente).
