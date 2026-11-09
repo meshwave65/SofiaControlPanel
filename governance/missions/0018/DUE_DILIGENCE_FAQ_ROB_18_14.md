@@ -25,6 +25,8 @@
 
 **Qual é o papel do ecossistema MeshWave?** Dar contexto, estrutura e possibilidades de utilidade à MWN por meio de serviços, aplicações, infraestrutura distribuída e mecanismos internos de contabilização e participação. Os componentes são apresentados como fundamento da tese do ativo, não como ofertas separadas.
 
+**O que significa ROB?** Return On Believe — retorno por acreditar. É a denominação da tese de investimento e não uma métrica financeira padronizada, ROI, valuation ou promessa de retorno.
+
 **Como se relacionam UMS e MWN?** UMS é a unidade interna de contabilização de contribuição útil e consumo de serviços. MWN é o ativo que conecta essa economia interna à circulação externa. A arquitetura define MWN como gateway asset: a conversão entre o ambiente UMS e o mercado externo ocorre por meio de MWN, com MW-Ex como canal próprio pretendido; não há rota direta UMS↔outro criptoativo.
 
 **Por que buscar recursos agora?** Para consolidar a arquitetura econômica e a infraestrutura que sustentam a MWN, aperfeiçoar os componentes da base MeshWave, avançar a MW-Ex e ampliar os recursos materiais, computacionais, financeiros e humanos necessários à evolução do ativo e de seu ecossistema.
@@ -33,7 +35,7 @@
 
 **A MW-Ex já funciona?** Não. A evidência disponível classifica MW-Ex como preview visual não funcional. Não há prova de ordens, matching, trades, custódia, liquidez ou operação de exchange.
 
-**O que são UMS e MWN?** UMS é a unidade interna proposta para contabilizar contribuição útil e consumo de serviços. MWN é o ativo de circulação/mercado pretendido. Direitos, supply, emissão, Genesis, conversão e parâmetros finais não estão aprovados.
+**O que são UMS e MWN?** UMS é a unidade interna de contabilização de contribuição útil e consumo de serviços. MWN é o ativo de mercado e gateway da economia MeshWave, conectando o ambiente interno à circulação externa. A arquitetura não prevê rota direta UMS↔outro criptoativo; a conexão com o mercado ocorre por MWN, com MW-Ex como canal próprio pretendido. Direitos, supply, emissão, Genesis e parâmetros finais de conversão ainda dependem de aprovação.
 
 **Já existe blockchain pública ou rede descentralizada?** A evidência revisada classifica o ledger/blockchain como piloto single-operator e non-canonical. Não há comprovação de rede pública distribuída em produção com consenso independente.
 
