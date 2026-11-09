@@ -32,3 +32,10 @@ Para o procedimento completo de seleção/criação de skill, execução, regist
 
 Quando uma tarefa pertencer a uma missão com documentação canônica de contextualização (por exemplo, `governance/missions/<ID>/README.md`), **se a sessão/chat for novo ou o contexto estiver incompleto, leia esse README integralmente antes de agir**, além do Blueprint aplicável, da definição da tarefa e dos ORs recentes. O README de missão é handoff persistente: não dependa de conversas anteriores que podem não estar disponíveis e não peça ao responsável para repetir decisões já documentadas. Confira o estado atual do repositório antes de tratar informações de contextualização como status atual de implementação. Em caso de divergência material, consulte a decisão explícita mais recente do responsável; não invente uma reconciliação. Para MISSION_0018, a ordem mínima de leitura está definida em `governance/missions/0018/README.md` e `BLUEPRINT.md`.
 
+
+
+## Fonte canônica para dados financeiros MeshWave (MISSION_0018 / MWN / UMS)
+
+Quando a tarefa exigir estado atual de aquisições, saldos, carteiras, conversões ou registros econômicos MeshWave, a consulta obrigatória é SQL read-only no Supabase **MeshWave65**, project ref `ufylccbdjfzydbwhpmpp`. Confirme o project ref antes de consultar. Não usar snapshot, relatório de migração incompleta, OR antigo ou projeto Supabase alternativo como fonte do estado atual. A base `mwn`/projeto alternativo foi identificada como incompleta para a história de aquisições; não combinar resultados de projetos diferentes.
+
+Comece pelas tabelas pertinentes (`mwc_acquisitions`, `mwc_acquisition_events`, `mwc_wallet_ledger`; e somente conforme necessidade `mw_wallets`, `mw_transactions`, `mw_blocks` ou tabelas UMS). Separe status de aquisição, entradas, reversões/conversões e saldo líquido. Inspecione apenas colunas/tabelas necessárias ao objetivo. Toda resposta sobre estado atual deve executar nova consulta no banco e registrar projeto, data/hora, filtros, tabelas e definição da métrica. Se não puder consultar, declarar “não verificado ao vivo”; nunca preencher com snapshot antigo ou inferência.
