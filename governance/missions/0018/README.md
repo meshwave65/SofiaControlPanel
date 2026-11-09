@@ -159,3 +159,18 @@ Não comece do zero. Primeiro identifique o pedido atual do responsável. Leia e
 ## Atualização de estado — fechamento preliminar autorizado (2026-11-09)
 
 O responsável autorizou expressamente retirar o bloqueio por ausência de Oracle/FOR e concluir a MISSION_0018 de forma **preliminar**. Estado corrente: **DONE — PRELIMINARY / OWNER-APPROVED OVERRIDE**. A revisão independente Oracle e o FOR continuam pendentes, mas não bloqueiam esta conclusão preliminar. Quando o FOR estiver disponível, deverá ser incorporado e será preparada a versão definitiva da missão, registrando-se eventuais correções. Esta conclusão não equivale a aprovação Oracle, aprovação final da tese ROB, liberação para circulação externa, oferta, listing, lançamento ou decisão final de tokenomics. Consulte OR-20261109-0004.
+
+
+## 12. Regra obrigatória de fonte financeira e consulta ao vivo (correção 2026-11-09)
+
+**Para qualquer análise de saldo, aquisição, contribuição, conversão, carteira ou estado financeiro MWN/UMS, a fonte canônica é o banco Supabase ativo do projeto MeshWave65 — project ref `ufylccbdjfzydbwhpmpp` (organização `remwpkmiaavakbgcftob`).** Antes de usar números, confirme o projeto pelo nome/ref na conexão Supabase e execute consultas SQL read-only diretamente nele, na sessão atual.
+
+- Não use snapshots exportados, ORs antigos, relatórios de migração, arquivos de evidência datados ou respostas de outro projeto como estado financeiro atual. Eles servem somente como histórico/contexto e precisam ser marcados como tal.
+- **Não use o projeto Supabase `mwn`/outra conexão como substituto**: a leitura anterior dessa base retornou um conjunto incompleto e associado à migração interrompida. Não misture tabelas com nomes iguais entre projetos.
+- Para aquisições, consulte os registros atuais de `public.mwc_acquisitions` e os eventos/lançamentos relacionados (`mwc_acquisition_events`, `mwc_wallet_ledger`) no projeto canônico. Filtre e apresente status por separado; não confunda aquisição validada com saldo atual, nem soma bruta com reversões/conversões.
+- Para blocos/transações/carteiras, consulte `mw_blocks`, `mw_transactions` e `mw_wallets` somente quando a pergunta exigir esses domínios. Para UMS, identifique e consulte as tabelas canônicas relevantes no mesmo projeto. Faça inspeção de colunas restrita às tabelas necessárias; não enumere o schema inteiro.
+- Em cada resposta com números, registre: projeto/ref, tabelas consultadas, consulta/critério, horário da leitura, filtros/status, unidade, e se a métrica é bruta, líquida, histórica ou saldo atual. Preserve rastreabilidade de reversões (incluindo a reversão de conversão Genesis/UMS→MWN relatada pelo responsável).
+- Se o projeto estiver indisponível, se a consulta falhar ou se a origem não puder ser confirmada, declare “não verificado ao vivo” e pare de usar números anteriores como substituto. Não reconstrua por inferência.
+- O agente deve fazer a consulta ao vivo **toda vez que for responder sobre estado atual**, inclusive em uma nova sessão; persistir uma instrução não torna um snapshot atual.
+
+Este guardrail substitui leituras financeiras históricas incorretas e prevalece sobre qualquer instrução antiga que encaminhe a relatórios/snapshots em vez do banco canônico.
