@@ -379,3 +379,11 @@ Esta revisão leu arquivos de implementação e metadados de commits. Ela confir
 - **Condenser:** descrever o mecanismo de condensação e otimização de prompt como implementação em código; resultados, robustez e benefícios precisam de benchmark e execução.
 - **MIA-D:** separar a visão/metodologia do protótipo visual atual. Não apresentar o contador fixo de litros ou constantes de economia no frontend como impacto medido.
 - Nenhum teste foi submetido, nenhuma conta/segredo foi acessado e nenhum endpoint de IA foi chamado nesta unidade.
+
+## Correção obrigatória de proveniência financeira — 2026-11-09
+
+A seção histórica sobre snapshots de aquisições não deve ser usada como estado atual nem como fonte-base para números de apresentação. Em particular, a leitura feita no projeto Supabase `mwn` que registrava somente um conjunto reduzido de aquisições é **incompleta e vinculada à base associada à migração interrompida**; ela não representa o histórico financeiro canônico de MeshWave.
+
+A fonte para estado atual é o Supabase MeshWave65, project ref `ufylccbdjfzydbwhpmpp`, consultado diretamente por SQL read-only em cada sessão/resposta que necessite de números atuais. Consultar `mwc_acquisitions` e, conforme a métrica, `mwc_acquisition_events` e `mwc_wallet_ledger`; não somar aquisição bruta como saldo atual. Reconciliar eventos de reversão, conversão e Genesis em trilha própria. Não misturar snapshots de datas/projetos diferentes.
+
+Regra de apresentação: snapshots e ORs passados são fontes de **histórico datado**, não de atualização contínua. Todo número atual deve vir de consulta ao vivo com project ref, data/hora, critério/status, unidade e definição. Se não houver consulta confirmada, marcar “não verificado ao vivo” e omitir o valor. Esta correção prevalece sobre trechos históricos conflitantes acima.
