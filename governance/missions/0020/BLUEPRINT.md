@@ -1,10 +1,10 @@
 # Blueprint da MISSION_0020 — Diagnóstico e Restauração Integral das Funcionalidades do SCP
 
 **Missão:** `MISSION_0020`  
-**Estado:** STAGED  
+**Estado:** PROGRESS
 **Data de criação:** 2026-11-09 04:58 (-03:00)  
 **Orquestrador:** SofiaControlPanel (SCP)  
-**Definição da missão:** `MISSION_0020 - Diagnóstico e Restauração Integral das Funcionalidades do SCP - STAGED.md`
+**Definição da missão:** `MISSION_0020 - Diagnóstico e Restauração Integral das Funcionalidades do SCP - PROGRESS.md`
 
 ## 1. Motivação e evidência inicial
 
@@ -18,7 +18,7 @@ Localizar e corrigir as causas-raiz que impedem o SCP de executar missões e val
 
 ## 3. Unidades de trabalho
 
-O quadro `MISSION_0020 - TASKS - STAGED.md` decompõe a missão em unidades sequenciais/paralelizáveis quando não houver sobreposição. Nenhuma tarefa deve ser assumida até passar a missão a `PROGRESS`, reconciliar branch/locks/dependências e registrar responsável. A tarefa 20.1 deve estabelecer inventário, sinais de falha e primeira fronteira divergente antes de implementar correções. Correções devem ser atribuídas a tarefas próprias ou adicionadas por decomposição rastreável antes da edição.
+O quadro `MISSION_0020 - TASKS - PROGRESS.md` decompõe a missão em unidades sequenciais/paralelizáveis quando não houver sobreposição. Nenhuma tarefa deve ser assumida até passar a missão a `PROGRESS`, reconciliar branch/locks/dependências e registrar responsável. A tarefa 20.1 deve estabelecer inventário, sinais de falha e primeira fronteira divergente antes de implementar correções. Correções devem ser atribuídas a tarefas próprias ou adicionadas por decomposição rastreável antes da edição.
 
 ## 4. Limites e autorização
 

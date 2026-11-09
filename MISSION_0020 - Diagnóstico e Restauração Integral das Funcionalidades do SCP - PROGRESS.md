@@ -3,7 +3,7 @@
 > **Projeto:** SofiaControlPanel (SCP)  
 > **Data e hora de criação:** 2026-11-09 04:58 (-03:00)  
 > **Orquestrador:** SofiaControlPanel (SCP)  
-> **Status:** STAGED  
+> **Status:** PROGRESS
 > **Blueprint:** `governance/missions/0020/BLUEPRINT.md`
 
 ## Objetivo
