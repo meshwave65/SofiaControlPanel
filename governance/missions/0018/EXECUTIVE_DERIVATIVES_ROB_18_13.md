@@ -1,6 +1,8 @@
 # MISSION_0018 / 18.13 — Derivados executivos ROB
 
-**Versão:** 0.1.0-DRAFT | **Derivado de:** master ROB v0.3 e matriz 18.1/18.11  
+**Versão:** 0.1.1-DRAFT | **Derivado de:** master ROB v0.4 e matriz 18.1/18.11
+
+**Sincronização:** revisão de consistência com o master v0.4. O conteúdo executivo permanece alinhado; nenhuma alegação nova foi introduzida.  
 **Data:** 2026-11-09 | **Uso:** revisão interna; não autorizado para distribuição.
 
 ## 1. Resumo executivo
