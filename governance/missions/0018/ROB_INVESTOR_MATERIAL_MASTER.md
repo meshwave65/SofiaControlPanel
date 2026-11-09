@@ -1,5 +1,5 @@
-# MESHWAVE
-## Da construção individual à escala de um ecossistema tecnológico.
+# MWN — O ATIVO DE MERCADO DA ECONOMIA MESHWAVE
+## Um ativo com um ecossistema tecnológico como fundamento.
 
 **ROB — Return On Believe | Retorno por acreditar**
 
@@ -9,9 +9,19 @@
 
 ---
 
-## Uma realidade que já começou a ser construída
+## A tese central: MWN
 
-A MeshWave é um ecossistema tecnológico em desenvolvimento, concebido para conectar serviços digitais, inteligência artificial, infraestrutura distribuída e uma economia própria de participação e circulação de valor.
+**MWN é o ativo de mercado da economia MeshWave e o foco desta proposta ROB.** Esta não é uma apresentação para vender isoladamente um conjunto de produtos de software. O que se apresenta ao investidor é um ativo concebido para ocupar a camada de circulação externa de uma economia apoiada por um ecossistema tecnológico, serviços, aplicações, infraestrutura e mecanismos internos de participação e contabilização.
+
+A MeshWave é a base que dá contexto, estrutura e possibilidades de utilidade à MWN. O ecossistema não é um catálogo de produtos que compete com o ativo pela atenção do investidor: é o fundamento tecnológico e econômico que diferencia a proposta de um criptoativo sem uma estrutura de serviços e aplicações por trás.
+
+A arquitetura distingue a UMS, unidade interna de contabilização de contribuição útil e consumo de serviços, da MWN, ativo destinado à circulação e à conexão com o mercado externo. Na arquitetura proposta, a conexão entre a economia interna e o mercado externo ocorre por meio da MWN, com a MW-Ex como canal próprio pretendido. Não se prevê uma rota alternativa de conversão direta entre UMS e outros criptoativos.
+
+A existência desse ecossistema oferece uma base para desenvolver utilidade e atividade econômica. Isso não significa que cada projeto gere automaticamente demanda por MWN, nem que demanda, preço ou liquidez estejam garantidos. A tese está na possibilidade de consolidar essa relação econômica e operacional, com MWN como ativo de conexão com o mercado.
+
+## O ecossistema como fundamento da MWN
+
+A MeshWave conecta serviços digitais, inteligência artificial, infraestrutura distribuída e uma economia própria de participação e circulação de valor. É essa base que sustenta a tese de MWN.
 
 Sua construção não começou com uma equipe financiada, uma estrutura empresarial robusta ou acesso a infraestrutura profissional. Até aqui, a MeshWave foi construída pelo trabalho de uma única pessoa: seu fundador, que conduziu individualmente a concepção, a arquitetura e a implementação de suas diferentes frentes.
 
@@ -21,19 +31,19 @@ A dimensão desse esforço precisa ser compreendida junto com o que já foi efet
 
 O modelo individual e de recursos mínimos permitiu chegar até aqui. Entretanto, o fundador chegou ao limite do que essa estrutura consegue oferecer individualmente. A continuidade e a expansão exigem mais capacidade material e computacional, recursos financeiros, participação de profissionais e uma estrutura organizacional e operacional compatível com a dimensão do projeto.
 
-**A oportunidade está em participar da evolução de um ecossistema que já foi criado e demonstrado em seus componentes: aperfeiçoar, expandir, integrar, consolidar e escalar aquilo que o fundador já conseguiu construir com recursos mínimos.**
+**A oportunidade está em avaliar a MWN como ativo de mercado apoiado por um ecossistema tecnológico já construído em seus componentes — e participar da consolidação da infraestrutura econômica e operacional que poderá sustentar sua utilidade e circulação.**
 
-## Capacidade demonstrada e significado de sucesso nesta oportunidade
+## Capacidade de execução que sustenta a tese
 
 A trajetória da MeshWave não é apresentada como garantia de sucesso futuro. Nenhuma empresa, por maior que seja, tem sucesso permanente assegurado: permanecer relevante exige movimento, adaptação e capacidade contínua de execução. Interromper esse movimento pode significar perder espaço e deixar de avançar.
 
-Nesta proposta, a pergunta central é mais objetiva: o fundador já demonstrou capacidade de conceber e construir o ecossistema que está apresentando? A resposta está no próprio conjunto de sistemas, aplicações, módulos e estruturas já desenvolvidos. A base não é uma promessa de que um dia será criada; ela já existe. O que se busca agora é aperfeiçoar, expandir, integrar e consolidar essa realidade — em uma palavra, escalar.
+Nesta proposta, a pergunta sobre capacidade de execução é parte da fundamentação da tese MWN: o fundador já demonstrou capacidade de conceber e construir a base tecnológica e econômica que está apresentando. A base não é uma promessa de que um dia será criada; ela já existe. O que se busca agora é aperfeiçoar, expandir, integrar e consolidar essa realidade para fortalecer a estrutura que dá suporte à MWN.
 
 A retrospectiva do que foi realizado sob condições individuais e extremamente limitadas é evidência da capacidade de execução demonstrada até aqui, não uma promessa de resultado futuro. A pergunta que orienta a oportunidade é: **se foi possível realizar tanto com nada, o que poderá ser realizado com alguma coisa?**
 
-## O que é a MeshWave
+## A arquitetura econômica: UMS e MWN
 
-A MeshWave não é apenas um criptoativo. MWN é parte de uma proposta mais ampla: uma infraestrutura de serviços e aplicações na qual diferentes formas de participação, prestação de serviços e utilização de recursos podem se conectar a uma economia comum.
+A arquitetura econômica da MeshWave distingue duas unidades com funções diferentes.
 
 A visão reúne quatro dimensões:
 
@@ -44,25 +54,21 @@ A visão reúne quatro dimensões:
 
 Essas dimensões não estão todas no mesmo estágio. Algumas possuem código e protótipos; outras permanecem em desenvolvimento, laboratório ou concepção. A proposta de ecossistema está na possibilidade de conectá-las progressivamente, preservando a identidade e a utilidade de cada frente.
 
-## A arquitetura econômica: UMS e MWN
-
-A arquitetura econômica da MeshWave distingue duas unidades com funções diferentes.
-
 **UMS — unidade interna de serviço e utilidade**
 
 A UMS é concebida como unidade interna associada ao reconhecimento de contribuições úteis e à utilização de serviços dentro do ecossistema. Sua função é permitir que atividades e utilidades internas possam ser representadas segundo regras econômicas próprias.
 
-**MWN — ativo de circulação no mercado**
+**MWN — ativo de circulação e conexão com o mercado**
 
-MWN é o criptoativo associado à dimensão de circulação e acesso ao mercado. A proposta é que ele conecte a economia interna do ecossistema a uma camada de mercado mais ampla, conforme uma arquitetura econômica e regras que ainda precisam ser consolidadas.
+MWN é o ativo de mercado da economia MeshWave. É a porta de conexão entre a contabilização interna de utilidade e contribuição e a circulação externa do valor econômico do ecossistema. A arquitetura estabelece a MWN como caminho exclusivo entre a economia interna UMS e a camada de mercado, com a MW-Ex como canal próprio pretendido. Não há rota alternativa direta UMS↔outro criptoativo.
 
-A distinção entre UMS e MWN procura separar a contabilização interna de utilidade e contribuição da circulação externa do ativo. Os parâmetros definitivos — incluindo direitos, emissão, supply, conversão, custódia e demais regras econômicas — ainda não estão aprovados como configuração final.
+Os parâmetros finais de emissão, supply, direitos, Genesis, conversão, custódia e operação ainda dependem de consolidação e aprovação.
 
-A existência dessa arquitetura conceitual não significa que todos os fluxos estejam implementados ou disponíveis para uso. Ela representa a estrutura econômica em desenvolvimento sobre a qual as próximas etapas poderão ser construídas.
+A UMS permanece no ambiente interno de contabilização; MWN é o ativo que conecta esse ambiente à circulação externa. Essa separação é central para a identidade econômica do projeto: a UMS não é o ativo de mercado e a MWN não é apenas um crédito interno de serviço. A arquitetura e os parâmetros de implementação precisam ser consolidados, mas a função de gateway da MWN é o princípio estruturante da proposta.
 
-## Um ecossistema com diferentes frentes de desenvolvimento
+## A base tecnológica e de serviços da MWN
 
-A MeshWave reúne iniciativas que podem contribuir para a utilidade e a evolução da rede. Cada uma possui seu próprio estágio de maturidade.
+As frentes a seguir não são apresentadas como produtos independentes que desviam o foco da proposta. Elas demonstram a amplitude da base MeshWave e as fontes potenciais de serviço, atividade e utilidade que poderão se conectar à economia cuja camada de mercado é a MWN. Cada frente possui seu próprio estágio de maturidade.
 
 ### Infraestrutura distribuída e MeshWalker
 
@@ -197,7 +203,7 @@ A MeshWave busca investidores e parceiros estratégicos interessados em conhecer
 
 O objetivo é reunir capacidade financeira, humana, material e institucional para ampliar o desenvolvimento, profissionalizar a operação, integrar as diferentes frentes e criar condições para que o ecossistema alcance uma escala compatível com sua proposta.
 
-**A oportunidade não está em financiar uma ideia que ainda precisa nascer. Está em participar da evolução de um ecossistema que o fundador já conseguiu construir individualmente e com recursos mínimos. Se foi possível realizar tanto com nada, o que poderá ser realizado com alguma coisa?**
+**A oportunidade não está em financiar uma ideia que ainda precisa nascer. Está em participar da evolução da MWN — um ativo de mercado apoiado por uma base tecnológica e de serviços que o fundador já conseguiu construir individualmente e com recursos mínimos. Se foi possível construir essa base com tão pouco, o que poderá ser realizado com recursos para consolidar a economia e ampliar a MWN?**
 
 **MESHWAVE**  
 **ROB — Return On Believe**  
