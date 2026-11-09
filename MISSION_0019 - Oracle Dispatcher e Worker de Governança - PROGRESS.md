@@ -21,11 +21,12 @@ A missão foi criada como `STAGED` e agora foi assumida como `PROGRESS` pela ins
 
 ## Execução atual
 
-- **Tarefa ativa:** 19.1 — Especificar contrato, autoridade e modelo de execução do Oracle Dispatcher.
-- **Instância:** ChatGPT.
-- **Status da tarefa:** DONE.
-- **Checkpoint:** 2026-11-08 23:14 (-03:00).
+- **Última tarefa:** 19.2 — Implementar worker determinístico de fila e revisão estrutural de ORs.
+- **Instância:** Manus (sandbox).
+- **Status da tarefa:** DONE; OR-20261108-0033 submetido para revisão independente.
+- **Checkpoint:** 2026-11-08 23:40 (-03:00); implementação e testes locais concluídos.
+- **Reconciliação:** o protótipo mencionado no histórico não existe no HEAD remoto reconciliado. O worker foi criado conforme blueprint/contrato, mas o dry-run real bloqueia fail-closed em 9 linhas de `INDEX.csv` fora do schema; nenhum OR real foi processado e nenhuma normalização foi feita.
 
 ## Handoff
 
-Tarefa 19.1 foi assumida formalmente e concluída com contrato versionado e auditoria de injeções. As tarefas 19.2–19.7 permanecem `STAGED` para continuidade por outros agentes. O protótipo continua preliminar e não aceito até a execução da 19.2.
+Tarefas 19.1 e 19.2 estão concluídas em seus respectivos escopos; a MISSION_0019 permanece `PROGRESS`. O OR-20261108-0033 aguarda revisão. Próximo passo elegível: tarefa 19.3, com estratégia explícita, lossless e testável para CSV legado, IDs, atomicidade, locks e recuperação. Até esse gate, o worker não consegue percorrer o índice real; não executar reescrita automática ou FOR.
