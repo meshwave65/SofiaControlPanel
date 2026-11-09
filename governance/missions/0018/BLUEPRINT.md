@@ -122,3 +122,12 @@ O responsável pode autorizar expressamente um **fechamento preliminar** quando 
 - exige que o FOR, quando produzido, seja incorporado à versão definitiva, com correções e divergências documentadas.
 
 A distinção entre fechamento preliminar e versão definitiva deve constar no README da missão, no cross-review e no Operational Report.
+
+
+## 10. Fonte financeira canônica e atualização obrigatória ao vivo
+
+Para métricas atuais de aquisição, saldo, carteira, conversão ou economia MWN/UMS, consulte diretamente o Supabase **MeshWave65**, project ref `ufylccbdjfzydbwhpmpp`, em SQL read-only na sessão atual. Não derive “estado atual” de snapshots, ORs, inventários, dumps de migração ou de outro projeto Supabase. A base `mwn` consultada anteriormente é incompleta para a história de aquisições e não deve ser usada como fonte substituta.
+
+Consultar somente tabelas necessárias, começando pelos registros de aquisição atuais (`mwc_acquisitions`) e seus eventos/ledger (`mwc_acquisition_events`, `mwc_wallet_ledger`), conforme o objetivo; usar `mw_blocks`, `mw_transactions`, `mw_wallets` e tabelas UMS apenas quando pertinentes. Separar aquisição validada, movimento histórico, reversão e saldo líquido atual. Não misturar números entre projetos ou métricas.
+
+Cada dado quantitativo deve indicar projeto, leitura ao vivo/data-hora, tabela/critério, filtro de status e definição da métrica. Se consulta/projeto não estiver acessível, marcar como **não verificado ao vivo**; não reutilizar número histórico para preencher a lacuna. Esta regra é obrigatória para todos os agentes e chats, e prevalece sobre snapshots/documentos de evidência datados.
