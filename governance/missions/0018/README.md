@@ -222,3 +222,14 @@ Após a retomada formal da missão em OR-20261109-0006, o responsável confirmou
 - fatos e limites sobre estágio de maturidade, UMS/MWN, MW-Ex e riscos foram preservados, sem introduzir promessa ou status novo.
 
 Próximo passo dentro de 18.10: receber a avaliação do fundador sobre o documento mestre integral e iterar diretamente nele. Não solicitar que o fundador monte ou cole fragmentos.
+
+
+## Atualização de continuidade — execução 18.11–18.14 (2026-11-09)
+
+A execução documental autônoma concluiu 18.11–18.14, com artefatos e ORs próprios:
+- 18.11: CLAIM_EVIDENCE_AUDIT_18_11.md — OR-20261109-0008.
+- 18.12: CAPITAL_PARTICIPATION_FRAMEWORK_18_12.md — OR-20261109-0009.
+- 18.13: EXECUTIVE_DERIVATIVES_ROB_18_13.md — OR-20261109-0010.
+- 18.14: DUE_DILIGENCE_FAQ_ROB_18_14.md — OR-20261109-0011.
+
+A matriz de alegações é documental e se baseia no inventário de 08/11; não houve nova validação de runtime, dados financeiros ou auditoria técnica independente. O master ROB v0.3 e os derivados permanecem DRAFT para revisão do fundador. 18.10 segue PROGRESS para revisão do texto integral; 18.15 está BLOCKED aguardando aprovação humana do conteúdo e decisão separada sobre autorização de distribuição; 18.16 está BLOCKED até aprovação textual. A missão permanece PROGRESS e nenhuma ação externa foi executada.
