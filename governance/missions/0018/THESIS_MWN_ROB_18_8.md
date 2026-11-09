@@ -1,12 +1,15 @@
-# MeshWave / MWN — Tese de lançamento e proposta ROB
+# MWN — Tese de lançamento e proposta ROB
+## O ativo de mercado da economia MeshWave, fundamentado por seu ecossistema
 
 **Versão:** 0.1.1-DRAFT_FOR_OWNER_DECISION | **Data:** 2026-11-08 | **Status:** documento de decisão; não é oferta pública, investment solicitation, aprovação de tokenomics ou previsão financeira.
 
 ## 1. Resumo da tese
 
-MeshWave é um ecossistema existente, parcialmente construído, rudimentar em sua operação e em evolução, conforme a definição canônica do responsável. O responsável relata que a base foi desenvolvida predominantemente em esforço solo sob restrições financeiras, materiais e estruturais severas. A arquitetura distingue **UMS**, unidade interna de contabilização de contribuição útil e consumo de serviços, de **MWN**, camada planejada de circulação/mercado. O ecossistema inclui a rede/infraestrutura MeshWalker, a camada cognitiva SOFIA, o produto SWE, Condenser, MIA-D e opções de adoção/impacto como Jardim do Éden, aferição opcional de qualidade de serviços (QoS) e ORP.
+**MWN é o ativo de mercado da economia MeshWave e o objeto central desta tese ROB.** A proposta não é vender os produtos e projetos do ecossistema individualmente. É apresentar um ativo destinado à circulação externa que possui como fundamento uma base tecnológica e econômica: serviços, aplicações, infraestrutura distribuída e mecanismos internos de contabilização de contribuição e consumo.
 
-A tese de investimento não é “um token já operacional”. É a possibilidade de profissionalizar e integrar uma base parcialmente construída: portal público, wallet frontend autenticada, ledger/piloto UMS, código de software e protótipos. A integração completa, o mercado próprio e a demanda recorrente ainda dependem de execução, capital, decisões econômicas, segurança, conformidade, adoção e liquidez.
+A **MeshWave é a base da MWN**. O ecossistema dá contexto e possibilidades de utilidade ao ativo, enquanto a UMS organiza a contabilização interna de contribuição útil e consumo de serviços. A MWN é o gateway asset entre essa economia interna e a camada de mercado; a MW-Ex é o canal próprio pretendido. A arquitetura não prevê uma rota alternativa de conversão direta UMS↔outro criptoativo.
+
+A base foi construída pelo trabalho de uma única pessoa — o fundador — com ferramentas e serviços gratuitos da internet e equipamentos extremamente limitados. Ela já inclui componentes funcionais e iniciativas em diferentes estágios. O investimento busca consolidar a economia, fortalecer a infraestrutura e ampliar as condições de utilidade e circulação da MWN. A existência do ecossistema oferece fundamento à tese, mas não significa que cada projeto gere automaticamente demanda, preço ou liquidez.
 
 ## 2. O problema e a proposta de valor
 
@@ -20,7 +23,7 @@ A tese de investimento não é “um token já operacional”. É a possibilidad
 ### 2.2 Proposta
 
 - **UMS:** unidade interna para contabilizar contribuição útil e consumo de serviços segundo regras aprovadas e versionadas.
-- **MWN:** ativo externo/mercado pretendido; sua identidade, direitos, supply, Genesis, conversão e circulação permanecem decisões abertas.
+- **MWN:** ativo de mercado e gateway da economia MeshWave, conectando a contabilização interna UMS à circulação externa. Direitos, supply, Genesis, emissão e parâmetros finais de conversão ainda dependem de aprovação.
 - **MeshWave:** camada de rede e serviços que pode gerar workloads e uso real.
 - **MW-Ex:** mercado próprio pretendido como canal primário inicial, hoje somente preview.
 - **SWE/Condenser:** produtos de software que podem entregar valor comercial e workloads antes da maturidade completa da rede federada.
@@ -64,7 +67,9 @@ flowchart LR
 
 ## 5. Por que MWN é o foco
 
-MWN é o foco de mercado porque a tese pretende conectar a economia interna e o conjunto de serviços a uma camada de circulação externa. O valor potencial não depende apenas do ticker, mas de:
+MWN é o ativo central da proposta. A MeshWave não está sendo apresentada como um portfólio de produtos independentes: o ecossistema é a base que dá contexto, estrutura e possibilidades de utilidade ao ativo. A UMS permanece como unidade interna de contabilização; a MWN é a porta de conexão com o mercado externo. A arquitetura reserva à MWN o papel exclusivo de gateway entre UMS e o mercado, sem rota direta UMS↔outro criptoativo.
+
+A tese de valor potencial depende da consolidação de elementos como:
 
 1. um ativo canônico com direitos/supply/regras definidos;
 2. UMS como unidade interna com utilidade e emissão verificáveis;
@@ -102,7 +107,7 @@ ROB não é uma fórmula de retorno, valuation, ROI forecast, token price target
 
 ### Linguagem recomendada
 
-“ROB (Return On Believe) descreve o caráter de investimento em uma tese de execução e integração de alto risco. O potencial de retorno depende de milestones, adoção, utilidade, mercado e decisões futuras; não é ROI garantido nem promessa de valorização.”
+“ROB (Return On Believe) descreve o caráter de investimento em uma tese de evolução da MWN, ativo de mercado fundamentado pelo ecossistema MeshWave. O potencial depende da consolidação da arquitetura econômica, da utilidade do ecossistema, da infraestrutura de mercado e da adoção; não é ROI garantido nem promessa de valorização.”
 
 ## 8. Cenários qualitativos — sem projeção financeira
 
