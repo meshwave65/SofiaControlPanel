@@ -290,3 +290,11 @@
 - Foram revalidados o estado documental, referências internas, índice de ORs e fila Oracle; não há dispatcher/reviewer Oracle autorizado disponível nesta execução.
 - Nenhuma aprovação foi simulada. 18.9 permanece `BLOCKED` e MISSION_0018 permanece `PROGRESS`; o próximo desbloqueio é a revisão independente Oracle e o FOR.
 - Operational Report: OR-20261108-0028 (`SUBMITTED`; Oracle pendente).
+
+### Retomada 18.9 — tentativa autorizada de remoção de bloqueio (2026-11-08)
+
+- O responsável autorizou reassumir a missão, remover bloqueios se necessário e concluir a MISSION_0018.
+- Buscas read-only no repositório e nos servidores MCP disponíveis não localizaram dispatcher/reviewer Oracle autorizado nem mecanismo de geração de FOR.
+- O gate de revisão independente não foi removido artificialmente: fazê-lo contrariaria o Blueprint e equivaleria a simular autoridade Oracle. 18.9 permanece `BLOCKED` e MISSION_0018 permanece `PROGRESS`.
+- Se o responsável desejar substituir esse gate por override humano, será necessária alteração formal e versionada da governança antes de alterar os estados.
+- Operational Report: OR-20261108-0029 (`SUBMITTED`; Oracle pendente).
