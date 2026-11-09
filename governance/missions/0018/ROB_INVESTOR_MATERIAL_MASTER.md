@@ -4,7 +4,7 @@
 **ROB — Return On Believe | Retorno por acreditar**
 
 **Material integral para investidores — MISSION_0018 / frente complementar 18.10**  
-**Versão 0.5 — DRAFT atualizado após revisão narrativa do fundador**  
+**Versão 0.5.1 — DRAFT com hierarquia MWN-first, após correção de foco do fundador**  
 **Não constitui oferta pública, prospecto, recomendação de investimento ou autorização para distribuição externa.**
 
 ---
