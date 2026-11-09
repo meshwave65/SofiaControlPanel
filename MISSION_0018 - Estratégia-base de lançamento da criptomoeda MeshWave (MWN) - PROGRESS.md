@@ -1,7 +1,7 @@
 # MISSION_0018 — Estratégia-base de lançamento da criptomoeda MeshWave (MWN)
 
 - **ID:** 0018
-- **Status:** PROGRESS
+- **Status:** DONE — PRELIMINARY (owner-approved override; definitive version awaits FOR)
 - **Tipo:** Missão-base estratégica
 - **Projeto central:** MeshWave Network (MWN)
 - **Objetivo:** definir uma estratégia integrada, faseada e executável para o lançamento da MWN, articulando economia, mercado, infraestrutura, adoção, projetos do ecossistema, capital, segurança, conformidade e governança.
@@ -57,3 +57,10 @@ A missão está STAGED. Esta definição registra a direção estratégica infor
 - **Checkpoint:** iniciado em 2026-11-07; levantamento de fontes e evidências em curso.
 
 A execução seguirá os critérios do blueprint e produzirá inventário rastreável e Operational Report.
+
+
+## Fechamento preliminar autorizado pelo responsável — 2026-11-09
+
+A missão foi concluída preliminarmente por decisão explícita do responsável, que autorizou remover o bloqueio dependente da inexistência atual do Final Operational Report. A revisão 18.9 é encerrada como **DONE — PRELIMINARY**. Esta decisão não simula revisão Oracle nem declara a versão definitiva. Quando o FOR for elaborado, ele será incorporado e a versão definitiva será preparada, com eventuais correções registradas. O pacote continua sendo documental e sujeito à revisão do responsável; não autoriza desenvolvimento, oferta, listing, outreach, lançamento ou distribuição externa.
+
+Operational Report da decisão: OR-20261109-0004 (SUBMITTED; Oracle PENDING).
