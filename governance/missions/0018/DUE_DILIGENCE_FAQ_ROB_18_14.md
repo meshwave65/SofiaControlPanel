@@ -1,4 +1,4 @@
-# MISSION_0018 / 18.14 — Pacote de diligência e FAQ ROB (Return On Believe — retorno por acreditar)
+# MISSION_0018 / 18.14 — Pacote de diligência e FAQ (Frequently Asked Questions — perguntas frequentes) ROB (Return On Believe — retorno por acreditar)
 
 **Versão:** 0.5-DRAFT | **Data:** 2026-11-10  
 **Base textual:** master ROB v0.5.8; matriz 18.1; tarefas 18.2–18.8; auditoria 18.11; framework 18.12; derivados 18.13.
@@ -20,6 +20,7 @@ Toda sigla deve ser apresentada por extenso na primeira ocorrência de cada docu
 - **ROB — Return On Believe (retorno por acreditar).**
 - **MVP — Minimum Viable Product (produto mínimo viável).**
 - **ESG — Environmental, Social and Governance (ambiental, social e governança).**
+- **FAQ — Frequently Asked Questions (perguntas frequentes).**
 
 ## 1. Rota de leitura
 1. EXECUTIVE_DERIVATIVES_ROB_18_13.md — resumo executivo.
