@@ -1,6 +1,6 @@
 # ROB (Return On Believe — retorno por acreditar) — Storyboard de apresentação para investidores
 
-**Fonte editorial:** master ROB v0.5.7  
+**Fonte editorial:** master ROB v0.5.8  
 **Status:** roteiro visual interno; não publicado.  
 **Objetivo:** apresentar MWN como ativo de mercado e o ecossistema MeshWave como fundamento tecnológico/econômico, sem transformar a apresentação em catálogo de produtos.
 
