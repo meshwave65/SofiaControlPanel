@@ -103,11 +103,11 @@
 
 ## Checkpoint de sincronização — 2026-11-10 (master ROB v0.5.6)
 
-- 18.10: master integral v0.5.5 mantido como documento-fonte; status operacional da MW-Ex e arquitetura ampliada do JEd já incorporados.
+- 18.10: master integral v0.5.6 mantido como documento-fonte; status operacional da MW-Ex e arquitetura ampliada do JEd já incorporados.
 - 18.11: auditoria de alegações atualizada para v0.2-DRAFT; adendo factual da MW-Ex substitui a classificação histórica de preview não funcional e registra os limites do MVP interno.
 - 18.12: framework de capital atualizado para v0.2-DRAFT_FOR_OWNER_DECISION; primeira etapa agora descreve consolidação e profissionalização da MW-Ex operacional, não sua construção inicial.
 - 18.13: pitch, resumo executivo e apresentação verbal sincronizados com master v0.5.6, versão 0.4-DRAFT.
-- 18.14: FAQ sincronizado com master v0.5.5, versão 0.4-DRAFT; links públicos e contatos institucionais (e-mail e WhatsApp Brasil/Portugal) incluídos.
+- 18.14: FAQ sincronizado com master v0.5.6, versão 0.4-DRAFT; links públicos e contatos institucionais (e-mail e WhatsApp Brasil/Portugal) incluídos.
 - 18.15: permanece BLOCKED — OWNER REVIEW até aprovação explícita do fundador do pacote textual final. Aprovação não autoriza distribuição.
 - 18.16: permanece BLOCKED — DEPENDENCY até aprovação textual em 18.15.
 
