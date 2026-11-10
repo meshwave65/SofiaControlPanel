@@ -1,9 +1,9 @@
 # MISSION_0018 / 18.14 — Pacote de diligência e FAQ ROB
 
-**Versão:** 0.4-DRAFT | **Data:** 2026-11-09  
+**Versão:** 0.4-DRAFT | **Data:** 2026-11-10  
 **Base textual:** master ROB v0.5.6; matriz 18.1; tarefas 18.2–18.8; auditoria 18.11; framework 18.12; derivados 18.13.
 
-**Sincronização:** atualizado para master ROB v0.5.5, preservando MWN-first e incorporando o estado operacional da MW-Ex como MVP custodial interno.  
+**Sincronização:** atualizado para master ROB v0.5.6, preservando MWN-first e incorporando o estado operacional da MW-Ex como MVP custodial interno.  
 **Status:** pacote interno; sem autorização para envio externo.
 
 ## 1. Rota de leitura
@@ -67,8 +67,16 @@
 - [ ] Definir instrumento, valuation, direitos e governança somente após assessoria.
 - [ ] Confirmar mercados/jurisdições e contraparte antes de qualquer venue.
 
-## 4. Contatos e links
-Nenhum e-mail, WhatsApp, telefone ou URL de contato foi acrescentado porque não há destino confirmado neste pacote. Não inventar links. A inclusão de contatos é pendência do fundador antes de qualquer versão destinada a terceiros.
+## 4. Links públicos e contato
+
+- Apresentação para investidores: https://www.meshwave.com.br/investidores
+- Estado do projeto: https://www.meshwave.com.br/estado-do-projeto
+- MW-Ex: https://www.meshwave.com.br/mw-ex
+- E-mail institucional: [info@meshwave.com.br](mailto:info@meshwave.com.br)
+- WhatsApp — Brasil: [+55 21 97234-1965](https://wa.me/5521972341965)
+- WhatsApp — Portugal: [+351 914 845 439](https://wa.me/351914845439)
+
+Os canais acima correspondem aos contatos publicados na página institucional de contato da MeshWave.
 
 ## 5. Resultado
 **18.14 atualizada para master v0.5.5.** A rota documental e as respostas foram sincronizadas, inclusive o status operacional da MW-Ex. Permanecem como gates para circulação externa: inserir contato confirmado, concluir revisão/aprovação do fundador e obter autorização específica de distribuição.
