@@ -341,3 +341,17 @@ O JEd é, portanto, plataforma de otimização digital, mensuração do impacto 
 - A infraestrutura distribuída poderá comercializar processamento e armazenamento a terceiros desde a etapa operacional inicial, como objetivo do modelo, sem afirmar que a oferta já esteja em produção.
 - A estratégia inclui unidade própria de desenvolvimento de jogos/aplicações e/ou parcerias com Software Houses para integrar Condenser, MIA-D e módulo de interconexão a jogos, aplicativos e sistemas de terceiros. Cada parceria poderá agregar usuários e potenciais MeshWalkers.
 - Master ROB atualizado para v0.5.4. MWN permanece o ativo central; JEd, MeshWalker e integrações são fundamentos e canais potenciais de utilidade e atividade econômica. Conteúdo continua DRAFT e sem autorização de distribuição externa.
+
+
+## Checkpoint atual — sincronização do pacote ROB v0.5.5 (2026-11-10)
+
+O documento-fonte `ROB_INVESTOR_MATERIAL_MASTER.md` está na versão 0.5.5 e permanece como referência canônica. Os derivados foram sincronizados para eliminar informações antigas sobre a MW-Ex:
+
+- 18.11 — auditoria de alegações v0.2-DRAFT, com adendo de evidências do MVP custodial interno operacional.
+- 18.12 — framework de participação e capital v0.2-DRAFT_FOR_OWNER_DECISION, com a primeira etapa orientada à consolidação da exchange já operacional.
+- 18.13 — pitch curto, resumo executivo e apresentação verbal v0.4-DRAFT.
+- 18.14 — FAQ e diligência v0.4-DRAFT, com links públicos para investidores, estado do projeto e MW-Ex.
+
+A MW-Ex deve ser descrita como exchange própria operacional em modalidade interna, MVP custodial, com carteira MWN/ledger separado, conversões UMS↔MWN, transferências internas elegíveis, histórico, créditos administrativos validados e reversões compensatórias. O MVP não inclui listagem externa, saques automáticos ou movimentação financeira automatizada para fora do ecossistema.
+
+**Pendências para apresentação externa:** revisão final e aprovação textual explícita do fundador (18.15); confirmação e inclusão de e-mail/WhatsApp de contato no CTA; autorização de distribuição, que é separada da aprovação do texto. As peças visuais (18.16) dependem da aprovação textual.
