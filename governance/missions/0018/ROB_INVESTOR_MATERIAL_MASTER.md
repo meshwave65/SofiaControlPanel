@@ -4,7 +4,7 @@
 **ROB — Return On Believe | Retorno por acreditar**
 
 **Material integral para investidores — MISSION_0018 / frente complementar 18.10**  
-**Versão 0.5.7 — consolidação editorial da tese econômica e pacote executivo**  
+**Versão 0.5.8 — consolidação editorial da tese econômica e pacote executivo**  
 **Não constitui oferta pública, prospecto, recomendação de investimento ou autorização para distribuição externa.**
 
 ---
