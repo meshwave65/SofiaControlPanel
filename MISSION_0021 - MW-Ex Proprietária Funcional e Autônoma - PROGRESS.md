@@ -3,7 +3,7 @@
 > **Projeto:** SofiaControlPanel (SCP) / MeshWave  
 > **Data de criação:** 2026-11-10  
 > **Orquestrador:** SofiaControlPanel (SCP)  
-> **Status:** STAGED — criada por solicitação do responsável; ainda não iniciada  
+> **Status:** PROGRESS — tarefa 21.1 assumida por ChatGPT  
 > **Blueprint:** governance/missions/0021/BLUEPRINT.md
 
 ## Objetivo
@@ -21,11 +21,11 @@ A primeira versão deve oferecer os fluxos explícitos de conversão e transfer�
 
 ## Estado inicial e relacionamento com outras missões
 
-A tela atual de MW-Ex em newsite é uma prévia marcada “Em breve”; contém candidatos MWN, BTC, ETH, Ibovespa, S&P 500 e IPCA, mas isso não demonstra cotação ou operação funcional. A MISSION_0018, tarefa 18.4, concluiu escopo/readiness documental; a MISSION_0021 cobre implementação funcional e validação técnica. A MISSION_0020 permanece PROGRESS; esta nova missão fica STAGED e não reivindica tarefa nem prioridade sobre trabalho em andamento.
+A tela atual de MW-Ex em newsite é uma prévia marcada “Em breve”; contém candidatos MWN, BTC, ETH, Ibovespa, S&P 500 e IPCA, mas isso não demonstra cotação ou operação funcional. A MISSION_0018, tarefa 18.4, concluiu escopo/readiness documental; a MISSION_0021 cobre implementação funcional e validação técnica. A MISSION_0020 permanece PROGRESS; a MISSION_0021 agora está em PROGRESS para executar exclusivamente a tarefa 21.1, sem reivindicar prioridade sobre trabalho em andamento da MISSION_0020.
 
 ## Próxima ação
 
-Quando selecionada conforme GOVERNANCE.md, reconciliar o estado remoto, assumir uma tarefa elegível no quadro e começar pelo inventário dos fluxos atuais e pela resolução dos gates de modelo de preço, liquidez, conversão e auditoria Genesis. Nenhuma operação financeira real, migração de saldo ou deploy de produção é autorizada por esta definição de missão.
+Tarefa 21.1 assumida em 2026-11-10 por ChatGPT. O primeiro passo é reconciliar o estado remoto e começar pelo inventário dos fluxos atuais e pela resolução dos gates de modelo de preço, liquidez, conversão e auditoria Genesis. Nenhuma operação financeira real, migração de saldo ou deploy de produção é autorizada por esta definição de missão.
 
 ## Artefatos
 
