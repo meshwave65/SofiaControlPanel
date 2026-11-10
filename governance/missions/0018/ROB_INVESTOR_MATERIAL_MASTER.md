@@ -28,6 +28,7 @@ Definições utilizadas neste material:
 - **ROI — Return on Investment:** retorno sobre o investimento.
 - **MVP — Minimum Viable Product:** produto mínimo viável.
 - **RPC — Remote Procedure Call:** chamada de procedimento remoto.
+- **GTA — Grand Theft Auto:** franquia de jogos citada apenas como exemplo de categoria de integração.
 
 ## A tese central: MWN
 
