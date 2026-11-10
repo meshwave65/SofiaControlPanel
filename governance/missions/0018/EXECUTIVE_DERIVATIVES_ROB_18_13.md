@@ -1,9 +1,21 @@
-# MISSION_0018 / 18.13 — Derivados executivos ROB
+# MISSION_0018 / 18.13 — Derivados executivos ROB (Return On Believe — retorno por acreditar)
 
 **Versão:** 0.5-DRAFT | **Derivado de:** master ROB v0.5.7; atualização editorial de 2026-11-10
 
 **Hierarquia narrativa:** MWN é o ativo central da tese ROB. O ecossistema MeshWave é sua base tecnológica e econômica; seus componentes são apresentados como fundamento da MWN, não como produtos independentes à venda.  
 **Data:** 2026-11-10 | **Uso:** revisão interna; aprovação final do fundador pendente.
+
+## Glossário de siglas
+
+- **MWN — MeshWave Network:** criptoativo da economia MeshWave.
+- **UMS — Unidade MeshWave de Serviços:** unidade interna de contabilização de contribuição útil e consumo de serviços.
+- **MW-Ex — MeshWave Exchange:** exchange própria da MeshWave.
+- **SOFIA — Sistema de Orquestração Federada de Inteligências Artificiais.**
+- **SWE — Sofia Web Extractor:** módulo de captura e extração de conhecimento.
+- **MIA-D — Monitor de Impacto Ambiental Digital:** estrutura de mensuração, análise e inteligência sobre impactos associados à eficiência digital.
+- **JEd — Jardim do Éden.**
+- **MVP — Minimum Viable Product (produto mínimo viável).**
+- **ROB — Return On Believe (retorno por acreditar).**
 
 ## 1. Resumo executivo
 
