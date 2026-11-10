@@ -15,6 +15,7 @@
 - **MIA-D — Monitor de Impacto Ambiental Digital:** estrutura de mensuração, análise e inteligência sobre impactos associados à eficiência digital.
 - **JEd — Jardim do Éden.**
 - **MVP — Minimum Viable Product (produto mínimo viável).**
+- **ESG — Environmental, Social and Governance (ambiental, social e governança).**
 - **ROB — Return On Believe (retorno por acreditar).**
 
 ## 1. Resumo executivo
