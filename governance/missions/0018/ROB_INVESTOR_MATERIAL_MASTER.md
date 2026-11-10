@@ -4,7 +4,7 @@
 **ROB — Return On Believe | Retorno por acreditar**
 
 **Material integral para investidores — MISSION_0018 / frente complementar 18.10**  
-**Versão 0.5.4 — DRAFT com expansão do JEd, economia de jogo, patrocínios, MeshWalkers e integração de aplicações explicitadas**  
+**Versão 0.5.5 — atualização do status operacional da MW-Ex e sincronização da tese com a implantação do MVP custodial**  
 **Não constitui oferta pública, prospecto, recomendação de investimento ou autorização para distribuição externa.**
 
 ---
@@ -15,7 +15,7 @@
 
 A MeshWave é a base que dá contexto, estrutura e possibilidades de utilidade à MWN. O ecossistema não é um catálogo de produtos que compete com o ativo pela atenção do investidor: é o fundamento tecnológico e econômico que diferencia a proposta de um criptoativo sem uma estrutura de serviços e aplicações por trás.
 
-A arquitetura distingue a UMS, unidade interna de contabilização de contribuição útil e consumo de serviços, da MWN, ativo destinado à circulação e à conexão com o mercado externo. Na arquitetura proposta, a conexão entre a economia interna e o mercado externo ocorre por meio da MWN, com a MW-Ex como canal próprio pretendido. Não se prevê uma rota alternativa de conversão direta entre UMS e outros criptoativos.
+A arquitetura distingue a UMS, unidade interna de contabilização de contribuição útil e consumo de serviços, da MWN, ativo destinado à circulação e à conexão com o mercado externo. Na arquitetura da MeshWave, a conexão entre a economia interna e a camada de mercado ocorre por meio da MWN, utilizando a MW-Ex, que já está operacional como exchange própria para as operações internas de MWN e UMS. A plataforma já conta com compradores e oferece carteira MWN, conversões explícitas UMS↔MWN e transferências internas entre usuários elegíveis. A expansão para integração com exchanges externas permanece como etapa posterior. Não se prevê uma rota alternativa de conversão direta entre UMS e outros criptoativos.
 
 O funcionamento do ecossistema gera uma demanda recorrente pela MWN. Os serviços e as atividades da rede utilizam UMS; quando um usuário consome mais UMS do que possui, sua única alternativa para obter novas unidades é adquirir MWN no mercado e convertê-la em UMS. Esse mecanismo conecta diretamente a atividade econômica interna à procura pela MWN: enquanto o ecossistema estiver funcional, a necessidade de UMS sustenta a demanda pela MWN e sua dinâmica de preço e liquidez no mercado. A tese, portanto, está na consolidação e no funcionamento do próprio ecossistema, cuja atividade alimenta continuamente essa relação econômica.
 
@@ -60,7 +60,7 @@ A UMS é concebida como unidade interna associada ao reconhecimento de contribui
 
 **MWN — ativo de circulação e conexão com o mercado**
 
-MWN é o ativo de mercado da economia MeshWave. É a porta de conexão entre a contabilização interna de utilidade e contribuição e a circulação externa do valor econômico do ecossistema. A arquitetura estabelece a MWN como caminho exclusivo entre a economia interna UMS e a camada de mercado, com a MW-Ex como canal próprio pretendido. Não há rota alternativa direta UMS↔outro criptoativo.
+MWN é o ativo de mercado da economia MeshWave. É a porta de conexão entre a contabilização interna de utilidade e contribuição e a circulação externa do valor econômico do ecossistema. A arquitetura estabelece a MWN como caminho exclusivo entre a economia interna UMS e a camada de mercado, com a MW-Ex já operacional como canal próprio para as operações internas. Não há rota alternativa direta UMS↔outro criptoativo.
 
 Os parâmetros finais de emissão, supply, direitos, Genesis, conversão, custódia e operação ainda dependem de consolidação e aprovação.
 
@@ -134,15 +134,15 @@ A proposta não depende, portanto, de a MeshWave produzir individualmente todos 
 
 ### MW-Ex — mercado próprio
 
-MW-Ex é concebida como a exchange própria do ecossistema e como canal primário inicial para a experiência de mercado de MWN.
+MW-Ex é a exchange própria do ecossistema MeshWave e já está operacional em sua modalidade interna. A plataforma conta com compradores e oferece carteira MWN com ledger separado, conversões explícitas UMS↔MWN e transferências internas entre MeshWalkers elegíveis. As operações são executadas por funções RPC no backend Supabase, com histórico e possibilidade de reversão administrativa por lançamentos compensatórios. A rota `/mw-ex` é protegida por autenticação e a elegibilidade é verificada no servidor.
 
-Há uma prévia visual integrada à experiência da carteira no website, mas ela ainda não executa operações de mercado. Não há comprovação de matching de ordens, negociação, custódia operacional, liquidez ou mercado em funcionamento.
+A implantação do MVP custodial interno está registrada no [relatório operacional OR-20261110-0046](https://github.com/meshwave65/SofiaControlPanel/blob/main/governance/operational_reports/OR-20261110-0046.md), e o código da interface está disponível em [MwEx.jsx](https://github.com/meshwave65/newsite/blob/main/src/pages/MwEx.jsx).
 
-Sua evolução representa uma das frentes relevantes de estruturação do ecossistema.
+Esse estado operacional corresponde à exchange interna MeshWave. Integração com exchanges externas, saques automáticos e movimentação financeira para fora do ecossistema são etapas distintas e posteriores.
 
 ## Por que a oportunidade MWN existe neste momento
 
-A MWN foi concebida para ser o ativo de mercado da economia MeshWave. O momento da oportunidade está ligado à necessidade de consolidar a arquitetura econômica que conecta a unidade interna UMS ao ativo de circulação externa, estruturar a MW-Ex como canal próprio e ampliar a base tecnológica e de serviços que poderá sustentar a utilidade e a atividade econômica associadas à MWN.
+A MWN foi concebida para ser o ativo de mercado da economia MeshWave. O momento da oportunidade está ligado à necessidade de consolidar a arquitetura econômica que conecta a unidade interna UMS ao ativo de circulação externa, consolidar e expandir a MW-Ex, já operacional como canal próprio, e ampliar a base tecnológica e de serviços que poderá sustentar a utilidade e a atividade econômica associadas à MWN.
 
 A base já existe em diferentes graus de maturidade, mas a estrutura disponível — construída individualmente pelo fundador — chegou ao limite de sua capacidade. O desafio agora é ampliar os meios necessários para consolidar a economia e a infraestrutura da MWN:
 
@@ -152,7 +152,7 @@ A base já existe em diferentes graus de maturidade, mas a estrutura disponível
 - **Estrutura organizacional:** processos, responsabilidades, suporte, governança e capacidade de execução contínua.
 - **Integração e validação:** transformar componentes independentes em soluções utilizáveis, testadas e progressivamente conectadas.
 
-O investimento representa a possibilidade de fortalecer o ativo central da proposta: consolidar a economia UMS/MWN, avançar a MW-Ex e ampliar o ecossistema que fundamenta a MWN.
+O investimento representa a possibilidade de fortalecer o ativo central da proposta: consolidar a economia UMS/MWN, profissionalizar e expandir a MW-Ex operacional e ampliar o ecossistema que fundamenta a MWN.
 
 ## ROB — Return On Believe
 
@@ -168,7 +168,7 @@ A proposta não é vender isoladamente os produtos do ecossistema. É apresentar
 
 A estratégia de mercado considera a experiência própria da MeshWave como ponto inicial de relacionamento com o ativo e com a economia do ecossistema.
 
-A MW-Ex é concebida como canal primário próprio. Sua implementação exige desenvolvimento técnico, definição econômica, controles operacionais, segurança, conformidade e condições adequadas de funcionamento.
+A MW-Ex já funciona como canal primário próprio para as operações internas UMS/MWN. Sua evolução exige aperfeiçoamento dos controles operacionais, segurança, conformidade, monitoramento, documentação e preparação de integrações externas futuras.
 
 Em uma etapa posterior, uma exchange externa poderá ampliar o acesso público ao ativo. A escolha de uma venue dependerá de elegibilidade, requisitos, custos, condições de mercado e avaliações específicas. Nenhuma exchange externa está atualmente selecionada ou contratada.
 
@@ -182,13 +182,13 @@ O fundador estabeleceu faixas estratégicas de capital para diferentes momentos 
 
 | Etapa | Objetivo estratégico | Faixa pretendida |
 |---|---|---:|
-| Desenvolvimento inicial | Ampliar a estrutura, amadurecer o ecossistema e avançar na MW-Ex própria | R$ 50 mil a R$ 100 mil |
+| Desenvolvimento inicial | Ampliar a estrutura, amadurecer o ecossistema e consolidar a MW-Ex operacional | R$ 50 mil a R$ 100 mil |
 | Acesso externo futuro | Preparar e avaliar acesso a uma exchange externa | R$ 250 mil a R$ 500 mil |
 | Expansão em maior escala | Ampliar capacidade, alcance e estrutura do ecossistema | Alguns milhões de reais |
 
 Essas faixas representam objetivos estratégicos preliminares, não orçamentos aprovados, projeções financeiras, valuation ou compromissos de captação. A destinação detalhada dos recursos, a estrutura de participação e os instrumentos possíveis dependem de definição própria e negociação.
 
-O propósito da primeira etapa é consolidar a arquitetura econômica UMS/MWN, avançar a MW-Ex e ampliar a capacidade tecnológica e operacional que sustenta a MWN.
+O propósito da primeira etapa é consolidar a arquitetura econômica UMS/MWN, fortalecer e expandir a MW-Ex já operacional e ampliar a capacidade tecnológica e operacional que sustenta a MWN.
 
 ## O que pode ser construído com uma estrutura ampliada
 
@@ -196,7 +196,7 @@ Uma estrutura ampliada poderá permitir que a MWN e sua economia avancem em fren
 
 1. **Profissionalização da base tecnológica:** reforço de infraestrutura, documentação, testes, segurança, qualidade e continuidade.
 2. **Formação de equipe:** incorporação de competências técnicas, operacionais, econômicas, comerciais e de conformidade.
-3. **Evolução da MW-Ex:** desenvolvimento progressivo do mercado próprio, com arquitetura, controles e operação adequados.
+3. **Consolidação da MW-Ex:** amadurecimento do MVP custodial interno já operacional, reforço de controles, monitoramento e preparação das próximas integrações.
 4. **Produtos e serviços:** amadurecimento de soluções como SWE e Condenser, com validação de utilidade, desempenho e possibilidade comercial.
 5. **Infraestrutura MeshWalker:** evolução dos protótipos e validação de mecanismos de participação distribuída em processamento e armazenamento.
 6. **Economia UMS/MWN:** consolidação das regras econômicas, dos fluxos internos e da relação com a circulação do ativo.
@@ -229,7 +229,7 @@ A oportunidade deve ser examinada a partir de elementos concretos:
 - a arquitetura UMS/MWN e a função exclusiva da MWN na conexão entre a economia interna e o mercado;
 - a base tecnológica, os serviços e as aplicações que fundamentam a tese;
 - o estágio real de cada componente do ecossistema;
-- o escopo técnico e os requisitos para tornar a MW-Ex operacional;
+- o funcionamento atual da MW-Ex interna, seus controles e as etapas necessárias para sua expansão;
 - as possibilidades de utilidade e atividade econômica que poderão sustentar a MWN;
 - as necessidades de capital, equipe, infraestrutura e governança;
 - os riscos técnicos, econômicos, jurídicos, regulatórios e de mercado.
@@ -240,7 +240,7 @@ A documentação de apoio permite aprofundar cada frente sem confundir protótip
 
 A proposta ROB busca investidores e parceiros estratégicos interessados em avaliar a MWN como ativo de mercado fundamentado pela economia e pelo ecossistema MeshWave.
 
-O objetivo é reunir capacidade financeira, humana, material e institucional para consolidar a arquitetura UMS/MWN, avançar a MW-Ex e fortalecer a base tecnológica e de serviços que poderá sustentar a utilidade e a circulação da MWN. Os projetos do ecossistema são apresentados para demonstrar essa fundamentação — não como uma lista de produtos independentes à venda.
+O objetivo é reunir capacidade financeira, humana, material e institucional para consolidar a arquitetura UMS/MWN, fortalecer e expandir a MW-Ex já operacional e ampliar a base tecnológica e de serviços que sustenta a utilidade e a circulação da MWN. Os projetos do ecossistema são apresentados para demonstrar essa fundamentação — não como uma lista de produtos independentes à venda.
 
 **A oportunidade não está em financiar uma ideia que ainda precisa nascer. Está em participar da evolução da MWN — um ativo de mercado apoiado por uma base tecnológica e de serviços que o fundador já conseguiu construir individualmente e com recursos mínimos. Se foi possível construir essa base com tão pouco, o que poderá ser realizado com recursos para consolidar a economia e ampliar a MWN?**
 
