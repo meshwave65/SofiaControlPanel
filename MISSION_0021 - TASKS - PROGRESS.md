@@ -128,6 +128,17 @@
 
 ## Checkpoint 21.4 — serviço local executável (2026-11-10)
 
+## Checkpoint 21.4 — MVP custodial em produção (2026-11-10)
+
+- A implementação foi integrada à branch `main` pelos PRs #21 e #22; commit final de referência: `cf1bb8d`.
+- A migration `supabase/migrations/20261110140000_mwex_mvp_ledger.sql` foi executada com sucesso.
+- O MVP operacional oferece ledger MWN separado, conversões explícitas UMS↔MWN, transferências internas entre MeshWalkers elegíveis, crédito administrativo após referência de depósito e validação, e reversões compensatórias que preservam o histórico.
+- A rota `/mw-ex` é protegida por autenticação; a elegibilidade MeshWalker é verificada no servidor.
+- A implantação foi validada e o deploy Vercel de produção de referência ficou READY. A tarefa 21.4 foi encerrada como `DONE (MVP custodial)`.
+- A tarefa 21.7 permanece PROGRESS para validação operacional posterior; 21.5 continua PROGRESS para cotações externas read-only. O harness file-backed do espelho privado permanece apenas um experimento sandbox complementar, sem alterar o status operacional do MVP.
+- OR: `OR-20261110-0046`.
+
+
 - A branch `meshwave65/mwex-sandbox-mirror:feat/mwex-local-persistent-test-ledger` recebeu o commit `dc8a55a`.
 - Foi adicionado `npm run serve:mwex`, que sobe o serviço HTTP sandbox em `127.0.0.1`, cria ledger JSON temporário privado, imprime URL/tokens sintéticos e remove os dados ao encerrar por padrão.
 - Smoke test real passou: `/health`, leitura de carteira demo, transferência `1.5 MWN` para recipient e leitura do saldo destinatário.
