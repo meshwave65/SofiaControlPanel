@@ -1,6 +1,6 @@
 # MISSION_0018 / 18.13 — Derivados executivos ROB
 
-**Versão:** 0.4-DRAFT | **Derivado de:** master ROB v0.5.5; atualização operacional MW-Ex de 2026-11-10
+**Versão:** 0.4-DRAFT | **Derivado de:** master ROB v0.5.6; atualização operacional MW-Ex de 2026-11-10
 
 **Hierarquia narrativa:** MWN é o ativo central da tese ROB. O ecossistema MeshWave é sua base tecnológica e econômica; seus componentes são apresentados como fundamento da MWN, não como produtos independentes à venda.  
 **Data:** 2026-11-10 | **Uso:** revisão interna; aprovação final do fundador pendente.
@@ -22,6 +22,9 @@ A base MeshWave foi construída pelo trabalho individual do fundador, utilizando
 MWN é o ativo de mercado da economia MeshWave. Sua proposta é conectar a circulação externa de valor a uma base que reúne serviços digitais, aplicações, inteligência artificial, infraestrutura distribuída e uma unidade interna de contabilização de contribuição e consumo de serviços (UMS). A UMS permanece no ambiente interno; a MWN conecta essa economia à circulação externa. A MeshWave já conta com a MW-Ex, sua exchange própria, operacional em modalidade interna como MVP custodial, com carteira MWN, conversões UMS↔MWN e transferências internas entre usuários elegíveis. O ecossistema é a fundamentação da MWN, não um catálogo de produtos independentes que esta apresentação procura vender.
 
 A base foi construída pelo trabalho de uma única pessoa — o fundador — utilizando exclusivamente ferramentas e serviços gratuitos disponíveis na internet e equipamentos próprios extremamente limitados. Já existem componentes funcionais como SOFIA, AppAndroid, SWE e Condenser, além da estrutura mínima de medição e avaliação MIA-D. O que se busca agora é reunir recursos materiais, computacionais, financeiros e humanos para profissionalizar, integrar e ampliar essa base, consolidando a economia e fortalecendo a MWN. Se foi possível realizar tanto com nada, o que poderá ser realizado com alguma coisa?
+
+**Contato:** [info@meshwave.com.br](mailto:info@meshwave.com.br) · [WhatsApp Brasil](https://wa.me/5521972341965) · [WhatsApp Portugal](https://wa.me/351914845439)  
+**Material:** [Apresentação para investidores](https://www.meshwave.com.br/investidores) · [Estado do projeto](https://www.meshwave.com.br/estado-do-projeto)
 
 ## 3. Texto de apresentação em conversa
 
