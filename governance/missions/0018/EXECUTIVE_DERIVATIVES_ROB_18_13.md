@@ -17,6 +17,9 @@ O funcionamento do ecossistema conecta a utilização de serviços e atividades 
 
 A base MeshWave foi construída pelo trabalho individual do fundador, utilizando exclusivamente ferramentas e serviços gratuitos disponíveis na internet e equipamentos próprios extremamente limitados. Já existem componentes funcionais como SOFIA, AppAndroid, SWE e Condenser, além de uma estrutura mínima de medição e avaliação MIA-D. O conjunto ainda é rudimentar e requer integração, profissionalização e escala. A oportunidade é fortalecer a MWN e consolidar a economia e a infraestrutura que dão suporte à sua utilidade e circulação.
 
+**Contato e informações:** [info@meshwave.com.br](mailto:info@meshwave.com.br) · [WhatsApp Brasil](https://wa.me/5521972341965) · [WhatsApp Portugal](https://wa.me/351914845439)  
+**Aprofundamento:** [Apresentação para investidores](https://www.meshwave.com.br/investidores) · [Estado do projeto](https://www.meshwave.com.br/estado-do-projeto)
+
 ## 2. Pitch curto — 2 parágrafos
 
 MWN é o ativo de mercado da economia MeshWave. Sua proposta é conectar a circulação externa de valor a uma base que reúne serviços digitais, aplicações, inteligência artificial, infraestrutura distribuída e uma unidade interna de contabilização de contribuição e consumo de serviços (UMS). A UMS permanece no ambiente interno; a MWN conecta essa economia à circulação externa. A MeshWave já conta com a MW-Ex, sua exchange própria, operacional em modalidade interna como MVP custodial, com carteira MWN, conversões UMS↔MWN e transferências internas entre usuários elegíveis. O ecossistema é a fundamentação da MWN, não um catálogo de produtos independentes que esta apresentação procura vender.
