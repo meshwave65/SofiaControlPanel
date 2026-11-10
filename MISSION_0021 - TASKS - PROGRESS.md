@@ -9,8 +9,8 @@
 |---|---|---|---|---|
 | 21.1 | Reconciliar arquitetura e estado real da MW-Ex, carteira interna, contratos, dados e deploys | DONE | ChatGPT | Matriz requisito→tela/API/ledger/dado; distinguir placeholder, operação real, hipótese e dependência; nenhuma consulta ou escrita fora do escopo |
 | 21.2 | Fechar o modelo funcional mínimo e os gates econômicos | DONE | ChatGPT | Fluxos de conversão/transferência, fonte MWN, liquidez/contraparte, cotação, arredondamento e tratamento Genesis documentados; decisões pendentes encaminhadas ao responsável |
-| 21.3 | Especificar isolamento de acesso, carteiras, ledgers e ponte UMS↔MWN | STAGED | — | Acesso MeshWalker-only, autorização, razão independente, controles e contrato da ponte sem saldo compartilhado ou transferência implícita |
-| 21.4 | Implementar razão MW-Ex e transações seguras | STAGED | — | Saldo MWN e histórico por usuário; transferências e conversões explícitas, idempotentes, atômicas e sem gasto duplo |
+| 21.3 | Especificar isolamento de acesso, carteiras, ledgers e ponte UMS↔MWN | DONE | ChatGPT | Acesso MeshWalker-only, autorização, razão independente, controles e contrato da ponte sem saldo compartilhado ou transferência implícita |
+| 21.4 | Implementar razão MW-Ex e transações seguras | PROGRESS | ChatGPT | Saldo MWN e histórico por usuário; transferências e conversões explícitas, idempotentes, atômicas e sem gasto duplo |
 | 21.5 | Implementar cotações externas e indicadores somente leitura | STAGED | — | Itens aprovados com fonte, horário e frescor; falhas/staleness visíveis; sem cotação fabricada nem negociação externa |
 | 21.6 | Construir a interface minimalista da MW-Ex | STAGED | — | Exibe saldo MWN, UMS potencial a 1:1.000, valor verificável de mercado e apenas ações aprovadas; mantém separação visual/contábil |
 | 21.7 | Validar segurança, contabilidade, conversões e erros | STAGED | — | Testes cobrem autorização, isolamento, concorrência, idempotência, falha parcial, arredondamento, cotação ausente/desatualizada e ledger |
@@ -48,3 +48,25 @@
 - Precisão, arredondamento, resíduos, idempotência, liquidez/contraparte e Genesis foram transformados em gates explícitos.
 - Oito decisões pendentes foram encaminhadas ao responsável; nenhuma operação real foi autorizada ou executada.
 - OR: `OR-20261110-0037`. Próxima tarefa segura: 21.3, especificação de isolamento e ponte.
+
+## Checkpoint 21.3 — início da especificação de isolamento (2026-11-10)
+
+- Tarefa 21.3 assumida por ChatGPT após a conclusão da 21.2.
+- Escopo: contrato documental de autorização, carteiras, ledgers, ponte, estados, invariantes e reconciliação.
+- Sem alteração de schema, RLS, RPC, saldo, produção, Genesis, deploy ou código do `newsite`.
+
+## Checkpoint 21.3 — isolamento e ponte (2026-11-10)
+
+- Contrato persistido em `governance/missions/0021/MWEX_ISOLATION_BRIDGE_CONTRACT_21_3.md`.
+- Definidos domínios separados UMS/MWN, autorização MeshWalker-only em camadas, entidades mínimas, estados da ponte, idempotência, atomicidade, rollback e reconciliação.
+- Proibido reutilizar `mw_account_ledger` UMS como ledger operacional MWN ou conceder bypass administrativo.
+- Tarefa 21.3 `DONE`; próxima tarefa segura: 21.4, implementação da razão MW-Ex somente em fixture/sandbox autorizada.
+- OR: `OR-20261110-0038`.
+
+## Checkpoint 21.4 — implementação sandbox (2026-11-10)
+
+- Protótipo funcional publicado no repositório `meshwave65/newsite`, branch `feat/mwex-sandbox-ledger-21-4`, commit `a673063`.
+- Inclui ledger determinístico em memória, conversões UMS↔MWN, transferência MWN→MWN, idempotency keys, precisão controlada, UI funcional e testes Node reproduzíveis.
+- A implementação é deliberadamente sandbox-only: não usa Supabase, não lê produção, não cria saldo real e não habilita o ecossistema.
+- `npm run test:mwex` e `npm run build` passam. `npm run lint` ainda falha por três erros preexistentes fora dos arquivos MW-Ex (`MwcWallet.jsx` e `vite.config.js`) e duas advertências preexistentes.
+- A tarefa 21.4 permanece `PROGRESS` até haver backend persistente, autorização server-side, RLS, concorrência transacional e validação 21.7; OR: `OR-20261110-0039`.
