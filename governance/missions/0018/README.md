@@ -383,3 +383,11 @@ A partir desta orientação, ChatGPT assume a condução operacional da MISSION_
 
 ### Formato de checkpoint no chat
 A comunicação no chat deve ser um resumo de checkpoint após persistência: o que foi concluído, onde foi persistido, evidências/verificações, o que segue em andamento e somente as decisões que dependem do fundador. Não usar o chat como substituto do repositório.
+
+
+## Checkpoint de preparação final do pacote ROB — OR-20261110-0049 (2026-11-10)
+
+- Master ROB atualizado para v0.5.7, mantendo MWN como ativo central e MeshWave como fundamento tecnológico/econômico. O mecanismo UMS→MWN→UMS foi refinado para explicitar a ligação entre atividade interna e procura pelo ativo sem atribuir efeitos automáticos sobre preço ou liquidez.
+- Pitch executivo e FAQ sincronizados para v0.5-DRAFT. A FAQ agora cobre a lógica econômica, JEd, hipótese de 750 mil usuários, adesão MeshWalker, contribuição-base de 1% e distinção entre propostas de patrocínio/parceria e contratos existentes.
+- Criados INVESTOR_ONE_PAGE_ROB_18_16.md, PRESENTATION_STORYBOARD_ROB_18_16.md e OWNER_REVIEW_CHECKLIST_18_15.md para fechar o pacote de apresentação e orientar a decisão do fundador.
+- 18.15 está READY — OWNER DECISION; 18.16 tem storyboard pronto, mas arte final/publicação permanecem dependentes da aprovação textual. O snapshot público ainda não foi alterado e não houve deploy, outreach ou distribuição.
