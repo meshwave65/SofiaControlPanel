@@ -355,3 +355,8 @@ O documento-fonte `ROB_INVESTOR_MATERIAL_MASTER.md` está na versão 0.5.5 e per
 A MW-Ex deve ser descrita como exchange própria operacional em modalidade interna, MVP custodial, com carteira MWN/ledger separado, conversões UMS↔MWN, transferências internas elegíveis, histórico, créditos administrativos validados e reversões compensatórias. O MVP não inclui listagem externa, saques automáticos ou movimentação financeira automatizada para fora do ecossistema.
 
 **Pendências para apresentação externa:** revisão final e aprovação textual explícita do fundador (18.15); confirmação e inclusão de e-mail/WhatsApp de contato no CTA; autorização de distribuição, que é separada da aprovação do texto. As peças visuais (18.16) dependem da aprovação textual.
+
+
+## Atualização do pacote de apresentação — master ROB v0.5.6 (2026-11-10)
+
+O master foi atualizado para v0.5.6 com os canais institucionais de contato confirmados na página pública de contato da MeshWave: info@meshwave.com.br, WhatsApp Brasil (+55 21 97234-1965) e WhatsApp Portugal (+351 914 845 439). Os contatos e links públicos foram incorporados ao pitch executivo e ao FAQ. A página pública de investidores ainda exibe a cópia v0.5.5; sua atualização e eventual deploy ficam condicionados à aprovação textual do fundador e à autorização de publicação. O pacote documental interno está sincronizado; a etapa 18.15 permanece aguardando aprovação humana.
