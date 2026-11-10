@@ -16,11 +16,11 @@
 | 18.7 | Roadmap integrado | DONE | ChatGPT | Fases e gates para decisão; não é cronograma/budget aprovado. |
 | 18.8 | Tese MWN/ROB | DONE | ChatGPT | Draft executivo e detalhado preservado. |
 | 18.9 | Revisão cruzada e fechamento preliminar | DONE — PRELIMINARY | ChatGPT | Override humano registrado em OR-20261109-0004; Oracle/FOR pendentes para versão definitiva histórica. |
-| 18.10 | Material integral ROB para investidores | PROGRESS | ChatGPT | Documento mestre integral v0.5.4 publicado com hierarquia MWN-first, mecanismo de demanda recorrente UMS→MWN→UMS, arquitetura expandida do JEd, economia de jogo, patrocínios, MeshWalker e integração com parceiros; revisão e aprovação explícita do fundador ainda pendentes. OR-20261110-0002 registra a atualização. |
+| 18.10 | Material integral ROB para investidores | PROGRESS | ChatGPT | Documento mestre integral v0.5.5 publicado com hierarquia MWN-first, mecanismo de demanda recorrente UMS→MWN→UMS, arquitetura expandida do JEd, economia de jogo, patrocínios, MeshWalker e integração com parceiros; revisão e aprovação explícita do fundador ainda pendentes. OR-20261110-0002 registra a atualização. |
 | 18.11 | Auditoria de alegações e evidências | DONE | ChatGPT | Auditoria documental e limites de formulação em CLAIM_EVIDENCE_AUDIT_18_11.md; OR-20261109-0008. |
 | 18.12 | Estrutura de participação e capital | DONE | ChatGPT | Framework de alternativas e diligência em CAPITAL_PARTICIPATION_FRAMEWORK_18_12.md; nenhuma opção escolhida; OR-20261109-0009. |
-| 18.13 | Derivados executivos | DONE | ChatGPT | Resumo, pitch e apresentação em EXECUTIVE_DERIVATIVES_ROB_18_13.md; DRAFT interno; OR-20261109-0010. |
-| 18.14 | Pacote de diligência e FAQ | DONE | ChatGPT | Rota de leitura, FAQ e checklist em DUE_DILIGENCE_FAQ_ROB_18_14.md; contatos não inventados; OR-20261109-0011. |
+| 18.13 | Derivados executivos | DONE | ChatGPT | Derivados sincronizados com master v0.5.5, incluindo MW-Ex operacional como MVP custodial interno; v0.4-DRAFT; checkpoint 2026-11-10. |
+| 18.14 | Pacote de diligência e FAQ | DONE | ChatGPT | FAQ sincronizado com master v0.5.5 e status operacional da MW-Ex; links públicos incluídos; contato direto ainda pendente; v0.4-DRAFT. |
 | 18.15 | Revisão de comunicação e autorização | BLOCKED — OWNER REVIEW | Fundador | Exige revisão e aprovação explícita do texto integral/derivados pelo fundador; aprovação textual e autorização de distribuição são atos separados. |
 | 18.16 | Peças visuais derivadas | BLOCKED — DEPENDENCY | — | Depende da aprovação do conteúdo textual em 18.15; não produzir peças para material ainda não aprovado. |
 
@@ -32,7 +32,7 @@
 - Diretrizes internas de execução não devem aparecer automaticamente no material dirigido ao investidor.
 - Separar fatos verificados, declarações do fundador, hipóteses, propostas e decisões pendentes.
 - ROB significa Return On Believe — retorno por acreditar; não é ROI, métrica financeira padronizada ou promessa.
-- Não afirmar adoção, receita, operação MW-Ex, liquidez, preço, conversão, valuation ou listagem sem evidência.
+- Não afirmar adoção em escala, receita, liquidez pública, preço, valuation ou listagem sem evidência. Descrever MW-Ex conforme o escopo comprovado do MVP custodial interno operacional; não confundir com exchange externa ou saques automatizados.
 - Não realizar outreach, publicação, oferta, listing, transação, deploy ou compromisso financeiro sem autorização específica.
 - Cada tarefa produz seu próprio Operational Report e atualização deste arquivo/índice.
 - Estado após execução autônoma de 2026-11-09: 18.11–18.14 DONE; 18.10 permanece PROGRESS para revisão do fundador; 18.15 BLOCKED por aprovação humana; 18.16 BLOCKED por dependência de 18.15.
@@ -99,3 +99,16 @@
 - Incluída a estratégia de desenvolvimento próprio e/ou parcerias com Software Houses para incorporar Condenser, MIA-D e interconexão a jogos, aplicativos e sistemas externos.
 - OR-20261110-0002 criado; README e índice de ORs atualizados.
 - 18.10 permanece PROGRESS até revisão e aprovação explícita do fundador. Nenhuma distribuição externa foi autorizada ou realizada.
+
+
+## Checkpoint de sincronização — 2026-11-10 (master ROB v0.5.5)
+
+- 18.10: master integral v0.5.5 mantido como documento-fonte; status operacional da MW-Ex e arquitetura ampliada do JEd já incorporados.
+- 18.11: auditoria de alegações atualizada para v0.2-DRAFT; adendo factual da MW-Ex substitui a classificação histórica de preview não funcional e registra os limites do MVP interno.
+- 18.12: framework de capital atualizado para v0.2-DRAFT_FOR_OWNER_DECISION; primeira etapa agora descreve consolidação e profissionalização da MW-Ex operacional, não sua construção inicial.
+- 18.13: pitch, resumo executivo e apresentação verbal sincronizados com master v0.5.5, versão 0.4-DRAFT.
+- 18.14: FAQ sincronizado com master v0.5.5, versão 0.4-DRAFT; links públicos incluídos. Falta confirmar e inserir contato direto (e-mail/WhatsApp) para o pacote externo.
+- 18.15: permanece BLOCKED — OWNER REVIEW até aprovação explícita do fundador do pacote textual final. Aprovação não autoriza distribuição.
+- 18.16: permanece BLOCKED — DEPENDENCY até aprovação textual em 18.15.
+
+A atualização corrige os documentos derivados sem reescrever o master e sem alterar a tese central MWN-first. Nenhum outreach, envio a investidores ou distribuição externa foi realizado.
