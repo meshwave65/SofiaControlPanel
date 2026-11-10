@@ -253,11 +253,11 @@ export const appRouter = router({
   // ============================================
   tasks: router({
     list: protectedProcedure.query(async ({ ctx }) => {
-      return db.getAllTasks(ctx.user.id);
+      return db.getAllTasks(ctx.user.id, ctx.user.role === "admin");
     }),
 
     listAll: protectedProcedure.query(async ({ ctx }) => {
-      return db.getAllTasks(ctx.user.id);
+      return db.getAllTasks(ctx.user.id, ctx.user.role === "admin");
     }),
 
     create: protectedProcedure

@@ -85,6 +85,7 @@ export class SofiaOrchestrator {
     for (const dim of dimensions) {
       const result = await db.createTask({
         createdBy: task.createdBy,
+        creatorType: task.creatorType === "system" ? "system" : "user",
         agentId: task.agentId,
         agentPinned: task.agentPinned,
         title: `${dim.title}: ${task.title}`,

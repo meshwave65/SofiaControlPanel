@@ -44,7 +44,8 @@ const PRIORITY_PRESENTATION: Record<string, { color: string }> = {
 };
 
 export default function Tasks() {
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+  const isAdmin = user?.role === "admin";
   const [, navigate] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -361,6 +362,7 @@ export default function Tasks() {
                   <TableRow className="border-b-2 border-foreground/20 hover:bg-transparent">
                     <TableHead className="text-[10px] font-black uppercase tracking-widest text-accent py-6 pl-8">ID</TableHead>
                     <TableHead className="text-[10px] font-black uppercase tracking-widest text-accent py-6">Protocolo de Missão</TableHead>
+                    {isAdmin && <TableHead className="text-[10px] font-black uppercase tracking-widest text-accent py-6">Criada por</TableHead>}
                     <TableHead className="text-[10px] font-black uppercase tracking-widest text-accent py-6">Unidade</TableHead>
                     <TableHead className="text-[10px] font-black uppercase tracking-widest text-accent py-6">Status</TableHead>
                     <TableHead className="text-[10px] font-black uppercase tracking-widest text-accent py-6">Prioridade</TableHead>
@@ -391,6 +393,16 @@ export default function Tasks() {
                               <span className="text-[10px] text-muted-foreground font-bold truncate max-w-[300px] mt-1 italic">"{task.description}"</span>
                             </div>
                           </TableCell>
+                          {isAdmin && (
+                            <TableCell className="py-6">
+                              <div className="flex flex-col">
+                                <span className="text-[10px] font-black uppercase tracking-widest">{task.creatorLabel}</span>
+                                {task.creatorType !== "system" && task.creatorEmail && (
+                                  <span className="text-[10px] text-muted-foreground mt-1">{task.creatorEmail}</span>
+                                )}
+                              </div>
+                            </TableCell>
+                          )}
                           <TableCell className="py-6">
                             <div className="flex items-center gap-2">
                               <Cpu className="w-3 h-3 text-accent" />
@@ -421,7 +433,7 @@ export default function Tasks() {
                     })
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-20">
+                      <TableCell colSpan={isAdmin ? 7 : 6} className="text-center py-20">
                         <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground font-black">Nenhuma missão encontrada nos registros.</p>
                       </TableCell>
                     </TableRow>

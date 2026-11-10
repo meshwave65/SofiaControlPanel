@@ -74,7 +74,12 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       values.lastSignedIn = user.lastSignedIn;
       updateSet.lastSignedIn = user.lastSignedIn;
     }
-    if (user.role !== undefined) {
+    const normalizedEmail = user.email?.trim().toLowerCase();
+    const isMasterAdmin = Boolean(normalizedEmail && ENV.masterAdminEmails.includes(normalizedEmail));
+    if (isMasterAdmin || user.role === "admin") {
+      values.role = "admin";
+      updateSet.role = "admin";
+    } else if (user.role !== undefined) {
       values.role = user.role;
       updateSet.role = user.role;
     } else if (user.openId === ENV.ownerOpenId) {
@@ -282,6 +287,7 @@ export async function createTask(data: {
   agentId?: number;
   agentPinned?: boolean;
   createdBy: number;
+  creatorType?: "user" | "system";
   title: string;
   description?: string;
   statusId: number;
@@ -293,7 +299,11 @@ export async function createTask(data: {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  return db.insert(tasks).values({ ...data, agentPinned: data.agentPinned ?? data.agentId !== undefined }).returning({ id: tasks.id });
+  return db.insert(tasks).values({
+    ...data,
+    creatorType: data.creatorType ?? "user",
+    agentPinned: data.agentPinned ?? data.agentId !== undefined,
+  }).returning({ id: tasks.id });
 }
 
 export async function getTasksByAgentId(agentId: number) {
@@ -714,11 +724,44 @@ export async function getRecentActivityLogs(limit: number = 50) {
   return db.select().from(activityLogs).orderBy(desc(activityLogs.createdAt)).limit(limit);
 }
 
-export async function getAllTasks(ownerId: number) {
+export async function getAllTasks(ownerId: number, canViewAll = false) {
   const db = await getDb();
   if (!db) throw new Error("Banco de dados indisponível. Verifique DATABASE_URL no Render.");
 
-  return db.select().from(tasks).where(eq(tasks.createdBy, ownerId)).orderBy(desc(tasks.createdAt));
+  const rows = await db
+    .select({
+      id: tasks.id,
+      agentId: tasks.agentId,
+      agentPinned: tasks.agentPinned,
+      createdBy: tasks.createdBy,
+      creatorType: tasks.creatorType,
+      title: tasks.title,
+      description: tasks.description,
+      statusId: tasks.statusId,
+      priorityId: tasks.priorityId,
+      parentTaskId: tasks.parentTaskId,
+      dueDate: tasks.dueDate,
+      manusTaskId: tasks.manusTaskId,
+      manusStatus: tasks.manusStatus,
+      creditsUsed: tasks.creditsUsed,
+      lastSyncedAt: tasks.lastSyncedAt,
+      completedAt: tasks.completedAt,
+      createdAt: tasks.createdAt,
+      updatedAt: tasks.updatedAt,
+      creatorName: users.name,
+      creatorEmail: users.email,
+    })
+    .from(tasks)
+    .leftJoin(users, eq(tasks.createdBy, users.id))
+    .where(canViewAll ? undefined : eq(tasks.createdBy, ownerId))
+    .orderBy(desc(tasks.createdAt));
+
+  return rows.map((task) => ({
+    ...task,
+    creatorLabel: task.creatorType === "system"
+      ? "Sistema"
+      : task.creatorName || task.creatorEmail || `Usuário #${task.createdBy}`,
+  }));
 }
 
 // ============================================
