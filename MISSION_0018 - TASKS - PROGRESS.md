@@ -16,13 +16,13 @@
 | 18.7 | Roadmap integrado | DONE | ChatGPT | Fases e gates para decisão; não é cronograma/budget aprovado. |
 | 18.8 | Tese MWN/ROB | DONE | ChatGPT | Draft executivo e detalhado preservado. |
 | 18.9 | Revisão cruzada e fechamento preliminar | DONE — PRELIMINARY | ChatGPT | Override humano registrado em OR-20261109-0004; Oracle/FOR pendentes para versão definitiva histórica. |
-| 18.10 | Material integral ROB para investidores | PROGRESS | ChatGPT | Documento mestre integral v0.5.6 publicado com hierarquia MWN-first, mecanismo de demanda recorrente UMS→MWN→UMS, arquitetura expandida do JEd, economia de jogo, patrocínios, MeshWalker e integração com parceiros; revisão e aprovação explícita do fundador ainda pendentes. OR-20261110-0002 registra a atualização. |
+| 18.10 | Material integral ROB para investidores | READY — OWNER REVIEW | ChatGPT | Documento mestre integral v0.5.7 consolidado; tese MWN-first, mecanismo de procura recorrente UMS→MWN→UMS com precisão econômica, MW-Ex MVP interno, JEd, MeshWalker, patrocínios e parceiros. Revisão/aprovação do fundador é o único gate editorial remanescente. OR-20261110-0049. |
 | 18.11 | Auditoria de alegações e evidências | DONE | ChatGPT | Auditoria documental e limites de formulação em CLAIM_EVIDENCE_AUDIT_18_11.md; OR-20261109-0008. |
 | 18.12 | Estrutura de participação e capital | DONE | ChatGPT | Framework de alternativas e diligência em CAPITAL_PARTICIPATION_FRAMEWORK_18_12.md; nenhuma opção escolhida; OR-20261109-0009. |
-| 18.13 | Derivados executivos | DONE | ChatGPT | Derivados sincronizados com master v0.5.6, incluindo MW-Ex operacional como MVP custodial interno; v0.4-DRAFT; checkpoint 2026-11-10. |
-| 18.14 | Pacote de diligência e FAQ | DONE | ChatGPT | FAQ sincronizado com master v0.5.6 e status operacional da MW-Ex; links públicos incluídos; contatos institucionais incluídos; v0.4-DRAFT. |
-| 18.15 | Revisão de comunicação e autorização | BLOCKED — OWNER REVIEW | Fundador | Exige revisão e aprovação explícita do texto integral/derivados pelo fundador; aprovação textual e autorização de distribuição são atos separados. |
-| 18.16 | Peças visuais derivadas | BLOCKED — DEPENDENCY | — | Depende da aprovação do conteúdo textual em 18.15; não produzir peças para material ainda não aprovado. |
+| 18.13 | Derivados executivos | DONE — v0.5-DRAFT | ChatGPT | Resumo executivo, pitch de dois parágrafos e apresentação verbal sincronizados com master v0.5.7; ampliada a conexão JEd/MeshWalker/parcerias. OR-20261110-0049. |
+| 18.14 | Pacote de diligência e FAQ | DONE — v0.5-DRAFT | ChatGPT | FAQ sincronizado com master v0.5.7; inclui mecanismo de procura UMS→MWN→UMS, estado do JEd, cenário potencial de 750 mil, adesão MeshWalker e limites de parcerias/patrocínios. OR-20261110-0049. |
+| 18.15 | Revisão de comunicação e autorização | READY — OWNER DECISION | Fundador | Pacote editorial consolidado e checklist de aprovação preparado em OWNER_REVIEW_CHECKLIST_18_15.md. Aprovação textual e autorização de distribuição são atos separados. |
+| 18.16 | Peças visuais derivadas | STORYBOARD READY — VISUAL APPROVAL PENDING | ChatGPT | Brief visual e roteiro de 8 slides preparados em PRESENTATION_STORYBOARD_ROB_18_16.md; arte final e publicação dependem da aprovação textual 18.15. |
 
 ## Regras de execução
 
@@ -124,3 +124,13 @@ O master ROB foi atualizado para v0.5.6 com e-mail institucional, WhatsApp Brasi
 O fundador determinou que ChatGPT assuma a condução operacional da MISSION_0018 para evitar trabalho sem persistência. A partir deste checkpoint, cada lote coerente deve ser concluído com: (a) alterações nos arquivos canônicos/repositórios pertinentes; (b) re-fetch e verificação dos arquivos escritos; (c) atualização deste progresso e dos READMEs/índices pertinentes; (d) Operational Report próprio indexado no INDEX.csv. O chat serve apenas para checkpoints e decisões que realmente dependam do fundador.
 
 ChatGPT deve avançar proativamente as tarefas já autorizadas, sem pedir confirmação para cada etapa operacional. Permanecem reservadas ao fundador: aprovação formal do conteúdo (18.15), decisões estratégicas/financeiras/jurídicas não definidas, autorização de publicação e autorização separada de distribuição/outreach. Não realizar ações externas irreversíveis ou compromissos sem autorização específica. Quando uma dependência bloquear uma frente, registrar o bloqueio e avançar atividades independentes.
+
+
+### Checkpoint editorial e preparação de apresentação — OR-20261110-0049
+
+- Master atualizado para v0.5.7: mecanismo de procura UMS→MWN→UMS descrito com precisão, sem associar automaticamente procura a preço ou liquidez; hierarquia MWN-first preservada.
+- Pitch executivo atualizado para v0.5-DRAFT e ampliado para conectar JEd, MeshWalker e integrações como fundamentos/canais de expansão da MWN.
+- FAQ atualizado para v0.5-DRAFT com respostas sobre mecanismo de procura, JEd, cenário potencial de 750 mil, adesão MeshWalker, 1% de processamento/armazenamento e patrocínios/parcerias ainda não firmados.
+- Framework de capital atualizado para v0.3, mantendo faixas estratégicas e ausência de instrumento, valuation, direitos e orçamento aprovados.
+- Criados one-page investor brief, storyboard de 8 slides e checklist de revisão do fundador.
+- 18.10 e 18.15 estão prontos para decisão do fundador; 18.16 possui storyboard, mas arte final permanece condicionada à aprovação textual. Nenhuma página pública foi alterada, nenhum deploy ou outreach foi realizado.
