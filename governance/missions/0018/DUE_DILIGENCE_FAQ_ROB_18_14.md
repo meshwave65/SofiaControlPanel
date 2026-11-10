@@ -1,9 +1,9 @@
 # MISSION_0018 / 18.14 — Pacote de diligência e FAQ ROB
 
-**Versão:** 0.4-DRAFT | **Data:** 2026-11-10  
-**Base textual:** master ROB v0.5.6; matriz 18.1; tarefas 18.2–18.8; auditoria 18.11; framework 18.12; derivados 18.13.
+**Versão:** 0.5-DRAFT | **Data:** 2026-11-10  
+**Base textual:** master ROB v0.5.7; matriz 18.1; tarefas 18.2–18.8; auditoria 18.11; framework 18.12; derivados 18.13.
 
-**Sincronização:** atualizado para master ROB v0.5.6, preservando MWN-first e incorporando o estado operacional da MW-Ex como MVP custodial interno.  
+**Sincronização:** atualizado para master ROB v0.5.7, preservando MWN-first e incorporando o estado operacional da MW-Ex como MVP custodial interno.  
 **Status:** pacote interno; sem autorização para envio externo.
 
 ## 1. Rota de leitura
@@ -29,6 +29,8 @@
 
 **Como se relacionam UMS e MWN?** UMS é a unidade interna de contabilização de contribuição útil e consumo de serviços. MWN é o ativo que conecta essa economia interna à circulação externa. A arquitetura define MWN como gateway asset: a conversão entre o ambiente UMS e a camada de mercado ocorre por meio de MWN. A MW-Ex já funciona como exchange própria para operações internas; não há rota direta UMS↔outro criptoativo.
 
+**Como surge a procura recorrente por MWN?** Serviços e atividades do ecossistema utilizam UMS. Quando um participante precisa de novas unidades além do saldo disponível, o caminho econômico previsto é adquirir MWN no mercado e convertê-la em UMS. Isso conecta a atividade interna à procura pela MWN: o uso efetivo e contínuo dos serviços alimenta a necessidade de UMS e, por consequência, o caminho de aquisição e conversão por MWN.
+
 **Por que buscar recursos agora?** Para consolidar a arquitetura econômica e a infraestrutura que sustentam a MWN, aperfeiçoar os componentes da base MeshWave, avançar a MW-Ex e ampliar os recursos materiais, computacionais, financeiros e humanos necessários à evolução do ativo e de seu ecossistema.
 
 **A MeshWave já está em produção?** É necessário distinguir os componentes do ecossistema integrado. SOFIA, AppAndroid, SWE e Condenser são funcionais; MIA-D já possui estrutura mínima de medição e avaliação. A operação conjunta do ecossistema ainda é rudimentar e sua integração e escala precisam avançar. Funcionalidade de componentes não significa que todas as frentes estejam integradas em uma única operação madura.
@@ -43,7 +45,15 @@
 
 **Quais sistemas já são funcionais?** SOFIA é um sistema funcional de orquestração de inteligências artificiais. AppAndroid é uma aplicação Android funcional que atua como frontend do SOFIA Core. SWE é um módulo funcional de captura e extração de conhecimento. Condenser é um sistema funcional de condensação e otimização. MIA-D já possui uma estrutura mínima de medição e avaliação. Esses componentes ainda podem ser rudimentares e demandar aperfeiçoamento, integração, otimização e escala; isso não elimina sua funcionalidade atual.
 
-**O que é MIA-D?** É uma estrutura mínima já existente de medição e avaliação, acompanhada de metodologia em evolução para avaliar impactos associados a operações digitais. Não se limita à contabilidade de carbono. A consolidação metodológica e a ampliação das medições são etapas de evolução; não se deve confundir estrutura existente com certificação ou validação científica independente.
+**O que é MIA-D?** É uma estrutura mínima já existente de medição e avaliação, acompanhada de metodologia em evolução para avaliar impactos associados a operações digitais. Não se limita à contabilidade de carbono. No desenho integrado do JEd, os metadados gerados pelas otimizações do Condenser alimentam o MIA-D, que deverá oferecer análises individuais, empresariais e agregadas por regiões, países e segmentos. A consolidação metodológica e a ampliação das medições são etapas de evolução; não se deve confundir estrutura existente com certificação ou validação científica independente.
+
+**O que é o JEd?** Jardim do Éden (JEd) é concebido como plataforma que integra experiência de jogo baseada no SimCity clássico, economia interna em UMS, Condenser em segundo plano, MIA-D e distribuição do módulo de interconexão MeshWave. O módulo será disponibilizado em atualização futura e só será ativado mediante autorização expressa. A plataforma integrada e seus canais de patrocínio ainda fazem parte da evolução planejada.
+
+**Os 750 mil usuários do JEd já existem?** Não. É um cenário potencial estimado pelo fundador, equivalente a aproximadamente 5% da referência histórica de mais de 15 milhões de downloads do SimCity clássico. Não representa usuários atuais, migração realizada ou adoção confirmada.
+
+**Como alguém se torna MeshWalker?** Apenas após escolher e autorizar expressamente a ativação do módulo de interconexão. Para quem adere como MeshWalker, a regra-base prevê contribuição de 1% da capacidade de processamento e 1% da capacidade de armazenamento do equipamento; capacidade adicional é opcional. A comercialização dessa capacidade a terceiros é objetivo do modelo de rede, não deve ser apresentada como serviço comercial já em produção.
+
+**Já existem patrocinadores ou parceiros do JEd?** Os exemplos de marcas, estruturas patrocinadas, campanhas e integrações com Software Houses ilustram modelos comerciais possíveis. Não representam contratos, patrocínios ou parcerias firmados.
 
 **Quais valores estão sendo considerados?** Faixas estratégicas relatadas de R$ 50 mil–R$ 100 mil na etapa inicial, R$ 250 mil–R$ 500 mil para acesso externo futuro e alguns milhões para escala futura. Não são orçamento aprovado, valuation, projeção ou compromisso.
 
@@ -79,4 +89,4 @@
 Os canais acima correspondem aos contatos publicados na página institucional de contato da MeshWave.
 
 ## 5. Resultado
-**18.14 atualizada para master v0.5.6.** A rota documental e as respostas foram sincronizadas, inclusive o status operacional da MW-Ex e os canais institucionais de contato. Permanecem como gates para circulação externa: concluir revisão/aprovação do fundador e obter autorização específica de distribuição.
+**18.14 atualizada para master v0.5.7.** A rota documental e as respostas foram sincronizadas, inclusive o status operacional da MW-Ex e os canais institucionais de contato. Permanecem como gates para circulação externa: concluir revisão/aprovação do fundador e obter autorização específica de distribuição.
