@@ -72,7 +72,7 @@ As frentes a seguir não são apresentadas como produtos independentes que desvi
 
 ### Infraestrutura distribuída e MeshWalker
 
-O MeshWalker é o participante que, após aderir expressamente ao módulo de interconexão, passa a integrar a infraestrutura distribuída da MeshWave. A regra-base de participação prevê a contribuição de **1% da capacidade de processamento e 1% da capacidade de armazenamento do equipamento**. Essa contribuição-base integra as condições de participação aceitas pelo usuário ao ativar o módulo; acima desse patamar, o participante poderá disponibilizar capacidade adicional se desejar.
+O MeshWalker é o participante que, após aderir expressamente ao módulo de interconexão, passa a integrar a infraestrutura distribuída da MeshWave. A regra-base de participação prevê a contribuição de **1% da capacidade de processamento e 1% da capacidade de armazenamento do equipamento**. A contribuição-base de 1% em processamento e 1% em armazenamento é obrigatória para quem adere como MeshWalker e integra as condições aceitas pelo usuário ao ativar o módulo; acima desse patamar, o participante poderá disponibilizar capacidade adicional se desejar.
 
 A adesão é voluntária e depende de autorização expressa. A contribuição-base de 1% aplica-se ao participante que escolhe tornar-se MeshWalker; não há ativação silenciosa ou automática. A infraestrutura poderá atender workloads e serviços do próprio ecossistema e também disponibilizar capacidade computacional e armazenamento a terceiros. A comercialização desses recursos é uma frente prevista para a etapa operacional inicial da rede, criando uma fonte externa de utilização e receita para a infraestrutura.
 
