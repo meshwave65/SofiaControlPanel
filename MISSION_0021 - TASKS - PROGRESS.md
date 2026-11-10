@@ -11,7 +11,7 @@
 | 21.2 | Fechar o modelo funcional mínimo e os gates econômicos | DONE | ChatGPT | Fluxos de conversão/transferência, fonte MWN, liquidez/contraparte, cotação, arredondamento e tratamento Genesis documentados; decisões pendentes encaminhadas ao responsável |
 | 21.3 | Especificar isolamento de acesso, carteiras, ledgers e ponte UMS↔MWN | DONE | ChatGPT | Acesso MeshWalker-only, autorização, razão independente, controles e contrato da ponte sem saldo compartilhado ou transferência implícita |
 | 21.4 | Implementar razão MW-Ex e transações seguras | PROGRESS | ChatGPT | Saldo MWN e histórico por usuário; transferências e conversões explícitas, idempotentes, atômicas e sem gasto duplo |
-| 21.5 | Implementar cotações externas e indicadores somente leitura | STAGED | — | Itens aprovados com fonte, horário e frescor; falhas/staleness visíveis; sem cotação fabricada nem negociação externa |
+| 21.5 | Implementar cotações externas e indicadores somente leitura | PROGRESS | ChatGPT | Itens aprovados com fonte, horário e frescor; falhas/staleness visíveis; sem cotação fabricada nem negociação externa |
 | 21.6 | Construir a interface minimalista da MW-Ex | STAGED | — | Exibe saldo MWN, UMS potencial a 1:1.000, valor verificável de mercado e apenas ações aprovadas; mantém separação visual/contábil |
 | 21.7 | Validar segurança, contabilidade, conversões e erros | STAGED | — | Testes cobrem autorização, isolamento, concorrência, idempotência, falha parcial, arredondamento, cotação ausente/desatualizada e ledger |
 | 21.8 | Preparar readiness, transição UMS Genesis e handoff | STAGED | — | Cutover somente após auditoria/reconciliação; caminho normal sem compra de UMS definido; operação real permanece atrás de gates |
@@ -70,3 +70,18 @@
 - A implementação é deliberadamente sandbox-only: não usa Supabase, não lê produção, não cria saldo real e não habilita o ecossistema.
 - `npm run test:mwex` e `npm run build` passam. `npm run lint` ainda falha por três erros preexistentes fora dos arquivos MW-Ex (`MwcWallet.jsx` e `vite.config.js`) e duas advertências preexistentes.
 - A tarefa 21.4 permanece `PROGRESS` até haver backend persistente, autorização server-side, RLS, concorrência transacional e validação 21.7; OR: `OR-20261110-0039`.
+
+## Checkpoint 21.5 — adaptador read-only (2026-11-10)
+
+- Tarefa 21.5 assumida por ChatGPT.
+- Implementação inicial será um adaptador validado em sandbox, sem chamada a provedor externo e sem cotação executável.
+- Todo valor deverá carregar fonte, símbolo, moeda, horário do provedor, horário de ingestão, TTL e estado de frescor.
+
+## Checkpoint 21.5 — adaptador read-only (2026-11-10)
+
+- Adaptador publicado no `newsite` branch `feat/mwex-sandbox-ledger-21-4`, commit `3061df8`.
+- `normalizeQuote` rejeita campos/valores inválidos, classifica `FRESH`, `STALE` ou `UNAVAILABLE`, carrega fonte/horários/TTL e força `executable=false`.
+- `calculateIndicativeValue` não calcula valor para cotação stale/indisponível; `sandboxQuote` é explicitamente fixture local.
+- Testes de ledger e market-data e build passam.
+- Nenhum provedor externo foi escolhido ou chamado; a 21.5 permanece `PROGRESS` até decisão de fonte aprovada e integração server-side segura.
+- OR: `OR-20261110-0040`.
