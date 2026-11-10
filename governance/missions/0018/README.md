@@ -290,3 +290,21 @@ Esta seção registra a orientação explícita mais recente do fundador e preva
 - Tese detalhada 18.8 e resumo executivo 18.8 alinhados à mesma hierarquia.
 
 A revisão textual não aprova tokenomics, direitos, supply, preço, listagem, liquidez ou distribuição externa. Aprovação do conteúdo e autorização de distribuição permanecem decisões separadas do fundador.
+
+
+## Checkpoint de continuidade — MWN-first e situação da frente ROB (2026-11-09)
+
+O OR-20261109-0015 registra a correção da hierarquia narrativa solicitada pelo fundador. A tese tem **MWN como ativo central**; MeshWave é o ecossistema tecnológico e econômico que fundamenta o ativo. As frentes SOFIA, AppAndroid, SWE, Condenser, MIA-D, MeshWalker e Jardim do Éden são evidências/componentes dessa base, não um catálogo de produtos independentes oferecidos ao investidor.
+
+### Estado após sincronização
+- Master integral: governance/missions/0018/ROB_INVESTOR_MATERIAL_MASTER.md, v0.5.1, DRAFT.
+- Derivados executivos: 18.13 v0.3-DRAFT.
+- FAQ/diligência: 18.14 v0.3-DRAFT.
+- Tese detalhada e resumo executivo 18.8: alinhados à hierarquia MWN-first.
+- 18.11 e 18.12: concluídas como auditoria documental e framework de discussão.
+- 18.13 e 18.14: concluídas como derivados internos; não aprovados para circulação externa.
+- 18.10: PROGRESS até revisão e aprovação integral do master pelo fundador.
+- 18.15: BLOCKED — OWNER REVIEW. A revisão interna de comunicação não substitui aprovação explícita do fundador.
+- 18.16: BLOCKED — DEPENDENCY até aprovação textual em 18.15.
+
+A continuidade documental autorizada nesta sessão foi executada e registrada. A missão não deve ser marcada como integralmente concluída enquanto 18.10/18.15 dependerem da revisão humana e 18.16 depender da aprovação textual. Aprovação do conteúdo não autoriza, por si só, distribuição externa; essa autorização continua separada. Nenhum outreach, oferta, listagem, publicação externa, transação, deploy, contratação, despesa ou compromisso foi realizado.
