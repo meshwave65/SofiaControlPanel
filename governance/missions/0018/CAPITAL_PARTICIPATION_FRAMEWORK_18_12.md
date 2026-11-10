@@ -1,6 +1,6 @@
 # MISSION_0018 / 18.12 — Estrutura de participação e capital
 
-**Versão:** 0.2-DRAFT_FOR_OWNER_DECISION | **Data:** 2026-11-09  
+**Versão:** 0.3-DRAFT_FOR_OWNER_DECISION | **Data:** 2026-11-10 | **Referência narrativa:** master ROB v0.5.7  
 **Natureza:** framework de discussão; não é oferta, recomendação jurídica/financeira, term sheet ou autorização de captação.
 
 ## 1. Ponto de partida
@@ -51,4 +51,4 @@ Nenhum instrumento, valuation, direito, percentual, retorno, preço ou alocaçã
 
 ## 7. Atualização de contexto operacional — 2026-11-10
 
-A MW-Ex deixou de ser uma preparação ou interface pretendida: está operacional como MVP custodial interno. A primeira etapa de capital deve ser descrita como consolidação, profissionalização e expansão da exchange já existente e da economia UMS/MWN, e não como construção inicial da exchange. A etapa de acesso externo permanece futura e condicionada à definição de requisitos e readiness. Esta atualização não escolhe instrumento, valuation, direitos ou alocação de capital.
+A MW-Ex deixou de ser uma preparação ou interface pretendida: está operacional como MVP custodial interno. A primeira etapa de capital deve ser descrita como consolidação, profissionalização e expansão da exchange já existente e da economia UMS/MWN, e não como construção inicial da exchange. O foco é ampliar capacidade de execução sobre uma base já construída: controles e operação da MW-Ex, segurança, infraestrutura, equipe, integração dos serviços e sustentação da economia interna. A etapa de acesso externo permanece futura e condicionada à definição de requisitos e readiness. Esta atualização não escolhe instrumento, valuation, direitos ou alocação de capital.
