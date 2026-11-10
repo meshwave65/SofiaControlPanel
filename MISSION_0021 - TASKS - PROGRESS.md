@@ -13,7 +13,7 @@
 | 21.4 | Implementar razão MW-Ex e transações seguras | PROGRESS | ChatGPT | Saldo MWN e histórico por usuário; transferências e conversões explícitas, idempotentes, atômicas e sem gasto duplo |
 | 21.5 | Implementar cotações externas e indicadores somente leitura | PROGRESS | ChatGPT | Itens aprovados com fonte, horário e frescor; falhas/staleness visíveis; sem cotação fabricada nem negociação externa |
 | 21.6 | Construir a interface minimalista da MW-Ex | DONE | ChatGPT | Exibe saldo MWN, UMS potencial a 1:1.000, valor verificável de mercado e apenas ações aprovadas; mantém separação visual/contábil |
-| 21.7 | Validar segurança, contabilidade, conversões e erros | STAGED | — | Testes cobrem autorização, isolamento, concorrência, idempotência, falha parcial, arredondamento, cotação ausente/desatualizada e ledger |
+| 21.7 | Validar segurança, contabilidade, conversões e erros | PROGRESS | ChatGPT | Testes cobrem autorização, isolamento, concorrência, idempotência, falha parcial, arredondamento, cotação ausente/desatualizada e ledger |
 | 21.8 | Preparar readiness, transição UMS Genesis e handoff | STAGED | — | Cutover somente após auditoria/reconciliação; caminho normal sem compra de UMS definido; operação real permanece atrás de gates |
 
 ## Regras de execução
@@ -92,3 +92,9 @@
 - A interface exibe “SANDBOX”/“Não habilitada” e não oferece preço executável, liquidez externa ou operação do ecossistema.
 - Build e testes do branch passam; a tarefa 21.6 foi fechada para o escopo sandbox.
 - OR: `OR-20261110-0041`. Próxima etapa de validação: 21.7; 21.4 e 21.5 permanecem abertas para backend/fonte aprovados.
+
+## Checkpoint 21.7 — validação sandbox (2026-11-10)
+
+- Tarefa 21.7 assumida por ChatGPT.
+- Validação inicial cobrirá invariantes do ledger, isolamento entre carteiras sintéticas, idempotência, precisão, rejeição de saldo/auto-transferência, cotação stale/indisponível e build.
+- Concorrência transacional real, RLS e falha parcial entre sistemas permanecem pendentes da persistência server-side.
