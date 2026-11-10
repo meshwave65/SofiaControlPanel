@@ -1,7 +1,7 @@
 # Blueprint da MISSION_0021 — MW-Ex Proprietária Funcional e Autônoma
 
 **Missão:** MISSION_0021  
-**Estado:** STAGED  
+**Estado:** PROGRESS
 **Data:** 2026-11-10  
 **Orquestrador:** SofiaControlPanel (SCP)  
 **Projeto-alvo:** MeshWave / newsite
