@@ -318,3 +318,14 @@ A continuidade documental autorizada nesta sessão foi executada e registrada. A
 - A tese econômica definida pelo responsável é que a atividade do ecossistema gera demanda recorrente por MWN: serviços e atividades consomem UMS; usuários deficitários de UMS obtêm novas unidades adquirindo MWN no mercado e reconvertendo-a em UMS. A necessidade operacional de UMS conecta a atividade interna à procura por MWN.
 - Na narrativa ROB, a questão central é a consolidação, continuidade e expansão do ecossistema funcional que origina essa atividade econômica — não apresentar a demanda pela MWN como mera possibilidade hipotética.
 - Esta diretriz foi registrada em OR-20261109-0016 e aplicada ao master v0.5.2. Não altera gates de aprovação do fundador nem autoriza distribuição externa.
+
+
+## 12. Jardim do Éden (JEd) — arquitetura estratégica persistente
+
+A definição do fundador para o Jardim do Éden, convencionado como **JEd**, compreende três componentes integrados:
+
+1. **Condenser em segundo plano:** plugin integrado ao JEd para interceptar as interações do usuário com browsers, IAs, LLMs e outros ambientes compatíveis. Cada consulta é otimizada; os metadados gerados em cada operação alimentam o MIA-D.
+2. **MIA-D como ferramenta ESG:** não é apenas monitor. É uma ferramenta de mensuração, análise e inteligência ESG para uso individual e empresarial. A visão inclui avaliações individuais e acesso global a dados agregados e filtrados por região, país, segmento e outros recortes.
+3. **Módulo de interconexão da MeshWave:** o JEd será sua plataforma de instalação/distribuição. O módulo, inspirado no modelo do Briar, será disponibilizado em atualização futura do JEd. Sua ativação exige autorização expressa do usuário; somente então ele passa a participar efetivamente da rede, contribuindo com recursos e podendo utilizar a infraestrutura.
+
+O JEd é, portanto, plataforma de otimização digital, mensuração do impacto dessa otimização e adesão voluntária à infraestrutura distribuída. Não confundir a arquitetura pretendida com integração completa ou rede de produção já comprovada. A ativação do módulo de interconexão nunca deve ser presumida: consentimento expresso é condição obrigatória.
