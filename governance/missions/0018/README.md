@@ -39,6 +39,10 @@ Distinção:
 - **ROI (Return on Investment):** métrica convencional de retorno financeiro sobre investimento.
 - **ROB (Return On Believe):** tese narrativa “retorno por acreditar” — potencial relacionado a apoiar a evolução do ecossistema; não quantificado nem garantido.
 
+## Regra editorial de siglas em materiais MeshWave
+
+Em qualquer documento, apresentação, página ou comunicação dirigida a terceiros, toda sigla deve ser apresentada por extenso na primeira ocorrência daquele material, seguida da sigla entre parênteses. Depois dessa primeira definição, pode-se usar somente a sigla. A regra se aplica também a títulos, subtítulos, tabelas, gráficos, legendas e slides. Não presumir familiaridade do leitor com nomenclaturas internas. As definições canônicas devem respeitar o glossário do documento ROB vigente; entre elas: SOFIA (Sistema de Orquestração Federada de Inteligências Artificiais), MW-Ex (MeshWave Exchange), UMS (Unidade MeshWave de Serviços), MWN (MeshWave Network — criptoativo da economia MeshWave) e MIA-D (Monitor de Impacto Ambiental Digital).
+
 ## 3. Estratégia de mercado: decisões explícitas
 
 ### Prioridade atual
