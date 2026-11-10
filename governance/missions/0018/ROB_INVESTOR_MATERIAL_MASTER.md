@@ -4,7 +4,7 @@
 **ROB — Return On Believe | Retorno por acreditar**
 
 **Material integral para investidores — MISSION_0018 / frente complementar 18.10**  
-**Versão 0.5.2 — DRAFT com hierarquia MWN-first e mecanismo de demanda UMS/MWN explicitado**  
+**Versão 0.5.3 — DRAFT com hierarquia MWN-first, demanda UMS/MWN e arquitetura integrada do JEd explicitadas**  
 **Não constitui oferta pública, prospecto, recomendação de investimento ou autorização para distribuição externa.**
 
 ---
@@ -82,19 +82,21 @@ SOFIA é um sistema funcional de orquestração de inteligências artificiais. O
 
 Esses componentes já materializam a camada de inteligência e preservação de conhecimento da MeshWave. Seu estágio atual é funcional, embora ainda rudimentar e sujeito a aperfeiçoamento, integração, otimização e ampliação de capacidade. O desafio da próxima etapa não é provar que esses sistemas podem ser construídos, mas amadurecê-los e ampliar sua capacidade de atender a mais usuários, operações e demandas.
 
-### Condenser e MIA-D — eficiência e avaliação de impacto
+### Condenser e MIA-D — otimização contínua e inteligência ESG
 
-Condenser é um sistema funcional de condensação e otimização de consultas e conteúdos utilizados em processamento de inteligência artificial.
+Condenser é o mecanismo de otimização que, integrado ao Jardim do Éden (JEd), funciona como plugin em segundo plano. A arquitetura prevê que ele acompanhe e intercepte as interações digitais do usuário com browsers, sistemas de inteligência artificial, LLMs e outros ambientes compatíveis. Cada consulta passa pelo processo de otimização do Condenser antes de seguir ao serviço correspondente. A operação de cada otimização também gera metadados que alimentam o MIA-D.
 
-MIA-D já possui uma estrutura mínima de medição e avaliação, além de metodologia em evolução para avaliar impactos associados a operações digitais e ao uso de recursos. Não se limita à contabilidade de carbono: busca relacionar eficiência e impacto às condições reais de utilização.
+MIA-D não é apenas um monitor de consumo ou impacto. É concebido como uma ferramenta de mensuração, análise e inteligência ESG, utilizável individualmente e por empresas. A partir dos metadados produzidos pelas otimizações, poderá avaliar o impacto associado à eficiência obtida, tanto no âmbito de cada usuário ou organização quanto em uma visão coletiva. Sua dimensão global permitirá acesso a dados agregados e filtrados por regiões, países, segmentos e outros recortes, ampliando a capacidade de análise e comparação do impacto da otimização em escala.
 
-Condenser e MIA-D já ultrapassaram a etapa de mera concepção. O trabalho seguinte é aperfeiçoar os sistemas, ampliar a consistência das medições, consolidar a metodologia e desenvolver avaliações e demonstrações cada vez mais abrangentes.
+A estrutura mínima de medição e avaliação do MIA-D já existe e sua metodologia permanece em evolução. O objetivo é consolidá-lo como instrumento de avaliação do impacto real da otimização digital — não apenas como contador ou painel ambiental —, com aplicações individuais, corporativas e globais. Condenser e MIA-D já ultrapassaram a etapa de mera concepção; a integração completa ao JEd, a instrumentação abrangente e a consolidação metodológica fazem parte da evolução da plataforma.
 
-### Jardim do Éden — experiência e participação
+### Jardim do Éden (JEd) — plataforma de otimização, impacto e participação na rede
 
-Jardim do Éden é uma proposta de experiência digital e engajamento que pode funcionar como uma das portas de participação no ecossistema. Sua relação com a economia MeshWave está associada à possibilidade de aproximar usuários, utilidades e contribuições.
+Jardim do Éden, convencionado como **JEd**, é concebido como uma plataforma de experiência e participação no ecossistema MeshWave. Sua função vai além de engajamento: ao ser instalado, o JEd reúne o Condenser como camada de otimização em segundo plano e o MIA-D como camada de mensuração e inteligência ESG. Assim, transforma a experiência digital do usuário em uma plataforma de otimização das interações compatíveis e de acompanhamento do impacto individual e coletivo produzido por essa otimização.
 
-A proposta não deve ser confundida com uma plataforma de adoção em escala já comprovada.
+O JEd também será a plataforma de instalação e distribuição do **módulo de interconexão da MeshWave**, inspirado no modelo de funcionamento do Briar. Esse módulo será disponibilizado em uma atualização futura do JEd. Sua instalação/disponibilização não significará adesão automática: **a ativação dependerá de autorização expressa do usuário**. Somente após essa decisão o usuário passará efetivamente a participar da rede, contribuindo voluntariamente com recursos e podendo, ao mesmo tempo, utilizar a infraestrutura e os serviços disponibilizados por ela.
+
+O JEd conecta, portanto, três dimensões estratégicas da MeshWave: otimização das interações digitais pelo Condenser; mensuração do impacto dessa otimização pelo MIA-D; e participação voluntária na infraestrutura distribuída por meio do módulo de interconexão. A plataforma constitui uma via de aproximação entre usuários, utilidades e contribuições, sem que a ativação da interconexão seja presumida ou realizada sem consentimento expresso.
 
 ### MW-Ex — mercado próprio
 
