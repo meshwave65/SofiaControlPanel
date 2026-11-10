@@ -46,7 +46,7 @@
 
 ## Slide 5 — JEd: plataforma de atividade, utilidade e expansão
 
-**Mensagem:** JEd conecta economia de jogo, Condenser, MIA-D, patrocínios potenciais e distribuição do módulo de interconexão.
+**Mensagem:** JEd foi concebido para conectar economia de jogo, Condenser, MIA-D, patrocínios potenciais e distribuição do módulo de interconexão.
 
 **Visual:** cidade/jogo estilizado em vista isométrica, com quatro chamadas discretas: economia UMS; otimização digital; inteligência ESG; adesão MeshWalker voluntária.
 
