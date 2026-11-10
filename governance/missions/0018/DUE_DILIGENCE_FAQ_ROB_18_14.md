@@ -79,4 +79,4 @@
 Os canais acima correspondem aos contatos publicados na página institucional de contato da MeshWave.
 
 ## 5. Resultado
-**18.14 atualizada para master v0.5.5.** A rota documental e as respostas foram sincronizadas, inclusive o status operacional da MW-Ex. Permanecem como gates para circulação externa: inserir contato confirmado, concluir revisão/aprovação do fundador e obter autorização específica de distribuição.
+**18.14 atualizada para master v0.5.6.** A rota documental e as respostas foram sincronizadas, inclusive o status operacional da MW-Ex e os canais institucionais de contato. Permanecem como gates para circulação externa: concluir revisão/aprovação do fundador e obter autorização específica de distribuição.
