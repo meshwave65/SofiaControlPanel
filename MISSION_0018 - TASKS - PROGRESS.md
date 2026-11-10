@@ -16,11 +16,11 @@
 | 18.7 | Roadmap integrado | DONE | ChatGPT | Fases e gates para decisão; não é cronograma/budget aprovado. |
 | 18.8 | Tese MWN/ROB | DONE | ChatGPT | Draft executivo e detalhado preservado. |
 | 18.9 | Revisão cruzada e fechamento preliminar | DONE — PRELIMINARY | ChatGPT | Override humano registrado em OR-20261109-0004; Oracle/FOR pendentes para versão definitiva histórica. |
-| 18.10 | Material integral ROB para investidores | READY — OWNER REVIEW | ChatGPT | Documento mestre integral v0.5.7 consolidado; tese MWN-first, mecanismo de procura recorrente UMS→MWN→UMS com precisão econômica, MW-Ex MVP interno, JEd, MeshWalker, patrocínios e parceiros. Revisão/aprovação do fundador é o único gate editorial remanescente. OR-20261110-0049. |
+| 18.10 | Material integral ROB para investidores | READY — OWNER REVIEW | ChatGPT | Documento mestre integral v0.5.8 consolidado; tese MWN-first, mecanismo de procura recorrente UMS→MWN→UMS com precisão econômica, MW-Ex MVP interno, JEd, MeshWalker, patrocínios e parceiros. Revisão/aprovação do fundador é o único gate editorial remanescente. OR-20261110-0049. |
 | 18.11 | Auditoria de alegações e evidências | DONE | ChatGPT | Auditoria documental e limites de formulação em CLAIM_EVIDENCE_AUDIT_18_11.md; OR-20261109-0008. |
 | 18.12 | Estrutura de participação e capital | DONE | ChatGPT | Framework de alternativas e diligência em CAPITAL_PARTICIPATION_FRAMEWORK_18_12.md; nenhuma opção escolhida; OR-20261109-0009. |
-| 18.13 | Derivados executivos | DONE — v0.5-DRAFT | ChatGPT | Resumo executivo, pitch de dois parágrafos e apresentação verbal sincronizados com master v0.5.7; ampliada a conexão JEd/MeshWalker/parcerias. OR-20261110-0049. |
-| 18.14 | Pacote de diligência e FAQ | DONE — v0.5-DRAFT | ChatGPT | FAQ sincronizado com master v0.5.7; inclui mecanismo de procura UMS→MWN→UMS, estado do JEd, cenário potencial de 750 mil, adesão MeshWalker e limites de parcerias/patrocínios. OR-20261110-0049. |
+| 18.13 | Derivados executivos | DONE — v0.5-DRAFT | ChatGPT | Resumo executivo, pitch de dois parágrafos e apresentação verbal sincronizados com master v0.5.8; ampliada a conexão JEd/MeshWalker/parcerias. OR-20261110-0049. |
+| 18.14 | Pacote de diligência e FAQ | DONE — v0.5-DRAFT | ChatGPT | FAQ sincronizado com master v0.5.8; inclui mecanismo de procura UMS→MWN→UMS, estado do JEd, cenário potencial de 750 mil, adesão MeshWalker e limites de parcerias/patrocínios. OR-20261110-0049. |
 | 18.15 | Revisão de comunicação e autorização | READY — OWNER DECISION | Fundador | Pacote editorial consolidado e checklist de aprovação preparado em OWNER_REVIEW_CHECKLIST_18_15.md. Aprovação textual e autorização de distribuição são atos separados. |
 | 18.16 | Peças visuais derivadas | STORYBOARD READY — VISUAL APPROVAL PENDING | ChatGPT | Brief visual e roteiro de 8 slides preparados em PRESENTATION_STORYBOARD_ROB_18_16.md; arte final e publicação dependem da aprovação textual 18.15. |
 
@@ -129,7 +129,7 @@ ChatGPT deve avançar proativamente as tarefas já autorizadas, sem pedir confir
 
 ### Checkpoint editorial e preparação de apresentação — OR-20261110-0049
 
-- Master atualizado para v0.5.7: mecanismo de procura UMS→MWN→UMS descrito com precisão, sem associar automaticamente procura a preço ou liquidez; hierarquia MWN-first preservada.
+- Master atualizado para v0.5.8: mecanismo de procura UMS→MWN→UMS descrito com precisão, sem associar automaticamente procura a preço ou liquidez; hierarquia MWN-first preservada.
 - Pitch executivo atualizado para v0.5-DRAFT e ampliado para conectar JEd, MeshWalker e integrações como fundamentos/canais de expansão da MWN.
 - FAQ atualizado para v0.5-DRAFT com respostas sobre mecanismo de procura, JEd, cenário potencial de 750 mil, adesão MeshWalker, 1% de processamento/armazenamento e patrocínios/parcerias ainda não firmados.
 - Framework de capital atualizado para v0.3, mantendo faixas estratégicas e ausência de instrumento, valuation, direitos e orçamento aprovados.
