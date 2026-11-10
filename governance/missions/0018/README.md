@@ -360,3 +360,26 @@ A MW-Ex deve ser descrita como exchange própria operacional em modalidade inter
 ## Atualização do pacote de apresentação — master ROB v0.5.6 (2026-11-10)
 
 O master foi atualizado para v0.5.6 com os canais institucionais de contato confirmados na página pública de contato da MeshWave: info@meshwave.com.br, WhatsApp Brasil (+55 21 97234-1965) e WhatsApp Portugal (+351 914 845 439). Os contatos e links públicos foram incorporados ao pitch executivo e ao FAQ. A página pública de investidores ainda exibe a cópia v0.5.5; sua atualização e eventual deploy ficam condicionados à aprovação textual do fundador e à autorização de publicação. O pacote documental interno está sincronizado; a etapa 18.15 permanece aguardando aprovação humana.
+
+
+## Protocolo de execução e persistência — direção do fundador (2026-11-10)
+
+A partir desta orientação, ChatGPT assume a condução operacional da MISSION_0018 dentro do escopo já definido, sem exigir que o fundador acompanhe cada etapa por mensagens no chat.
+
+### Regra obrigatória de persistência
+1. Toda unidade de trabalho concluída deve ser persistida nos arquivos canônicos e/ou repositórios pertinentes, conforme seu impacto; decisões e definições devem ser registradas no master/README/progresso, e alterações de conteúdo nos respectivos artefatos.
+2. Cada lote de trabalho deve gerar um Operational Report (OR) próprio, com objetivo, arquivos/commits alterados, verificações realizadas, resultado, pendências e próximos passos. O OR deve ser indexado em `governance/operational_reports/INDEX.csv`.
+3. Após cada escrita, reler os arquivos alterados no branch de destino e verificar o conteúdo. Nunca declarar persistência, sincronização, teste, deploy ou conclusão sem evidência observável.
+4. Atualizar o arquivo de progresso da missão e os READMEs/índices pertinentes no mesmo lote, evitando que o chat seja o único registro do estado.
+5. Evitar ORs artificiais para cada microedição: agrupar alterações coerentes em um lote, mas não encerrar um lote concluído sem seu OR e atualização dos índices.
+6. Manter rastreabilidade entre afirmações públicas, master, derivados e evidências operacionais. Corrigir divergências encontradas em vez de apenas relatá-las, desde que estejam dentro do escopo autorizado.
+
+### Autonomia e limites
+- ChatGPT deve avançar proativamente as tarefas documentais, técnicas e de verificação que já estejam dentro do escopo aprovado da missão, sem pedir autorização repetida para cada passo operacional.
+- Perguntas ao fundador ficam reservadas a decisões realmente pessoais/estratégicas, parâmetros ainda não definidos, aprovações formais exigidas ou ações externas irreversíveis.
+- A aprovação textual do fundador (18.15), decisões de instrumento/valuation/direitos/termos de participação e autorização de publicação, contato ou distribuição externa continuam sendo gates humanos. A orientação para assumir a missão não substitui essas aprovações.
+- Não executar outreach, enviar material, publicar/deployar alterações públicas, assumir compromissos financeiros ou jurídicos, nem alterar produção fora de uma autorização específica já concedida.
+- Se uma dependência bloquear uma tarefa, registrar o bloqueio, concluir tudo o que puder ser feito sem ela e seguir para a próxima atividade independente.
+
+### Formato de checkpoint no chat
+A comunicação no chat deve ser um resumo de checkpoint após persistência: o que foi concluído, onde foi persistido, evidências/verificações, o que segue em andamento e somente as decisões que dependem do fundador. Não usar o chat como substituto do repositório.
