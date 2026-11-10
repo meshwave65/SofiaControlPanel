@@ -1,10 +1,25 @@
-# MISSION_0018 / 18.14 — Pacote de diligência e FAQ ROB
+# MISSION_0018 / 18.14 — Pacote de diligência e FAQ ROB (Return On Believe — retorno por acreditar)
 
 **Versão:** 0.5-DRAFT | **Data:** 2026-11-10  
 **Base textual:** master ROB v0.5.7; matriz 18.1; tarefas 18.2–18.8; auditoria 18.11; framework 18.12; derivados 18.13.
 
 **Sincronização:** atualizado para master ROB v0.5.7, preservando MWN-first e incorporando o estado operacional da MW-Ex como MVP custodial interno.  
 **Status:** pacote interno; sem autorização para envio externo.
+
+## Convenção editorial de siglas
+
+Toda sigla deve ser apresentada por extenso na primeira ocorrência de cada documento, seguida da sigla entre parênteses. Nas ocorrências posteriores, pode-se utilizar apenas a sigla.
+
+- **MWN — MeshWave Network:** criptoativo da economia MeshWave.
+- **UMS — Unidade MeshWave de Serviços:** unidade interna de contabilização de contribuição útil e consumo de serviços.
+- **MW-Ex — MeshWave Exchange:** exchange própria da MeshWave.
+- **SOFIA — Sistema de Orquestração Federada de Inteligências Artificiais.**
+- **MIA-D — Monitor de Impacto Ambiental Digital.**
+- **SWE — Sofia Web Extractor.**
+- **JEd — Jardim do Éden.**
+- **ROB — Return On Believe (retorno por acreditar).**
+- **MVP — Minimum Viable Product (produto mínimo viável).**
+- **ESG — Environmental, Social and Governance (ambiental, social e governança).**
 
 ## 1. Rota de leitura
 1. EXECUTIVE_DERIVATIVES_ROB_18_13.md — resumo executivo.
