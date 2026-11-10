@@ -1,12 +1,12 @@
 # MISSION_0018 / 18.12 — Estrutura de participação e capital
 
-**Versão:** 0.1.0-DRAFT_FOR_OWNER_DECISION | **Data:** 2026-11-09  
+**Versão:** 0.2-DRAFT_FOR_OWNER_DECISION | **Data:** 2026-11-09  
 **Natureza:** framework de discussão; não é oferta, recomendação jurídica/financeira, term sheet ou autorização de captação.
 
 ## 1. Ponto de partida
 As faixas registradas são objetivos estratégicos declarados pelo fundador:
-- **Etapa inicial:** R$ 50 mil–R$ 100 mil, para amadurecimento do ecossistema e preparação da MW-Ex própria.
-- **Etapa futura:** R$ 250 mil–R$ 500 mil, para eventual acesso a exchange externa, após readiness.
+- **Etapa inicial:** R$ 50 mil–R$ 100 mil, para consolidação da economia UMS/MWN, fortalecimento e amadurecimento da MW-Ex própria já operacional como MVP custodial interno, e profissionalização da base tecnológica e operacional.
+- **Etapa futura:** R$ 250 mil–R$ 500 mil, para preparar e avaliar eventual integração com exchange externa, após definição de readiness.
 - **Escala futura:** alguns milhões de reais, condicionados à execução e decisão de expansão.
 
 Não há orçamento detalhado, valuation, cap table validado, instrumento escolhido, direitos aprovados, cronograma de captação ou destinação percentual autorizada. As faixas não devem ser somadas como uma rodada única nem tratadas como necessidade imediata integral.
@@ -47,3 +47,8 @@ Nenhum instrumento, valuation, direito, percentual, retorno, preço ou alocaçã
 
 ## 6. Resultado
 **18.12 concluída como framework documental para decisão.** As opções permanecem abertas; definição de entidade, orçamento, escopo, ativos/IP e preferência de instrumento dependem de decisão humana e assessoria profissional.
+
+
+## 7. Atualização de contexto operacional — 2026-11-10
+
+A MW-Ex deixou de ser uma preparação ou interface pretendida: está operacional como MVP custodial interno. A primeira etapa de capital deve ser descrita como consolidação, profissionalização e expansão da exchange já existente e da economia UMS/MWN, e não como construção inicial da exchange. A etapa de acesso externo permanece futura e condicionada à definição de requisitos e readiness. Esta atualização não escolhe instrumento, valuation, direitos ou alocação de capital.
