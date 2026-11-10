@@ -124,3 +124,13 @@
 - Revisão independente não identificou blockers no escopo documentado de processo único. O harness **não** prova RLS, auth real, banco transacional, concorrência entre processos/máquinas ou rollback distribuído; tarefa 21.4 permanece `PROGRESS`.
 - OR-0044 foi acrescentado como uma única linha de 11 colunas; o prefixo histórico do índice foi preservado byte a byte apesar de linhas legadas inconsistentes, sem normalização retroativa.
 - OR: `OR-20261110-0044` (`SUBMITTED` / `PENDING`); contém também a investigação read-only do alerta recebido após a publicação da branch.
+
+
+## Checkpoint 21.4 — serviço local executável (2026-11-10)
+
+- A branch `meshwave65/mwex-sandbox-mirror:feat/mwex-local-persistent-test-ledger` recebeu o commit `dc8a55a`.
+- Foi adicionado `npm run serve:mwex`, que sobe o serviço HTTP sandbox em `127.0.0.1`, cria ledger JSON temporário privado, imprime URL/tokens sintéticos e remove os dados ao encerrar por padrão.
+- Smoke test real passou: `/health`, leitura de carteira demo, transferência `1.5 MWN` para recipient e leitura do saldo destinatário.
+- `npm run test:mwex` passou com 8 testes do serviço e os testes anteriores; `npm run build:mwex` passou.
+- A tarefa 21.4 permanece `PROGRESS`: o serviço é evidência operacional sandbox, não backend de produto. Supabase/Postgres, RLS, autenticação MeshWalker real, concorrência multiprocesso/máquina e rollback distribuído permanecem gates.
+- OR: `OR-20261110-0045`.
