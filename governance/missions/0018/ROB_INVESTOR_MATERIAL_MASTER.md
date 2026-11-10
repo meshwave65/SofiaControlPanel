@@ -1,4 +1,4 @@
-# MWN — O ATIVO DE MERCADO DA ECONOMIA MESHWAVE
+# MWN (MeshWave Network — criptoativo da economia MeshWave): O ATIVO DE MERCADO DA ECONOMIA MESHWAVE
 ## Um ativo com um ecossistema tecnológico como fundamento.
 
 **ROB — Return On Believe | Retorno por acreditar**
@@ -8,6 +8,26 @@
 **Não constitui oferta pública, prospecto, recomendação de investimento ou autorização para distribuição externa.**
 
 ---
+
+## Convenção editorial e glossário de siglas
+
+Toda sigla deve ser apresentada por extenso na primeira ocorrência de cada documento, seguida da sigla entre parênteses. Nas ocorrências posteriores do mesmo documento, pode-se utilizar apenas a sigla. A regra vale para títulos, subtítulos, tabelas, legendas, textos corridos, apresentações e materiais derivados. Não se deve presumir que o leitor conhece uma sigla, mesmo quando ela é recorrente no ecossistema.
+
+Definições utilizadas neste material:
+
+- **MWN — MeshWave Network:** criptoativo da economia MeshWave e ativo destinado à circulação e à conexão com o mercado externo.
+- **ROB — Return On Believe:** retorno por acreditar; denominação da tese, não métrica financeira padronizada nem promessa de retorno.
+- **UMS — Unidade MeshWave de Serviços:** unidade interna de contabilização de contribuição útil e consumo de serviços.
+- **MW-Ex — MeshWave Exchange:** exchange própria da MeshWave.
+- **SOFIA — Sistema de Orquestração Federada de Inteligências Artificiais.**
+- **MIA-D — Monitor de Impacto Ambiental Digital:** instrumento de mensuração, análise e inteligência sobre impactos associados à eficiência e às atividades digitais.
+- **SWE — Sofia Web Extractor:** módulo de captura e extração de conhecimento.
+- **JEd — Jardim do Éden:** plataforma de experiência e participação no ecossistema MeshWave.
+- **ESG — Environmental, Social and Governance:** critérios ambientais, sociais e de governança.
+- **LLM — Large Language Model:** grande modelo de linguagem.
+- **ROI — Return on Investment:** retorno sobre o investimento.
+- **MVP — Minimum Viable Product:** produto mínimo viável.
+- **RPC — Remote Procedure Call:** chamada de procedimento remoto.
 
 ## A tese central: MWN
 
@@ -50,11 +70,11 @@ Nesta proposta, a pergunta sobre capacidade de execução é parte da fundamenta
 
 A retrospectiva do que foi realizado sob condições individuais e extremamente limitadas é evidência da capacidade de execução demonstrada até aqui, não uma promessa de resultado futuro. A pergunta que orienta a oportunidade é: **se foi possível realizar tanto com nada, o que poderá ser realizado com alguma coisa?**
 
-## A arquitetura econômica: UMS e MWN
+## A arquitetura econômica: Unidade MeshWave de Serviços (UMS) e MeshWave Network (MWN)
 
 A arquitetura econômica da MeshWave distingue duas unidades com funções diferentes.
 
-**UMS — unidade interna de serviço e utilidade**
+**UMS — Unidade MeshWave de Serviços; unidade interna de serviço e utilidade**
 
 A UMS é concebida como unidade interna associada ao reconhecimento de contribuições úteis e à utilização de serviços dentro do ecossistema. Sua função é permitir que atividades e utilidades internas possam ser representadas segundo regras econômicas próprias.
 
@@ -80,13 +100,13 @@ Como ilustração de escala, se o cenário potencial de 750.000 participantes do
 
 A visão MeshWalker transforma a base instalada de dispositivos dos participantes em uma possível camada de infraestrutura distribuída: cada aplicação, jogo ou parceria que traga novos MeshWalkers poderá ampliar a capacidade disponível para a rede e para clientes externos. A implementação em produção exige evolução técnica, segurança, coordenação, validação de workloads, medição de capacidade e modelo operacional; os protótipos e simuladores existentes não representam, por si só, uma rede comercial em produção.
 
-### SOFIA e SWE — inteligência e preservação de conhecimento
+### SOFIA (Sistema de Orquestração Federada de Inteligências Artificiais) e SWE (Sofia Web Extractor) — inteligência e preservação de conhecimento
 
 SOFIA é um sistema funcional de orquestração de inteligências artificiais. O AppAndroid é uma aplicação Android desenvolvida e funcional que atua como frontend do SOFIA Core. O SWE (Sofia Web Extractor) é um módulo funcional de captura e extração de conhecimento, concebido para capturar, organizar, preservar e recuperar conhecimento produzido em conversas e fluxos de trabalho com diferentes inteligências artificiais.
 
 Esses componentes já materializam a camada de inteligência e preservação de conhecimento da MeshWave. Seu estágio atual é funcional, embora ainda rudimentar e sujeito a aperfeiçoamento, integração, otimização e ampliação de capacidade. O desafio da próxima etapa não é provar que esses sistemas podem ser construídos, mas amadurecê-los e ampliar sua capacidade de atender a mais usuários, operações e demandas.
 
-### Condenser e MIA-D — otimização contínua e inteligência ESG
+### Condenser e MIA-D (Monitor de Impacto Ambiental Digital) — otimização contínua e inteligência ESG
 
 Condenser é o mecanismo de otimização que, integrado ao Jardim do Éden (JEd), funciona como plugin em segundo plano. A arquitetura prevê que ele acompanhe e intercepte as interações digitais do usuário com browsers, sistemas de inteligência artificial, LLMs e outros ambientes compatíveis. Cada consulta passa pelo processo de otimização do Condenser antes de seguir ao serviço correspondente. A operação de cada otimização também gera metadados que alimentam o MIA-D.
 
@@ -132,7 +152,7 @@ Cada jogo, aplicativo ou parceria poderá funcionar como um novo canal de aquisi
 
 A proposta não depende, portanto, de a MeshWave produzir individualmente todos os jogos e aplicativos que utilizarão sua infraestrutura. A estratégia combina desenvolvimento próprio, componentes integráveis e parcerias de distribuição, ampliando os pontos de entrada para usuários, empresas e novos participantes da rede.
 
-### MW-Ex — mercado próprio
+### MW-Ex (MeshWave Exchange) — mercado próprio
 
 MW-Ex é a exchange própria do ecossistema MeshWave e já está operacional em sua modalidade interna. A plataforma conta com compradores e oferece carteira MWN com ledger separado, conversões explícitas UMS↔MWN e transferências internas entre MeshWalkers elegíveis. As operações são executadas por funções RPC no backend Supabase, com histórico e possibilidade de reversão administrativa por lançamentos compensatórios. A rota `/mw-ex` é protegida por autenticação e a elegibilidade é verificada no servidor.
 
@@ -154,7 +174,7 @@ A base já existe em diferentes graus de maturidade, mas a estrutura disponível
 
 O investimento representa a possibilidade de fortalecer o ativo central da proposta: consolidar a economia UMS/MWN, profissionalizar e expandir a MW-Ex operacional e ampliar o ecossistema que fundamenta a MWN.
 
-## ROB — Return On Believe
+## ROB (Return On Believe) — retorno por acreditar
 
 **ROB significa Return On Believe — retorno por acreditar.**
 
