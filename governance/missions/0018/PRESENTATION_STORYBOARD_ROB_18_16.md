@@ -16,6 +16,7 @@ Na primeira ocorrência em cada slide/material, apresentar o nome por extenso se
 - **MIA-D — Monitor de Impacto Ambiental Digital.**
 - **JEd — Jardim do Éden.**
 - **ESG — Environmental, Social and Governance (ambiental, social e governança).**
+- **CTA — Call to Action (chamada para ação).**
 
 ## Direção visual
 
