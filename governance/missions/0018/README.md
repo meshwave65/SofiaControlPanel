@@ -308,3 +308,13 @@ O OR-20261109-0015 registra a correção da hierarquia narrativa solicitada pelo
 - 18.16: BLOCKED — DEPENDENCY até aprovação textual em 18.15.
 
 A continuidade documental autorizada nesta sessão foi executada e registrada. A missão não deve ser marcada como integralmente concluída enquanto 18.10/18.15 dependerem da revisão humana e 18.16 depender da aprovação textual. Aprovação do conteúdo não autoriza, por si só, distribuição externa; essa autorização continua separada. Nenhum outreach, oferta, listagem, publicação externa, transação, deploy, contratação, despesa ou compromisso foi realizado.
+
+
+## Diretriz editorial ROB — comunicação positiva e mecanismo de demanda (2026-11-09)
+
+- A narrativa principal ROB apresenta a oportunidade de forma positiva, confiante e orientada à capacidade de execução, à utilidade e à atividade econômica do ecossistema. Não deve ser convertida em um inventário preventivo de cenários negativos ou em uma sequência de ressalvas hipotéticas.
+- Isso não autoriza falsidade, ocultação de problemas conhecidos, exagero de maturidade ou afirmações incompatíveis com os fatos. Problemas concretos e limitações relevantes devem ser tratados com transparência nos contextos apropriados, especialmente em diligência e quando questionados; não precisam ser antecipados como advertências genéricas na apresentação principal.
+- A comunicação deve transmitir preparo, confiança e capacidade de condução, sem transformar a apresentação da oportunidade em uma exposição de tudo que poderia dar errado.
+- A tese econômica definida pelo responsável é que a atividade do ecossistema gera demanda recorrente por MWN: serviços e atividades consomem UMS; usuários deficitários de UMS obtêm novas unidades adquirindo MWN no mercado e reconvertendo-a em UMS. A necessidade operacional de UMS conecta a atividade interna à procura por MWN.
+- Na narrativa ROB, a questão central é a consolidação, continuidade e expansão do ecossistema funcional que origina essa atividade econômica — não apresentar a demanda pela MWN como mera possibilidade hipotética.
+- Esta diretriz foi registrada em OR-20261109-0016 e aplicada ao master v0.5.2. Não altera gates de aprovação do fundador nem autoriza distribuição externa.
