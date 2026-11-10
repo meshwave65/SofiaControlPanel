@@ -117,3 +117,10 @@ A atualização corrige os documentos derivados sem reescrever o master e sem al
 ### Complemento de CTA — 2026-11-10
 
 O master ROB foi atualizado para v0.5.6 com e-mail institucional, WhatsApp Brasil e WhatsApp Portugal, além dos links para investidores, estado do projeto e MW-Ex. Os mesmos canais foram incorporados ao pitch e ao FAQ. Os contatos foram conferidos na página institucional de contato do site. A página pública de investidores ainda utiliza a cópia v0.5.5; sua atualização/deploy fica reservada para depois da aprovação textual e da autorização de publicação.
+
+
+## Diretriz operacional permanente — OR-20261110-0048
+
+O fundador determinou que ChatGPT assuma a condução operacional da MISSION_0018 para evitar trabalho sem persistência. A partir deste checkpoint, cada lote coerente deve ser concluído com: (a) alterações nos arquivos canônicos/repositórios pertinentes; (b) re-fetch e verificação dos arquivos escritos; (c) atualização deste progresso e dos READMEs/índices pertinentes; (d) Operational Report próprio indexado no INDEX.csv. O chat serve apenas para checkpoints e decisões que realmente dependam do fundador.
+
+ChatGPT deve avançar proativamente as tarefas já autorizadas, sem pedir confirmação para cada etapa operacional. Permanecem reservadas ao fundador: aprovação formal do conteúdo (18.15), decisões estratégicas/financeiras/jurídicas não definidas, autorização de publicação e autorização separada de distribuição/outreach. Não realizar ações externas irreversíveis ou compromissos sem autorização específica. Quando uma dependência bloquear uma frente, registrar o bloqueio e avançar atividades independentes.
