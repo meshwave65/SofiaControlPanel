@@ -329,3 +329,15 @@ A definição do fundador para o Jardim do Éden, convencionado como **JEd**, co
 3. **Módulo de interconexão da MeshWave:** o JEd será sua plataforma de instalação/distribuição. O módulo, inspirado no modelo do Briar, será disponibilizado em atualização futura do JEd. Sua ativação exige autorização expressa do usuário; somente então ele passa a participar efetivamente da rede, contribuindo com recursos e podendo utilizar a infraestrutura.
 
 O JEd é, portanto, plataforma de otimização digital, mensuração do impacto dessa otimização e adesão voluntária à infraestrutura distribuída. Não confundir a arquitetura pretendida com integração completa ou rede de produção já comprovada. A ativação do módulo de interconexão nunca deve ser presumida: consentimento expresso é condição obrigatória.
+
+
+## 13. Expansão do JEd, MeshWalker e integração por parceiros — OR-20261110-0002
+
+- O JEd adota como referência o SimCity clássico, com mais de 15 milhões de downloads históricos considerados como referência de alcance. O cenário potencial de migração de 750.000 usuários (aprox. 5%) é uma hipótese de adesão informada pelo fundador, não uma base ativa ou adoção confirmada.
+- A economia do jogo prevê usos de UMS para progressão, aceleração de construções, aquisição de edificações e estruturas especiais. A necessidade de novas UMS conecta-se ao mecanismo de aquisição de MWN no mercado e conversão em UMS.
+- O JEd poderá oferecer estruturas patrocinadas, campanhas institucionais, interações com recompensas em UMS e bônus modestos financiados por patrocinadores. Exemplos de marcas são ilustrativos e não representam parcerias firmadas.
+- O usuário só se torna MeshWalker após autorização expressa para ativar o módulo de interconexão. Ao aderir, a regra-base é contribuir com 1% da capacidade de processamento e 1% da capacidade de armazenamento do equipamento; capacidade adicional poderá ser oferecida voluntariamente.
+- Em cenário hipotético de 750.000 MeshWalkers, 1% por equipamento equivale aritmeticamente a 7.500 equipamentos completos equivalentes, sob hipótese de capacidades médias iguais; não é contagem literal de nós nem medição real.
+- A infraestrutura distribuída poderá comercializar processamento e armazenamento a terceiros desde a etapa operacional inicial, como objetivo do modelo, sem afirmar que a oferta já esteja em produção.
+- A estratégia inclui unidade própria de desenvolvimento de jogos/aplicações e/ou parcerias com Software Houses para integrar Condenser, MIA-D e módulo de interconexão a jogos, aplicativos e sistemas de terceiros. Cada parceria poderá agregar usuários e potenciais MeshWalkers.
+- Master ROB atualizado para v0.5.4. MWN permanece o ativo central; JEd, MeshWalker e integrações são fundamentos e canais potenciais de utilidade e atividade econômica. Conteúdo continua DRAFT e sem autorização de distribuição externa.
