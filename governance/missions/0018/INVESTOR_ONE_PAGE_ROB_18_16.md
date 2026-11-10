@@ -13,7 +13,7 @@ A necessidade recorrente de UMS cria uma ligação direta entre o uso do ecossis
 
 ## O fundamento tecnológico
 
-A base reúne SOFIA (orquestração de IAs), AppAndroid (frontend Android do SOFIA Core), SWE (captura e extração de conhecimento), Condenser (otimização/condensação) e MIA-D (estrutura de mensuração e avaliação ESG em evolução). A visão de expansão conecta essas capacidades ao **JEd**, plataforma que integra experiência de jogo, economia UMS, otimização digital, inteligência ESG e distribuição voluntária do módulo de interconexão MeshWave. A estratégia também prevê integração dos módulos a aplicações e jogos de parceiros.
+A base reúne SOFIA (orquestração de IAs), AppAndroid (frontend Android do SOFIA Core), SWE (captura e extração de conhecimento), Condenser (otimização/condensação) e MIA-D (estrutura de mensuração e avaliação ESG em evolução). A visão de expansão conecta essas capacidades ao **JEd**, plataforma concebida para integrar experiência de jogo, economia UMS, otimização digital, inteligência ESG e distribuição voluntária do módulo de interconexão MeshWave. A estratégia também prevê integração dos módulos a aplicações e jogos de parceiros.
 
 A participação na infraestrutura distribuída é voluntária e exige autorização expressa. Quem adere como MeshWalker aceita a contribuição-base de 1% de processamento e 1% de armazenamento do equipamento; capacidade adicional é opcional. A comercialização dessa capacidade a terceiros é objetivo do modelo de rede, ainda sujeito à evolução operacional.
 
