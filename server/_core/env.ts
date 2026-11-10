@@ -8,6 +8,10 @@ export const ENV = {
     .split(",")
     .map((email) => email.trim().toLowerCase())
     .filter(Boolean),
+  githubPat: process.env.GITHUB_PAT ?? "",
+  githubOwner: process.env.GITHUB_OWNER ?? "meshwave65",
+  githubRepo: process.env.GITHUB_REPO ?? "SofiaControlPanel",
+  githubBranch: process.env.GITHUB_BRANCH ?? "main",
   isProduction: process.env.NODE_ENV === "production",
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",

@@ -391,6 +391,9 @@ export default function Tasks() {
                             <div className="flex flex-col">
                               <span className="text-sm font-black uppercase tracking-tight group-hover:text-accent transition-colors">{task.title}</span>
                               <span className="text-[10px] text-muted-foreground font-bold truncate max-w-[300px] mt-1 italic">"{task.description}"</span>
+                              <span className={`text-[9px] font-black uppercase tracking-widest mt-2 ${task.githubSyncStatus === "synced" ? "text-emerald-500" : "text-amber-500"}`}>
+                                GitHub: {task.githubSyncStatus || "pending"}
+                              </span>
                             </div>
                           </TableCell>
                           {isAdmin && (

@@ -8,6 +8,7 @@ import { SofiaOrchestrator } from "./sofiaOrchestrator";
 import { TRPCError } from "@trpc/server";
 import { getConsolidatedTaskReport, uploadConsolidatedTaskReport } from "./controlPanelStorage";
 import { syncAgentCredits } from "./manusExecutionService";
+import { mirrorTaskToGitHub } from "./githubMissionMirror";
 
 export const appRouter = router({
   system: systemRouter,
@@ -271,7 +272,7 @@ export const appRouter = router({
         dueDate: z.date().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
-        return db.createTask({
+        const created = await db.createTask({
           agentId: input.agentId,
           createdBy: ctx.user.id,
           title: input.title,
@@ -281,6 +282,32 @@ export const appRouter = router({
           parentTaskId: input.parentTaskId,
           dueDate: input.dueDate,
         });
+        const taskId = created[0]?.id;
+        if (!taskId) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "A missão não foi persistida." });
+
+        const mirror = await mirrorTaskToGitHub({
+          id: taskId,
+          missionKey: `SCP-TASK-${String(taskId).padStart(6, "0")}`,
+          title: input.title,
+          description: input.description,
+          statusId: input.statusId,
+          priorityId: input.priorityId,
+          parentTaskId: input.parentTaskId,
+          dueDate: input.dueDate,
+          createdBy: ctx.user.id,
+          creatorType: "user",
+          creatorName: ctx.user.name,
+          creatorEmail: ctx.user.email,
+        });
+        await db.updateTaskGitHubSync(taskId, {
+          missionKey: mirror.missionKey,
+          githubPath: mirror.path,
+          githubSha: mirror.sha,
+          githubSyncStatus: mirror.status,
+          githubSyncError: mirror.error ?? null,
+        });
+
+        return { ...created[0], missionKey: mirror.missionKey, githubPath: mirror.path, githubSyncStatus: mirror.status };
       }),
 
     getById: protectedProcedure
@@ -304,8 +331,26 @@ export const appRouter = router({
         id: z.number(),
         statusId: z.number(),
       }))
-      .mutation(async ({ input }) => {
-        return db.updateTaskStatus(input.id, input.statusId);
+      .mutation(async ({ input, ctx }) => {
+        const task = await db.getTaskById(input.id);
+        if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+        }
+        const result = await db.updateTaskStatus(input.id, input.statusId);
+        if (task.missionKey) {
+          const mirror = await mirrorTaskToGitHub({
+            ...task,
+            statusId: input.statusId,
+          });
+          await db.updateTaskGitHubSync(input.id, {
+            missionKey: mirror.missionKey,
+            githubPath: mirror.path,
+            githubSha: mirror.sha,
+            githubSyncStatus: mirror.status,
+            githubSyncError: mirror.error ?? null,
+          });
+        }
+        return result;
       }),
 
     factorize: protectedProcedure

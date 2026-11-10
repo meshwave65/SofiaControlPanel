@@ -299,11 +299,40 @@ export async function createTask(data: {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  return db.insert(tasks).values({
+  const result = await db.insert(tasks).values({
     ...data,
     creatorType: data.creatorType ?? "user",
     agentPinned: data.agentPinned ?? data.agentId !== undefined,
   }).returning({ id: tasks.id });
+
+  const taskId = result[0]?.id;
+  if (taskId) {
+    await db.update(tasks).set({
+      missionKey: `SCP-TASK-${String(taskId).padStart(6, "0")}`,
+      githubSyncStatus: "pending",
+      updatedAt: new Date(),
+    }).where(eq(tasks.id, taskId));
+  }
+  return result;
+}
+
+export async function updateTaskGitHubSync(
+  taskId: number,
+  data: {
+    missionKey: string;
+    githubPath: string;
+    githubSha?: string;
+    githubSyncStatus: string;
+    githubSyncError?: string | null;
+  },
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.update(tasks).set({
+    ...data,
+    githubSyncedAt: data.githubSyncStatus === "synced" ? new Date() : undefined,
+    updatedAt: new Date(),
+  }).where(eq(tasks.id, taskId));
 }
 
 export async function getTasksByAgentId(agentId: number) {
@@ -735,6 +764,12 @@ export async function getAllTasks(ownerId: number, canViewAll = false) {
       agentPinned: tasks.agentPinned,
       createdBy: tasks.createdBy,
       creatorType: tasks.creatorType,
+      missionKey: tasks.missionKey,
+      githubPath: tasks.githubPath,
+      githubSha: tasks.githubSha,
+      githubSyncStatus: tasks.githubSyncStatus,
+      githubSyncError: tasks.githubSyncError,
+      githubSyncedAt: tasks.githubSyncedAt,
       title: tasks.title,
       description: tasks.description,
       statusId: tasks.statusId,

@@ -13,6 +13,12 @@ try {
   await sql`CREATE SCHEMA IF NOT EXISTS "sofia"`;
   await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "agentPinned" boolean NOT NULL DEFAULT false`;
   await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "creatorType" varchar(16) NOT NULL DEFAULT 'user'`;
+  await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "missionKey" varchar(64)`;
+  await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "githubPath" varchar(512)`;
+  await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "githubSha" varchar(128)`;
+  await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "githubSyncStatus" varchar(32) NOT NULL DEFAULT 'pending'`;
+  await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "githubSyncError" text`;
+  await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "githubSyncedAt" timestamp`;
   await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "manusTaskId" varchar(128)`;
   await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "manusStatus" varchar(32)`;
   await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "creditsUsed" integer`;
