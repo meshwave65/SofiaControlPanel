@@ -4,7 +4,7 @@
 **ROB — Return On Believe | Retorno por acreditar**
 
 **Material integral para investidores — MISSION_0018 / frente complementar 18.10**  
-**Versão 0.5.3 — DRAFT com hierarquia MWN-first, demanda UMS/MWN e arquitetura integrada do JEd explicitadas**  
+**Versão 0.5.4 — DRAFT com expansão do JEd, economia de jogo, patrocínios, MeshWalkers e integração de aplicações explicitadas**  
 **Não constitui oferta pública, prospecto, recomendação de investimento ou autorização para distribuição externa.**
 
 ---
@@ -72,9 +72,13 @@ As frentes a seguir não são apresentadas como produtos independentes que desvi
 
 ### Infraestrutura distribuída e MeshWalker
 
-A proposta MeshWalker considera a participação voluntária de usuários e dispositivos em uma infraestrutura distribuída. A visão é permitir que cada participante escolha quais recursos deseja disponibilizar e em que nível, podendo incluir capacidade de processamento e armazenamento.
+O MeshWalker é o participante que, após aderir expressamente ao módulo de interconexão, passa a integrar a infraestrutura distribuída da MeshWave. A regra-base de participação prevê a contribuição de **1% da capacidade de processamento e 1% da capacidade de armazenamento do equipamento**. Essa contribuição-base integra as condições de participação aceitas pelo usuário ao ativar o módulo; acima desse patamar, o participante poderá disponibilizar capacidade adicional se desejar.
 
-Essa capacidade poderá apoiar serviços e workloads do ecossistema, com mecanismos de reconhecimento de contribuição associados à economia interna. A proposta ainda depende de evolução técnica, segurança, coordenação, validação de workloads e modelo econômico. Os protótipos e simuladores existentes não representam uma rede distribuída de produção já estabelecida.
+A adesão é voluntária e depende de autorização expressa. A contribuição-base de 1% aplica-se ao participante que escolhe tornar-se MeshWalker; não há ativação silenciosa ou automática. A infraestrutura poderá atender workloads e serviços do próprio ecossistema e também disponibilizar capacidade computacional e armazenamento a terceiros. A comercialização desses recursos é uma frente prevista para a etapa operacional inicial da rede, criando uma fonte externa de utilização e receita para a infraestrutura.
+
+Como ilustração de escala, se o cenário potencial de 750.000 participantes do JEd se convertesse integralmente em MeshWalkers, a contribuição de 1% de cada equipamento corresponderia aritmeticamente a 7.500 equipamentos completos equivalentes em capacidade agregada, considerando equipamentos de capacidade média igual. Trata-se de uma equivalência normalizada para ilustrar a escala da contribuição, não de uma estimativa literal de 7.500 nós nem de uma medição de capacidade real. A contribuição adicional voluntária poderia ampliar esse total.
+
+A visão MeshWalker transforma a base instalada de dispositivos dos participantes em uma possível camada de infraestrutura distribuída: cada aplicação, jogo ou parceria que traga novos MeshWalkers poderá ampliar a capacidade disponível para a rede e para clientes externos. A implementação em produção exige evolução técnica, segurança, coordenação, validação de workloads, medição de capacidade e modelo operacional; os protótipos e simuladores existentes não representam, por si só, uma rede comercial em produção.
 
 ### SOFIA e SWE — inteligência e preservação de conhecimento
 
@@ -90,13 +94,43 @@ MIA-D não é apenas um monitor de consumo ou impacto. É concebido como uma fer
 
 A estrutura mínima de medição e avaliação do MIA-D já existe e sua metodologia permanece em evolução. O objetivo é consolidá-lo como instrumento de avaliação do impacto real da otimização digital — não apenas como contador ou painel ambiental —, com aplicações individuais, corporativas e globais. Condenser e MIA-D já ultrapassaram a etapa de mera concepção; a integração completa ao JEd, a instrumentação abrangente e a consolidação metodológica fazem parte da evolução da plataforma.
 
-### Jardim do Éden (JEd) — plataforma de otimização, impacto e participação na rede
+### Jardim do Éden (JEd) — plataforma de jogo, otimização, impacto e participação na rede
 
-Jardim do Éden, convencionado como **JEd**, é concebido como uma plataforma de experiência e participação no ecossistema MeshWave. Sua função vai além de engajamento: ao ser instalado, o JEd reúne o Condenser como camada de otimização em segundo plano e o MIA-D como camada de mensuração e inteligência ESG. Assim, transforma a experiência digital do usuário em uma plataforma de otimização das interações compatíveis e de acompanhamento do impacto individual e coletivo produzido por essa otimização.
+Jardim do Éden, convencionado como **JEd**, é concebido como uma plataforma de experiência e participação no ecossistema MeshWave, tendo como referência o jogo clássico SimCity e a possibilidade de utilizar como base seu código disponibilizado em regime aberto. O JEd combina uma experiência de jogo com funções de otimização digital, inteligência ESG e acesso à infraestrutura distribuída. Não é apenas uma porta de entrada para a rede: é uma plataforma capaz de gerar utilidade, atividade econômica e novos participantes.
 
-O JEd também será a plataforma de instalação e distribuição do **módulo de interconexão da MeshWave**, inspirado no modelo de funcionamento do Briar. Esse módulo será disponibilizado em uma atualização futura do JEd. Sua instalação/disponibilização não significará adesão automática: **a ativação dependerá de autorização expressa do usuário**. Somente após essa decisão o usuário passará efetivamente a participar da rede, contribuindo voluntariamente com recursos e podendo, ao mesmo tempo, utilizar a infraestrutura e os serviços disponibilizados por ela.
+#### Base de adoção e economia interna do jogo
 
-O JEd conecta, portanto, três dimensões estratégicas da MeshWave: otimização das interações digitais pelo Condenser; mensuração do impacto dessa otimização pelo MIA-D; e participação voluntária na infraestrutura distribuída por meio do módulo de interconexão. A plataforma constitui uma via de aproximação entre usuários, utilidades e contribuições, sem que a ativação da interconexão seja presumida ou realizada sem consentimento expresso.
+O SimCity clássico é utilizado como referência de alcance histórico, com mais de 15 milhões de downloads considerados na estimativa de potencial de adesão. A hipótese de trabalho do fundador é que até **750.000 usuários** possam migrar para uma edição MeshWave do jogo — cenário equivalente a aproximadamente 5% daquela referência histórica. Esse número representa uma estimativa potencial de adesão, não uma base atual de usuários nem uma adoção já realizada.
+
+Dentro do JEd, a UMS poderá ser utilizada para acelerar a evolução do jogo, antecipar construções, adquirir edificações e estruturas especiais, ampliar cidades e acessar outros recursos valorizados por jogadores engajados. Quando o jogador desejar avançar além do que seu saldo de UMS permite, poderá utilizar o mecanismo econômico previsto no ecossistema para adquirir MWN no mercado e convertê-la em UMS. Assim, a experiência de jogo cria ocasiões recorrentes de utilização de UMS e conecta a economia interna à MWN como ativo de acesso ao mercado.
+
+#### Patrocínio, marcas e campanhas institucionais
+
+O JEd também abre uma frente de presença de marcas, patrocínio de estruturas e campanhas dentro do ambiente do jogo. Empresas e organizações poderão patrocinar edificações, instalações ou projetos temáticos — por exemplo, uma fábrica sustentável associada à Coca-Cola, um edifício de referência ESG associado à Apple ou uma estação de dessalinização associada à Audi. Esses nomes são exemplos ilustrativos de formatos possíveis, não indicam parcerias ou patrocínios firmados.
+
+As estruturas patrocinadas poderão oferecer presença institucional permanente, campanhas temporárias e interações com o jogador. Uma campanha poderá, por exemplo, apresentar balões ou avisos interativos que o usuário escolhe clicar para conhecer a iniciativa e receber uma recompensa em UMS patrocinada pela empresa. A presença de determinadas estruturas também poderá conceder um bônus modesto e recorrente em UMS ao jogador, financiado pelo patrocinador. São possibilidades de desenho comercial e de experiência a desenvolver, não funcionalidades cuja implementação esteja sendo declarada como concluída.
+
+Esse modelo permite que marcas associem sua presença no jogo a temas de sustentabilidade, inovação, infraestrutura e impacto social, enquanto patrocinam recompensas e experiências para os participantes. A frente cria oportunidades de marketing, relacionamento e comunicação institucional dentro de uma plataforma de jogo.
+
+#### Condenser, MIA-D e otimização em segundo plano
+
+Ao ser instalado, o JEd reúne o Condenser como camada de otimização em segundo plano e o MIA-D como camada de mensuração e inteligência ESG. O Condenser acompanha e otimiza interações digitais compatíveis do usuário com browsers, sistemas de inteligência artificial, LLMs e outros ambientes integrados. Cada consulta otimizada gera metadados que alimentam o MIA-D. A experiência do JEd, portanto, não se limita ao jogo: ela pode estender a otimização e a mensuração de impacto ao uso digital cotidiano.
+
+#### Distribuição e ativação do módulo de interconexão
+
+O JEd também será a plataforma de instalação e distribuição do **módulo de interconexão da MeshWave**, inspirado no modelo de funcionamento do Briar. Esse módulo será disponibilizado em uma atualização futura do JEd. Sua instalação/disponibilização não significará adesão automática: **a ativação dependerá de autorização expressa do usuário**. Ao aceitar participar como MeshWalker, o usuário passa a integrar efetivamente a rede e a contribuir com a regra-base de 1% de processamento e 1% de armazenamento, podendo disponibilizar capacidade adicional se desejar. Em contrapartida, poderá utilizar a infraestrutura e os serviços disponibilizados pela rede.
+
+O JEd conecta, portanto, quatro dimensões estratégicas: experiência de jogo e economia UMS; presença patrocinada e campanhas empresariais; otimização digital pelo Condenser e mensuração ESG pelo MIA-D; e participação na infraestrutura distribuída por meio do módulo de interconexão. A plataforma constitui uma via de aquisição de usuários, geração de atividade econômica e formação de novos MeshWalkers, sempre preservando a autorização expressa para adesão à rede.
+
+### Unidade de jogos, aplicações e integração com parceiros
+
+A estratégia MeshWave prevê uma frente dedicada ao desenvolvimento de jogos e aplicações próprios e/ou a formação de parcerias com Software Houses, estúdios e desenvolvedores. O objetivo é permitir que as capacidades desenvolvidas para o JEd sejam disponibilizadas como módulos integráveis a outros produtos, em vez de depender exclusivamente da adoção de uma única aplicação.
+
+Condenser, MIA-D e módulo de interconexão poderão ser incorporados, conforme compatibilidade técnica e consentimento do usuário, a jogos, aplicativos e sistemas de terceiros. Um jogo de blocos como Tetris, um jogo de mundo aberto como GTA ou uma aplicação de produtividade como uma planilha são exemplos ilustrativos de categorias que poderiam receber esses módulos. A integração poderá acrescentar otimização de interações, mensuração ESG e uma opção de participação na rede à experiência já oferecida pelo aplicativo parceiro.
+
+Cada jogo, aplicativo ou parceria poderá funcionar como um novo canal de aquisição de usuários e de potenciais MeshWalkers. Com a adesão expressa ao módulo de interconexão, esses usuários poderão ampliar a base de equipamentos participantes e, consequentemente, a capacidade distribuída disponível para atender serviços internos e workloads de terceiros. A expansão da MeshWave poderá ocorrer tanto por desenvolvimento próprio quanto pela incorporação de suas capacidades a produtos criados por outras empresas.
+
+A proposta não depende, portanto, de a MeshWave produzir individualmente todos os jogos e aplicativos que utilizarão sua infraestrutura. A estratégia combina desenvolvimento próprio, componentes integráveis e parcerias de distribuição, ampliando os pontos de entrada para usuários, empresas e novos participantes da rede.
 
 ### MW-Ex — mercado próprio
 
@@ -166,7 +200,9 @@ Uma estrutura ampliada poderá permitir que a MWN e sua economia avancem em fren
 4. **Produtos e serviços:** amadurecimento de soluções como SWE e Condenser, com validação de utilidade, desempenho e possibilidade comercial.
 5. **Infraestrutura MeshWalker:** evolução dos protótipos e validação de mecanismos de participação distribuída em processamento e armazenamento.
 6. **Economia UMS/MWN:** consolidação das regras econômicas, dos fluxos internos e da relação com a circulação do ativo.
-7. **Adoção e aplicações:** desenvolvimento e avaliação de experiências e serviços capazes de gerar utilização concreta.
+7. **JEd e economia patrocinada:** evolução do jogo, aquisição de usuários, utilização de UMS e oportunidades de patrocínio, campanhas e presença institucional de marcas.
+8. **Desenvolvimento e integração de aplicações:** criação de jogos e sistemas próprios e incorporação dos módulos MeshWave a produtos de parceiros, ampliando os canais de aquisição de usuários e MeshWalkers.
+9. **Comercialização de infraestrutura:** estruturação da oferta de processamento e armazenamento distribuídos a terceiros desde a etapa operacional inicial da rede.
 
 Essas frentes representam possibilidades de desenvolvimento e prioridades a serem estruturadas. Não constituem resultados já alcançados nem garantias de execução integral.
 
