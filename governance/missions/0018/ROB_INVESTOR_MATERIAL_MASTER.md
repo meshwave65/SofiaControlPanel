@@ -4,7 +4,7 @@
 **ROB — Return On Believe | Retorno por acreditar**
 
 **Material integral para investidores — MISSION_0018 / frente complementar 18.10**  
-**Versão 0.5.6 — inclusão dos canais oficiais de contato para apresentação e diligência**  
+**Versão 0.5.7 — consolidação editorial da tese econômica e pacote executivo**  
 **Não constitui oferta pública, prospecto, recomendação de investimento ou autorização para distribuição externa.**
 
 ---
@@ -15,9 +15,9 @@
 
 A MeshWave é a base que dá contexto, estrutura e possibilidades de utilidade à MWN. O ecossistema não é um catálogo de produtos que compete com o ativo pela atenção do investidor: é o fundamento tecnológico e econômico que diferencia a proposta de um criptoativo sem uma estrutura de serviços e aplicações por trás.
 
-A arquitetura distingue a UMS, unidade interna de contabilização de contribuição útil e consumo de serviços, da MWN, ativo destinado à circulação e à conexão com o mercado externo. Na arquitetura da MeshWave, a conexão entre a economia interna e a camada de mercado ocorre por meio da MWN, utilizando a MW-Ex, que já está operacional como exchange própria para as operações internas de MWN e UMS. A plataforma já conta com compradores e oferece carteira MWN, conversões explícitas UMS↔MWN e transferências internas entre usuários elegíveis. A expansão para integração com exchanges externas permanece como etapa posterior. Não se prevê uma rota alternativa de conversão direta entre UMS e outros criptoativos.
+A arquitetura distingue a UMS, unidade interna de contabilização de contribuição útil e consumo de serviços, da MWN, ativo destinado à circulação e à conexão com o mercado externo. A conexão entre a economia interna e a camada de mercado ocorre por meio da MWN, utilizando a MW-Ex, exchange própria já operacional para as operações internas de MWN e UMS. A plataforma já conta com compradores e oferece carteira MWN com ledger próprio, conversões explícitas UMS↔MWN e transferências internas entre usuários elegíveis. A integração com exchanges externas permanece como etapa posterior. A arquitetura não prevê uma rota direta de conversão entre UMS e outros criptoativos.
 
-O funcionamento do ecossistema gera uma demanda recorrente pela MWN. Os serviços e as atividades da rede utilizam UMS; quando um usuário consome mais UMS do que possui, sua única alternativa para obter novas unidades é adquirir MWN no mercado e convertê-la em UMS. Esse mecanismo conecta diretamente a atividade econômica interna à procura pela MWN: enquanto o ecossistema estiver funcional, a necessidade de UMS sustenta a demanda pela MWN e sua dinâmica de preço e liquidez no mercado. A tese, portanto, está na consolidação e no funcionamento do próprio ecossistema, cuja atividade alimenta continuamente essa relação econômica.
+A atividade do ecossistema gera necessidade recorrente de UMS. Quando um participante precisa de novas unidades além do saldo disponível, o mecanismo econômico previsto é adquirir MWN no mercado e convertê-la em UMS. Forma-se, assim, um elo direto entre o uso dos serviços e atividades internas e a procura pela MWN: quanto maior e mais contínua a atividade econômica do ecossistema, maior a utilização desse caminho de aquisição e conversão. A consolidação da economia MeshWave é, portanto, parte central da tese de mercado da MWN.
 
 ## O ecossistema como fundamento da MWN
 
