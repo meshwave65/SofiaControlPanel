@@ -12,7 +12,7 @@
 | 21.3 | Especificar isolamento de acesso, carteiras, ledgers e ponte UMS↔MWN | DONE | ChatGPT | Acesso MeshWalker-only, autorização, razão independente, controles e contrato da ponte sem saldo compartilhado ou transferência implícita |
 | 21.4 | Implementar razão MW-Ex e transações seguras | PROGRESS | ChatGPT | Saldo MWN e histórico por usuário; transferências e conversões explícitas, idempotentes, atômicas e sem gasto duplo |
 | 21.5 | Implementar cotações externas e indicadores somente leitura | PROGRESS | ChatGPT | Itens aprovados com fonte, horário e frescor; falhas/staleness visíveis; sem cotação fabricada nem negociação externa |
-| 21.6 | Construir a interface minimalista da MW-Ex | STAGED | — | Exibe saldo MWN, UMS potencial a 1:1.000, valor verificável de mercado e apenas ações aprovadas; mantém separação visual/contábil |
+| 21.6 | Construir a interface minimalista da MW-Ex | DONE | ChatGPT | Exibe saldo MWN, UMS potencial a 1:1.000, valor verificável de mercado e apenas ações aprovadas; mantém separação visual/contábil |
 | 21.7 | Validar segurança, contabilidade, conversões e erros | STAGED | — | Testes cobrem autorização, isolamento, concorrência, idempotência, falha parcial, arredondamento, cotação ausente/desatualizada e ledger |
 | 21.8 | Preparar readiness, transição UMS Genesis e handoff | STAGED | — | Cutover somente após auditoria/reconciliação; caminho normal sem compra de UMS definido; operação real permanece atrás de gates |
 
@@ -85,3 +85,10 @@
 - Testes de ledger e market-data e build passam.
 - Nenhum provedor externo foi escolhido ou chamado; a 21.5 permanece `PROGRESS` até decisão de fonte aprovada e integração server-side segura.
 - OR: `OR-20261110-0040`.
+
+## Checkpoint 21.6 — interface funcional sandbox (2026-11-10)
+
+- `MwEx.jsx` no branch `feat/mwex-sandbox-ledger-21-4` fornece saldo MWN, UMS potencial, conversões, transferência, histórico local e referência indicativa com estado de frescor.
+- A interface exibe “SANDBOX”/“Não habilitada” e não oferece preço executável, liquidez externa ou operação do ecossistema.
+- Build e testes do branch passam; a tarefa 21.6 foi fechada para o escopo sandbox.
+- OR: `OR-20261110-0041`. Próxima etapa de validação: 21.7; 21.4 e 21.5 permanecem abertas para backend/fonte aprovados.
