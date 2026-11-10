@@ -1,9 +1,9 @@
 # MISSION_0018 / 18.14 — Pacote de diligência e FAQ ROB (Return On Believe — retorno por acreditar)
 
 **Versão:** 0.5-DRAFT | **Data:** 2026-11-10  
-**Base textual:** master ROB v0.5.7; matriz 18.1; tarefas 18.2–18.8; auditoria 18.11; framework 18.12; derivados 18.13.
+**Base textual:** master ROB v0.5.8; matriz 18.1; tarefas 18.2–18.8; auditoria 18.11; framework 18.12; derivados 18.13.
 
-**Sincronização:** atualizado para master ROB v0.5.7, preservando MWN-first e incorporando o estado operacional da MW-Ex como MVP custodial interno.  
+**Sincronização:** atualizado para master ROB v0.5.8, preservando MWN-first e incorporando o estado operacional da MW-Ex como MVP custodial interno.  
 **Status:** pacote interno; sem autorização para envio externo.
 
 ## Convenção editorial de siglas
