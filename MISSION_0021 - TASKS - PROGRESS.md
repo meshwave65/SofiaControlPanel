@@ -8,7 +8,7 @@
 | ID | Tarefa | Status | Instância | Critério/saída |
 |---|---|---|---|---|
 | 21.1 | Reconciliar arquitetura e estado real da MW-Ex, carteira interna, contratos, dados e deploys | DONE | ChatGPT | Matriz requisito→tela/API/ledger/dado; distinguir placeholder, operação real, hipótese e dependência; nenhuma consulta ou escrita fora do escopo |
-| 21.2 | Fechar o modelo funcional mínimo e os gates econômicos | STAGED | — | Fluxos de conversão/transferência, fonte MWN, liquidez/contraparte, cotação, arredondamento e tratamento Genesis documentados; decisões pendentes encaminhadas ao responsável |
+| 21.2 | Fechar o modelo funcional mínimo e os gates econômicos | DONE | ChatGPT | Fluxos de conversão/transferência, fonte MWN, liquidez/contraparte, cotação, arredondamento e tratamento Genesis documentados; decisões pendentes encaminhadas ao responsável |
 | 21.3 | Especificar isolamento de acesso, carteiras, ledgers e ponte UMS↔MWN | STAGED | — | Acesso MeshWalker-only, autorização, razão independente, controles e contrato da ponte sem saldo compartilhado ou transferência implícita |
 | 21.4 | Implementar razão MW-Ex e transações seguras | STAGED | — | Saldo MWN e histórico por usuário; transferências e conversões explícitas, idempotentes, atômicas e sem gasto duplo |
 | 21.5 | Implementar cotações externas e indicadores somente leitura | STAGED | — | Itens aprovados com fonte, horário e frescor; falhas/staleness visíveis; sem cotação fabricada nem negociação externa |
@@ -33,3 +33,18 @@
 - `src/config.js` centraliza `1 MWN = 1.000 UMS` e uma referência BRL estática; isso não é cotação atual verificável.
 - Não foram executados login, consulta autenticada, alteração de banco, migração Genesis, operação financeira, deploy ou mudança de produção.
 - OR: `OR-20261110-0036`. Próxima tarefa recomendada: 21.2.
+
+## Checkpoint 21.2 — início do modelo econômico (2026-11-10)
+
+- Tarefa 21.2 assumida por ChatGPT após a conclusão da 21.1.
+- Escopo limitado a especificação, gates e encaminhamento de decisões; nenhuma alteração de ledger, banco, UI, cotação ou produção.
+- O modelo deve separar referência contábil, preço indicativo e preço executável; não presumir liquidez ou contraparte.
+
+## Checkpoint 21.2 — modelo econômico mínimo (2026-11-10)
+
+- Modelo persistido em `governance/missions/0021/MWEX_FUNCTIONAL_ECONOMIC_MODEL_21_2.md`.
+- Fluxos documentados: manter MWN, UMS→MWN, transferência MWN→MWN e MWN→UMS.
+- Definida a separação entre referência configurada, cotação indicativa e preço executável.
+- Precisão, arredondamento, resíduos, idempotência, liquidez/contraparte e Genesis foram transformados em gates explícitos.
+- Oito decisões pendentes foram encaminhadas ao responsável; nenhuma operação real foi autorizada ou executada.
+- OR: `OR-20261110-0037`. Próxima tarefa segura: 21.3, especificação de isolamento e ponte.

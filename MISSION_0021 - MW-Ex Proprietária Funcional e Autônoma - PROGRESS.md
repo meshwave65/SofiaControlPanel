@@ -3,7 +3,7 @@
 > **Projeto:** SofiaControlPanel (SCP) / MeshWave  
 > **Data de criação:** 2026-11-10  
 > **Orquestrador:** SofiaControlPanel (SCP)  
-> **Status:** PROGRESS — tarefa 21.1 assumida por ChatGPT  
+> **Status:** PROGRESS — tarefas 21.1 e 21.2 concluídas; próxima 21.3
 > **Blueprint:** governance/missions/0021/BLUEPRINT.md
 
 ## Objetivo
@@ -21,14 +21,18 @@ A primeira versão deve oferecer os fluxos explícitos de conversão e transfer�
 
 ## Estado inicial e relacionamento com outras missões
 
-A tela atual de MW-Ex em newsite é uma prévia marcada “Em breve”; contém candidatos MWN, BTC, ETH, Ibovespa, S&P 500 e IPCA, mas isso não demonstra cotação ou operação funcional. A MISSION_0018, tarefa 18.4, concluiu escopo/readiness documental; a MISSION_0021 cobre implementação funcional e validação técnica. A MISSION_0020 permanece PROGRESS; a MISSION_0021 agora está em PROGRESS para executar exclusivamente a tarefa 21.1, sem reivindicar prioridade sobre trabalho em andamento da MISSION_0020.
+A tela atual de MW-Ex em newsite é uma prévia marcada “Em breve”; contém candidatos MWN, BTC, ETH, Ibovespa, S&P 500 e IPCA, mas isso não demonstra cotação ou operação funcional. A MISSION_0018, tarefa 18.4, concluiu escopo/readiness documental; a MISSION_0021 cobre implementação funcional e validação técnica. A MISSION_0020 permanece PROGRESS; a MISSION_0021 está em PROGRESS para executar as tarefas documentais e técnicas desta missão, sem reivindicar prioridade sobre trabalho em andamento da MISSION_0020.
 
 ## Próxima ação
 
-Tarefa 21.1 assumida em 2026-11-10 por ChatGPT. O primeiro passo é reconciliar o estado remoto e começar pelo inventário dos fluxos atuais e pela resolução dos gates de modelo de preço, liquidez, conversão e auditoria Genesis. Nenhuma operação financeira real, migração de saldo ou deploy de produção é autorizada por esta definição de missão.
+As tarefas 21.1 e 21.2 foram concluídas documentalmente por ChatGPT. A próxima etapa autônoma é a tarefa 21.3: especificar isolamento MeshWalker-only, carteiras/ledgers segregados e contrato da ponte UMS↔MWN em modo de especificação, sem operação financeira real, migração de saldo ou deploy de produção. Os gates e decisões pendentes da 21.2 estão em `governance/missions/0021/MWEX_FUNCTIONAL_ECONOMIC_MODEL_21_2.md`.
 
 ## Artefatos
 
 - governance/missions/0021/BLUEPRINT.md
-- MISSION_0021 - TASKS - STAGED.md
+- MISSION_0021 - TASKS - PROGRESS.md
 - governance/operational_reports/OR-20261110-0003.md
+- governance/missions/0021/MWEX_STATE_INVENTORY_21_1.md
+- governance/missions/0021/MWEX_FUNCTIONAL_ECONOMIC_MODEL_21_2.md
+- governance/operational_reports/OR-20261110-0036.md
+- governance/operational_reports/OR-20261110-0037.md
