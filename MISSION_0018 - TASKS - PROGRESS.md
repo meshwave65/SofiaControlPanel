@@ -76,3 +76,12 @@
 - Registrada a diretriz de comunicação ROB: narrativa principal positiva, confiante e orientada à oportunidade; não inserir ressalvas negativas genéricas ou cenários hipotéticos por iniciativa editorial. Transparência sobre problemas reais permanece obrigatória nos contextos adequados, especialmente diligência e respostas a questionamentos.
 - Atualizado o master para v0.5.2 e persistida a diretriz no README canônico.
 - 18.10 permanece PROGRESS, aguardando revisão e aprovação do fundador. Aprovação textual não autoriza distribuição externa.
+
+
+### Checkpoint editorial — arquitetura integrada do JEd — OR-20261110-0001
+
+- Persistida a definição do Jardim do Éden (JEd) como plataforma com três dimensões: Condenser em segundo plano para otimização das interações digitais e geração de metadados; MIA-D como ferramenta ESG individual, empresarial e global; e plataforma de instalação/distribuição do módulo de interconexão MeshWave.
+- Registrado que os metadados de cada consulta otimizada alimentam o MIA-D, cuja visão global contempla dados agregados e filtrados por região, país, segmento e outros recortes.
+- Registrado que o módulo de interconexão será disponibilizado em atualização futura do JEd e sua ativação exigirá autorização expressa do usuário, que então poderá contribuir recursos e utilizar a infraestrutura da rede.
+- Master atualizado para v0.5.3; definição também persistida no README canônico.
+- 18.10 permanece PROGRESS até revisão e aprovação do fundador; esta atualização não autoriza distribuição externa.
