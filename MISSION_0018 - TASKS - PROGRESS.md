@@ -16,7 +16,7 @@
 | 18.7 | Roadmap integrado | DONE | ChatGPT | Fases e gates para decisão; não é cronograma/budget aprovado. |
 | 18.8 | Tese MWN/ROB | DONE | ChatGPT | Draft executivo e detalhado preservado. |
 | 18.9 | Revisão cruzada e fechamento preliminar | DONE — PRELIMINARY | ChatGPT | Override humano registrado em OR-20261109-0004; Oracle/FOR pendentes para versão definitiva histórica. |
-| 18.10 | Material integral ROB para investidores | PROGRESS | ChatGPT | Documento mestre integral v0.5.1 publicado com hierarquia MWN-first; ecossistema como fundamento tecnológico/econômico do ativo. Aguardando revisão e aprovação explícita do fundador; OR-20261109-0015 registra a correção de foco. |
+| 18.10 | Material integral ROB para investidores | PROGRESS | ChatGPT | Documento mestre integral v0.5.2 publicado com hierarquia MWN-first, mecanismo de demanda recorrente UMS→MWN→UMS e diretriz de comunicação positiva; revisão e aprovação explícita do fundador ainda pendentes. OR-20261109-0016 registra a correção. |
 | 18.11 | Auditoria de alegações e evidências | DONE | ChatGPT | Auditoria documental e limites de formulação em CLAIM_EVIDENCE_AUDIT_18_11.md; OR-20261109-0008. |
 | 18.12 | Estrutura de participação e capital | DONE | ChatGPT | Framework de alternativas e diligência em CAPITAL_PARTICIPATION_FRAMEWORK_18_12.md; nenhuma opção escolhida; OR-20261109-0009. |
 | 18.13 | Derivados executivos | DONE | ChatGPT | Resumo, pitch e apresentação em EXECUTIVE_DERIVATIVES_ROB_18_13.md; DRAFT interno; OR-20261109-0010. |
@@ -67,3 +67,12 @@
 - 18.13 e 18.14 permanecem DONE como derivados internos em DRAFT. 18.11 e 18.12 permanecem DONE como entregáveis documentais.
 - 18.10 permanece PROGRESS até a revisão e aprovação do master integral pelo fundador. 18.15 permanece BLOCKED — OWNER REVIEW; 18.16 permanece BLOCKED — DEPENDENCY.
 - A execução documental interna desta rodada está concluída. Não houve outreach, distribuição, oferta, listagem, publicação externa, transação, deploy, contratação, despesa ou compromisso.
+
+
+### Checkpoint editorial — demanda estrutural e diretriz de comunicação — OR-20261109-0016
+
+- Corrigido o parágrafo de abertura econômica do master: a atividade do ecossistema gera necessidade recorrente de UMS; usuários deficitários obtêm UMS adquirindo MWN no mercado e reconvertendo-a.
+- A tese passa a apresentar esse fluxo como mecanismo estrutural de demanda pela MWN enquanto o ecossistema estiver funcional, com a consolidação e o funcionamento do ecossistema como questão central.
+- Registrada a diretriz de comunicação ROB: narrativa principal positiva, confiante e orientada à oportunidade; não inserir ressalvas negativas genéricas ou cenários hipotéticos por iniciativa editorial. Transparência sobre problemas reais permanece obrigatória nos contextos adequados, especialmente diligência e respostas a questionamentos.
+- Atualizado o master para v0.5.2 e persistida a diretriz no README canônico.
+- 18.10 permanece PROGRESS, aguardando revisão e aprovação do fundador. Aprovação textual não autoriza distribuição externa.
