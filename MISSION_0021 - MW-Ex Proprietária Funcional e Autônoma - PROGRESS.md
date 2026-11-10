@@ -3,14 +3,14 @@
 > **Projeto:** SofiaControlPanel (SCP) / MeshWave  
 > **Data de criação:** 2026-11-10  
 > **Orquestrador:** SofiaControlPanel (SCP)  
-> **Status:** PROGRESS — tarefas 21.1–21.3 e 21.6 concluídas; tarefas 21.4, 21.5 e 21.7 abertas; 21.8 STAGED
+> **Status:** PROGRESS — tarefas 21.1–21.4 e 21.6 concluídas; tarefas 21.5 e 21.7 abertas; 21.8 STAGED
 > **Blueprint:** governance/missions/0021/BLUEPRINT.md
 
 ## Objetivo
 
-Tornar a MW-Ex uma exchange proprietária, funcional e simples, acessível somente pela interface MeshWave a usuários autenticados elegíveis como MeshWalkers. A MW-Ex terá saldo e razão próprios em MWN, será visualmente acoplada à experiência da carteira MWN, mas permanecerá autônoma e segregada da carteira interna de UMS.
+Manter e evoluir a MW-Ex, exchange proprietária da MeshWave, já operacional em modalidade interna como MVP custodial. O acesso ocorre pela interface MeshWave, para usuários autenticados elegíveis como MeshWalkers. A MW-Ex possui saldo e ledger próprios em MWN, visualmente acoplados à experiência da carteira, mas autônomos e segregados da carteira interna de UMS.
 
-A primeira versão deve oferecer os fluxos explícitos de conversão e transferência MWN↔UMS definidos no Blueprint, saldo MWN, equivalência potencial em UMS, valor de mercado com fonte verificável e indicadores/cotações externas selecionados. Não inclui acesso público, exchange externa, depósitos/saques fiduciários nem uma plataforma ampla de trading.
+O MVP em produção oferece consulta de saldo, conversões explícitas UMS↔MWN, transferências internas entre MeshWalkers elegíveis, histórico de operações, crédito administrativo após referência de depósito e validação, e reversões por lançamentos compensatórios. Cotações externas e indicadores somente leitura, validação operacional ampliada e integrações externas permanecem em evolução ou fora do escopo atual.
 
 ## Decisões de desenho registradas
 
@@ -21,11 +21,11 @@ A primeira versão deve oferecer os fluxos explícitos de conversão e transfer�
 
 ## Estado inicial e relacionamento com outras missões
 
-A tela atual de MW-Ex em newsite é uma prévia marcada “Em breve”; contém candidatos MWN, BTC, ETH, Ibovespa, S&P 500 e IPCA, mas isso não demonstra cotação ou operação funcional. A MISSION_0018, tarefa 18.4, concluiu escopo/readiness documental; a MISSION_0021 cobre implementação funcional e validação técnica. A MISSION_0020 permanece PROGRESS; a MISSION_0021 está em PROGRESS para executar as tarefas documentais e técnicas desta missão, sem reivindicar prioridade sobre trabalho em andamento da MISSION_0020.
+A MW-Ex está operacional como MVP custodial interno em `newsite/main`. Os PRs #21 e #22 integraram a implementação; o commit de produção de referência é `cf1bb8d`, e a migration `20261110140000_mwex_mvp_ledger.sql` foi executada com sucesso. O MVP disponibiliza ledger MWN separado, conversões UMS↔MWN, transferências internas entre MeshWalkers elegíveis, crédito administrativo validado e reversões compensatórias. A rota `/mw-ex` é protegida por autenticação e a elegibilidade é verificada no servidor. A tarefa 21.4 foi encerrada como `DONE (MVP custodial)` no OR-20261110-0046. A MISSION_0021 segue em PROGRESS para concluir cotação externa read-only (21.5), validação operacional ampliada (21.7) e readiness/transição Genesis (21.8).
 
 ## Próxima ação
 
-As tarefas 21.1–21.3 foram concluídas documentalmente e a 21.6 concluiu a interface sandbox. A 21.4 foi reassumida por Manus (sandbox); 21.5 e 21.7 permanecem atribuídas e inalteradas. O espelho privado `meshwave65/mwex-sandbox-mirror` mantém `main` no snapshot `7cc013c`; a continuação reproduzível está na branch `feat/mwex-local-persistent-test-ledger`, commit `849633e`. O harness dessa branch usa ledger JSON temporário, tokens sintéticos e mutex compartilhado apenas no mesmo processo; clone limpo, testes e build passaram. Isso é evidência de teste local, não backend de produto: banco transacional, RLS, autorização real e concorrência multiprocesso continuam pendentes. Próximo passo da 21.4: selecionar/implementar apenas em ambiente descartável autorizado o backend que satisfaça os critérios originais e depois validar com a 21.7. Nenhum Supabase ou ambiente de produção foi acessado. Os gates da 21.2 estão em `governance/missions/0021/MWEX_FUNCTIONAL_ECONOMIC_MODEL_21_2.md`; detalhes e investigação read-only do alerta estão no OR-20261110-0044.
+A tarefa 21.4 foi concluída em produção como MVP custodial, conforme OR-20261110-0046. O espelho privado `meshwave65/mwex-sandbox-mirror` e a branch `feat/mwex-local-persistent-test-ledger` permanecem evidência complementar de testes reproduzíveis em ambiente isolado; não substituem nem descrevem o backend de produção. O harness local usa ledger JSON temporário, tokens sintéticos e mutex apenas no mesmo processo, portanto seus limites multiprocesso continuam válidos para aquele experimento, não para a implantação principal. Próximas frentes: concluir 21.5 (cotações externas read-only) e 21.7 (validação operacional ampliada), mantendo 21.8 STAGED até auditoria/reconciliação Genesis. Os gates da 21.2 estão em `governance/missions/0021/MWEX_FUNCTIONAL_ECONOMIC_MODEL_21_2.md`; a implantação operacional está registrada no OR-20261110-0046.
 
 ## Artefatos
 
@@ -46,4 +46,5 @@ As tarefas 21.1–21.3 foram concluídas documentalmente e a 21.6 concluiu a int
 - https://github.com/meshwave65/mwex-sandbox-mirror (espelho privado da sandbox, commit `7cc013c`)
 - https://github.com/meshwave65/mwex-sandbox-mirror/tree/feat/mwex-local-persistent-test-ledger (harness local, commit `849633e`)
 - governance/operational_reports/OR-20261110-0044.md
+- governance/operational_reports/OR-20261110-0046.md
 - `SOURCE_CHECKPOINT.json` no repositório espelho (origem, versões e hashes dos artefatos)
