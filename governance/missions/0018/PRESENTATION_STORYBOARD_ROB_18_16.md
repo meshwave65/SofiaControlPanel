@@ -1,8 +1,21 @@
-# ROB — Storyboard de apresentação para investidores
+# ROB (Return On Believe — retorno por acreditar) — Storyboard de apresentação para investidores
 
 **Fonte editorial:** master ROB v0.5.7  
 **Status:** roteiro visual interno; não publicado.  
 **Objetivo:** apresentar MWN como ativo de mercado e o ecossistema MeshWave como fundamento tecnológico/econômico, sem transformar a apresentação em catálogo de produtos.
+
+## Convenção editorial de siglas
+
+Na primeira ocorrência em cada slide/material, apresentar o nome por extenso seguido da sigla entre parênteses. Siglas não devem aparecer sem definição prévia no próprio material.
+
+- **MWN — MeshWave Network:** criptoativo da economia MeshWave.
+- **UMS — Unidade MeshWave de Serviços:** unidade interna de serviços e contabilização.
+- **MW-Ex — MeshWave Exchange:** exchange própria da MeshWave.
+- **SOFIA — Sistema de Orquestração Federada de Inteligências Artificiais.**
+- **SWE — Sofia Web Extractor.**
+- **MIA-D — Monitor de Impacto Ambiental Digital.**
+- **JEd — Jardim do Éden.**
+- **ESG — Environmental, Social and Governance (ambiental, social e governança).**
 
 ## Direção visual
 
