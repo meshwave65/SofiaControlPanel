@@ -1,9 +1,9 @@
 # MISSION_0018 / 18.14 — Pacote de diligência e FAQ ROB
 
-**Versão:** 0.3-DRAFT | **Data:** 2026-11-09  
-**Base textual:** master ROB v0.5.1; matriz 18.1; tarefas 18.2–18.8; auditoria 18.11; framework 18.12; derivados 18.13.
+**Versão:** 0.4-DRAFT | **Data:** 2026-11-09  
+**Base textual:** master ROB v0.5.5; matriz 18.1; tarefas 18.2–18.8; auditoria 18.11; framework 18.12; derivados 18.13.
 
-**Sincronização:** FAQ revisado para refletir a hierarquia MWN-first: MWN é o ativo central; MeshWave é a base tecnológica e econômica que o fundamenta.  
+**Sincronização:** atualizado para master ROB v0.5.5, preservando MWN-first e incorporando o estado operacional da MW-Ex como MVP custodial interno.  
 **Status:** pacote interno; sem autorização para envio externo.
 
 ## 1. Rota de leitura
@@ -27,15 +27,15 @@
 
 **O que significa ROB?** Return On Believe — retorno por acreditar. É a denominação da tese de investimento e não uma métrica financeira padronizada, ROI, valuation ou promessa de retorno.
 
-**Como se relacionam UMS e MWN?** UMS é a unidade interna de contabilização de contribuição útil e consumo de serviços. MWN é o ativo que conecta essa economia interna à circulação externa. A arquitetura define MWN como gateway asset: a conversão entre o ambiente UMS e o mercado externo ocorre por meio de MWN, com MW-Ex como canal próprio pretendido; não há rota direta UMS↔outro criptoativo.
+**Como se relacionam UMS e MWN?** UMS é a unidade interna de contabilização de contribuição útil e consumo de serviços. MWN é o ativo que conecta essa economia interna à circulação externa. A arquitetura define MWN como gateway asset: a conversão entre o ambiente UMS e a camada de mercado ocorre por meio de MWN. A MW-Ex já funciona como exchange própria para operações internas; não há rota direta UMS↔outro criptoativo.
 
 **Por que buscar recursos agora?** Para consolidar a arquitetura econômica e a infraestrutura que sustentam a MWN, aperfeiçoar os componentes da base MeshWave, avançar a MW-Ex e ampliar os recursos materiais, computacionais, financeiros e humanos necessários à evolução do ativo e de seu ecossistema.
 
 **A MeshWave já está em produção?** É necessário distinguir os componentes do ecossistema integrado. SOFIA, AppAndroid, SWE e Condenser são funcionais; MIA-D já possui estrutura mínima de medição e avaliação. A operação conjunta do ecossistema ainda é rudimentar e sua integração e escala precisam avançar. Funcionalidade de componentes não significa que todas as frentes estejam integradas em uma única operação madura.
 
-**A MW-Ex já funciona?** Não. A evidência disponível classifica MW-Ex como preview visual não funcional. Não há prova de ordens, matching, trades, custódia, liquidez ou operação de exchange.
+**A MW-Ex já funciona?** Sim. Está operacional em modalidade interna como MVP custodial. Possui carteira MWN com ledger separado da carteira UMS, conversões explícitas UMS↔MWN, transferências internas entre usuários elegíveis, histórico de operações, créditos administrativos mediante referência de depósito e validação, e reversões administrativas por lançamentos compensatórios que preservam o histórico. A rota /mw-ex exige autenticação, a elegibilidade é verificada no servidor e as operações de backend são executadas por RPCs Supabase. Esse escopo não inclui listagem em exchange externa, saques automáticos ou movimentação financeira automatizada para fora do ecossistema.
 
-**O que são UMS e MWN?** UMS é a unidade interna de contabilização de contribuição útil e consumo de serviços. MWN é o ativo de mercado e gateway da economia MeshWave, conectando o ambiente interno à circulação externa. A arquitetura não prevê rota direta UMS↔outro criptoativo; a conexão com o mercado ocorre por MWN, com MW-Ex como canal próprio pretendido. Direitos, supply, emissão, Genesis e parâmetros finais de conversão ainda dependem de aprovação.
+**O que são UMS e MWN?** UMS é a unidade interna de contabilização de contribuição útil e consumo de serviços. MWN é o ativo de mercado e gateway da economia MeshWave, conectando o ambiente interno à circulação externa. A arquitetura não prevê rota direta UMS↔outro criptoativo; a conexão com o mercado ocorre por MWN, com a MW-Ex já operacional como canal próprio para operações internas. Direitos, supply, emissão, Genesis e parâmetros finais de conversão ainda dependem de aprovação.
 
 **Já existe blockchain pública ou rede descentralizada?** A evidência revisada classifica o ledger/blockchain como piloto single-operator e non-canonical. Não há comprovação de rede pública distribuída em produção com consenso independente.
 
@@ -71,4 +71,4 @@
 Nenhum e-mail, WhatsApp, telefone ou URL de contato foi acrescentado porque não há destino confirmado neste pacote. Não inventar links. A inclusão de contatos é pendência do fundador antes de qualquer versão destinada a terceiros.
 
 ## 5. Resultado
-**18.14 concluída como pacote interno de diligência e FAQ.** A rota documental e as respostas preliminares estão organizadas; validação factual adicional, documentos jurídicos, contatos confirmados e autorização humana continuam necessários.
+**18.14 atualizada para master v0.5.5.** A rota documental e as respostas foram sincronizadas, inclusive o status operacional da MW-Ex. Permanecem como gates para circulação externa: inserir contato confirmado, concluir revisão/aprovação do fundador e obter autorização específica de distribuição.
