@@ -7,13 +7,13 @@
 - **UMS (Unidade MeshWave de Serviços):** unidade interna utilizada na contabilização de contribuição útil e no consumo de serviços.
 - **MWN (MeshWave Network):** ativo que conecta a economia interna à circulação externa.
 - **Caminho econômico:** atividade e serviços geram necessidade de UMS; quando o saldo não é suficiente, o participante adquire MWN no mercado e a converte em UMS.
-- **MW-Ex (MeshWave Exchange):** exchange própria já operacional em modalidade interna como MVP custodial, com carteira MWN/ledger separado, conversões UMS↔MWN, transferências internas entre usuários elegíveis e histórico de operações.
+- **MW-Ex (MeshWave Exchange):** exchange própria já operacional em modalidade interna como MVP (Minimum Viable Product — produto mínimo viável) custodial, com carteira MWN/ledger separado, conversões UMS↔MWN, transferências internas entre usuários elegíveis e histórico de operações.
 
 A necessidade recorrente de UMS cria uma ligação direta entre o uso do ecossistema e a procura pela MWN. A consolidação e a continuidade da atividade econômica MeshWave são centrais para fortalecer esse mecanismo.
 
 ## O fundamento tecnológico
 
-A base reúne SOFIA (Sistema de Orquestração Federada de Inteligências Artificiais), AppAndroid (frontend Android do SOFIA Core), SWE (captura e extração de conhecimento), Condenser (otimização/condensação) e MIA-D (Monitor de Impacto Ambiental Digital; estrutura de mensuração e avaliação ESG em evolução). A visão de expansão conecta essas capacidades ao **JEd (Jardim do Éden)**, plataforma concebida para integrar experiência de jogo, economia UMS, otimização digital, inteligência ESG e distribuição voluntária do módulo de interconexão MeshWave. A estratégia também prevê integração dos módulos a aplicações e jogos de parceiros.
+A base reúne SOFIA (Sistema de Orquestração Federada de Inteligências Artificiais), AppAndroid (frontend Android do SOFIA Core), SWE (Sofia Web Extractor; módulo de captura e extração de conhecimento), Condenser (otimização/condensação) e MIA-D (Monitor de Impacto Ambiental Digital; estrutura de mensuração e avaliação ESG (Environmental, Social and Governance — ambiental, social e governança) em evolução). A visão de expansão conecta essas capacidades ao **JEd (Jardim do Éden)**, plataforma concebida para integrar experiência de jogo, economia UMS, otimização digital, inteligência ESG e distribuição voluntária do módulo de interconexão MeshWave. A estratégia também prevê integração dos módulos a aplicações e jogos de parceiros.
 
 A participação na infraestrutura distribuída é voluntária e exige autorização expressa. Quem adere como MeshWalker aceita a contribuição-base de 1% de processamento e 1% de armazenamento do equipamento; capacidade adicional é opcional. A comercialização dessa capacidade a terceiros é objetivo do modelo de rede, ainda sujeito à evolução operacional.
 
