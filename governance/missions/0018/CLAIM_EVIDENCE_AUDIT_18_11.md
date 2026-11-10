@@ -1,6 +1,6 @@
 # MISSION_0018 / 18.11 — Auditoria de alegações e evidências
 
-**Versão:** 0.1.0-DRAFT | **Data:** 2026-11-09  
+**Versão:** 0.2-DRAFT | **Data:** 2026-11-09  
 **Base:** matriz 18.1 e entregas 18.2–18.8.  
 **Natureza:** auditoria documental de consistência; não é auditoria técnica independente, financeira, jurídica, de segurança ou de runtime.
 
@@ -22,7 +22,7 @@ A matriz 18.1 foi consolidada em 08/11/2026. Esta rodada não repetiu testes nos
 | Portal público | Website e repositório newsite referenciados na matriz 18.1 | Website informativo público | Prova de negociação, demanda ou operação financeira |
 | Wallet frontend | Código implementado; runtime não revalidado | Frontend autenticado implementado | Uso ativo, saldo de ativo emitido ou operação em produção |
 | Aquisição/ledger UMS | Piloto controlado e snapshots datados; readiness audit e modelo contábil newsite | Fluxos documentados e piloto controlado | Volume de mercado, receita recorrente, demanda ampla ou liquidação independente |
-| MW-Ex | Preview visual não funcional; MwEx.jsx e rota pública | Interface/preview “Em breve” | Exchange operacional, ordens, matching, trades, custódia ou liquidez |
+| MW-Ex | MVP custodial interno operacional; newsite/src/pages/MwEx.jsx, newsite/supabase/migrations/20261110140000_mwex_mvp_ledger.sql, rota protegida em newsite/src/main.jsx, OR-20261110-0046, relatório newsite/docs/relatorios/status-mwex-2026-11-10.md, deploy Vercel READY no commit cf1bb8d | Exchange própria operacional para operações internas; carteira MWN e ledger separado, conversões UMS↔MWN, transferências internas elegíveis, histórico, créditos administrativos validados e reversões compensatórias | Não afirmar listagem externa, saques automáticos, integração de terceiros ou movimentação financeira automatizada para fora do ecossistema; não inferir volume, liquidez pública ou escala de mercado |
 | Blockchain | Piloto single-operator e non-canonical; README e PILOT_STATE_2026-10-24 | Código e piloto controlado | Mainnet pública, consenso independente ou custódia auditada |
 | MeshWalker/processamento/armazenamento | Protótipo/laboratório e proposta; simulador, node-agent e escopo V0 | Protótipo local e arquitetura em evolução | Rede multi-node de produção, capacidade instalada, PoUW ativo ou contribuição de 1% em operação |
 | SOFIA/SWE | Código; runtime/E2E atual não revalidado | Backend e ingestão de conversas implementados em código | Confiabilidade de produção, usuários, receita ou adoção |
@@ -40,7 +40,7 @@ A matriz 18.1 foi consolidada em 08/11/2026. Esta rodada não repetiu testes nos
 2. Preservar o uso exclusivo de ferramentas e serviços gratuitos da internet e equipamento próprio extremamente limitado.
 3. Explicar que essa estrutura atingiu seu limite e que a próxima fase exige recursos materiais/computacionais, financeiros, humanos e organizacionais.
 4. Não converter esforço individual em prova de tração, desempenho, adoção ou sucesso.
-5. Descrever MW-Ex como preview não funcional.
+5. Descrever MW-Ex como MVP custodial interno operacional, sem ampliar o escopo para funcionalidades externas ainda não implementadas.
 6. Não apresentar UMS/MWN como tokenomics final, supply, direitos, taxa de conversão ou mercado aprovado.
 7. Não afirmar listagem, preço, liquidez, volume, receita, usuários, parcerias ou investidores interessados.
 8. Separar ROB de ROI e de qualquer promessa de retorno.
@@ -50,7 +50,7 @@ A matriz 18.1 foi consolidada em 08/11/2026. Esta rodada não repetiu testes nos
 ## 4. Lacunas para diligência
 - Revalidar runtime/deployment e E2E de portal, wallet e ledger em ambiente de teste.
 - Para números econômicos atuais, consultar somente SQL read-only no Supabase MeshWave65, project ref ufylccbdjfzydbwhpmpp; esta auditoria não contém números de saldo/aquisição.
-- Demonstrar MW-Ex em ambiente controlado; não há evidência de trading.
+- A implementação do MVP custodial interno está registrada e implantada; demonstrações e diligência devem respeitar o escopo interno documentado. Integrações externas e saques automatizados permanecem fora do MVP.
 - Revisar cadeia/ledger, custódia, chaves, threat model e segurança por especialistas independentes.
 - Executar benchmarks reprodutíveis de SWE/Condenser e avaliação de preservação semântica.
 - Validar MIA-D com instrumentação, incerteza, revisão técnica/científica e dados.
@@ -79,3 +79,24 @@ A classificação funcional não implica, por si só, integração completa entr
 A tese de capacidade deve ser formulada como capacidade já demonstrada pela construção realizada, não como garantia de sucesso futuro. A pergunta narrativa aprovada pelo fundador é: “Se foi possível realizar tanto com nada, o que se poderia realizar com alguma coisa?”
 
 Este adendo registra a orientação factual e editorial do fundador para a versão ROB v0.5. Não substitui inspeção técnica específica quando uma diligência exigir evidência de runtime, benchmarks ou integração.
+
+
+## Adendo de atualização factual — MW-Ex (2026-11-10)
+
+Este adendo prevalece sobre as classificações históricas de preview não funcional que permanecem em registros anteriores desta auditoria.
+
+### Evidências operacionais registradas
+- `newsite/src/pages/MwEx.jsx`: interface da exchange interna.
+- `newsite/supabase/migrations/20261110140000_mwex_mvp_ledger.sql`: migration do ledger do MVP custodial, aplicada.
+- `newsite/src/main.jsx`: rota `/mw-ex` protegida por autenticação.
+- Commit de produção de referência: `cf1bb8d`; deployment Vercel em estado READY.
+- Relatório operacional: `governance/operational_reports/OR-20261110-0046.md`.
+- Relatório de estado: `newsite/docs/relatorios/status-mwex-2026-11-10.md`.
+
+### Escopo funcional confirmado no registro
+Carteira MWN e ledger separado da carteira UMS; conversões explícitas UMS↔MWN; transferências internas entre usuários elegíveis; histórico de operações; créditos administrativos com referência de depósito e validação; reversões por lançamentos compensatórios, preservando o histórico; autenticação e verificação de elegibilidade no servidor; operações backend via RPCs Supabase. A plataforma já conta com compradores, sem quantificação neste documento.
+
+### Limites de escopo
+O MVP não inclui listagem em exchange externa, saques automáticos, integração de terceiros ou movimentação financeira automatizada para fora do ecossistema. O status operacional interno não comprova liquidez pública, volume de mercado ou escala comercial.
+
+A atualização documental reflete as evidências de implementação e implantação registradas em 10/11/2026. Não equivale a auditoria independente de segurança, custódia, conformidade ou runtime.
