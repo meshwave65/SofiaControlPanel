@@ -1,7 +1,7 @@
 # MISSION_0018 / 18.14 — Pacote de diligência e FAQ ROB
 
 **Versão:** 0.4-DRAFT | **Data:** 2026-11-09  
-**Base textual:** master ROB v0.5.5; matriz 18.1; tarefas 18.2–18.8; auditoria 18.11; framework 18.12; derivados 18.13.
+**Base textual:** master ROB v0.5.6; matriz 18.1; tarefas 18.2–18.8; auditoria 18.11; framework 18.12; derivados 18.13.
 
 **Sincronização:** atualizado para master ROB v0.5.5, preservando MWN-first e incorporando o estado operacional da MW-Ex como MVP custodial interno.  
 **Status:** pacote interno; sem autorização para envio externo.
