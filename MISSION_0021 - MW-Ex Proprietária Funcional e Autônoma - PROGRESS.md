@@ -3,7 +3,7 @@
 > **Projeto:** SofiaControlPanel (SCP) / MeshWave  
 > **Data de criação:** 2026-11-10  
 > **Orquestrador:** SofiaControlPanel (SCP)  
-> **Status:** PROGRESS — tarefas 21.1 e 21.2 concluídas; próxima 21.3
+> **Status:** PROGRESS — tarefas 21.1–21.3 e 21.6 concluídas; tarefas 21.4, 21.5 e 21.7 abertas; 21.8 STAGED
 > **Blueprint:** governance/missions/0021/BLUEPRINT.md
 
 ## Objetivo
@@ -25,7 +25,7 @@ A tela atual de MW-Ex em newsite é uma prévia marcada “Em breve”; contém 
 
 ## Próxima ação
 
-As tarefas 21.1 e 21.2 foram concluídas documentalmente por ChatGPT. A próxima etapa autônoma é a tarefa 21.3: especificar isolamento MeshWalker-only, carteiras/ledgers segregados e contrato da ponte UMS↔MWN em modo de especificação, sem operação financeira real, migração de saldo ou deploy de produção. Os gates e decisões pendentes da 21.2 estão em `governance/missions/0021/MWEX_FUNCTIONAL_ECONOMIC_MODEL_21_2.md`.
+As tarefas 21.1–21.3 foram concluídas documentalmente e a 21.6 concluiu a interface sandbox. O checkpoint remoto mais recente é a validação sandbox 21.7 (OR-20261110-0042); seu handoff identifica persistência server-side de teste como próximo pré-requisito, correspondente à tarefa 21.4 ainda aberta. Por instrução explícita do responsável, 21.4 foi reassumida por Manus (sandbox); 21.5 e 21.7 permanecem atribuídas e inalteradas. Para continuidade entre instâncias, foi criado o espelho privado `https://github.com/meshwave65/mwex-sandbox-mirror` no commit `7cc013c`; os passos reproduzíveis estão no README e `SOURCE_CHECKPOINT.json`. Próximo passo: desenvolver a persistência/testes isolados nesse espelho. Nenhum Supabase ou ambiente de produção foi acessado. Os gates da 21.2 estão em `governance/missions/0021/MWEX_FUNCTIONAL_ECONOMIC_MODEL_21_2.md`.
 
 ## Artefatos
 
@@ -36,3 +36,12 @@ As tarefas 21.1 e 21.2 foram concluídas documentalmente por ChatGPT. A próxima
 - governance/missions/0021/MWEX_FUNCTIONAL_ECONOMIC_MODEL_21_2.md
 - governance/operational_reports/OR-20261110-0036.md
 - governance/operational_reports/OR-20261110-0037.md
+- governance/missions/0021/MWEX_ISOLATION_BRIDGE_CONTRACT_21_3.md
+- governance/operational_reports/OR-20261110-0038.md
+- governance/operational_reports/OR-20261110-0039.md
+- governance/operational_reports/OR-20261110-0040.md
+- governance/operational_reports/OR-20261110-0041.md
+- governance/operational_reports/OR-20261110-0042.md
+- governance/operational_reports/OR-20261110-0043.md
+- https://github.com/meshwave65/mwex-sandbox-mirror (espelho privado da sandbox, commit `7cc013c`)
+- `SOURCE_CHECKPOINT.json` no repositório espelho (origem, versões e hashes dos artefatos)
