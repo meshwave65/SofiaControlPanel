@@ -1,5 +1,8 @@
 # MISSION_0021 / Tarefa 21.2 — Modelo funcional mínimo e gates econômicos
 
+> **Atualização de status — 10/11/2026:** este documento foi elaborado antes da implantação do MVP custodial da MW-Ex. As decisões e gates econômicos continuam como referência de desenho, mas afirmações sobre ausência de conversões, ledger ou operação refletem o baseline anterior. A MW-Ex está agora operacional em modalidade interna, conforme [OR-20261110-0046](../../operational_reports/OR-20261110-0046.md). A validação operacional ampliada e as cotações externas read-only permanecem frentes distintas.
+
+
 **Projeto:** Projeto Triangulo / SofiaControlPanel / MeshWave  
 **E-mail do usuário Manus:** 2.15080907e+08+meshwave65@users.noreply.github.com  
 **Data e hora:** 10/11/2026, 09:21 (-03:00)  
