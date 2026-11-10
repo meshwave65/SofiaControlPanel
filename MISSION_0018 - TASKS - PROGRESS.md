@@ -16,7 +16,7 @@
 | 18.7 | Roadmap integrado | DONE | ChatGPT | Fases e gates para decisão; não é cronograma/budget aprovado. |
 | 18.8 | Tese MWN/ROB | DONE | ChatGPT | Draft executivo e detalhado preservado. |
 | 18.9 | Revisão cruzada e fechamento preliminar | DONE — PRELIMINARY | ChatGPT | Override humano registrado em OR-20261109-0004; Oracle/FOR pendentes para versão definitiva histórica. |
-| 18.10 | Material integral ROB para investidores | PROGRESS | ChatGPT | Documento mestre integral v0.5.2 publicado com hierarquia MWN-first, mecanismo de demanda recorrente UMS→MWN→UMS e diretriz de comunicação positiva; revisão e aprovação explícita do fundador ainda pendentes. OR-20261109-0016 registra a correção. |
+| 18.10 | Material integral ROB para investidores | PROGRESS | ChatGPT | Documento mestre integral v0.5.4 publicado com hierarquia MWN-first, mecanismo de demanda recorrente UMS→MWN→UMS, arquitetura expandida do JEd, economia de jogo, patrocínios, MeshWalker e integração com parceiros; revisão e aprovação explícita do fundador ainda pendentes. OR-20261110-0002 registra a atualização. |
 | 18.11 | Auditoria de alegações e evidências | DONE | ChatGPT | Auditoria documental e limites de formulação em CLAIM_EVIDENCE_AUDIT_18_11.md; OR-20261109-0008. |
 | 18.12 | Estrutura de participação e capital | DONE | ChatGPT | Framework de alternativas e diligência em CAPITAL_PARTICIPATION_FRAMEWORK_18_12.md; nenhuma opção escolhida; OR-20261109-0009. |
 | 18.13 | Derivados executivos | DONE | ChatGPT | Resumo, pitch e apresentação em EXECUTIVE_DERIVATIVES_ROB_18_13.md; DRAFT interno; OR-20261109-0010. |
@@ -85,3 +85,17 @@
 - Registrado que o módulo de interconexão será disponibilizado em atualização futura do JEd e sua ativação exigirá autorização expressa do usuário, que então poderá contribuir recursos e utilizar a infraestrutura da rede.
 - Master atualizado para v0.5.3; definição também persistida no README canônico.
 - 18.10 permanece PROGRESS até revisão e aprovação do fundador; esta atualização não autoriza distribuição externa.
+
+
+### Checkpoint editorial — expansão do JEd, MeshWalker e integração por parceiros — OR-20261110-0002
+
+- Master atualizado para v0.5.4, preservando MWN como ativo central da tese ROB.
+- Incorporado o cenário potencial de 750.000 usuários do JEd, usando mais de 15 milhões de downloads históricos do SimCity como referência de alcance e 5% como hipótese ilustrativa de migração.
+- Incorporada a economia de jogo baseada em UMS para progressão, construções, edificações e estruturas especiais, conectada à aquisição de MWN para conversão em UMS.
+- Incorporadas oportunidades de patrocínio de estruturas, campanhas, recompensas e bônus modestos em UMS, identificadas como propostas e não como parcerias/funcionalidades já implementadas.
+- Definida a contribuição-base do MeshWalker aderente: 1% de processamento e 1% de armazenamento; capacidade adicional opcional. A adesão depende de autorização expressa.
+- Registrada a equivalência ilustrativa de 7.500 equipamentos completos equivalentes para 750.000 participantes contribuindo com 1%, sob hipótese de capacidades médias iguais; não representa contagem literal de nós.
+- Registrada a comercialização de processamento e armazenamento a terceiros como objetivo desde a etapa operacional inicial, não como serviço já em produção.
+- Incluída a estratégia de desenvolvimento próprio e/ou parcerias com Software Houses para incorporar Condenser, MIA-D e interconexão a jogos, aplicativos e sistemas externos.
+- OR-20261110-0002 criado; README e índice de ORs atualizados.
+- 18.10 permanece PROGRESS até revisão e aprovação explícita do fundador. Nenhuma distribuição externa foi autorizada ou realizada.
