@@ -1,7 +1,7 @@
 # MISSION_0018 / 18.11 — Auditoria de alegações e evidências
 
 **Versão:** 0.2-DRAFT | **Data:** 2026-11-09  
-**Base:** matriz 18.1 e entregas 18.2–18.8.  
+**Base:** matriz 18.1 e entregas 18.2–18.8; master ROB v0.5.7 e atualizações operacionais até 2026-11-10.  
 **Natureza:** auditoria documental de consistência; não é auditoria técnica independente, financeira, jurídica, de segurança ou de runtime.
 
 ## 1. Critério de classificação
@@ -100,3 +100,8 @@ Carteira MWN e ledger separado da carteira UMS; conversões explícitas UMS↔MW
 O MVP não inclui listagem em exchange externa, saques automáticos, integração de terceiros ou movimentação financeira automatizada para fora do ecossistema. O status operacional interno não comprova liquidez pública, volume de mercado ou escala comercial.
 
 A atualização documental reflete as evidências de implementação e implantação registradas em 10/11/2026. Não equivale a auditoria independente de segurança, custódia, conformidade ou runtime.
+
+
+## Adendo editorial — precisão do mecanismo econômico ROB (2026-11-10)
+
+A redação do master v0.5.7 foi ajustada para manter explícito o mecanismo de procura recorrente por MWN sem atribuir a ele, de forma automática, efeitos necessários sobre preço, volume ou liquidez. A cadeia descrita é: utilização de serviços/atividades → necessidade de UMS → aquisição de MWN → conversão em UMS. A força econômica desse caminho acompanha a atividade efetiva e contínua do ecossistema. Esta formulação preserva a tese do fundador e evita confundir mecanismo de demanda com garantia de resultado de mercado.
