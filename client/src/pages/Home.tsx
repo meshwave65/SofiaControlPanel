@@ -1,4 +1,5 @@
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
 import { Card } from "@/components/ui/card";
@@ -27,11 +28,17 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { Link } from "wouter";
-import { startGoogleLogin } from "@/lib/auth";
+import { login, register, startGoogleLogin } from "@/lib/auth";
 
 export default function Home() {
   const { user, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
+  const [authMode, setAuthMode] = useState<"login" | "register">("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authMessage, setAuthMessage] = useState<string | null>(null);
+  const [isSubmittingAuth, setIsSubmittingAuth] = useState(false);
   const { data: agents = [] } = trpc.agents.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
@@ -58,6 +65,31 @@ export default function Home() {
     pendingTasks: tasks.filter((task) => pendingStatusIds.has(task.statusId)).length,
     unreadMessages: 0,
     totalLogs: 0,
+  };
+
+  const handleEmailAuth = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setAuthError(null);
+    setAuthMessage(null);
+    setIsSubmittingAuth(true);
+
+    try {
+      if (authMode === "login") {
+        await login(email, password);
+        window.location.replace("/");
+      } else {
+        const result = await register(email, password, { full_name: email });
+        if (!result.session) {
+          setAuthMessage("Cadastro realizado. Verifique seu e-mail para confirmar a conta antes de entrar.");
+        } else {
+          window.location.replace("/");
+        }
+      }
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message : "Não foi possível concluir a autenticação.");
+    } finally {
+      setIsSubmittingAuth(false);
+    }
   };
 
   const activityData = [
@@ -107,10 +139,15 @@ export default function Home() {
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-4">
               <button
-                onClick={() => void startGoogleLogin().catch(() => undefined)}
+                onClick={() => {
+                  setAuthError(null);
+                  void startGoogleLogin().catch((error) => {
+                    setAuthError(error instanceof Error ? error.message : "Não foi possível iniciar o login com Google.");
+                  });
+                }}
                 className="h-14 border-2 border-accent bg-accent px-7 font-black uppercase tracking-[0.15em] text-accent-foreground shadow-[0_0_20px_rgba(6,182,212,0.5)] hover:bg-accent/90"
               >
-                Inicializar Acesso
+                Entrar com Google
               </button>
               <Link
                 href="/privacity"
@@ -140,7 +177,7 @@ export default function Home() {
               </div>
               <div>
                 <strong className="text-foreground">Acesso:</strong> entre com
-                uma conta Google autorizada.
+                Google ou com uma conta de e-mail autorizada.
               </div>
             </div>
             <div className="border-t border-foreground/15 pt-5 text-xs leading-6 text-muted-foreground">
@@ -149,6 +186,67 @@ export default function Home() {
               privacidade e uso antes do login.
             </div>
           </aside>
+
+          <section className="cad-card border-2 border-foreground/20 p-7 lg:col-start-2">
+            <div className="mb-5 flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.25em] text-accent">
+                  Acesso alternativo
+                </p>
+                <h2 className="mt-2 text-2xl font-black uppercase tracking-tight">
+                  {authMode === "login" ? "Entrar com e-mail" : "Criar conta"}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode(authMode === "login" ? "register" : "login");
+                  setAuthError(null);
+                  setAuthMessage(null);
+                }}
+                className="text-xs font-bold text-accent underline underline-offset-4"
+              >
+                {authMode === "login" ? "Criar conta" : "Já tenho conta"}
+              </button>
+            </div>
+
+            <form onSubmit={handleEmailAuth} className="space-y-4">
+              <label className="block text-xs font-black uppercase tracking-widest" htmlFor="auth-email">
+                E-mail
+                <input
+                  id="auth-email"
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  autoComplete="email"
+                  required
+                  className="mt-2 h-12 w-full border-2 border-foreground/20 bg-background px-3 text-sm outline-none focus:border-accent"
+                />
+              </label>
+              <label className="block text-xs font-black uppercase tracking-widest" htmlFor="auth-password">
+                Senha
+                <input
+                  id="auth-password"
+                  type="password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  autoComplete={authMode === "login" ? "current-password" : "new-password"}
+                  minLength={6}
+                  required
+                  className="mt-2 h-12 w-full border-2 border-foreground/20 bg-background px-3 text-sm outline-none focus:border-accent"
+                />
+              </label>
+              {authError && <p role="alert" className="text-sm text-red-500">{authError}</p>}
+              {authMessage && <p role="status" className="text-sm text-accent">{authMessage}</p>}
+              <button
+                type="submit"
+                disabled={isSubmittingAuth}
+                className="h-12 w-full border-2 border-foreground/30 px-5 text-sm font-black uppercase tracking-widest hover:border-accent disabled:cursor-wait disabled:opacity-60"
+              >
+                {isSubmittingAuth ? "Processando…" : authMode === "login" ? "Entrar" : "Cadastrar"}
+              </button>
+            </form>
+          </section>
         </main>
 
         <footer className="mx-auto flex max-w-6xl flex-wrap justify-between gap-4 border-t border-foreground/10 px-6 py-8 text-xs text-muted-foreground sm:px-10">
