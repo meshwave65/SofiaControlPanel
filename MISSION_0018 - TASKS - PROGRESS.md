@@ -57,3 +57,13 @@
 - 18.10 segue PROGRESS aguardando revisão/aprovação do fundador.
 - 18.15 segue BLOCKED — OWNER REVIEW; 18.16 segue BLOCKED — DEPENDENCY.
 - CTA com contatos e páginas públicas de resumo/detalhamento permanece pendente de destinos confirmados; nenhum contato foi inventado.
+
+
+### Checkpoint MWN-first — OR-20261109-0015
+
+- Corrigida a hierarquia da tese ROB: MWN é o ativo de mercado e protagonista da apresentação; o ecossistema MeshWave é o fundamento tecnológico e econômico que sustenta a tese.
+- Master ROB atualizado para v0.5.1; derivados executivos 18.13 e FAQ 18.14 atualizados para v0.3-DRAFT; tese detalhada e resumo executivo 18.8 alinhados.
+- A auditoria 18.11 e o framework 18.12 permanecem válidos como documentos de apoio, sem fixar parâmetros econômicos, jurídicos ou de oferta.
+- 18.13 e 18.14 permanecem DONE como derivados internos em DRAFT. 18.11 e 18.12 permanecem DONE como entregáveis documentais.
+- 18.10 permanece PROGRESS até a revisão e aprovação do master integral pelo fundador. 18.15 permanece BLOCKED — OWNER REVIEW; 18.16 permanece BLOCKED — DEPENDENCY.
+- A execução documental interna desta rodada está concluída. Não houve outreach, distribuição, oferta, listagem, publicação externa, transação, deploy, contratação, despesa ou compromisso.
