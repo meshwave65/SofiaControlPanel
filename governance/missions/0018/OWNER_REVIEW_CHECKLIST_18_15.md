@@ -1,6 +1,6 @@
 # MISSION_0018 / 18.15 — Checklist de revisão final do fundador
 
-**Pacote submetido à decisão:** master ROB v0.5.7 + pitch executivo v0.5-DRAFT + FAQ v0.5-DRAFT + Investor Brief + storyboard de 8 slides.  
+**Pacote submetido à decisão:** master ROB v0.5.8 + pitch executivo v0.5-DRAFT + FAQ v0.5-DRAFT + Investor Brief + storyboard de 8 slides.  
 **Status:** pronto para revisão/decisão do fundador; não aprovado por inferência.
 
 ## O que foi consolidado nesta rodada
