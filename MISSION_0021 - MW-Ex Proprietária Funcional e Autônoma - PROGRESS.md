@@ -25,7 +25,7 @@ A tela atual de MW-Ex em newsite é uma prévia marcada “Em breve”; contém 
 
 ## Próxima ação
 
-As tarefas 21.1–21.3 foram concluídas documentalmente e a 21.6 concluiu a interface sandbox. O checkpoint remoto mais recente é a validação sandbox 21.7 (OR-20261110-0042); seu handoff identifica persistência server-side de teste como próximo pré-requisito, correspondente à tarefa 21.4 ainda aberta. Por instrução explícita do responsável, 21.4 foi reassumida por Manus (sandbox); 21.5 e 21.7 permanecem atribuídas e inalteradas. Para continuidade entre instâncias, foi criado o espelho privado `https://github.com/meshwave65/mwex-sandbox-mirror` no commit `7cc013c`; os passos reproduzíveis estão no README e `SOURCE_CHECKPOINT.json`. Próximo passo: desenvolver a persistência/testes isolados nesse espelho. Nenhum Supabase ou ambiente de produção foi acessado. Os gates da 21.2 estão em `governance/missions/0021/MWEX_FUNCTIONAL_ECONOMIC_MODEL_21_2.md`.
+As tarefas 21.1–21.3 foram concluídas documentalmente e a 21.6 concluiu a interface sandbox. A 21.4 foi reassumida por Manus (sandbox); 21.5 e 21.7 permanecem atribuídas e inalteradas. O espelho privado `meshwave65/mwex-sandbox-mirror` mantém `main` no snapshot `7cc013c`; a continuação reproduzível está na branch `feat/mwex-local-persistent-test-ledger`, commit `849633e`. O harness dessa branch usa ledger JSON temporário, tokens sintéticos e mutex compartilhado apenas no mesmo processo; clone limpo, testes e build passaram. Isso é evidência de teste local, não backend de produto: banco transacional, RLS, autorização real e concorrência multiprocesso continuam pendentes. Próximo passo da 21.4: selecionar/implementar apenas em ambiente descartável autorizado o backend que satisfaça os critérios originais e depois validar com a 21.7. Nenhum Supabase ou ambiente de produção foi acessado. Os gates da 21.2 estão em `governance/missions/0021/MWEX_FUNCTIONAL_ECONOMIC_MODEL_21_2.md`; detalhes e investigação read-only do alerta estão no OR-20261110-0044.
 
 ## Artefatos
 
@@ -44,4 +44,6 @@ As tarefas 21.1–21.3 foram concluídas documentalmente e a 21.6 concluiu a int
 - governance/operational_reports/OR-20261110-0042.md
 - governance/operational_reports/OR-20261110-0043.md
 - https://github.com/meshwave65/mwex-sandbox-mirror (espelho privado da sandbox, commit `7cc013c`)
+- https://github.com/meshwave65/mwex-sandbox-mirror/tree/feat/mwex-local-persistent-test-ledger (harness local, commit `849633e`)
+- governance/operational_reports/OR-20261110-0044.md
 - `SOURCE_CHECKPOINT.json` no repositório espelho (origem, versões e hashes dos artefatos)

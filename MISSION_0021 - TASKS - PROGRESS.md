@@ -115,3 +115,12 @@
 - Validação no espelho: `npm ci`, `npm run test:mwex` (ledger, market-data e segurança/invariantes), `npm run build:mwex` e smoke test HTTP em `127.0.0.1:4173` — passaram.
 - Esta entrega resolve reprodutibilidade/handoff, mas **não** satisfaz o critério original de 21.4: não cria persistência server-side, autorização canônica, atomicidade de banco nem concorrência multi-instância. 21.4 permanece `PROGRESS`; próximo passo é continuar a implementação isolada neste espelho sem tocar produção.
 - OR: `OR-20261110-0043` (`SUBMITTED` / `PENDING`).
+
+## Checkpoint 21.4 — harness local de persistência (2026-11-10)
+
+- Acrescentado harness HTTP somente de teste no espelho privado, branch `feat/mwex-local-persistent-test-ledger`, commit `849633e201848004e8bbe863ef3dd43b89ba694a`.
+- O serviço usa somente identidades sintéticas, loopback `127.0.0.1` e ledger JSON em pasta temporária privada; serializa bootstrap/transações e concorrência entre instâncias no mesmo processo Node. Não se conecta a banco ou à UI do `newsite`.
+- `npm run test:mwex` passa: três scripts existentes e oito testes novos; `npm run build:mwex` passa. Clone remoto limpo da branch repetiu instalação, testes e build no mesmo commit.
+- Revisão independente não identificou blockers no escopo documentado de processo único. O harness **não** prova RLS, auth real, banco transacional, concorrência entre processos/máquinas ou rollback distribuído; tarefa 21.4 permanece `PROGRESS`.
+- OR-0044 foi acrescentado como uma única linha de 11 colunas; o prefixo histórico do índice foi preservado byte a byte apesar de linhas legadas inconsistentes, sem normalização retroativa.
+- OR: `OR-20261110-0044` (`SUBMITTED` / `PENDING`); contém também a investigação read-only do alerta recebido após a publicação da branch.
