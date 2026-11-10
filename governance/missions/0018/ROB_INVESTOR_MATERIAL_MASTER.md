@@ -4,7 +4,7 @@
 **ROB — Return On Believe | Retorno por acreditar**
 
 **Material integral para investidores — MISSION_0018 / frente complementar 18.10**  
-**Versão 0.5.5 — atualização do status operacional da MW-Ex e sincronização da tese com a implantação do MVP custodial**  
+**Versão 0.5.6 — inclusão dos canais oficiais de contato para apresentação e diligência**  
 **Não constitui oferta pública, prospecto, recomendação de investimento ou autorização para distribuição externa.**
 
 ---
@@ -251,3 +251,15 @@ O objetivo é reunir capacidade financeira, humana, material e institucional par
 ---
 
 *Este documento é material preliminar para avaliação privada. Não constitui oferta pública ou privada de valores mobiliários, recomendação de investimento, promessa de rentabilidade, garantia de valorização ou compromisso de listagem. Qualquer eventual investimento dependerá de diligência, definição dos instrumentos e direitos, documentação própria e análise jurídica, regulatória e tributária nas jurisdições aplicáveis.*
+
+
+## Contato e continuidade da conversa
+
+Para conhecer a proposta, solicitar informações complementares ou iniciar uma conversa sobre a MWN e a economia MeshWave:
+
+- **E-mail:** [info@meshwave.com.br](mailto:info@meshwave.com.br)
+- **WhatsApp — Brasil:** [+55 21 97234-1965](https://wa.me/5521972341965)
+- **WhatsApp — Portugal:** [+351 914 845 439](https://wa.me/351914845439)
+- **Material para investidores:** [meshwave.com.br/investidores](https://www.meshwave.com.br/investidores)
+- **Estado do projeto:** [meshwave.com.br/estado-do-projeto](https://www.meshwave.com.br/estado-do-projeto)
+- **MW-Ex:** [meshwave.com.br/mw-ex](https://www.meshwave.com.br/mw-ex)
