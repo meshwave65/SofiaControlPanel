@@ -1,6 +1,6 @@
 # MISSION_0018 / 18.13 — Derivados executivos ROB (Return On Believe — retorno por acreditar)
 
-**Versão:** 0.5-DRAFT | **Derivado de:** master ROB v0.5.7; atualização editorial de 2026-11-10
+**Versão:** 0.5-DRAFT | **Derivado de:** master ROB v0.5.8; atualização editorial de 2026-11-10
 
 **Hierarquia narrativa:** MWN é o ativo central da tese ROB. O ecossistema MeshWave é sua base tecnológica e econômica; seus componentes são apresentados como fundamento da MWN, não como produtos independentes à venda.  
 **Data:** 2026-11-10 | **Uso:** revisão interna; aprovação final do fundador pendente.
