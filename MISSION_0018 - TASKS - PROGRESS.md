@@ -31,7 +31,8 @@
 - A narrativa de origem deve informar que a MeshWave foi construída por uma única pessoa (fundador), exclusivamente com ferramentas e serviços gratuitos da internet e equipamentos próprios extremamente limitados; a estrutura atingiu seu limite e precisa de recursos materiais/computacionais, financeiros, humanos e estruturais para escalar.
 - Diretrizes internas de execução não devem aparecer automaticamente no material dirigido ao investidor.
 - Separar fatos verificados, declarações do fundador, hipóteses, propostas e decisões pendentes.
-- ROB significa Return On Believe — retorno por acreditar; não é ROI, métrica financeira padronizada ou promessa.
+- **Regra editorial de siglas:** na primeira ocorrência em cada documento/material, apresentar a expressão por extenso seguida da sigla entre parênteses; nas ocorrências posteriores, pode-se usar apenas a sigla. Aplicar também a títulos, subtítulos, tabelas, slides e legendas. Ex.: SOFIA (Sistema de Orquestração Federada de Inteligências Artificiais), MW-Ex (MeshWave Exchange), UMS (Unidade MeshWave de Serviços), MWN (MeshWave Network — criptoativo) e MIA-D (Monitor de Impacto Ambiental Digital).
+- ROB significa Return On Believe — retorno por acreditar; não é ROI (Return on Investment), métrica financeira padronizada ou promessa.
 - Não afirmar adoção em escala, receita, liquidez pública, preço, valuation ou listagem sem evidência. Descrever MW-Ex conforme o escopo comprovado do MVP custodial interno operacional; não confundir com exchange externa ou saques automatizados.
 - Não realizar outreach, publicação, oferta, listing, transação, deploy ou compromisso financeiro sem autorização específica.
 - Cada tarefa produz seu próprio Operational Report e atualização deste arquivo/índice.
