@@ -4,7 +4,7 @@
 **ROB — Return On Believe | Retorno por acreditar**
 
 **Material integral para investidores — MISSION_0018 / frente complementar 18.10**  
-**Versão 0.5.1 — DRAFT com hierarquia MWN-first, após correção de foco do fundador**  
+**Versão 0.5.2 — DRAFT com hierarquia MWN-first e mecanismo de demanda UMS/MWN explicitado**  
 **Não constitui oferta pública, prospecto, recomendação de investimento ou autorização para distribuição externa.**
 
 ---
@@ -17,7 +17,7 @@ A MeshWave é a base que dá contexto, estrutura e possibilidades de utilidade �
 
 A arquitetura distingue a UMS, unidade interna de contabilização de contribuição útil e consumo de serviços, da MWN, ativo destinado à circulação e à conexão com o mercado externo. Na arquitetura proposta, a conexão entre a economia interna e o mercado externo ocorre por meio da MWN, com a MW-Ex como canal próprio pretendido. Não se prevê uma rota alternativa de conversão direta entre UMS e outros criptoativos.
 
-A existência desse ecossistema oferece uma base para desenvolver utilidade e atividade econômica. Isso não significa que cada projeto gere automaticamente demanda por MWN, nem que demanda, preço ou liquidez estejam garantidos. A tese está na possibilidade de consolidar essa relação econômica e operacional, com MWN como ativo de conexão com o mercado.
+O funcionamento do ecossistema gera uma demanda recorrente pela MWN. Os serviços e as atividades da rede utilizam UMS; quando um usuário consome mais UMS do que possui, sua única alternativa para obter novas unidades é adquirir MWN no mercado e convertê-la em UMS. Esse mecanismo conecta diretamente a atividade econômica interna à procura pela MWN: enquanto o ecossistema estiver funcional, a necessidade de UMS sustenta a demanda pela MWN e sua dinâmica de preço e liquidez no mercado. A tese, portanto, está na consolidação e no funcionamento do próprio ecossistema, cuja atividade alimenta continuamente essa relação econômica.
 
 ## O ecossistema como fundamento da MWN
 
