@@ -1,7 +1,7 @@
 # ROB (Return On Believe — retorno por acreditar) — Storyboard de apresentação para investidores
 
 **Fonte editorial:** master ROB v0.5.8  
-**Status:** roteiro visual interno; não publicado.  
+**Status:** conteúdo aprovado pelo fundador em 2026-11-11; apresentação visual v1 produzida para revisão visual; não publicada.  
 **Objetivo:** apresentar MWN como ativo de mercado e o ecossistema MeshWave como fundamento tecnológico/econômico, sem transformar a apresentação em catálogo de produtos.
 
 ## Convenção editorial de siglas
@@ -44,9 +44,9 @@ Na primeira ocorrência em cada slide/material, apresentar o nome por extenso se
 
 ## Slide 3 — MW-Ex: canal próprio já operacional
 
-**Mensagem:** a exchange própria não está apenas em conceito; opera como MVP custodial interno.
+**Mensagem:** a exchange própria não está apenas em conceito; opera como produto mínimo viável (MVP) custodial interno.
 
-**Visual:** recorte da interface real da MW-Ex, acompanhado de quatro chamadas: carteira MWN/ledger separado; conversões UMS↔MWN; transferências internas elegíveis; histórico e controles administrativos.
+**Visual v1:** painel esquemático ilustrativo (não é captura da interface real), acompanhado de quatro chamadas: carteira MWN/ledger separado; conversões UMS↔MWN; transferências internas elegíveis; histórico e controles administrativos.
 
 **Limite em rodapé:** operação interna; sem listagem externa ou saques automatizados.
 
@@ -54,7 +54,7 @@ Na primeira ocorrência em cada slide/material, apresentar o nome por extenso se
 
 **Mensagem:** a base foi criada individualmente, com ferramentas/serviços gratuitos e equipamentos extremamente limitados; o próximo passo é profissionalizar e escalar.
 
-**Visual:** composição em módulos funcionais, não catálogo: SOFIA/AppAndroid, SWE, Condenser, MIA-D; cada um identificado como componente funcional/estrutura existente, com maturidade distinta.
+**Visual:** composição em módulos funcionais, não catálogo: SOFIA (Sistema de Orquestração Federada de Inteligências Artificiais)/AppAndroid, SWE (Sofia Web Extractor), Condenser, MIA-D (Monitor de Impacto Ambiental Digital); cada um identificado como componente funcional/estrutura existente, com maturidade distinta.
 
 **Frase:** “Se foi possível realizar tanto com nada, o que poderá ser realizado com alguma coisa?”
 
@@ -62,7 +62,7 @@ Na primeira ocorrência em cada slide/material, apresentar o nome por extenso se
 
 **Mensagem:** JEd foi concebido para conectar economia de jogo, Condenser, MIA-D, patrocínios potenciais e distribuição do módulo de interconexão.
 
-**Visual:** cidade/jogo estilizado em vista isométrica, com quatro chamadas discretas: economia UMS; otimização digital; inteligência ESG; adesão MeshWalker voluntária.
+**Visual v1:** composição geométrica inspirada em cidade/jogo (sem captura de jogo), com quatro chamadas discretas: economia UMS; otimização digital; inteligência ESG; adesão MeshWalker voluntária.
 
 **Número opcional:** “750 mil” apenas como cenário potencial de migração (5% de referência histórica de mais de 15 milhões de downloads), sempre rotulado como hipótese — nunca como usuários atuais.
 
@@ -97,10 +97,20 @@ Na primeira ocorrência em cada slide/material, apresentar o nome por extenso se
 
 ## Checklist de produção visual
 
-- [ ] Capturar screenshot atual da página MW-Ex no ambiente autorizado.
-- [ ] Obter logos/cores/fontes diretamente dos assets oficiais da MeshWave.
-- [ ] Validar todos os números e legendas com o master v0.5.7.
+- [ ] Substituir o painel esquemático do slide 3 por captura atual da interface MW-Ex, quando o asset estiver disponível para inserção.
+- [ ] Aplicar logos, cores e fontes oficiais MeshWave quando os assets de marca forem fornecidos/localizados; v1 usa paleta editorial neutra, sem propor rebranding.
+- [x] Sincronizar números e legendas com o master ROB v0.5.8.
 - [ ] Não representar patrocínios ou parcerias ilustrativas como contratos firmados.
 - [ ] Não representar 750 mil usuários ou 7.500 nós como estado atual.
 - [ ] Não representar a rede distribuída ou a integração JEd como produção já concluída.
-- [ ] Finalizar arte apenas após aprovação textual do fundador em 18.15.
+- [x] Gerar primeira apresentação visual após aprovação textual do fundador em 18.15.
+- [ ] Revisão visual do fundador antes de considerar as peças finais.
+
+
+## Entrega visual v1 — 2026-11-11
+
+- Arquivo: `ROB_MWN_Apresentacao_Investidores_v1.pptx` — apresentação editável de 8 slides.
+- Composição feita com formas vetoriais e texto editável; não depende de imagens externas para os diagramas.
+- A interface MW-Ex do slide 3 está explicitamente representada como esquema ilustrativo, não como screenshot real.
+- A paleta é neutra e editorial; não substitui nem redefine a identidade visual oficial MeshWave.
+- Conteúdo textual aprovado pelo fundador; esta entrega é um primeiro rascunho visual para revisão, não autorização de publicação ou distribuição.
