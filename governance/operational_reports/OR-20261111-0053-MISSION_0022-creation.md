@@ -28,7 +28,7 @@ Criar no SofiaControlPanel uma missão independente para finalizar o pacote ROB 
 
 ## Verificações
 
-A estrutura documental foi criada no branch `main` do repositório `meshwave65/SofiaControlPanel` por GitHub Contents API. A verificação por releitura dos arquivos será registrada após as gravações.
+A estrutura documental foi criada no branch `main` do repositório `meshwave65/SofiaControlPanel` por GitHub Contents API e relida após as gravações. Os cinco artefatos (Blueprint, README, quadro de tarefas, progresso e este OR) foram recuperados com sucesso. O `governance/operational_reports/INDEX.csv` foi atualizado e relido, confirmando a linha OR-20261111-0053.
 
 ## Resultado e limites
 
