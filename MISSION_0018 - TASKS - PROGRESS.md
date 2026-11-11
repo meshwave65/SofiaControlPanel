@@ -16,13 +16,13 @@
 | 18.7 | Roadmap integrado | DONE | ChatGPT | Fases e gates para decisão; não é cronograma/budget aprovado. |
 | 18.8 | Tese MWN/ROB | DONE | ChatGPT | Draft executivo e detalhado preservado. |
 | 18.9 | Revisão cruzada e fechamento preliminar | DONE — PRELIMINARY | ChatGPT | Override humano registrado em OR-20261109-0004; Oracle/FOR pendentes para versão definitiva histórica. |
-| 18.10 | Material integral ROB para investidores | READY — OWNER REVIEW | ChatGPT | Documento mestre integral v0.5.8 consolidado; tese MWN-first, mecanismo de procura recorrente UMS→MWN→UMS com precisão econômica, MW-Ex MVP interno, JEd, MeshWalker, patrocínios e parceiros. Revisão/aprovação do fundador é o único gate editorial remanescente. OR-20261110-0049. |
+| 18.10 | Material integral ROB para investidores | DONE — TEXT APPROVED (2026-11-11) | ChatGPT/Fundador | Documento mestre integral v0.5.8 aprovado pelo fundador para derivação visual. Aprovação textual não autoriza publicação ou distribuição. OR-20261111-0052. |
 | 18.11 | Auditoria de alegações e evidências | DONE | ChatGPT | Auditoria documental e limites de formulação em CLAIM_EVIDENCE_AUDIT_18_11.md; OR-20261109-0008. |
 | 18.12 | Estrutura de participação e capital | DONE | ChatGPT | Framework de evolução e participação em CAPITAL_PARTICIPATION_FRAMEWORK_18_12.md; atualizado para master v0.5.8 e orientado ao uso do capital para profissionalizar, integrar e escalar a base existente; OR-20261111-0051. |
 | 18.13 | Derivados executivos | DONE — v0.5-DRAFT | ChatGPT | Resumo executivo, pitch de dois parágrafos e apresentação verbal sincronizados com master v0.5.8; ampliada a conexão JEd/MeshWalker/parcerias. OR-20261110-0049. |
 | 18.14 | Pacote de diligência e FAQ | DONE — v0.5-DRAFT | ChatGPT | FAQ sincronizado com master v0.5.8; inclui mecanismo de procura UMS→MWN→UMS, estado do JEd, cenário potencial de 750 mil, adesão MeshWalker e limites de parcerias/patrocínios. OR-20261110-0049. |
-| 18.15 | Revisão de comunicação e autorização | READY — OWNER DECISION | Fundador | Pacote editorial consolidado e checklist de aprovação preparado em OWNER_REVIEW_CHECKLIST_18_15.md. Aprovação textual e autorização de distribuição são atos separados. |
-| 18.16 | Peças visuais derivadas | STORYBOARD READY — VISUAL APPROVAL PENDING | ChatGPT | Brief visual e roteiro de 8 slides preparados em PRESENTATION_STORYBOARD_ROB_18_16.md; arte final e publicação dependem da aprovação textual 18.15. |
+| 18.15 | Revisão de comunicação e autorização | DONE — TEXT APPROVED (2026-11-11) | Fundador | Fundador aprovou o conteúdo textual do pacote ROB. Autorização de publicação, deploy e distribuição/outreach permanece separada e não foi concedida. OR-20261111-0052. |
+| 18.16 | Peças visuais derivadas | VISUAL DRAFT V1 — OWNER VISUAL REVIEW | ChatGPT | Apresentação editável de 8 slides produzida em ROB_MWN_Apresentacao_Investidores_v1.pptx; aguardando revisão visual. Painel MW-Ex é esquemático e identidade visual oficial ainda não foi aplicada. OR-20261111-0052. |
 
 ## Regras de execução
 
@@ -148,3 +148,13 @@ O fundador corrigiu a prioridade da frente ROB: não transformar a preparação 
 - Nenhuma publicação, deploy, outreach ou distribuição externa foi realizada ou autorizada por esta atualização.
 
 **Estado corrente:** 18.10 READY — OWNER REVIEW; 18.11 DONE como registro documental histórico; 18.12 DONE — framework de evolução atualizado; 18.13/18.14 DONE — drafts executivos; 18.15 READY — OWNER DECISION; 18.16 STORYBOARD READY — VISUAL APPROVAL PENDING.
+
+
+### Checkpoint — aprovação textual e primeira entrega visual ROB — OR-20261111-0052
+
+- O fundador aprovou expressamente o conteúdo textual do pacote ROB em 2026-11-11.
+- 18.10 e 18.15 passam a DONE — TEXT APPROVED; aprovação não equivale a autorização de publicação, deploy, oferta, distribuição ou outreach.
+- 18.16 avançou para VISUAL DRAFT V1 — OWNER VISUAL REVIEW: apresentação editável de 8 slides criada em `ROB_MWN_Apresentacao_Investidores_v1.pptx`.
+- A apresentação cobre MWN, mecanismo UMS→MWN→UMS, MW-Ex, base tecnológica, JEd, MeshWalker, etapas de capital e chamada para conversa.
+- Slide 3 usa painel esquemático explicitamente ilustrativo, não screenshot real da MW-Ex. A paleta é neutra e não substitui identidade visual oficial MeshWave.
+- Próximo gate: revisão visual do fundador. Nenhuma publicação, deploy, contato ou distribuição foi executado.
