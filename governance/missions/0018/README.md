@@ -395,3 +395,19 @@ A comunicação no chat deve ser um resumo de checkpoint após persistência: o 
 - Pitch executivo e FAQ sincronizados para v0.5-DRAFT. A FAQ agora cobre a lógica econômica, JEd, hipótese de 750 mil usuários, adesão MeshWalker, contribuição-base de 1% e distinção entre propostas de patrocínio/parceria e contratos existentes.
 - Criados INVESTOR_ONE_PAGE_ROB_18_16.md, PRESENTATION_STORYBOARD_ROB_18_16.md e OWNER_REVIEW_CHECKLIST_18_15.md para fechar o pacote de apresentação e orientar a decisão do fundador.
 - 18.15 está READY — OWNER DECISION; 18.16 tem storyboard pronto, mas arte final/publicação permanecem dependentes da aprovação textual. O snapshot público ainda não foi alterado e não houve deploy, outreach ou distribuição.
+
+
+## Diretriz vigente do fundador — evolução, não auditoria permanente (2026-11-11)
+
+Esta orientação foi expressamente reafirmada pelo fundador e prevalece sobre qualquer redação anterior desta missão que transforme a preparação ROB em auditoria recorrente da base existente.
+
+- A MeshWave possui uma base construída, com componentes em diferentes estágios de maturidade. Alguns são funcionais e outros ainda rudimentares, incompletos ou dependentes de integração. O caráter rudimentar não apaga a existência nem o valor do trabalho já realizado.
+- A analogia do fundador: não se deve exigir que uma tranca de madeira seja auditada repetidamente para reconhecer que existe uma porta e que o próximo passo pretendido é evoluir para uma fechadura eletrônica. O objetivo do material ROB é viabilizar essa evolução.
+- **Prioridade da captação:** mostrar o que já foi construído, a capacidade de execução demonstrada e, principalmente, o que recursos materiais, computacionais, financeiros, humanos e organizacionais permitirão aperfeiçoar, integrar, profissionalizar e escalar.
+- Descrever o estágio atual com honestidade e proporcionalidade. Não rebaixar componentes funcionais a conceitos apenas por serem rudimentares; tampouco declarar maturidade, escala ou integração que não existam.
+- Não reabrir auditorias gerais, matrizes de risco ou ciclos de verificação sem uma necessidade concreta ligada a uma decisão, negociação ou execução. Diligência específica será tratada quando houver contraparte ou requisito real.
+- Não deixar a preparação do ROB consumir indefinidamente o tempo que deve ser dedicado a obter recursos e avançar o ecossistema.
+- A tese central permanece MWN-first: MWN é o ativo de mercado; MeshWave é o fundamento tecnológico e econômico.
+- Esta diretriz muda a prioridade e a abordagem editorial. Não altera fatos, não cria promessas de retorno e não autoriza publicação, deploy, outreach ou distribuição externa.
+
+**Aplicação imediata:** o framework 18.12 deve explicar o que o capital permitirá evoluir; o checklist 18.15 deve ser uma decisão editorial do fundador, não uma convocação para nova auditoria geral. As tarefas e registros históricos de auditoria permanecem preservados como histórico, sem comandar a prioridade atual.
