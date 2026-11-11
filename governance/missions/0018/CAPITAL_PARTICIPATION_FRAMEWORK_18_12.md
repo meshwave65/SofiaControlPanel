@@ -1,54 +1,70 @@
 # MISSION_0018 / 18.12 — Estrutura de participação e capital
 
-**Versão:** 0.3-DRAFT_FOR_OWNER_DECISION | **Data:** 2026-11-10 | **Referência narrativa:** master ROB v0.5.7  
-**Natureza:** framework de discussão; não é oferta, recomendação jurídica/financeira, term sheet ou autorização de captação.
+**Versão:** 0.4-DRAFT_FOR_OWNER_DECISION | **Data:** 2026-11-11 | **Referência narrativa:** master ROB v0.5.8  
+**Natureza:** framework de discussão; não é oferta, term sheet, recomendação jurídica/financeira ou autorização de captação.
 
-## 1. Ponto de partida
-As faixas registradas são objetivos estratégicos declarados pelo fundador:
-- **Etapa inicial:** R$ 50 mil–R$ 100 mil, para consolidação da economia UMS/MWN, fortalecimento e amadurecimento da MW-Ex própria já operacional como MVP custodial interno, e profissionalização da base tecnológica e operacional.
-- **Etapa futura:** R$ 250 mil–R$ 500 mil, para preparar e avaliar eventual integração com exchange externa, após definição de readiness.
-- **Escala futura:** alguns milhões de reais, condicionados à execução e decisão de expansão.
+## 1. Tese de capital: acelerar a evolução de uma base existente
 
-Não há orçamento detalhado, valuation, cap table validado, instrumento escolhido, direitos aprovados, cronograma de captação ou destinação percentual autorizada. As faixas não devem ser somadas como uma rodada única nem tratadas como necessidade imediata integral.
+A MeshWave não parte do zero. Há uma base de aplicações, serviços, componentes econômicos e infraestrutura já construída pelo fundador sob severas restrições de recursos. O estágio atual é rudimentar e desigual entre componentes, mas isso não apaga o que já foi realizado nem transforma a oportunidade em financiamento de uma ideia abstrata.
 
-## 2. Alternativas para estudo — nenhuma escolhida
-| Estrutura | Questões essenciais | Riscos/limites |
+O capital pretendido deve ampliar a capacidade de evoluir essa base: profissionalizar o que já funciona, integrar componentes, melhorar experiência e operação, ampliar infraestrutura e capacidade computacional, incorporar pessoas e acelerar a execução. A pergunta de investimento não é como começar a construir tudo, mas o que pode ser desenvolvido quando uma estrutura criada com recursos extremamente limitados passa a contar com meios adequados.
+
+**Princípio orientador:** evolução, integração e escala — não auditoria permanente do estágio rudimentar atual. A maturidade de cada frente deve ser descrita honestamente, sem exigir que cada componente seja submetido a uma nova rodada de validações antes de qualquer avanço conceitual ou de captação.
+
+## 2. Etapas estratégicas de capital
+
+As faixas abaixo são objetivos estratégicos declarados pelo fundador, não orçamento aprovado, valuation ou compromisso de captação.
+
+| Etapa | Faixa de referência | Direção de evolução |
+|---|---:|---|
+| Consolidação inicial | **R$ 50 mil–R$ 100 mil** | Fortalecer a economia UMS/MWN e profissionalizar a MW-Ex própria já operacional como MVP custodial interno; ampliar infraestrutura, capacidade computacional, experiência de uso, integração dos componentes e capacidade humana de execução. |
+| Acesso externo | **R$ 250 mil–R$ 500 mil** | Preparar a expansão do acesso ao mercado por integração com exchange externa e ampliar a estrutura operacional, conforme decisões e requisitos da etapa. |
+| Escala | **Alguns milhões de reais** | Acelerar expansão do ecossistema, rede distribuída, canais de adoção, parcerias e capacidade de atendimento a operações de maior porte. |
+
+As etapas são progressivas e condicionadas à execução e às decisões do fundador. Não devem ser somadas como uma única rodada nem apresentadas como necessidade imediata integral.
+
+## 3. O que a primeira etapa deve permitir
+
+A primeira etapa deve transformar uma base construída individualmente em uma operação mais estruturada e capaz de evoluir com continuidade. As frentes prioritárias são:
+
+1. **Economia UMS/MWN:** consolidar os fluxos de utilidade, contabilização e conversão que conectam a atividade do ecossistema ao ativo central MWN.
+2. **MW-Ex:** amadurecer a exchange própria já operacional em modalidade interna, reforçando operação, controles, experiência, infraestrutura e capacidade de evolução.
+3. **Integração do ecossistema:** aproximar os componentes existentes e suas jornadas, reduzindo fragmentação e permitindo que se reforcem mutuamente.
+4. **Infraestrutura e computação:** ampliar recursos de hospedagem, processamento, armazenamento, ferramentas e continuidade operacional.
+5. **Capacidade humana e organizacional:** incorporar competências de engenharia, produto, operação, design, negócios e apoio especializado conforme a prioridade de execução.
+6. **Preparação de expansão:** organizar a base para futuras integrações, parceiros, adoção e acesso externo.
+
+Esta lista define direção de evolução, não percentuais de alocação nem orçamento detalhado. A distribuição financeira será construída quando houver decisão de avançar para uma rodada ou proposta concreta.
+
+## 4. Alternativas de participação — nenhuma escolhida
+
+| Estrutura | Aplicação possível | Pontos a definir |
 |---|---|---|
-| Investimento societário | Entidade receptora, ativos/IP, cap table, valuation, governança, direitos e diluição | Exige due diligence societária, titularidade, avaliação e documentação jurídica |
-| Mútuo ou conversível | Tomador, prazo, juros, evento de conversão, limites e garantias | Pode criar passivo e tratamento regulatório/tributário específico |
-| SAFE ou equivalente | Compatibilidade jurisdicional, valuation cap/discount e direitos | Não é universal; validade depende de assessoria local |
-| Parceria estratégica com recursos | Entregas, exclusividade, IP, dados, SLA e responsabilidades | Dependência de contraparte e conflito de IP |
-| Financiamento por marcos | Marcos verificáveis, verificador, conta e regras de pausa | Requer orçamento e governança |
-| Financiamento não dilutivo | Elegibilidade, contrapartidas, prazos, IP e restrições | Disponibilidade não presumida |
-| Instrumento digital/token | Natureza jurídica, direitos, oferta, distribuição, custódia, AML/KYC e jurisdições | Complexidade elevada; MWN não está aprovado como instrumento de captação |
+| Investimento societário | Capital para profissionalização e expansão da operação | Entidade receptora, ativos/IP, valuation, participação, governança e diluição |
+| Mútuo ou conversível | Financiamento com condições de pagamento ou conversão futuras | Tomador, prazo, juros, evento de conversão, limites e garantias |
+| SAFE ou equivalente | Instrumento de investimento futuro, se adequado à jurisdição | Compatibilidade local, valuation cap/discount e direitos |
+| Parceria estratégica com recursos | Aporte de recursos, tecnologia, equipe, distribuição ou infraestrutura | Entregas, exclusividade, IP, dados, responsabilidades e contrapartidas |
+| Financiamento por marcos | Liberação progressiva vinculada à evolução acordada | Marcos, orçamento, governança e critérios de continuidade |
+| Financiamento não dilutivo | Apoio, edital ou programa compatível | Elegibilidade, contrapartidas, prazos e restrições |
 
-A presença de uma alternativa na tabela não significa que seja juridicamente adequada ou disponível.
+A presença de uma alternativa não significa que seja juridicamente adequada ou esteja disponível. Nenhuma modalidade foi escolhida.
 
-## 3. Questões antes de qualquer negociação
-**Entidade e propriedade:** qual entidade receberia o capital? Quem detém código, marcas, domínios e documentação? Existem cessões, licenças open source ou direitos de terceiros?
+## 5. Preparação de uma proposta concreta
 
-**Orçamento e marcos:** qual escopo mínimo financiável? Quais custos únicos/recorrentes? Quais recursos materiais e computacionais? Quais funções precisam de contratação? Quais entregas e critérios de pausa? Qual reserva para operação, segurança, jurídico e contingência?
+Quando houver interesse real de uma contraparte, a proposta poderá ser detalhada com:
+- entidade receptora e titularidade dos ativos relevantes;
+- orçamento da etapa e horizonte de sustentação;
+- entregas e marcos de evolução;
+- modalidade de participação e direitos envolvidos;
+- governança, prestação de informações e responsabilidades;
+- enquadramento jurídico, regulatório e tributário aplicável.
 
-**Participação e governança:** participação em qual entidade ou ativo? Quais direitos econômicos, políticos, informação, veto, preferência, liquidez e saída? Como serão valuation, diluição, conflitos e partes relacionadas?
+Esses itens são componentes normais da estruturação de uma negociação concreta. Não devem impedir a apresentação inicial da tese ROB nem transformar a preparação do material em um ciclo indefinido de diligência antecipada.
 
-**Ativo digital e regulação:** o investidor receberia participação societária, crédito, direito contratual, token ou combinação? Quais regras de oferta, publicidade, suitability, AML/KYC, custódia, tributação e disclosure se aplicam em cada jurisdição?
+## 6. Salvaguardas e estado das decisões
 
-## 4. Sequência sugerida
-1. Confirmar entidade e titularidade de ativos/IP.
-2. Preparar orçamento e runway da primeira etapa.
-3. Definir escopo e marcos mensuráveis.
-4. Comparar instrumentos com advogado societário/regulatório e consultor tributário.
-5. Preparar cap table, valuation rationale e pacote de diligência.
-6. Negociar direitos e governança em term sheet revisado profissionalmente.
-7. Somente após aprovação expressa do fundador, iniciar comunicação ou captação.
+Nenhum instrumento, valuation, direito, percentual, retorno ou alocação foi aprovado. As faixas são referências estratégicas do fundador. Não oferecer MWN/UMS, aceitar recursos, assinar documentos, prometer participação, criar entidade ou alterar titularidade sem decisão e autorização específicas. ROB significa Return On Believe — retorno por acreditar; é uma tese narrativa, não uma métrica financeira nem promessa de retorno.
 
-## 5. Salvaguardas
-Nenhum instrumento, valuation, direito, percentual, retorno, preço ou alocação foi aprovado. Não oferecer MWN/UMS, aceitar recursos, assinar documentos, prometer participação, criar entidade ou alterar titularidade. Não realizar outreach ou negociar termos sem autorização. ROB não é métrica financeira nem substituto de ROI.
+## 7. Resultado
 
-## 6. Resultado
-**18.12 concluída como framework documental para decisão.** As opções permanecem abertas; definição de entidade, orçamento, escopo, ativos/IP e preferência de instrumento dependem de decisão humana e assessoria profissional.
-
-
-## 7. Atualização de contexto operacional — 2026-11-10
-
-A MW-Ex deixou de ser uma preparação ou interface pretendida: está operacional como MVP custodial interno. A primeira etapa de capital deve ser descrita como consolidação, profissionalização e expansão da exchange já existente e da economia UMS/MWN, e não como construção inicial da exchange. O foco é ampliar capacidade de execução sobre uma base já construída: controles e operação da MW-Ex, segurança, infraestrutura, equipe, integração dos serviços e sustentação da economia interna. A etapa de acesso externo permanece futura e condicionada à definição de requisitos e readiness. Esta atualização não escolhe instrumento, valuation, direitos ou alocação de capital.
+**18.12 concluída como framework de evolução e participação para decisão.** O documento passa a explicar prioritariamente o que o capital permitirá desenvolver sobre a base existente. Orçamento detalhado, modalidade, direitos e termos permanecem para uma negociação concreta e decisão do fundador.
