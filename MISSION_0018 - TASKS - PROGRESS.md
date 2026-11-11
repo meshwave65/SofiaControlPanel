@@ -18,7 +18,7 @@
 | 18.9 | Revisão cruzada e fechamento preliminar | DONE — PRELIMINARY | ChatGPT | Override humano registrado em OR-20261109-0004; Oracle/FOR pendentes para versão definitiva histórica. |
 | 18.10 | Material integral ROB para investidores | READY — OWNER REVIEW | ChatGPT | Documento mestre integral v0.5.8 consolidado; tese MWN-first, mecanismo de procura recorrente UMS→MWN→UMS com precisão econômica, MW-Ex MVP interno, JEd, MeshWalker, patrocínios e parceiros. Revisão/aprovação do fundador é o único gate editorial remanescente. OR-20261110-0049. |
 | 18.11 | Auditoria de alegações e evidências | DONE | ChatGPT | Auditoria documental e limites de formulação em CLAIM_EVIDENCE_AUDIT_18_11.md; OR-20261109-0008. |
-| 18.12 | Estrutura de participação e capital | DONE | ChatGPT | Framework de alternativas e diligência em CAPITAL_PARTICIPATION_FRAMEWORK_18_12.md; nenhuma opção escolhida; OR-20261109-0009. |
+| 18.12 | Estrutura de participação e capital | DONE | ChatGPT | Framework de evolução e participação em CAPITAL_PARTICIPATION_FRAMEWORK_18_12.md; atualizado para master v0.5.8 e orientado ao uso do capital para profissionalizar, integrar e escalar a base existente; OR-20261111-0051. |
 | 18.13 | Derivados executivos | DONE — v0.5-DRAFT | ChatGPT | Resumo executivo, pitch de dois parágrafos e apresentação verbal sincronizados com master v0.5.8; ampliada a conexão JEd/MeshWalker/parcerias. OR-20261110-0049. |
 | 18.14 | Pacote de diligência e FAQ | DONE — v0.5-DRAFT | ChatGPT | FAQ sincronizado com master v0.5.8; inclui mecanismo de procura UMS→MWN→UMS, estado do JEd, cenário potencial de 750 mil, adesão MeshWalker e limites de parcerias/patrocínios. OR-20261110-0049. |
 | 18.15 | Revisão de comunicação e autorização | READY — OWNER DECISION | Fundador | Pacote editorial consolidado e checklist de aprovação preparado em OWNER_REVIEW_CHECKLIST_18_15.md. Aprovação textual e autorização de distribuição são atos separados. |
@@ -135,3 +135,16 @@ ChatGPT deve avançar proativamente as tarefas já autorizadas, sem pedir confir
 - Framework de capital atualizado para v0.3, mantendo faixas estratégicas e ausência de instrumento, valuation, direitos e orçamento aprovados.
 - Criados one-page investor brief, storyboard de 8 slides e checklist de revisão do fundador.
 - 18.10 e 18.15 estão prontos para decisão do fundador; 18.16 possui storyboard, mas arte final permanece condicionada à aprovação textual. Nenhuma página pública foi alterada, nenhum deploy ou outreach foi realizado.
+
+
+### Diretriz vigente — evolução, não auditoria permanente (2026-11-11)
+
+O fundador corrigiu a prioridade da frente ROB: não transformar a preparação do material em auditoria recorrente de cada componente rudimentar. A base existente deve ser reconhecida e apresentada com honestidade e proporcionalidade. O objetivo é captar interesse e recursos para aperfeiçoar, integrar, profissionalizar e escalar o que já foi construído.
+
+- 18.12 atualizado para explicar o que o capital permitirá evoluir sobre a base existente.
+- 18.15 ajustado para decisão editorial do fundador, sem exigir nova auditoria geral.
+- As auditorias e matrizes anteriores permanecem como registros históricos de apoio; não são a prioridade nem um bloqueio automático para a apresentação ROB.
+- Diligência específica será tratada quando houver contraparte, decisão ou requisito concreto.
+- Nenhuma publicação, deploy, outreach ou distribuição externa foi realizada ou autorizada por esta atualização.
+
+**Estado corrente:** 18.10 READY — OWNER REVIEW; 18.11 DONE como registro documental histórico; 18.12 DONE — framework de evolução atualizado; 18.13/18.14 DONE — drafts executivos; 18.15 READY — OWNER DECISION; 18.16 STORYBOARD READY — VISUAL APPROVAL PENDING.
