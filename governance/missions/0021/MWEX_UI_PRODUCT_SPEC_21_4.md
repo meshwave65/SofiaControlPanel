@@ -98,3 +98,27 @@ Cada fase deve produzir evidência verificável e ser registrada em Operational 
 - Cotação artificial ou preço independente de UMS.
 - Dados de mercado simulados apresentados como reais.
 - Alteração de tokenomics, ledger, saldos ou regras de conversão motivada apenas por conveniência visual.
+
+
+## 11. Provedores de dados e proveniência — atualização 2026-11-12
+
+A primeira integração read-only foi estruturada com um endpoint server-side `GET /api/market-data`, com cache compartilhado de 60 segundos. As chaves dos provedores devem permanecer em variáveis de ambiente server-side do Vercel; nunca usar prefixo `VITE_` para segredos.
+
+| Ativo / indicador | Fonte prevista | Observação |
+|---|---|---|
+| BTC / ETH | CoinGecko API | Cotação em BRL, variação de 24h, timestamp e atribuição visível. Demo key recomendada para estabilidade e limites previsíveis. |
+| Ibovespa / S&P 500 | HG Brasil Finance API | Tickers `INDEXB3:IBOV` e `INDEXNYSE:SPX`; cotação, variação e timestamp. Chave interna server-side. |
+| IPCA | Banco Central do Brasil — SGS, série 433 | Indicador mensal oficial; não é ativo negociado nem cotação intradiária. Comparação com mês anterior deve ser descrita como aceleração/desaceleração da inflação, não alta/queda de preço de ativo. |
+| MWN | Nenhuma fonte pública confirmada | Não apresentar preço externo até existir mercado e fonte verificáveis. |
+| UMS | Derivação econômica | Não possui cotação fiduciária independente. Valor implícito = cotação MWN/fiat ÷ UMS_PER_MWN vigente. |
+
+Variáveis server-side:
+- `COINGECKO_DEMO_API_KEY` — opcional para consulta pública inicial; recomendada para uso estável.
+- `HG_BRASIL_API_KEY` — necessária para as cotações de índices.
+
+Estado da implementação nesta atualização:
+- Endpoint server-side criado e normaliza os dados dos três provedores.
+- A MW-Ex consulta o endpoint e atualiza a cada 60 segundos.
+- A UI exibe preço/indicador, variação, fonte e timestamp/referência quando disponíveis.
+- Sem chave HG Brasil, os índices permanecem explicitamente indisponíveis; sem feed de histórico, os gráficos permanecem vazios.
+- As chaves ainda precisam ser cadastradas no ambiente de produção Vercel e o endpoint precisa ser validado com respostas reais de cada provedor.
