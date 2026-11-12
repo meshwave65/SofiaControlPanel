@@ -1,9 +1,11 @@
 import { trpc } from "@/lib/trpc";
 import { supabase } from "@/lib/supabase";
 import { useCallback, useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function useAuth() {
   const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
   const [sessionReady, setSessionReady] = useState(false);
   const [hasSession, setHasSession] = useState(false);
 
@@ -20,32 +22,30 @@ export function useAuth() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (!mounted) return;
-      setHasSession(Boolean(session?.access_token));
-      setSessionReady(true);
-      queueMicrotask(() => {
-        if (mounted) void utils.auth.me.invalidate();
-      });
-    });
 
-    void supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (!mounted) return;
-      if (error) console.error("[Auth] Could not read Supabase session:", error);
       setHasSession(Boolean(session?.access_token));
       setSessionReady(true);
-    }).catch((error) => {
-      if (!mounted) return;
-      console.error("[Auth] Session initialization failed:", error);
-      setHasSession(false);
-      setSessionReady(true);
+
+      // Never reuse protected query results across different Supabase sessions.
+      // SIGNED_IN/SIGNED_OUT are identity boundaries; token refreshes are not.
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
+        queryClient.clear();
+      }
+
+      queueMicrotask(() => {
+        if (mounted && session?.access_token) {
+          void utils.auth.me.invalidate();
+        }
+      });
     });
 
     return () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [utils]);
+  }, [queryClient, utils]);
 
   const logout = useCallback(async () => {
     await supabase.auth.signOut();
@@ -68,6 +68,7 @@ export function useAuth() {
     user,
     loading,
     error: backendAuth.error ?? null,
+    hasSession,
     isAuthenticated: Boolean(user),
     refresh,
     logout,
