@@ -1,4 +1,4 @@
-import { integer, pgEnum, pgTable, pgSchema, text, timestamp, varchar, boolean, numeric, jsonb, index, foreignKey } from "drizzle-orm/pg-core";
+import { integer, pgEnum, pgTable, pgSchema, text, timestamp, varchar, boolean, numeric, jsonb, index, uniqueIndex, foreignKey } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 const sofia = pgSchema("sofia");
@@ -392,6 +392,90 @@ export const arcEvidence = sofia.table(
 
 export type ArcEvidence = typeof arcEvidence.$inferSelect;
 export type InsertArcEvidence = typeof arcEvidence.$inferInsert;
+
+// ============================================
+// ARC / PGC TELEMETRY AND CONFIDENCE TABLES
+// ============================================
+
+export const arcAccessEvents = sofia.table("arcAccessEvents", {
+  id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
+  userId: integer("userId").notNull(),
+  agentId: integer("agentId"),
+  taskId: integer("taskId"),
+  sessionId: varchar("sessionId", { length: 128 }),
+  source: varchar("source", { length: 64 }).notNull().default("task_detail"),
+  observedAt: timestamp("observedAt").defaultNow().notNull(),
+  agentStatus: varchar("agentStatus", { length: 32 }),
+  agentVersion: varchar("agentVersion", { length: 64 }),
+  connectionStatus: varchar("connectionStatus", { length: 32 }),
+  heartbeatRecent: boolean("heartbeatRecent").notNull().default(false),
+  activityCount: integer("activityCount").notNull().default(0),
+  completedTasks: integer("completedTasks").notNull().default(0),
+  observedTasks: integer("observedTasks").notNull().default(0),
+  metadata: jsonb("metadata"),
+}, (table) => ({
+  userIdIdx: index("arcAccessEvents_userId_idx").on(table.userId),
+  agentIdIdx: index("arcAccessEvents_agentId_idx").on(table.agentId),
+  taskIdIdx: index("arcAccessEvents_taskId_idx").on(table.taskId),
+  observedAtIdx: index("arcAccessEvents_observedAt_idx").on(table.observedAt),
+  userIdFk: foreignKey({ columns: [table.userId], foreignColumns: [users.id] }).onDelete("cascade"),
+  agentIdFk: foreignKey({ columns: [table.agentId], foreignColumns: [agents.id] }).onDelete("set null"),
+  taskIdFk: foreignKey({ columns: [table.taskId], foreignColumns: [tasks.id] }).onDelete("set null"),
+}));
+
+export type ArcAccessEvent = typeof arcAccessEvents.$inferSelect;
+export type InsertArcAccessEvent = typeof arcAccessEvents.$inferInsert;
+
+export const arcDeviceProfiles = sofia.table("arcDeviceProfiles", {
+  id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
+  ownerId: integer("ownerId").notNull(),
+  agentId: integer("agentId").notNull(),
+  known: boolean("known").notNull().default(false),
+  firstSeenAt: timestamp("firstSeenAt").defaultNow().notNull(),
+  lastSeenAt: timestamp("lastSeenAt").defaultNow().notNull(),
+  observationCount: integer("observationCount").notNull().default(0),
+  lastVersion: varchar("lastVersion", { length: 64 }),
+  lastConnectionStatus: varchar("lastConnectionStatus", { length: 32 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+}, (table) => ({
+  agentIdUnique: uniqueIndex("arcDeviceProfiles_agentId_unique").on(table.agentId),
+  ownerIdIdx: index("arcDeviceProfiles_ownerId_idx").on(table.ownerId),
+  ownerIdFk: foreignKey({ columns: [table.ownerId], foreignColumns: [users.id] }).onDelete("cascade"),
+  agentIdFk: foreignKey({ columns: [table.agentId], foreignColumns: [agents.id] }).onDelete("cascade"),
+}));
+
+export type ArcDeviceProfile = typeof arcDeviceProfiles.$inferSelect;
+export type InsertArcDeviceProfile = typeof arcDeviceProfiles.$inferInsert;
+
+export const arcConfidenceSnapshots = sofia.table("arcConfidenceSnapshots", {
+  id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
+  userId: integer("userId").notNull(),
+  agentId: integer("agentId"),
+  taskId: integer("taskId"),
+  assessmentId: integer("assessmentId"),
+  accessEventId: integer("accessEventId"),
+  score: numeric("score", { precision: 5, scale: 2 }).notNull(),
+  posterior: numeric("posterior", { precision: 7, scale: 6 }).notNull(),
+  decision: varchar("decision", { length: 16 }).notNull(),
+  anomalyCount: integer("anomalyCount").notNull().default(0),
+  trigger: varchar("trigger", { length: 64 }).notNull().default("assessment"),
+  signals: jsonb("signals").notNull(),
+  observedAt: timestamp("observedAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("arcConfidenceSnapshots_userId_idx").on(table.userId),
+  agentIdIdx: index("arcConfidenceSnapshots_agentId_idx").on(table.agentId),
+  taskIdIdx: index("arcConfidenceSnapshots_taskId_idx").on(table.taskId),
+  observedAtIdx: index("arcConfidenceSnapshots_observedAt_idx").on(table.observedAt),
+  userIdFk: foreignKey({ columns: [table.userId], foreignColumns: [users.id] }).onDelete("cascade"),
+  agentIdFk: foreignKey({ columns: [table.agentId], foreignColumns: [agents.id] }).onDelete("set null"),
+  taskIdFk: foreignKey({ columns: [table.taskId], foreignColumns: [tasks.id] }).onDelete("set null"),
+  assessmentIdFk: foreignKey({ columns: [table.assessmentId], foreignColumns: [arcAssessments.id] }).onDelete("set null"),
+  accessEventIdFk: foreignKey({ columns: [table.accessEventId], foreignColumns: [arcAccessEvents.id] }).onDelete("set null"),
+}));
+
+export type ArcConfidenceSnapshot = typeof arcConfidenceSnapshots.$inferSelect;
+export type InsertArcConfidenceSnapshot = typeof arcConfidenceSnapshots.$inferInsert;
 
 // ============================================
 // RELATIONS
