@@ -73,7 +73,7 @@ export default function DashboardLayout({
       return DEFAULT_WIDTH;
     }
   });
-  const { loading, user } = useAuth();
+  const { loading, user, error } = useAuth();
 
   useEffect(() => {
     try {
@@ -89,9 +89,13 @@ export default function DashboardLayout({
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-6">
         <div className="flex w-full max-w-md flex-col items-center gap-6 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">Entre para continuar</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            {error ? "Não foi possível validar seu acesso" : "Entre para continuar"}
+          </h1>
           <p className="text-sm text-muted-foreground">
-            O acesso a este painel requer autenticação.
+            {error
+              ? `A sessão foi iniciada, mas o servidor não conseguiu identificar o usuário do painel: ${error.message}`
+              : "O acesso a este painel requer autenticação."}
           </p>
           <Button
             onClick={() => {
