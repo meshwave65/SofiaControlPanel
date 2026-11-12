@@ -49,7 +49,9 @@ export class SofiaOrchestrator {
    * Determina se uma tarefa deve ser fatorada (decomposta).
    */
   static shouldFactorize(task: any): boolean {
-    if (!task.description) return false;
+    // A decomposed task is a leaf in the factorization tree; do not recursively
+    // create another set of structural/operational/strategic dimensions.
+    if (task.parentTaskId != null || !task.description) return false;
     
     const descLower = task.description.toLowerCase();
     const keywords = [
@@ -84,6 +86,9 @@ export class SofiaOrchestrator {
    * retomar uma fatoração interrompida sem duplicar subtarefas já persistidas.
    */
   static async factorizeTask(task: any): Promise<number[]> {
+    if (task.parentTaskId != null) {
+      throw new Error("Esta tarefa já é uma subtarefa. A fatoração deve ser feita na missão principal.");
+    }
     console.log(`[Orchestrator] Fatorando tarefa ${task.id}: ${task.title}`);
 
     const subtaskIds: number[] = [];
