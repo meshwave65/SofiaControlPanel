@@ -174,3 +174,18 @@ A MW-Ex passou a consumir o endpoint server-side `/api/market-data`, com integra
 A consulta de produção confirmou dados reais de BTC, ETH e IPCA. A fonte HG Brasil ainda não está habilitada porque `HG_BRASIL_API_KEY` não foi configurada no Vercel. O gráfico histórico permanece pendente de série temporal validada. MWN não recebe cotação inventada e UMS não recebe cotação fiduciária independente.
 
 Registro operacional: [OR-20261112-0055](../../operational_reports/OR-20261112-0055.md).
+
+
+## 14. Histórico interno de preço da MWN — proposta em avaliação — 2026-11-12
+
+O responsável propôs registrar cada evento que efetivamente altere o preço interno da MWN, incluindo timestamp e metadados suficientes para reconstruir a evolução histórica. A MWN não possui cotação pública externa: não está listada em exchange externa e sua negociação ocorre exclusivamente na MW-Ex. A série histórica pretendida é, portanto, interna e não deve ser apresentada como cotação pública.
+
+A proposta e sua avaliação preliminar estão em [MWN_INTERNAL_PRICE_HISTORY_PROPOSAL_21_5.md](./MWN_INTERNAL_PRICE_HISTORY_PROPOSAL_21_5.md).
+
+**Recomendação ainda não aprovada:** avaliar um ledger append-only de eventos de preço como histórico primário; derivar fechamentos diários a partir dos eventos; não criar desde já uma segunda tabela física de candles nem monitoramento contínuo por segundos. A granularidade poderá evoluir conforme a atividade real do mercado justificar.
+
+**Pendências antes de decidir schema ou implementar:** identificar a tabela/coluna que contém o preço referido como 0,0021605; confirmar moeda/unidade e semântica; mapear os caminhos e autoridade de alteração; definir fuso de fechamento; inspecionar RLS/grants e fluxo transacional. A consulta ao projeto Supabase `mwn` falhou nesta interação por erro de autenticação read-only (`28P01`), portanto nenhuma estrutura foi presumida.
+
+### Governança das interações
+
+Na MISSION_0021, declarações e sugestões do responsável são entradas para avaliação, não decisões arquiteturais automáticas, salvo aprovação explícita. Cada interação de trabalho relevante deve gerar Operational Report auditável, inclusive quando não houver implementação. O OR deve distinguir proposta recebida, análise, recomendação, decisão aprovada, itens rejeitados/adiados e respectivas razões, evidências, limitações e próximos gates. Nenhuma alteração de banco, regra econômica, ledger ou operação financeira é autorizada apenas pela apresentação de uma sugestão.
