@@ -113,6 +113,8 @@ export default function TaskDetail() {
       await Promise.all([taskQuery.refetch(), messagesQuery.refetch(), subtasksQuery.refetch(), consolidatedReportQuery.refetch()]);
       if (result?.started) {
         toast.success(result.factorized ? "Missão iniciada e fatorada em subtarefas." : "Missão iniciada.");
+      } else if (result?.waitingForAgent) {
+        toast.info("A missão continua em STAGED, mas não há agente elegível com créditos disponíveis e atualizados. Verifique a conexão e o saldo dos agentes.");
       } else {
         toast.info("A missão já não está em STAGED; nenhum reinício foi necessário.");
       }
