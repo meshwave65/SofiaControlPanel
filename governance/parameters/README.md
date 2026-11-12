@@ -1,6 +1,6 @@
 # Registro canônico de parâmetros
 
-Este registro aponta as chaves e suas fontes canônicas. A política geral está em [CONFIGURATION_AND_PARAMETER_GOVERNANCE.md](../CONFIGURATION_AND_PARAMETER_GOVERNANCE.md).
+Este registro aponta as chaves e suas fontes canônicas. A política geral está em [CONFIGURATION_AND_PARAMETER_GOVERNANCE.md](../CONFIGURATION_AND_PARAMETER_GOVERNANCE.md). Para parâmetros econômicos e dados de mercado, consulte também [ECONOMIC_PARAMETER_GOVERNANCE.md](../ECONOMIC_PARAMETER_GOVERNANCE.md).
 
 | Chave | Domínio | Unidade | Valor de referência documentado | Fonte operacional pretendida | Estado |
 |---|---|---|---:|---|---|
@@ -15,6 +15,10 @@ Este registro aponta as chaves e suas fontes canônicas. A política geral está
 - Persistência histórica: toda conversão grava o identificador da versão aplicada e os valores/unidades necessários à auditoria.
 - Alteração: criar nova versão; nunca editar transações antigas para refletir o parâmetro novo.
 - Fonte runtime: a tabela é a fonte operacional pretendida. Até que sua existência, schema, políticas de acesso e integração sejam verificadas no ambiente, não presumir que a migração já foi implementada. O valor nesta tabela documental é referência de governança, não substituto silencioso da fonte runtime.
+
+## Parâmetros econômicos ainda não cadastrados
+
+Os valores fiduciários/de mercado de UMS e MWN, fontes de cotação, preços executáveis, spreads, tarifas futuras e limites econômicos ainda não possuem chaves/contratos ativos neste registro. Não atribuir nomes, valores, provedores, vigências ou status por inferência. Cada item deverá ser especificado e aprovado antes de ser cadastrado como parâmetro ativo. A norma econômica define os metadados e distinções obrigatórios.
 
 ## Regra de manutenção
 
