@@ -10,7 +10,7 @@
 
 O responsável solicita a primeira MW-Ex funcional, pequena e proprietária, operada pela interface MeshWave e restrita a MeshWalkers. Ela pode ficar visualmente próxima da carteira MWN, mas deve ser autônoma, com saldo, razão e histórico próprios, segregados da carteira interna UMS.
 
-A tela atual em newsite/src/pages/MwEx.jsx exibe “Em breve” e cartões candidatos MWN, BTC, ETH, Ibovespa, S&P 500 e IPCA. Isso comprova uma prévia visual, não cotações nem operação. A MISSION_0018, tarefa 18.4, documentou escopo/readiness; esta missão trata da implementação funcional, sem reescrever a decisão histórica. A carteira existente mostra equivalência 1 MWN = 1.000 UMS na interface; estado de banco, regras vigentes, saldos, liquidez, fontes de preço e auditoria Genesis deverão ser reconfirmados na tarefa 21.1.
+A tela atual em newsite/src/pages/MwEx.jsx exibe “Em breve” e cartões candidatos MWN, BTC, ETH, Ibovespa, S&P 500 e IPCA. Isso comprova uma prévia visual, não cotações nem operação. A MISSION_0018, tarefa 18.4, documentou escopo/readiness; esta missão trata da implementação funcional, sem reescrever a decisão histórica. A carteira existente mostra uma equivalência UMS/MWN na interface; seu valor deve ser lido da fonte canônica versionada identificada pela chave `UMS_PER_MWN`. Estado de banco, regras vigentes, saldos, liquidez, fontes de preço e auditoria Genesis deverão ser reconfirmados na tarefa 21.1.
 
 ## 2. Objetivo e princípios de produto
 
@@ -22,13 +22,13 @@ A autenticação do site pode ser reutilizada se apropriado; a autorização e a
 
 1. **Acesso privado:** acesso pela interface MeshWave e somente por usuários autenticados elegíveis como MeshWalkers. Sem exchange pública, autoinscrição pública ou endpoint de trading externo.
 2. **Ledger próprio:** saldo e histórico MWN por usuário são mantidos pela MW-Ex. Não derivar saldo de leitura lateral da carteira interna nem compartilhar/mutar os dois ledgers por efeito colateral.
-3. **Saldo e equivalência:** exibir saldo MWN e equivalência potencial = MWN × 1.000 UMS. Identificar equivalência como potencial; não a apresentar como UMS disponível antes da conversão concluída.
+3. **Saldo e equivalência:** exibir saldo MWN e equivalência potencial = MWN × parâmetro `UMS_PER_MWN`. Identificar equivalência como potencial; não a apresentar como UMS disponível antes da conversão concluída.
 4. **Valor da carteira:** saldo MWN × cotação MWN atual em moeda configurada. Mostrar fonte, moeda, horário e estado de frescor. Sem fonte aprovada e atual, não inventar preço nem chamar referência interna de cotação de mercado; mostrar indisponível ou referência explicitamente indicativa.
 5. **Indicadores externos:** feed somente leitura. Confirmar provedor, unidades, frequência e limites antes de integrar. Candidatos já visíveis na prévia não garantem disponibilidade. Mostrar fonte e horário, sinalizar atraso/falha, nunca chamar dado stale de “ao vivo”.
 6. **Transferência entre participantes:** caminho normal de UMS entre participantes: remetente converte explicitamente UMS em MWN na MW-Ex; transfere MWN à carteira MW-Ex do destinatário; destinatário decide manter MWN ou convertê-lo explicitamente em UMS na carteira interna.
 7. **Sem exceção para fundador:** após a auditoria Genesis e a reconciliação formal, Genesis deixa de ser classe separada e se torna UMS comum na carteira interna pessoal do fundador, conforme decisão informada. Depois disso, o fundador também usa o mesmo fluxo via MWN; não há transferência direta UMS→UMS entre usuários nem bypass administrativo.
 8. **Retirar aquisição normal de UMS:** o fluxo de aquisição de UMS pela carteira interna não é caminho normal do modelo. Planejar sua retirada somente após a ponte de transferência estar testada, os saldos reconciliados, rollback preparado e aprovação explícita. A carteira interna de UMS não é descontinuada integralmente nesta missão.
-9. **Relação de conversão:** requisito informado: 1 MWN = 1.000 UMS. Reconfirmar estado normativo antes de operação; centralizar/versionar o parâmetro, definir precisão, arredondamento e resíduos. Conversão não pode criar valor ou permitir gasto duplo.
+9. **Relação de conversão:** consumir o parâmetro versionado `UMS_PER_MWN` da fonte canônica. Confirmar a versão ativa antes de operação; definir precisão, arredondamento e resíduos. Conversão não pode criar valor ou permitir gasto duplo.
 10. **Escopo mínimo:** sem depósito/saque fiat, PIX/cartão, CEX/DEX, execução externa de ordens, bridge blockchain, alavancagem, derivativos, market-making garantido ou ampliação funcional sem nova decisão.
 
 ## 4. Escopo de implementação
@@ -67,7 +67,7 @@ O quadro MISSION_0021 - TASKS - STAGED.md organiza oito unidades. As tarefas 21.
 
 ## 8. Gates
 
-- Reconciliar MISSION_0018/18.4 e confirmar a regra 1 MWN = 1.000 UMS antes de operação real.
+- Reconciliar MISSION_0018/18.4 e confirmar a versão aprovada de `UMS_PER_MWN` antes de operação real.
 - Definir e aprovar a natureza e fonte da cotação MWN e o modelo de contraparte/liquidez. Não chamar referência de mercado sem preço verificável.
 - Confirmar elegibilidade MeshWalker na fonte canônica.
 - Para migração Genesis: auditoria concluída, saldos reconciliados, evento de migração demonstrável, reconciliação da carteira do fundador, rollback preparado e autorização explícita.
@@ -89,7 +89,7 @@ Critérios:
 2. Apenas MeshWalkers autorizados acessam a MW-Ex; saldo/ledger MWN são independentes da carteira interna UMS.
 3. O fluxo explícito UMS→MWN→destinatário MWN e a conversão opcional para UMS interno funcionam sem transferência direta UMS→UMS.
 4. Fundador usa a mesma regra, sem bypass.
-5. UMS potencial = MWN × 1.000, exibido sem parecer saldo disponível.
+5. UMS potencial = MWN × `UMS_PER_MWN`, exibido sem parecer saldo disponível.
 6. Valor de mercado depende de cotação verificável e atual; preço/fonte/horário aparecem e ausência/staleness são sinalizados.
 7. Indicadores externos são read-only e identificam fonte/frescor.
 8. Testes cobrem invariantes, precisão, concorrência, repetição, erros e autorização.
@@ -136,6 +136,10 @@ A prioridade define apenas qual saldo é consumido primeiro; não cria conversã
 - MWN é unidade inteira: não existem frações de MWN.
 - A interface apresenta quantidades sem casas decimais, truncando para baixo. Essa regra é exclusivamente visual e não altera os valores armazenados.
 - A contabilidade interna UMS preserva sua precisão integral; a apresentação sem decimais não pode arredondar, truncar ou modificar o saldo efetivo.
-- A relação de referência atual é **1.000 UMS = 1 MWN**. Ela deve ser parametrizada e versionada, nunca replicada como constante dispersa. Cada transação conserva a versão/taxa efetivamente aplicada.
+- A relação de referência é definida pela chave **`UMS_PER_MWN`**, mantida na fonte canônica versionada. Seu valor não pode ser replicado como constante no código ou em documentos; cada transação conserva o ID/versão e o valor efetivamente aplicado.
 - A regra de conversão deve preservar resíduos UMS; nenhuma fração ou saldo residual pode ser descartado silenciosamente. O comportamento transacional exato para valores que não formem MWN inteiro precisa ser definido no contrato de conversão antes de operação real.
 - Taxas de corretagem/administrativas atuais: zero. Se introduzidas futuramente, serão parametrizadas e debitadas sempre da carteira interna UMS, nunca do saldo MWN nem do saldo fiat da MW-Ex.
+
+## Governança de parâmetros
+
+Esta missão obedece à [Diretriz de arquitetura — Configuração e governança de parâmetros](../../CONFIGURATION_AND_PARAMETER_GOVERNANCE.md). A chave `UMS_PER_MWN` e sua fonte canônica estão registradas no [Registro canônico de parâmetros](../../parameters/README.md). O valor não deve ser copiado para código ou documentação operacional.
