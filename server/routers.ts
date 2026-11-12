@@ -214,7 +214,7 @@ export const appRouter = router({
         status: z.enum(["online", "offline", "idle", "paused"]),
       }))
       .mutation(async ({ input, ctx }) => {
-        const agent = await db.getAgentByIdForOwner(input.id, ctx.user.id);
+        const agent = await db.getAgentByIdForOwner(input.id, ctx.user.id, ctx.user.role === "admin");
         if (!agent && ctx.user.role !== "admin") {
           throw new TRPCError({ code: "NOT_FOUND", message: "Agente não encontrado." });
         }
