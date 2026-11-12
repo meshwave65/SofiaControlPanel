@@ -156,3 +156,54 @@ Qualquer exceção bloqueia nova operação real no escopo afetado até triagem 
 ## 11. Handoff
 
 A tarefa 21.4 poderá implementar uma razão MW-Ex apenas em fixture/sandbox autorizada e depois em ambiente aprovado, usando este contrato. Antes de qualquer operação real, 21.7 deve testar todos os invariantes, concorrência, idempotência, falha parcial e autorização; 21.8 deve fechar readiness, Genesis e rollback.
+
+## 12. Aditamento — nomenclatura, domínio fiat e ponte para ativos externos (2026-11-11)
+
+Este aditamento complementa o contrato e prevalece sobre definições anteriores incompatíveis. Não cria schema, RPC, saldo, integração ou autorização de produção.
+
+### 12.1 Nomenclatura oficial e identificadores legados
+
+- O ativo vigente chama-se **MWN — MeshWave Network**.
+- **MWC** é denominação histórica/legada de “MeshWave Cripto”, abandonada após a identificação de outro token em circulação com essa sigla.
+- Identificadores existentes com o prefixo/símbolo mwc em tabelas, colunas/campos, variáveis, módulos, serviços e no simulador mwc-bm51.onrender.com são legados. Não representam um ativo separado.
+- Novos contratos, documentação, interfaces e conceitos usam MWN. Migração de nomes técnicos não é automática: requer inventário de dependências, compatibilidade, plano reversível, estratégia de dados e aprovação.
+
+### 12.2 Domínios e rota de conversão
+
+A separação contábil UMS/MWN permanece obrigatória. Para operações que envolvam ativos externos, o contrato deve reconhecer também o domínio de saldo/liquidação fiat e a posição/ordem do ativo externo, sem fundir seus ledgers.
+
+Rota obrigatória para aquisição de ativo externo com recursos originados em UMS:
+
+**UMS → MWN → moeda fiduciária → ativo/token externo.**
+
+Não são permitidas arestas diretas UMS→fiat ou UMS→ativo externo. A etapa MWN→fiat é uma operação própria da MW-Ex, com preço, contraparte, custos, limites, estado e evidência de liquidação. A compra externa usa o saldo fiat resultante e registra ordem, execução, ativo recebido, preço, fonte/contraparte, timestamps, taxas e reconciliação.
+
+O mecanismo existente de aquisição de UMS usando moeda fiduciária permanece distinto e permitido; não deve ser confundido com conversão reversa UMS→fiat.
+
+### 12.3 Modos de origem dos recursos
+
+A solicitação de ordem deve persistir o modo escolhido:
+- UMS_ONLY;
+- FIAT_ONLY;
+- HYBRID_FIAT_FIRST — fiat primeiro, complemento por UMS→MWN→fiat;
+- HYBRID_UMS_FIRST — UMS primeiro, complemento fiat; a parcela UMS percorre UMS→MWN→fiat.
+
+A escolha define a prioridade de consumo, não uma conversão direta. O sistema deve registrar por perna os ativos, quantidades, taxa/versão, preço, custos, contraparte, estado e referências correlacionadas. A execução só pode ser declarada concluída após liquidação e reconciliação de todas as pernas.
+
+### 12.4 Precisão, taxas e histórico
+
+- MWN é inteiro e não admite frações.
+- O truncamento para baixo e a exibição sem casas decimais aplicam-se somente à apresentação na interface; nunca modificam o ledger.
+- UMS mantém internamente toda a precisão contábil existente, mesmo que a UI o apresente sem casas decimais.
+- A relação de referência atual é 1.000 UMS = 1 MWN. Deve ser configurável e versionada; cada transação guarda a versão aplicada, e alterações futuras não reinterpretam o histórico.
+- Conversões para MWN inteiro não podem descartar resíduos UMS. A regra exata para conversão parcial e manutenção do resíduo deve ser formalizada antes de ativar a operação.
+- Taxas atuais de corretagem/administrativas são zero. Se criadas, devem ser cobradas em UMS na carteira interna, nunca deduzidas do saldo MWN ou fiat da MW-Ex.
+
+### 12.5 Invariantes adicionais
+
+1. Nenhum débito UMS é finalizado sem MWN correspondente creditado, ou compensação/rollback integral e auditável.
+2. Nenhuma ordem externa financiada por UMS contorna a sequência UMS→MWN→fiat→ativo.
+3. A prioridade híbrida é registrada antes da execução e aplicada de forma determinística; insuficiência ou falha em qualquer perna cancela ou compensa a operação conforme política aprovada.
+4. Saldos UMS, MWN e fiat permanecem contabilmente segregados; a correlação entre eles é feita por operações/eventos auditáveis.
+5. A aquisição de UMS com fiat não autoriza conversão de UMS de volta para fiat.
+6. Nenhuma integração externa, depósito/saque, custódia ou execução real é autorizada por este documento; requer desenho, controles, conformidade e aprovação próprios.
