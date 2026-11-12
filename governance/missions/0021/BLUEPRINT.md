@@ -160,3 +160,17 @@ A implementação será faseada:
 4. testes de regressão, responsividade, acessibilidade e precisão.
 
 Não usar preços, variações ou séries fictícias para preencher a interface. A cotação MWN só poderá ser apresentada como cotação de mercado se existir fonte verificável. A UMS não possui cotação fiduciária independente; seu valor fiduciário é derivado conforme a norma econômica. Nenhuma alteração visual pode modificar saldos, precisão contábil ou operações do ledger.
+
+
+## 13. Atualização de carteira e cotações externas — 2026-11-12
+
+A apresentação dos saldos nas telas de carteira foi ajustada para unidades inteiras e tipografia mais compacta. A precisão original do ledger permanece preservada no extrato detalhado; nenhuma operação contábil foi modificada.
+
+A MW-Ex passou a consumir o endpoint server-side `/api/market-data`, com integração read-only para:
+- BTC e ETH via CoinGecko;
+- Ibovespa e S&P 500 via HG Brasil (aguardando chave interna server-side);
+- IPCA mensal via série SGS 433 do Banco Central.
+
+A consulta de produção confirmou dados reais de BTC, ETH e IPCA. A fonte HG Brasil ainda não está habilitada porque `HG_BRASIL_API_KEY` não foi configurada no Vercel. O gráfico histórico permanece pendente de série temporal validada. MWN não recebe cotação inventada e UMS não recebe cotação fiduciária independente.
+
+Registro operacional: [OR-20261112-0055](../../operational_reports/OR-20261112-0055.md).
