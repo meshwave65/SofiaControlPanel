@@ -9,29 +9,59 @@ if (!url) {
 
 const sql = postgres(url, { max: 1, prepare: false, connect_timeout: 10 });
 
+async function runStep(label, operation) {
+  console.log(`[Database] ${label}...`);
+  await operation();
+  console.log(`[Database] ${label}: OK`);
+}
+
 try {
-  await sql`CREATE SCHEMA IF NOT EXISTS "sofia"`;
-  await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "agentPinned" boolean NOT NULL DEFAULT false`;
-  await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "creatorType" varchar(16) NOT NULL DEFAULT 'user'`;
-  await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "missionKey" varchar(64)`;
-  await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "githubPath" varchar(512)`;
-  await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "githubSha" varchar(128)`;
-  await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "githubSyncStatus" varchar(32) NOT NULL DEFAULT 'pending'`;
-  await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "githubSyncError" text`;
-  await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "githubSyncedAt" timestamp`;
-  await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "manusTaskId" varchar(128)`;
-  await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "manusStatus" varchar(32)`;
-  await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "creditsUsed" integer`;
-  await sql`ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "lastSyncedAt" timestamp`;
+  // Supabase roles may impose a short statement_timeout. Schema verification
+  // includes DDL and trigger installation, which can legitimately take longer.
+  await runStep("Set migration timeouts", async () => {
+    await sql`SET statement_timeout = '60s'`;
+    await sql`SET lock_timeout = '15s'`;
+  });
+
+  await runStep("Ensure sofia schema", () =>
+    sql`CREATE SCHEMA IF NOT EXISTS "sofia"`,
+  );
+
+  const columns = [
+    ['agentPinned', 'boolean NOT NULL DEFAULT false'],
+    ['creatorType', "varchar(16) NOT NULL DEFAULT 'user'"],
+    ['missionKey', 'varchar(64)'],
+    ['githubPath', 'varchar(512)'],
+    ['githubSha', 'varchar(128)'],
+    ['githubSyncStatus', "varchar(32) NOT NULL DEFAULT 'pending'"],
+    ['githubSyncError', 'text'],
+    ['githubSyncedAt', 'timestamp'],
+    ['manusTaskId', 'varchar(128)'],
+    ['manusStatus', 'varchar(32)'],
+    ['creditsUsed', 'integer'],
+    ['lastSyncedAt', 'timestamp'],
+  ];
+
+  for (const [name, definition] of columns) {
+    await runStep(`Verify tasks.${name}`, () =>
+      sql.unsafe(
+        `ALTER TABLE "sofia"."tasks" ADD COLUMN IF NOT EXISTS "${name}" ${definition}`,
+      ),
+    );
+  }
+
   const dispatchMigration = await readFile(
     new URL("../drizzle/0003_automatic_task_dispatch.sql", import.meta.url),
     "utf8",
   );
-  await sql.unsafe(dispatchMigration);
+  await runStep("Install automatic task dispatch trigger", () =>
+    sql.unsafe(dispatchMigration),
+  );
+
   console.log("[Database] Execution columns verified successfully");
   console.log("[Database] Automatic task dispatch trigger verified successfully");
 } catch (error) {
-  console.error("[Database] Failed to verify execution columns:", error);
+  console.error("[Database] Database initialization failed:", error);
   process.exitCode = 1;
 } finally {
   await sql.end({ timeout: 5 });
