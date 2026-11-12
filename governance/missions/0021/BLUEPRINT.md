@@ -100,3 +100,42 @@ Critérios:
 ## 10. Limites de declaração
 
 Este Blueprint não afirma que MW-Ex já negocia, que MWN possui cotação/mercado líquido, que a equivalência UMS/MWN foi auditada, que a auditoria Genesis terminou ou que algum saldo foi migrado. Placeholder não pode ser apresentado como operação; “valor de mercado” requer fonte atual e representativa.
+
+## 11. Aditamento econômico e nomenclatura — 2026-11-11
+
+Este aditamento registra decisões posteriores do responsável e prevalece sobre qualquer item anterior deste Blueprint que as contradiga.
+
+### 11.1 Nomenclatura oficial e legado técnico
+
+- A denominação vigente e única do ativo é **MWN — MeshWave Network**.
+- **MWC** é exclusivamente uma designação histórica/legada, originalmente usada para “MeshWave Cripto” e abandonada após a identificação de outro token em circulação com essa designação.
+- Identificadores técnicos existentes com o prefixo/símbolo mwc — inclusive tabelas, campos, variáveis, módulos, serviços e o simulador mwc-bm51.onrender.com — são legados. Sua existência não define um ativo separado nem altera a nomenclatura vigente.
+- Documentação nova, interfaces, contratos e conceitos devem usar MWN. Não renomear identificadores técnicos automaticamente: qualquer migração exige análise de dependências, compatibilidade, plano reversível e aprovação explícita.
+
+### 11.2 Fiat, aquisição de UMS e ordens externas
+
+- Continua permitido o mecanismo existente de **aquisição de UMS mediante moeda fiduciária**. Isso não constitui conversão de UMS de volta para fiat.
+- É proibida a conversão direta UMS→fiat e a conversão direta UMS→token externo.
+- Para alcançar ativos externos, o caminho obrigatório é **UMS → MWN → moeda fiduciária (BRL/USD/EUR, conforme suporte aprovado) → ativo/token externo**.
+- Para ordens externas, a etapa UMS→MWN ocorre pela ponte interna; MWN é então vendido por moeda fiduciária; a moeda fiduciária resultante liquida a compra do ativo externo.
+- A disponibilidade de saldos fiat, depósitos, retiradas, meios de pagamento, execução externa e custódia depende de desenho operacional, jurídico, técnico e de autorização próprios. Este aditamento define o caminho econômico pretendido, mas não declara tais capacidades implementadas nem autoriza operação real.
+
+### 11.3 Modos de financiamento de ordens
+
+A interface de ordem deve permitir ao usuário escolher a origem dos recursos:
+
+1. **Somente UMS:** converter UMS em MWN e, quando a ordem envolver ativo externo, seguir MWN→fiat→ativo externo.
+2. **Somente fiat:** financiar integralmente a ordem com saldo fiat disponível.
+3. **Híbrido fiat:** consumir primeiro o saldo fiat; se insuficiente, complementar com UMS, passando obrigatoriamente por UMS→MWN→fiat.
+4. **Híbrido UMS:** consumir primeiro UMS; se insuficiente, complementar com saldo fiat. A parcela UMS percorre UMS→MWN→fiat.
+
+A prioridade define apenas qual saldo é consumido primeiro; não cria conversão direta UMS↔fiat nem UMS↔ativo externo. Para ordens de MWN, a perna fiat adquire MWN conforme mecanismo aprovado; para ativos externos, fiat é a moeda intermediária de liquidação.
+
+### 11.4 Precisão, apresentação e taxas
+
+- MWN é unidade inteira: não existem frações de MWN.
+- A interface apresenta quantidades sem casas decimais, truncando para baixo. Essa regra é exclusivamente visual e não altera os valores armazenados.
+- A contabilidade interna UMS preserva sua precisão integral; a apresentação sem decimais não pode arredondar, truncar ou modificar o saldo efetivo.
+- A relação de referência atual é **1.000 UMS = 1 MWN**. Ela deve ser parametrizada e versionada, nunca replicada como constante dispersa. Cada transação conserva a versão/taxa efetivamente aplicada.
+- A regra de conversão deve preservar resíduos UMS; nenhuma fração ou saldo residual pode ser descartado silenciosamente. O comportamento transacional exato para valores que não formem MWN inteiro precisa ser definido no contrato de conversão antes de operação real.
+- Taxas de corretagem/administrativas atuais: zero. Se introduzidas futuramente, serão parametrizadas e debitadas sempre da carteira interna UMS, nunca do saldo MWN nem do saldo fiat da MW-Ex.
