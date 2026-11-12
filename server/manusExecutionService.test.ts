@@ -13,6 +13,7 @@ vi.mock("./db", () => dbMock);
 
 import {
   createManusTask,
+  syncAgentCredits,
   syncRunningManusTasks,
 } from "./manusExecutionService";
 
@@ -30,6 +31,21 @@ describe("manusExecutionService — fluxo controlado de execução", () => {
       return 2;
     });
     vi.stubGlobal("fetch", vi.fn());
+  });
+
+
+  it("lê total_credits no nível superior da resposta atual da Manus", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(new Response(JSON.stringify({
+      ok: true,
+      total_credits: 137,
+      max_refresh_credits: 100,
+      refresh_credits: 20,
+      refresh_interval: 3600,
+      request_id: "fixture-request",
+    }), { status: 200 }));
+
+    await expect(syncAgentCredits(7)).resolves.toBe(137);
+    expect(dbMock.updateAgentCredits).toHaveBeenCalledWith(7, 137);
   });
 
   it("cria execução Manus mockada e persiste o ID/status local", async () => {
