@@ -11,8 +11,8 @@
 | 19.1 | Especificar contrato, autoridade e modelo de execução do Oracle Dispatcher | DONE | ChatGPT | Contrato CLI/worker, estados, decisões, permissões, lock, idempotência, falhas e handoff documentados |
 | 19.2 | Implementar worker determinístico de fila e revisão estrutural de ORs | DONE | Manus (sandbox) | Worker funcional em dry-run/escrita por fixtures; valida OR, frontmatter, artefatos e referências; bloqueia índice legado real sem normalização |
 | 19.3 | Implementar atualização atômica do índice, locks e recuperação | DONE | Manus (sandbox) | Patch por spans preserva bytes; anomalias hashadas; lock/manifesto/recovery fail-closed exercitados em fixtures; OR-20261109-0001 pendente de Oracle |
-| 19.4 | Implementar geração condicional de FOR e integração de missão | PROGRESS | Manus (sandbox) | FOR só é produzido quando a cobertura/aceite permite; missões incompletas permanecem abertas com pendências explícitas |
-| 19.5 | Testar o dispatcher com fixtures, ORs válidos/inválidos e cenários de falha | STAGED | — | Testes automatizados reproduzíveis cobrem sucesso, bloqueio, CSV legado, lock, idempotência e ausência de evidência |
+| 19.4 | Implementar geração condicional de FOR e integração de missão | PROGRESS | Manus (sandbox) | FOR só é produzido quando cobertura/aceite permite; missões incompletas permanecem abertas com pendências explícitas |
+| 19.5 | Testar o dispatcher com fixtures, ORs válidos/inválidos e cenários de falha | PROGRESS | Manus (sandbox:CiTUSQ7F4JHT7xPXz6EUQN) | Testes automatizados reproduzíveis cobrem sucesso, bloqueio, CSV legado, lock, idempotência e ausência de evidência |
 | 19.6 | Documentar operação, segurança, handoff e integração futura | STAGED | — | Guia para outro agente executar/retomar; limites e integração SCP/GitHub Actions claramente separados |
 | 19.7 | Revisão cruzada, validação end-to-end e continuidade | STAGED | — | Outro agente reproduz a execução; divergências resolvidas; ORs, índice e backlog atualizados |
 
@@ -67,3 +67,10 @@
 - A atribuição concorrente de `MISSION_0020 / 20.3` a `Agente Mateus` foi preservada; nenhuma alteração foi feita nessa missão.
 - Dependências 19.1–19.3 consultadas; a tarefa 19.4 estava `STAGED`, sem instância atribuída. Skill específica consultada: `skill-governance-oracle` 1.1.0, commit `35ca3757ae5a6a3e602bcabd754c05f7040c5592`; ciclo do repositório consultado: `operational-task-lifecycle` 0.2.0-DRAFT.
 - Escopo: implementar apenas geração condicional e integração de estado; nenhum FOR será criado se cobertura, reviews/aceite ou evidências forem insuficientes. Nenhuma revisão real ou decisão humana será fabricada.
+
+## Assunção 19.5 — Manus (sandbox:CiTUSQ7F4JHT7xPXz6EUQN), 2026-11-12
+
+- Tarefa 19.5 atribuída antes da execução; branch `main`, base `f9a9d4fdf16a191dd197ff01f3ca863962f2d484`, sincronizada com `origin/main`, árvore limpa.
+- A tarefa 19.4 permanece atribuída a `Manus (sandbox)` e não foi duplicada nem alterada.
+- Dependências 19.1–19.4, o blueprint `governance/missions/0019/BLUEPRINT.md`, a skill `skill-governance-oracle` 1.1.0 (ACTIVE) e o ciclo `operational-task-lifecycle` 0.2.0 (DRAFT) foram consultados.
+- Escopo assumido: executar testes reproduzíveis do dispatcher com fixtures válidos/inválidos, bloqueios, CSV legado, lock, idempotência e ausência de evidência; não modificar decisão humana, não executar ação externa e não duplicar trabalho da 19.4.
