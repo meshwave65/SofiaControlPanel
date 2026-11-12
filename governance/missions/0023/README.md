@@ -24,7 +24,7 @@ A MISSION_0021 permanece PROGRESS. A MISSION_0023 não a substitui, não reabre 
 - A UI já foi separada em campos independentes; o RPC mwex_get_wallet retorna balance_ums e balance_mwn no contrato da migration preparada.
 - A migration foi reforçada para validar transferência, reconversão e crédito administrativo como inteiros e adicionar restrições de armazenamento sobre ledger e transações.
 - A migration não foi aplicada ao Supabase de produção. Nenhuma transferência, saldo, dado financeiro ou deployment de produção foi alterado nesta missão.
-- A compilação Vercel da versão UI inicial ficou READY; a compilação da última atualização SQL está sendo acompanhada. A validação visual continua pendente porque o preview anterior exigiu autenticação SSO.
+- O deployment Vercel do commit mais recente d8be351e0967781358bbbad42e51e6e6f497bf87 está READY (preview: https://newsite-oxg7s4yy5-meshwaves-projects.vercel.app/). Isso confirma build do projeto frontend, não valida sintaxe/aplicação da migration SQL nem operação end-to-end. A validação visual continua pendente porque o preview exige autenticação SSO.
 - A PR #24 permanece aberta; nenhum merge foi executado.
 
 ## Como retomar
