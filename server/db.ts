@@ -156,8 +156,10 @@ function toPublicAgent(agent: any) {
 export async function getAgentsByOwnerId(ownerId: number, canViewAll = false) {
   const db = await getDb();
   if (!db) throw new Error("Banco de dados indisponível. Verifique DATABASE_URL no Render.");
-  const rows = await db.select().from(agents)
-    .where(canViewAll ? undefined : eq(agents.ownerId, ownerId));
+  const query = db.select().from(agents);
+  const rows = canViewAll
+    ? await query
+    : await query.where(eq(agents.ownerId, ownerId));
   return rows.map(toPublicAgent);
 }
 export async function getAgentById(id: number) {
@@ -839,7 +841,7 @@ export async function getAllTasks(ownerId: number, canViewAll = false) {
   const db = await getDb();
   if (!db) throw new Error("Banco de dados indisponível. Verifique DATABASE_URL no Render.");
 
-  const rows = await db
+  const query = db
     .select({
       id: tasks.id,
       agentId: tasks.agentId,
@@ -869,9 +871,10 @@ export async function getAllTasks(ownerId: number, canViewAll = false) {
       creatorEmail: users.email,
     })
     .from(tasks)
-    .leftJoin(users, eq(tasks.createdBy, users.id))
-    .where(canViewAll ? undefined : eq(tasks.createdBy, ownerId))
-    .orderBy(desc(tasks.createdAt));
+    .leftJoin(users, eq(tasks.createdBy, users.id));
+  const rows = canViewAll
+    ? await query.orderBy(desc(tasks.createdAt))
+    : await query.where(eq(tasks.createdBy, ownerId)).orderBy(desc(tasks.createdAt));
 
   return rows.map((task) => ({
     ...task,
