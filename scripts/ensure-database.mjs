@@ -58,6 +58,14 @@ try {
     sql.unsafe(dispatchMigration),
   );
 
+  const activityLogMigration = await readFile(
+    new URL("../drizzle/0008_activity_logs_optional_agent.sql", import.meta.url),
+    "utf8",
+  );
+  await runStep("Allow task-level activity logs without an assigned agent", () =>
+    sql.unsafe(activityLogMigration),
+  );
+
   console.log("[Database] Execution columns verified successfully");
   console.log("[Database] Automatic task dispatch trigger verified successfully");
 } catch (error) {
