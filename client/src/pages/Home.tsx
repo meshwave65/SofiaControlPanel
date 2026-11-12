@@ -245,6 +245,16 @@ export default function Home() {
               >
                 {isSubmittingAuth ? "Processando…" : authMode === "login" ? "Entrar" : "Cadastrar"}
               </button>
+              {authMode === "login" && (
+                <div className="text-center">
+                  <Link
+                    href="/recover-password"
+                    className="text-sm font-semibold text-accent underline underline-offset-4 hover:text-foreground"
+                  >
+                    Esqueci minha senha
+                  </Link>
+                </div>
+              )}
             </form>
           </section>
         </main>
