@@ -10,7 +10,9 @@ Não espalhar valores, regras ou referências mutáveis diretamente pelo código
 
 Todo parâmetro que possa variar por ambiente, usuário, operação, política, versão ou decisão de negócio deve possuir uma **fonte canônica única**, explicitamente identificada e controlada.
 
-A regra vale para valores econômicos, limites, taxas, proporções, prazos, TTLs, flags operacionais, endpoints configuráveis, critérios de elegibilidade e demais decisões parametrizáveis. Constantes matemáticas e valores intrínsecos ao protocolo podem permanecer no código quando forem realmente invariáveis; a classificação deve ser explícita, não presumida.
+**Ênfase desta diretriz:** impedir que valores econômicos e regras operacionais variáveis sejam espalhados ou duplicados. Exemplos centrais incluem valor de referência/mercado da UMS e da MWN em moeda fiduciária; taxas e relações de conversão (por exemplo, `x UMS = y MWN`); taxas de compra, venda e intermediação; spreads, limites e demais condições econômicas. Esses valores precisam de origem identificável, atualização controlada, versionamento, vigência e histórico auditável.
+
+O princípio é **centralizar e controlar**, não impor uma tecnologia única de persistência. A escolha do mecanismo deve respeitar a natureza, o ciclo de vida, os requisitos de segurança e a forma de consumo de cada informação. A diretriz também abrange outros parâmetros mutáveis — limites, prazos, TTLs, flags operacionais, endpoints configuráveis e critérios de elegibilidade — sem presumir que todos devam residir no banco de dados. Constantes matemáticas e valores intrínsecos ao protocolo podem permanecer no código quando forem realmente invariáveis; a classificação deve ser explícita, não presumida.
 
 ## 2. Onde armazenar
 
