@@ -31,7 +31,7 @@ import { Link } from "wouter";
 import { login, register, startGoogleLogin } from "@/lib/auth";
 
 export default function Home() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, error: backendAuthError, hasSession } = useAuth();
   const [, setLocation] = useLocation();
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
@@ -39,12 +39,14 @@ export default function Home() {
   const [authError, setAuthError] = useState<string | null>(null);
   const [authMessage, setAuthMessage] = useState<string | null>(null);
   const [isSubmittingAuth, setIsSubmittingAuth] = useState(false);
-  const { data: agents = [] } = trpc.agents.list.useQuery(undefined, {
+  const agentsQuery = trpc.agents.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
-  const { data: tasks = [] } = trpc.tasks.list.useQuery(undefined, {
+  const tasksQuery = trpc.tasks.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
+  const agents = agentsQuery.data ?? [];
+  const tasks = tasksQuery.data ?? [];
   const { data: lookups } = trpc.lookups.listAll.useQuery(undefined, {
     enabled: isAuthenticated,
   });
@@ -122,6 +124,14 @@ export default function Home() {
             </nav>
           </div>
         </header>
+
+        {hasSession && backendAuthError && (
+          <div role="alert" className="mx-auto mt-6 max-w-6xl border-2 border-red-500/40 bg-red-500/5 p-5 text-sm text-red-300">
+            <p className="font-black uppercase tracking-widest">Sessão ativa, mas o painel não conseguiu validar o usuário no backend.</p>
+            <p className="mt-2 font-mono text-xs">{backendAuthError.message}</p>
+            <p className="mt-2 text-xs text-muted-foreground">Saia da conta e entre novamente. Se o erro persistir, esta mensagem identifica a falha de autenticação da API.</p>
+          </div>
+        )}
 
         <main className="mx-auto grid max-w-6xl gap-10 px-6 py-16 sm:px-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:py-24">
           <section>
@@ -259,6 +269,13 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground relative">
+      {(agentsQuery.isError || tasksQuery.isError) && (
+        <div role="alert" className="mx-auto max-w-7xl border-2 border-red-500/40 bg-red-500/5 p-5 text-sm text-red-300">
+          <p className="font-black uppercase tracking-widest">Falha ao carregar dados operacionais</p>
+          {agentsQuery.isError && <p className="mt-2">Agentes: <span className="font-mono text-xs">{agentsQuery.error.message}</span></p>}
+          {tasksQuery.isError && <p className="mt-2">Missões: <span className="font-mono text-xs">{tasksQuery.error.message}</span></p>}
+        </div>
+      )}
       {/* DEPLOY VALIDATION WATERMARK */}
       <div className="fixed top-0 left-0 w-full bg-red-600 text-white text-[10px] font-bold text-center py-1 z-[9999] uppercase tracking-widest animate-pulse pointer-events-none">
         Deploy Verificado: Manus AI - Julho 2026 - Sofia Control Panel v1.2
