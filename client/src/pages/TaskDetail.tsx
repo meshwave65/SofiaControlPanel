@@ -254,6 +254,7 @@ export default function TaskDetail() {
   const operationalReports = messages.filter(m => m.typeId === 2); // OperationalReport type
   const currentStatusName = statuses.find((status) => status.id === task.statusId)?.name.toUpperCase();
   const canStartExecution = (currentStatusName === "STAGED" || currentStatusName === "PROGRESS") && !task.manusTaskId;
+  const canFactorize = task.parentTaskId == null;
 
   return (
     <DashboardLayout>
@@ -315,7 +316,8 @@ export default function TaskDetail() {
                   </Button>
                   <Button
                     onClick={handleFactorize}
-                    disabled={isFactorizing}
+                    disabled={isFactorizing || !canFactorize}
+                    title={!canFactorize ? "A fatoração deve ser feita na missão principal." : undefined}
                     className="bg-accent hover:bg-accent/80 text-foreground"
                   >
                     {isFactorizing ? (
@@ -349,6 +351,30 @@ export default function TaskDetail() {
                   </Button>
                 </CardContent>
               </Card>
+
+              {task.manusStatus === "waiting_for_available_agent" && (
+                <Card className="cad-card mt-4 border-amber-500/50">
+                  <CardContent className="pt-5 text-sm">
+                    <p className="font-semibold text-amber-500">Missão aguardando agente elegível</p>
+                    <p className="mt-2 text-muted-foreground">
+                      A missão permanece em STAGED. A atribuição automática depende de um agente online,
+                      com credencial válida e saldo de créditos confirmado nos últimos 60 segundos.
+                      Nenhuma execução foi enviada à Manus.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+              {task.manusStatus === "waiting_for_pinned_agent" && (
+                <Card className="cad-card mt-4 border-amber-500/50">
+                  <CardContent className="pt-5 text-sm">
+                    <p className="font-semibold text-amber-500">Missão aguardando o agente selecionado</p>
+                    <p className="mt-2 text-muted-foreground">
+                      O agente fixado não está elegível neste momento. A missão permanece em STAGED
+                      e não será transferida automaticamente para outro agente.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* ARC / PGC — avaliação contextual em shadow mode */}
               <Card className="cad-card mt-6 border-accent/30">
