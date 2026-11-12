@@ -245,3 +245,21 @@ describe("SofiaOrchestrator.factorizeTask", () => {
     expect(dbMock.createActivityLog).toHaveBeenCalledTimes(2);
   });
 });
+
+
+describe("SofiaOrchestrator factorization depth", () => {
+  it("does not recursively factorize a task that already has a parent", async () => {
+    const subtask = {
+      id: 6,
+      title: "Análise Estratégica: ASSUMIR MISSIONS MATEUS",
+      description: "[ESTRATÉGICA] Análise detalhada em múltiplas etapas.",
+      parentTaskId: 3,
+    };
+
+    expect(SofiaOrchestrator.shouldFactorize(subtask)).toBe(false);
+    await expect(SofiaOrchestrator.factorizeTask(subtask)).rejects.toThrow(
+      "Esta tarefa já é uma subtarefa. A fatoração deve ser feita na missão principal.",
+    );
+    expect(dbMock.createTask).not.toHaveBeenCalled();
+  });
+});
