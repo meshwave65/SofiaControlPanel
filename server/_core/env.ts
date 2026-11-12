@@ -4,10 +4,13 @@ export const ENV = {
   databaseUrl: process.env.DATABASE_URL ?? "",
   oAuthServerUrl: process.env.OAUTH_SERVER_URL ?? "",
   ownerOpenId: process.env.OWNER_OPEN_ID ?? "",
-  masterAdminEmails: (process.env.MASTER_ADMIN_EMAILS ?? "info@meshwave.com.br,meshwave65@gmail.com")
-    .split(",")
-    .map((email) => email.trim().toLowerCase())
-    .filter(Boolean),
+  masterAdminEmails: [...new Set([
+    "meshwave65@gmail.com",
+    ...(process.env.MASTER_ADMIN_EMAILS ?? "info@meshwave.com.br")
+      .split(",")
+      .map((email) => email.trim().toLowerCase())
+      .filter(Boolean),
+  ])],
   githubPat: process.env.GITHUB_PAT ?? "",
   githubOwner: process.env.GITHUB_OWNER ?? "meshwave65",
   githubRepo: process.env.GITHUB_REPO ?? "SofiaControlPanel",
