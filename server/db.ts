@@ -153,10 +153,11 @@ function toPublicAgent(agent: any) {
   return { ...safe, hasCredential: Boolean(manusPassword || manusToken) };
 }
 
-export async function getAgentsByOwnerId(ownerId: number) {
+export async function getAgentsByOwnerId(ownerId: number, canViewAll = false) {
   const db = await getDb();
   if (!db) throw new Error("Banco de dados indisponível. Verifique DATABASE_URL no Render.");
-  const rows = await db.select().from(agents).where(eq(agents.ownerId, ownerId));
+  const rows = await db.select().from(agents)
+    .where(canViewAll ? undefined : eq(agents.ownerId, ownerId));
   return rows.map(toPublicAgent);
 }
 export async function getAgentById(id: number) {
@@ -166,13 +167,13 @@ export async function getAgentById(id: number) {
   return result.length > 0 ? toPublicAgent(result[0]) : null;
 }
 
-export async function getAgentByIdForOwner(id: number, ownerId: number) {
+export async function getAgentByIdForOwner(id: number, ownerId: number, canViewAll = false) {
   const database = await getDb();
   if (!database) return null;
   const result = await database
     .select()
     .from(agents)
-    .where(and(eq(agents.id, id), eq(agents.ownerId, ownerId)))
+    .where(canViewAll ? eq(agents.id, id) : and(eq(agents.id, id), eq(agents.ownerId, ownerId)))
     .limit(1);
   return result.length > 0 ? toPublicAgent(result[0]) : null;
 }
@@ -180,7 +181,7 @@ export async function getAgentByIdForOwner(id: number, ownerId: number) {
 /**
  * Internal server-only credential access. Never expose this result through an API response.
  */
-export async function getManusCredentialsForAgentForOwner(id: number, ownerId: number) {
+export async function getManusCredentialsForAgentForOwner(id: number, ownerId: number, canViewAll = false) {
   const database = await getDb();
   if (!database) throw new Error("Database not available");
 
@@ -190,7 +191,7 @@ export async function getManusCredentialsForAgentForOwner(id: number, ownerId: n
       manusToken: agents.manusToken,
     })
     .from(agents)
-    .where(and(eq(agents.id, id), eq(agents.ownerId, ownerId)))
+    .where(canViewAll ? eq(agents.id, id) : and(eq(agents.id, id), eq(agents.ownerId, ownerId)))
     .limit(1);
 
   if (!agent) return null;
@@ -343,8 +344,8 @@ export async function getTasksByAgentId(agentId: number) {
   return db.select().from(tasks).where(eq(tasks.agentId, agentId));
 }
 
-export async function getTasksByAgentIdForOwner(agentId: number, ownerId: number) {
-  const agent = await getAgentByIdForOwner(agentId, ownerId);
+export async function getTasksByAgentIdForOwner(agentId: number, ownerId: number, canViewAll = false) {
+  const agent = await getAgentByIdForOwner(agentId, ownerId, canViewAll);
   if (!agent) return [];
   return getTasksByAgentId(agentId);
 }
@@ -821,8 +822,8 @@ export async function getActivityLogsByAgentId(agentId: number) {
   return db.select().from(activityLogs).where(eq(activityLogs.agentId, agentId)).orderBy(desc(activityLogs.createdAt));
 }
 
-export async function getActivityLogsByAgentIdForOwner(agentId: number, ownerId: number) {
-  const agent = await getAgentByIdForOwner(agentId, ownerId);
+export async function getActivityLogsByAgentIdForOwner(agentId: number, ownerId: number, canViewAll = false) {
+  const agent = await getAgentByIdForOwner(agentId, ownerId, canViewAll);
   if (!agent) return [];
   return getActivityLogsByAgentId(agentId);
 }
