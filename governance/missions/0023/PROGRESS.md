@@ -25,7 +25,7 @@ Missão criada como frente corretiva complementar à MISSION_0021. O objetivo é
 | 23.2 | PROGRESS | UI alterada na PR #24; campos independentes, saldos contextualizados e transferência inteira limitada ao saldo. |
 | 23.3 | PROGRESS | Migration na PR #24 reforçada com validações inteiras e constraints de armazenamento; não aplicada em produção. |
 | 23.4 | PROGRESS | Extrato MW-Ex e carteira integrada incluem trilha MWN; revisão visual ainda pendente. |
-| 23.5 | STAGED | Aguardando build final, testes e validação visual/autenticada. |
+| 23.5 | PROGRESS | Deployment Vercel do commit mais recente READY; testes adicionais e validação visual/autenticada pendentes por SSO. OR-20261112-0067. |
 | 23.6 | STAGED — GATE HUMANO | Nenhuma autorização de merge, migration ou deploy de produção foi concedida. |
 
 ## Artefatos de implementação
@@ -40,11 +40,11 @@ Missão criada como frente corretiva complementar à MISSION_0021. O objetivo é
 
 ## Bloqueios e limites atuais
 
-- A compilação Vercel do commit inicial da UI foi READY; o estado do deployment gerado pelo commit SQL mais recente precisa ser confirmado.
+- O deployment Vercel do commit mais recente d8be351e0967781358bbbad42e51e6e6f497bf87 está READY. Isso valida o build frontend, não a migration SQL nem o fluxo autenticado.
 - O preview visual anterior foi bloqueado por Vercel SSO; não houve autenticação nem alteração de proteção.
 - Migration ainda não aplicada; produção não recebeu mudanças.
 - Nenhuma transferência real ou ajuste de saldo foi executado durante a correção.
 
 ## Próximo passo
 
-Concluir as tarefas 23.2–23.4, confirmar build e testes, obter validação visual/autenticada em ambiente seguro e somente então apresentar o gate de rollout. A tarefa 23.6 continua bloqueada por autorização explícita.
+Concluir testes de regressão para frações/limites/saldo, obter validação visual/autenticada em ambiente seguro e revisar a migration SQL sem aplicá-la em produção. Depois, apresentar o gate de rollout. A tarefa 23.6 continua bloqueada por autorização explícita.
