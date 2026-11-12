@@ -48,3 +48,8 @@ A tarefa 21.4 foi concluída em produção como MVP custodial, conforme OR-20261
 - governance/operational_reports/OR-20261110-0044.md
 - governance/operational_reports/OR-20261110-0046.md
 - `SOURCE_CHECKPOINT.json` no repositório espelho (origem, versões e hashes dos artefatos)
+
+
+## Missão corretiva relacionada — MISSION_0023 (2026-11-12)
+
+A ocorrência de segregação UMS/MWN e a regra de indivisibilidade MWN foram isoladas na MISSION_0023 — Integridade Operacional e Segregação de Ativos da MW-Ex. Ela complementa esta missão, sem substituí-la nem alterar o estado das tarefas 21.5, 21.7 ou 21.8. A MISSION_0023 possui Blueprint, README, quadro, progresso e ORs próprios. A tarefa 21.7 continua PROGRESS; sua validação deverá considerar os resultados da MISSION_0023. Rollout de produção continua dependente de autorização explícita.
