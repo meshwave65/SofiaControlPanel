@@ -195,7 +195,7 @@ A escolha define a prioridade de consumo, não uma conversão direta. O sistema 
 - MWN é inteiro e não admite frações.
 - O truncamento para baixo e a exibição sem casas decimais aplicam-se somente à apresentação na interface; nunca modificam o ledger.
 - UMS mantém internamente toda a precisão contábil existente, mesmo que a UI o apresente sem casas decimais.
-- A relação de referência atual é 1.000 UMS = 1 MWN. Deve ser configurável e versionada; cada transação guarda a versão aplicada, e alterações futuras não reinterpretam o histórico.
+- A relação de conversão é definida pela chave `UMS_PER_MWN`, mantida na fonte canônica versionada. Cada transação guarda o ID/versão e o valor aplicado; alterações futuras não reinterpretam o histórico.
 - Conversões para MWN inteiro não podem descartar resíduos UMS. A regra exata para conversão parcial e manutenção do resíduo deve ser formalizada antes de ativar a operação.
 - Taxas atuais de corretagem/administrativas são zero. Se criadas, devem ser cobradas em UMS na carteira interna, nunca deduzidas do saldo MWN ou fiat da MW-Ex.
 
@@ -207,3 +207,7 @@ A escolha define a prioridade de consumo, não uma conversão direta. O sistema 
 4. Saldos UMS, MWN e fiat permanecem contabilmente segregados; a correlação entre eles é feita por operações/eventos auditáveis.
 5. A aquisição de UMS com fiat não autoriza conversão de UMS de volta para fiat.
 6. Nenhuma integração externa, depósito/saque, custódia ou execução real é autorizada por este documento; requer desenho, controles, conformidade e aprovação próprios.
+
+## Governança de configuração
+
+Aplicam-se a [Diretriz de arquitetura — Configuração e governança de parâmetros](../../CONFIGURATION_AND_PARAMETER_GOVERNANCE.md) e o [Registro canônico de parâmetros](../../parameters/README.md). Nenhuma implementação pode replicar valores mutáveis; operações devem persistir o ID/versão do parâmetro aplicado.
