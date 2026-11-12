@@ -149,4 +149,42 @@ describe("SofiaOrchestrator.startTask", () => {
     expect(result).toMatchObject({ started: false, executionStarted: false });
     expect(manusMock.createManusTask).not.toHaveBeenCalled();
   });
+
+  it("keeps the mission staged and records an explicit wait when no agent is eligible", async () => {
+    dbMock.getTaskById
+      .mockResolvedValueOnce(stagedTask)
+      .mockResolvedValueOnce({ ...stagedTask, manusStatus: "waiting_for_available_agent" });
+    dbMock.claimStagedTaskWithAvailableAgent.mockResolvedValueOnce(null);
+
+    const result = await SofiaOrchestrator.startTask(30);
+
+    expect(result).toMatchObject({
+      started: false,
+      executionStarted: false,
+      waitingForAgent: true,
+      task: { manusStatus: "waiting_for_available_agent" },
+    });
+    expect(dbMock.updateTaskExecution).toHaveBeenCalledWith(30, {
+      manusStatus: "waiting_for_available_agent",
+    });
+    expect(manusMock.createManusTask).not.toHaveBeenCalled();
+  });
+
+  it("persists dispatch_failed/FAIL and an activity event when the external adapter errors", async () => {
+    dbMock.getTaskById.mockResolvedValueOnce(stagedTask);
+    dbMock.claimStagedTaskWithAvailableAgent.mockResolvedValueOnce(claimedTask);
+    manusMock.createManusTask.mockRejectedValueOnce(new Error("fixture Manus timeout"));
+
+    await expect(SofiaOrchestrator.startTask(30)).rejects.toThrow("fixture Manus timeout");
+
+    expect(dbMock.updateTaskExecution).toHaveBeenCalledWith(30, expect.objectContaining({
+      manusStatus: "dispatch_failed",
+      completedAt: expect.any(Date),
+    }));
+    expect(dbMock.updateTaskStatus).toHaveBeenCalledWith(30, 5);
+    expect(dbMock.createActivityLog).toHaveBeenCalledWith(expect.objectContaining({
+      taskId: 30,
+      details: "fixture Manus timeout",
+    }));
+  });
 });
