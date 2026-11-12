@@ -145,3 +145,8 @@
 - `npm run test:mwex` passou com 8 testes do serviço e os testes anteriores; `npm run build:mwex` passou.
 - A tarefa 21.4 permanece `PROGRESS`: o serviço é evidência operacional sandbox, não backend de produto. Supabase/Postgres, RLS, autenticação MeshWalker real, concorrência multiprocesso/máquina e rollback distribuído permanecem gates.
 - OR: `OR-20261110-0045`.
+
+
+## Frente corretiva vinculada — MISSION_0023
+
+A MISSION_0023 foi criada para isolar a correção de segregação de ativos, indivisibilidade MWN e auditabilidade dos extratos. Ela complementa os critérios da tarefa 21.7, mas não a encerra automaticamente. Consultar governance/missions/0023/BLUEPRINT.md e governance/missions/0023/TASKS.md. O status da tarefa 21.7 permanece PROGRESS até validação documentada.
