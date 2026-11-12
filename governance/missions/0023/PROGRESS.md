@@ -22,9 +22,9 @@ Missão criada como frente corretiva complementar à MISSION_0021. O objetivo é
 | Tarefa | Estado | Evidência/observação |
 |---|---|---|
 | 23.1 | DONE | Auditoria contábil e especificação dos invariantes concluídas; OR-20261112-0066. |
-| 23.2 | PROGRESS | UI alterada na PR #24; campos independentes, saldos contextualizados e transferência inteira limitada ao saldo. |
-| 23.3 | PROGRESS | Migration na PR #24 reforçada com validações inteiras e constraints de armazenamento; não aplicada em produção. |
-| 23.4 | PROGRESS | Extrato MW-Ex e carteira integrada incluem trilha MWN; revisão visual ainda pendente. |
+| 23.2 | PROGRESS | UI alterada na PR #24; campos independentes, saldos contextualizados e transferência inteira limitada ao saldo. OR parcial: OR-20261112-0068. |
+| 23.3 | PROGRESS | Migration na PR #24 reforçada com validações inteiras e constraints de armazenamento; não aplicada em produção. OR parcial: OR-20261112-0068. |
+| 23.4 | PROGRESS | Extrato MW-Ex e carteira integrada incluem trilha MWN; revisão visual ainda pendente. OR parcial: OR-20261112-0068. |
 | 23.5 | PROGRESS | Deployment Vercel do commit mais recente READY; testes adicionais e validação visual/autenticada pendentes por SSO. OR-20261112-0067. |
 | 23.6 | STAGED — GATE HUMANO | Nenhuma autorização de merge, migration ou deploy de produção foi concedida. |
 
