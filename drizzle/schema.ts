@@ -221,7 +221,7 @@ export const activityLogs = sofia.table(
   "activityLogs",
   {
     id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
-    agentId: integer("agentId").notNull(),
+    agentId: integer("agentId"),
     taskId: integer("taskId"),
     eventTypeId: integer("eventTypeId").notNull(),
     details: text("details"),
