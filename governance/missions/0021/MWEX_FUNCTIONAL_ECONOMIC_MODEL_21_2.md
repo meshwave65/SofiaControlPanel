@@ -164,3 +164,43 @@ O agente não deve criar saldos reais, chamar RPCs de produção, alterar schema
 ## 9. Critério de conclusão da 21.2
 
 A tarefa é considerada concluída documentalmente quando este modelo, os fluxos, gates, precisão, Genesis e decisões pendentes estão versionados; o quadro e o OR apontam para este arquivo; e outra instância consegue iniciar a 21.3 sem reinterpretar as regras.
+
+## 10. Aditamento — decisões econômicas e nomenclatura de 2026-11-11
+
+Este aditamento prevalece sobre trechos anteriores deste documento que sejam incompatíveis.
+
+### 10.1 Nomenclatura
+
+A denominação atual e única é **MWN — MeshWave Network**. **MWC** é designação histórica/legada de “MeshWave Cripto”, abandonada porque já existe outro token em circulação com essa designação. Nomes técnicos existentes com o prefixo/símbolo mwc (tabelas, campos, variáveis, módulos, serviços e mwc-bm51.onrender.com) permanecem identificadores legados até eventual migração deliberada. Não representam um segundo ativo. Documentação e nomenclatura conceitual novas devem usar MWN; não renomear estruturas técnicas sem análise de impacto e aprovação.
+
+### 10.2 Aquisição de UMS e proibição de conversão direta
+
+O mecanismo existente de aquisição de UMS com moeda fiduciária permanece válido. Isso é distinto de converter UMS de volta para fiat. São proibidas:
+- conversão direta UMS→fiat;
+- conversão direta UMS→qualquer token/ativo externo;
+- qualquer atalho que elimine MWN e fiat da rota de aquisição de ativo externo.
+
+A rota obrigatória para ativo externo é **UMS→MWN→BRL/USD/EUR→ativo/token externo**. A ponte UMS→MWN é interna; a venda de MWN gera moeda fiduciária; essa moeda fiduciária liquida a compra externa.
+
+### 10.3 Seleção da origem dos recursos
+
+A ordem deve oferecer quatro modos escolhidos pelo usuário:
+- **UMS-only:** usa UMS, convertendo-o em MWN; para ativo externo, segue MWN→fiat→ativo.
+- **Fiat-only:** usa somente saldo fiat.
+- **Híbrido fiat:** consome fiat primeiro e complementa com UMS, convertido por UMS→MWN→fiat.
+- **Híbrido UMS:** consome UMS primeiro e complementa com fiat; a parcela UMS percorre UMS→MWN→fiat.
+
+A prioridade de consumo não altera a rota de conversão. Não existe aresta direta UMS↔fiat nem UMS↔ativo externo.
+
+### 10.4 Precisão, interface e taxa de conversão
+
+- MWN é inteiro, sem unidades fracionárias.
+- Quantidades exibidas na interface são apresentadas sem casas decimais, por truncamento para baixo. Isso é apenas formatação visual.
+- O ledger e a carteira UMS preservam a precisão integral; a interface não pode alterar o saldo contábil.
+- A referência vigente é **1.000 UMS = 1 MWN**, sujeita à revisão após estudo da emissão total de UMS e da valoração dos serviços. A taxa deve ser centralizada, configurável e versionada; transações históricas mantêm a versão aplicada.
+- Nenhum resíduo UMS pode ser perdido silenciosamente quando a conversão exigir MWN inteiro. A política operacional de conversão parcial/resíduo ainda precisa ser especificada e aprovada.
+- Taxas atuais de corretagem/administrativas são zero. Eventuais taxas futuras serão debitadas exclusivamente em UMS na carteira interna, nunca em MWN ou fiat.
+
+### 10.5 Escopo e autorização
+
+Este modelo econômico prevê suporte a saldos fiat e a ordens de ativos externos por meio da rota acima, mas não afirma que depósito/saque fiat, meios de pagamento, custódia, integração de contraparte ou execução externa estejam implementados. Essas capacidades exigem especificação técnica, operacional e de conformidade, além de autorização explícita, antes de qualquer transação real.
