@@ -188,3 +188,60 @@ describe("SofiaOrchestrator.startTask", () => {
     }));
   });
 });
+
+describe("SofiaOrchestrator.factorizeTask", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    dbMock.getTasksByParentId.mockResolvedValue([]);
+    dbMock.getTaskStatusIdByName.mockResolvedValue(1);
+    dbMock.getOrCreateActivityEventType.mockResolvedValue({ id: 5 });
+    dbMock.createActivityLog.mockResolvedValue(undefined);
+  });
+
+  it("factorizes an unassigned task and records activity with a null agent", async () => {
+    dbMock.createTask
+      .mockResolvedValueOnce([{ id: 81 }])
+      .mockResolvedValueOnce([{ id: 82 }])
+      .mockResolvedValueOnce([{ id: 83 }]);
+
+    const ids = await SofiaOrchestrator.factorizeTask({
+      id: 7,
+      title: "PoUW-01",
+      description: "Análise detalhada em múltiplas etapas.",
+      createdBy: 152,
+      agentId: null,
+      agentPinned: false,
+      priorityId: 1,
+    });
+
+    expect(ids).toEqual([81, 82, 83]);
+    expect(dbMock.createActivityLog).toHaveBeenCalledTimes(3);
+    expect(dbMock.createActivityLog).toHaveBeenCalledWith(expect.objectContaining({
+      agentId: null,
+      taskId: 7,
+    }));
+  });
+
+  it("resumes a partial factorization without duplicating existing subtasks", async () => {
+    dbMock.getTasksByParentId.mockResolvedValueOnce([
+      { id: 8, title: "Análise Estrutural: PoUW-01" },
+    ]);
+    dbMock.createTask
+      .mockResolvedValueOnce([{ id: 82 }])
+      .mockResolvedValueOnce([{ id: 83 }]);
+
+    const ids = await SofiaOrchestrator.factorizeTask({
+      id: 7,
+      title: "PoUW-01",
+      description: "Análise detalhada em múltiplas etapas.",
+      createdBy: 152,
+      agentId: null,
+      agentPinned: false,
+      priorityId: 1,
+    });
+
+    expect(ids).toEqual([8, 82, 83]);
+    expect(dbMock.createTask).toHaveBeenCalledTimes(2);
+    expect(dbMock.createActivityLog).toHaveBeenCalledTimes(2);
+  });
+});
