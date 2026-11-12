@@ -38,7 +38,7 @@ A autenticação do site pode ser reutilizada se apropriado; a autorização e a
 - Implementar carteira/ledger MW-Ex segregado e ponte explícita para conversão/transferência, idempotente e com trilha de auditoria.
 - Permitir manter e transferir MWN dentro da exchange e converter MWN em UMS interno conforme o modelo aprovado.
 - Integrar feed externo read-only para cotações/indicadores selecionados; não executar ordens em terceiros.
-- Construir uma UI responsiva e minimalista com saldo MWN, UMS potencial, valor de mercado verificável, fonte/horário e as ações aprovadas.
+- Construir uma UI responsiva, mobile-first e profissional, com saldo MWN inteiro, UMS potencial, valor de mercado verificável, fonte/horário, gráficos e indicadores de mercado somente quando houver dados reais. A especificação visual e funcional está em [MWEX_UI_PRODUCT_SPEC_21_4.md](./MWEX_UI_PRODUCT_SPEC_21_4.md).
 - Testar autorização, isolamento, invariantes contábeis, precisão, concorrência, falhas, cotações atrasadas/ausentes e compatibilidade dos fluxos de carteira.
 - Preparar plano reversível de retirar a aquisição normal de UMS e tratar a conversão Genesis pós-auditoria; não executar esses cutovers sem gates explícitos.
 
@@ -63,7 +63,7 @@ A autenticação do site pode ser reutilizada se apropriado; a autorização e a
 
 ## 7. Decomposição
 
-O quadro MISSION_0021 - TASKS - STAGED.md organiza oito unidades. As tarefas 21.1 e 21.2 antecedem mudanças de banco, ledger ou UI que assumam política econômica. Cada tarefa será atribuída antes de execução e exigirá seu próprio Operational Report. A MISSION_0020 está PROGRESS; a MISSION_0021 permanece STAGED até seleção compatível com governança, prioridade e locks.
+O plano de trabalho da MISSION_0021 deve ordenar a reconciliação do estado real e do modelo econômico antes de alterações em banco, ledger ou operações financeiras. A missão está em PROGRESS. A prioridade operacional foi atualizada em 2026-11-11: concluir primeiro a frente MW-Ex (MISSION_0021) e, em seguida, retomar a restauração geral do SCP (MISSION_0020). Cada lote de implementação deve ter escopo delimitado, evidência de teste e Operational Report.
 
 ## 8. Gates
 
@@ -78,7 +78,7 @@ O quadro MISSION_0021 - TASKS - STAGED.md organiza oito unidades. As tarefas 21.
 
 - Matriz do estado atual e requisito→implementação→evidência.
 - Modelo funcional, decisão de preço/contraparte, fluxo de conversão e mapa de dados/permissões.
-- MW-Ex privada com ledger próprio, ponte explícita, transações seguras e UI minimalista, conforme gates aprovados.
+- MW-Ex privada com ledger próprio, ponte explícita, transações seguras e UI profissional mobile-first, conforme gates aprovados e a especificação [MWEX_UI_PRODUCT_SPEC_21_4.md](./MWEX_UI_PRODUCT_SPEC_21_4.md).
 - Feed externo read-only com proveniência e manejo de dado ausente/atrasado.
 - Testes repetíveis para autorização, isolamento, idempotência, concorrência, precisão, reconciliação e falhas.
 - Plano reversível para a transição de UMS e pós-auditoria Genesis, sem alegar auditoria inexistente.
@@ -143,3 +143,20 @@ A prioridade define apenas qual saldo é consumido primeiro; não cria conversã
 ## Governança de parâmetros
 
 Esta missão obedece à [Diretriz de arquitetura — Configuração e governança de parâmetros](../../CONFIGURATION_AND_PARAMETER_GOVERNANCE.md) e à [Governança de parâmetros econômicos e dados de mercado](../../ECONOMIC_PARAMETER_GOVERNANCE.md). A chave `UMS_PER_MWN` e sua fonte canônica estão registradas no [Registro canônico de parâmetros](../../parameters/README.md). Cotações fiduciárias, preços executáveis, spreads, taxas e limites devem respeitar a classificação e os requisitos de proveniência definidos na norma econômica. Valores mutáveis não devem ser copiados para código ou documentação operacional.
+
+
+## 12. Atualização de prioridade e evolução da interface — 2026-11-11
+
+O responsável confirmou que a ordem de execução do plano geral deve priorizar **MISSION_0021 antes da MISSION_0020**. A MW-Ex será a primeira frente de trabalho; a restauração geral do SCP será retomada em seguida, sem ser cancelada.
+
+A interface atual em `newsite/src/pages/MwEx.jsx` foi inspecionada. A formatação existente ainda permite até seis casas decimais nas quantidades apresentadas. A regra de quantidade inteira MWN, já registrada na seção 11.4, portanto ainda precisa ser aplicada e validada no frontend.
+
+A evolução visual solicitada pelo responsável — referência de carteira/exchange profissional, tema escuro azul, hierarquia de carteira, cotações externas, gráficos e indicadores de alta/queda/estabilidade — foi formalizada em [MWEX_UI_PRODUCT_SPEC_21_4.md](./MWEX_UI_PRODUCT_SPEC_21_4.md).
+
+A implementação será faseada:
+1. estrutura visual profissional e correção da apresentação de quantidades MWN;
+2. integração de fontes de mercado externas read-only, após seleção e validação dos provedores;
+3. gráficos históricos e indicadores derivados exclusivamente de séries reais;
+4. testes de regressão, responsividade, acessibilidade e precisão.
+
+Não usar preços, variações ou séries fictícias para preencher a interface. A cotação MWN só poderá ser apresentada como cotação de mercado se existir fonte verificável. A UMS não possui cotação fiduciária independente; seu valor fiduciário é derivado conforme a norma econômica. Nenhuma alteração visual pode modificar saldos, precisão contábil ou operações do ledger.
