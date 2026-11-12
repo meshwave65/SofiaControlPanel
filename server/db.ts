@@ -1,10 +1,11 @@
 import { eq, and, desc, isNull, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { InsertUser, InsertAgent, users, agents, tasks, messages, activityLogs, contextReports, taskStatuses, taskPriorities, messageTypes, activityEventTypes, arcPolicies, arcAssessments, arcEvidence } from "../drizzle/schema";
+import { InsertUser, InsertAgent, users, agents, tasks, messages, activityLogs, contextReports, taskStatuses, taskPriorities, messageTypes, activityEventTypes, arcPolicies, arcAssessments, arcEvidence, arcAccessEvents, arcDeviceProfiles, arcConfidenceSnapshots } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { decryptCredential, encryptCredential } from './credentials';
 import { evaluateArcShadow } from './arcEvaluator';
+import { scoreConfidence } from './confidenceScorer';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 let _dbPromise: Promise<ReturnType<typeof drizzle> | null> | null = null;
@@ -395,6 +396,21 @@ export async function evaluateTaskInShadow(taskId: number) {
   const agentTasks = task.agentId ? await getTasksByAgentId(task.agentId) : [];
   const activity = task.agentId ? await getActivityLogsByAgentId(task.agentId) : [];
   const completedTasks = agentTasks.filter((item) => item.completedAt !== null).length;
+  const observedAt = new Date();
+  const heartbeatRecent = Boolean(agent?.lastHeartbeat && observedAt.getTime() - agent.lastHeartbeat.getTime() >= 0 && observedAt.getTime() - agent.lastHeartbeat.getTime() <= 5 * 60 * 1000);
+  const assignmentMatch = Boolean(agent && task.agentId === agent.id);
+  const profile = agent
+    ? (await database.select().from(arcDeviceProfiles).where(eq(arcDeviceProfiles.agentId, agent.id)).limit(1))[0]
+    : undefined;
+  const confidence = scoreConfidence({
+    profileKnown: Boolean(profile?.known),
+    heartbeatRecent,
+    agentOnline: agent?.status === "online",
+    assignmentMatch,
+    successRate: agentTasks.length > 0 ? completedTasks / agentTasks.length : 0,
+    activityEvents: activity.length,
+    connectionStatus: agent?.connectionStatus ?? null,
+  });
   const assessment = evaluateArcShadow({
     taskId,
     taskAgentId: task.agentId,
@@ -407,7 +423,7 @@ export async function evaluateTaskInShadow(taskId: number) {
     allowThreshold: Number(policy.allowThreshold),
     reviewThreshold: Number(policy.reviewThreshold),
   });
-  return createArcAssessment({
+  const created = await createArcAssessment({
     taskId: assessment.taskId,
     agentId: assessment.agentId,
     policyId: policy.id,
@@ -423,6 +439,61 @@ export async function evaluateTaskInShadow(taskId: number) {
       likelihoodRatio: item.likelihoodRatio.toFixed(6),
     })),
   });
+  const [event] = await database.insert(arcAccessEvents).values({
+    userId: task.createdBy,
+    agentId: agent?.id ?? null,
+    taskId: task.id,
+    source: "task_detail",
+    observedAt,
+    agentStatus: agent?.status ?? null,
+    agentVersion: agent?.version ?? null,
+    connectionStatus: agent?.connectionStatus ?? null,
+    heartbeatRecent,
+    activityCount: activity.length,
+    completedTasks,
+    observedTasks: agentTasks.length,
+    metadata: { anomalies: confidence.anomalies },
+  }).returning({ id: arcAccessEvents.id });
+  if (agent?.id) {
+    if (profile) {
+      await database.update(arcDeviceProfiles).set({
+        known: true,
+        lastSeenAt: observedAt,
+        observationCount: sql`${arcDeviceProfiles.observationCount} + 1`,
+        lastVersion: agent.version,
+        lastConnectionStatus: agent.connectionStatus,
+        updatedAt: observedAt,
+      }).where(eq(arcDeviceProfiles.id, profile.id));
+    } else {
+      await database.insert(arcDeviceProfiles).values({
+        ownerId: task.createdBy,
+        agentId: agent.id,
+        known: false,
+        firstSeenAt: observedAt,
+        lastSeenAt: observedAt,
+        observationCount: 1,
+        lastVersion: agent.version,
+        lastConnectionStatus: agent.connectionStatus,
+        createdAt: observedAt,
+        updatedAt: observedAt,
+      });
+    }
+  }
+  await database.insert(arcConfidenceSnapshots).values({
+    userId: task.createdBy,
+    agentId: agent?.id ?? null,
+    taskId: task.id,
+    assessmentId: created.id,
+    accessEventId: event?.id ?? null,
+    score: confidence.score.toFixed(2),
+    posterior: assessment.posterior.toFixed(6),
+    decision: assessment.decision,
+    anomalyCount: confidence.anomalyCount,
+    trigger: "assessment",
+    signals: confidence.signals,
+    observedAt,
+  });
+  return created;
 }
 
 /**
@@ -688,6 +759,16 @@ export async function listArcAssessmentsByTask(taskId: number, ownerId: number, 
     result.push({ ...assessment, evidence });
   }
   return result;
+}
+
+export async function listArcConfidenceSnapshotsByTask(taskId: number, ownerId: number, isAdmin: boolean, limit: number) {
+  if (!(await canAccessTask(taskId, ownerId, isAdmin))) return [];
+  const database = await getDb();
+  if (!database) return [];
+  return database.select().from(arcConfidenceSnapshots)
+    .where(eq(arcConfidenceSnapshots.taskId, taskId))
+    .orderBy(desc(arcConfidenceSnapshots.observedAt))
+    .limit(limit);
 }
 
 // ============================================

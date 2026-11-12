@@ -48,11 +48,15 @@ export default function TaskDetail() {
     { taskId },
     { enabled: canLoadTask && Boolean(taskQuery.data), retry: false },
   );
+  const arcConfidenceQuery = trpc.arc.listConfidenceSnapshots.useQuery(
+    { taskId, limit: 30 },
+    { enabled: canLoadTask && Boolean(taskQuery.data), retry: false },
+  );
   const evaluateArcMutation = trpc.arc.evaluateTask.useMutation({
-    onSuccess: () => arcAssessmentQuery.refetch(),
+    onSuccess: () => Promise.all([arcAssessmentQuery.refetch(), arcConfidenceQuery.refetch()]),
   });
   const ensureArcAssessmentMutation = trpc.arc.ensureAssessment.useMutation({
-    onSuccess: () => arcAssessmentQuery.refetch(),
+    onSuccess: () => Promise.all([arcAssessmentQuery.refetch(), arcConfidenceQuery.refetch()]),
     onError: (error) => toast.error(error.message || "Não foi possível gerar o relatório ARC."),
   });
   const autoEnsureArcTaskRef = useRef<number | null>(null);
@@ -396,6 +400,32 @@ export default function TaskDetail() {
                             {(Number(arcAssessmentQuery.data.prior) * 100).toFixed(1)}%
                           </p>
                         </div>
+                      </div>
+
+                      <div className="rounded-lg border p-4">
+                        <div className="mb-3 flex items-center justify-between gap-3">
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Ranking de confiança</p>
+                            <p className="mt-1 text-sm text-muted-foreground">Sinal operacional agregado, sem bloqueio de acesso.</p>
+                          </div>
+                          {arcConfidenceQuery.data?.[0] && (
+                            <span className="text-2xl font-bold text-accent">{Number(arcConfidenceQuery.data[0].score).toFixed(0)}<span className="text-sm font-normal text-muted-foreground">/100</span></span>
+                          )}
+                        </div>
+                        {arcConfidenceQuery.data && arcConfidenceQuery.data.length > 0 ? (
+                          <div className="flex h-20 items-end gap-1" aria-label="Histórico de confiança">
+                            {[...arcConfidenceQuery.data].reverse().map((snapshot) => {
+                              const score = Math.max(0, Math.min(100, Number(snapshot.score)));
+                              return (
+                                <div key={snapshot.id} className="group flex h-full flex-1 flex-col justify-end" title={`${score.toFixed(0)}/100 — ${new Date(snapshot.observedAt).toLocaleString()}`}>
+                                  <div className="w-full rounded-t bg-accent/80 transition-all group-hover:bg-accent" style={{ height: `${Math.max(score, 4)}%` }} />
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">O primeiro snapshot será criado ao gerar uma nova avaliação.</p>
+                        )}
                       </div>
 
                       <div className="rounded-lg bg-muted/40 p-3 text-sm text-muted-foreground">

@@ -554,6 +554,12 @@ export const appRouter = router({
           evidence: assessment.evidence.map(({ metadata: _metadata, ...item }) => item),
         }));
       }),
+
+    listConfidenceSnapshots: protectedProcedure
+      .input(z.object({ taskId: z.number().int().positive(), limit: z.number().int().min(1).max(100).default(30) }))
+      .query(async ({ input, ctx }) => {
+        return db.listArcConfidenceSnapshotsByTask(input.taskId, ctx.user.id, ctx.user.role === "admin", input.limit);
+      }),
   }),
 
   // ============================================
