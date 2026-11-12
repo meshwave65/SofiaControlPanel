@@ -5,6 +5,7 @@ import { COOKIE_NAME } from "@shared/const";
 import type { User } from "../../drizzle/schema";
 import * as db from "../db";
 import { sdk } from "./sdk";
+import { ENV } from "./env";
 
 export type TrpcContext = {
   req: CreateExpressContextOptions["req"];
@@ -67,7 +68,9 @@ async function authenticateSupabaseToken(accessToken: string): Promise<User> {
       "Authenticated Supabase user could not be loaded from the database"
     );
   }
-  return user;
+  const normalizedEmail = user.email?.trim().toLowerCase();
+  const isMasterAdmin = Boolean(normalizedEmail && ENV.masterAdminEmails.includes(normalizedEmail));
+  return isMasterAdmin ? { ...user, role: "admin" } : user;
 }
 
 export async function createContext(
