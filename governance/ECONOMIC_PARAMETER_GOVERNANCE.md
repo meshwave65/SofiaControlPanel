@@ -32,11 +32,17 @@ Essa relação:
 
 A designação atual do ativo é **MWN — MeshWave Network**. **MWC** é somente uma designação histórica/legada; não deve ser usada como nome de ativo em novos materiais, parâmetros ou interfaces.
 
-### 2.2 Valores fiduciários e cotações de referência
+### 2.2 Cotação fiduciária da MWN e valoração fiduciária derivada da UMS
 
-São dados que expressam o valor de UMS ou MWN em uma moeda fiduciária, como BRL, USD ou EUR, conforme moedas efetivamente suportadas e aprovadas.
+No modelo econômico vigente, **a UMS não possui cotação fiduciária própria e independente**. Seu valor fiduciário é inferido matematicamente a partir do preço de mercado observado para a MWN e da relação interna `UMS_PER_MWN` válida no instante da aferição.
 
-Esses dados não são equivalentes à relação interna `UMS_PER_MWN`. Devem identificar, no mínimo, quando aplicável:
+A cotação externa a ser observada é a da **MWN em relação à moeda fiduciária** (por exemplo, MWN/BRL). A partir dela, calcula-se uma valoração fiduciária implícita da UMS:
+
+`valor_fiduciario_implicito_UMS = cotacao_MWN_fiat / UMS_PER_MWN`
+
+Exemplo meramente ilustrativo: se 1 MWN estiver cotada a R$ 10,00 e a relação vigente for 1.000 UMS por MWN, então 1 UMS terá valor fiduciário implícito de R$ 0,01. Esse resultado é derivado, não uma cotação independente da UMS.
+
+A observação de mercado da MWN deve identificar, no mínimo:
 - ativo e par de cotação;
 - moeda-base e moeda de cotação;
 - valor e unidade;
@@ -46,7 +52,32 @@ Esses dados não são equivalentes à relação interna `UMS_PER_MWN`. Devem ide
 - estado de validação e frescor/validade;
 - política para ausência, atraso, divergência ou indisponibilidade da fonte.
 
-Não chamar cotação indicativa de preço executável. Não afirmar que existe mercado líquido, contraparte ou garantia de conversão sem evidência e aprovação próprias. Não inventar preço quando a fonte estiver ausente, inválida ou desatualizada.
+Toda valoração derivada da UMS deve preservar a cotação MWN utilizada, a fonte e os horários, além do ID/versão e valor de `UMS_PER_MWN` utilizados no cálculo. Não chamar cotação indicativa de preço executável. Não afirmar que existe mercado líquido, contraparte ou garantia de conversão sem evidência e aprovação próprias. Não inventar preço quando a fonte estiver ausente, inválida ou desatualizada.
+
+### 2.3 Valoração comparativa de serviços e índice de inflação/deflação interno
+
+A valoração fiduciária implícita da UMS permite normalizar preços de serviços internos e compará-los com preços de referência externos. O objetivo é avaliar o poder de compra econômico da unidade UMS e a competitividade dos serviços prestados no ecossistema.
+
+Exemplo ilustrativo:
+- MWN negociada a R$ 10,00;
+- relação interna de 1.000 UMS por MWN;
+- valor fiduciário implícito de 1 UMS = R$ 0,01;
+- serviço externo comparável (por exemplo, manter 1 GB de dados por 30 dias na AWS) custa R$ 10,00;
+- esse custo externo equivale, para fins de comparação, a 1 MWN ou 1.000 UMS.
+
+Se o mesmo serviço, com escopo e qualidade equivalentes, custar internamente:
+- 1.100 UMS, seu preço está 10% acima da referência externa normalizada;
+- 900 UMS, seu preço está 10% abaixo da referência externa normalizada.
+
+A variação relativa pode ser expressa por:
+
+`desvio_percentual = (preco_interno_UMS / benchmark_externo_equivalente_UMS - 1) × 100`
+
+Valor positivo indica preço interno acima da referência (pressão inflacionária relativa para aquele serviço); valor negativo indica preço interno abaixo da referência (deflação relativa). Essa leitura deve ser feita por serviço e também pode alimentar indicadores agregados do ecossistema.
+
+Para que a comparação seja válida, o serviço externo e o interno devem ter escopo comparável: capacidade, duração, região, disponibilidade, redundância, transferência/egress, suporte, SLA, impostos e demais componentes relevantes. Diferenças devem ser explicitadas ou normalizadas. Uma comparação isolada não constitui, por si só, índice geral de inflação do ecossistema; um índice agregado exige cesta definida, pesos, metodologia, período-base e série histórica consistentes.
+
+A cotação MWN/fiat, a relação `UMS_PER_MWN` e o preço do serviço externo devem ser capturados no mesmo instante de aferição ou em janelas temporais justificadas. O cálculo deve preservar os dados de origem e a metodologia utilizada. Uma alteração no preço de mercado da MWN pode alterar o valor fiduciário implícito da UMS mesmo que o preço nominal do serviço em UMS permaneça constante.
 
 ### 2.3 Preços executáveis, spreads e liquidação
 
@@ -184,7 +215,7 @@ Uma implementação que consuma ou altere parâmetros econômicos ou dados de me
 
 ## 11. Estado atual do registro
 
-Neste momento, o registro canônico documenta a chave `UMS_PER_MWN` e uma referência econômica já conhecida, mas a fonte runtime versionada indicada ainda precisa ser verificada/implementada. Os valores fiduciários de UMS e MWN, as respectivas fontes de cotação, preços executáveis, spreads e limites econômicos não devem ser presumidos nem preenchidos por inferência: precisam de especificação e aprovação próprias antes de serem registrados como parâmetros ativos.
+Neste momento, o registro canônico documenta a chave `UMS_PER_MWN` e uma referência econômica já conhecida, mas a fonte runtime versionada indicada ainda precisa ser verificada/implementada. A cotação fiduciária observável é a da MWN; o valor fiduciário da UMS é calculado por derivação com `UMS_PER_MWN`, sem cotação própria independente. A fonte da cotação MWN, os preços executáveis, spreads, benchmarks externos de serviços e limites econômicos precisam de especificação e aprovação próprias. A metodologia de comparação de serviços deve preservar escopo, temporalidade e proveniência.
 
 ---
 
