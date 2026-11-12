@@ -10,7 +10,7 @@
 | 23.2 | Separar UI de conversão/reconversão e transferência | PROGRESS | ChatGPT | 23.1 | Campos independentes; saldos UMS e MWN visíveis no bloco de conversão; transferência mostra apenas MWN e valida inteiro/saldo. |
 | 23.3 | Impor indivisibilidade MWN no backend e armazenamento | PROGRESS | ChatGPT | 23.1 | Transferência, reconversão e crédito administrativo rejeitam frações; constraints impedem atomic units fracionárias no ledger/transações. |
 | 23.4 | Completar extratos e rastreabilidade MWN | PROGRESS | ChatGPT | 23.1 | Origem/destino, IDs das carteiras, titular, direção, estado, reversão e transaction ID visíveis nos extratos pertinentes. |
-| 23.5 | Validar build, testes, preview e smoke test autenticado | STAGED | — | 23.2, 23.3, 23.4 | Build/testes aprovados; testes de fração/limite/saldo; revisão visual e smoke test com conta autorizada em ambiente seguro. |
+| 23.5 | Validar build, testes, preview e smoke test autenticado | PROGRESS | ChatGPT | 23.2, 23.3, 23.4 | Deployment Vercel do commit d8be351 READY; testes de fração/limite/saldo; revisão visual e smoke test com conta autorizada em ambiente seguro ainda pendentes. OR-20261112-0067. |
 | 23.6 | Rollout controlado em produção | STAGED — GATE HUMANO | — | 23.5; PR #23; autorização explícita | PR #23 mergeada; migration aplicada no Supabase canônico; PR #24 mergeada e deploy verificado; nenhum passo sem autorização. |
 
 ## Regras de execução
