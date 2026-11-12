@@ -108,6 +108,7 @@ export async function syncAgentCredits(agentId: number) {
 
   const response = await manusRequest<ManusTaskResponse & {
     request_id?: string;
+    total_credits?: unknown;
     data?: unknown;
   }>(
     credentials.manusToken,
@@ -118,7 +119,9 @@ export async function syncAgentCredits(agentId: number) {
   const dataObject = data && typeof data === "object" && !Array.isArray(data)
     ? data as Record<string, unknown>
     : null;
-  const credits = dataObject?.total_credits;
+  // Manus currently returns total_credits at the top level. Accept the
+  // nested data shape as a backward-compatible variant.
+  const credits = response.total_credits ?? dataObject?.total_credits;
   if (typeof credits !== "number" || !Number.isFinite(credits)) {
     const topLevelKeys = Object.keys(response).sort().join(", ") || "(nenhuma)";
     const dataType = Array.isArray(data) ? "array" : data === null ? "null" : typeof data;
@@ -126,7 +129,7 @@ export async function syncAgentCredits(agentId: number) {
     const creditsType = credits === null ? "null" : typeof credits;
     const requestId = response.request_id || "(não informado)";
     throw new Error(
-      `Resposta de créditos Manus sem data.total_credits numérico. request_id=${requestId}; top_level_keys=[${topLevelKeys}]; data_type=${dataType}; data_keys=[${dataKeys}]; total_credits_type=${creditsType}.`,
+      `Resposta de créditos Manus sem total_credits numérico. request_id=${requestId}; top_level_keys=[${topLevelKeys}]; data_type=${dataType}; data_keys=[${dataKeys}]; total_credits_type=${creditsType}.`,
     );
   }
 
