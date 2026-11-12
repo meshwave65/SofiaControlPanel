@@ -142,4 +142,4 @@ A prioridade define apenas qual saldo é consumido primeiro; não cria conversã
 
 ## Governança de parâmetros
 
-Esta missão obedece à [Diretriz de arquitetura — Configuração e governança de parâmetros](../../CONFIGURATION_AND_PARAMETER_GOVERNANCE.md). A chave `UMS_PER_MWN` e sua fonte canônica estão registradas no [Registro canônico de parâmetros](../../parameters/README.md). O valor não deve ser copiado para código ou documentação operacional.
+Esta missão obedece à [Diretriz de arquitetura — Configuração e governança de parâmetros](../../CONFIGURATION_AND_PARAMETER_GOVERNANCE.md) e à [Governança de parâmetros econômicos e dados de mercado](../../ECONOMIC_PARAMETER_GOVERNANCE.md). A chave `UMS_PER_MWN` e sua fonte canônica estão registradas no [Registro canônico de parâmetros](../../parameters/README.md). Cotações fiduciárias, preços executáveis, spreads, taxas e limites devem respeitar a classificação e os requisitos de proveniência definidos na norma econômica. Valores mutáveis não devem ser copiados para código ou documentação operacional.
