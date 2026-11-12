@@ -72,10 +72,22 @@ export class SofiaOrchestrator {
   /**
    * Fatoriza uma tarefa em subtarefas.
    */
+  static hasFactorizationSubtasks(task: any, subtasks: any[]): boolean {
+    const dimensionTitles = ["Análise Estrutural", "Análise Operacional", "Análise Estratégica"];
+    return subtasks.some((subtask) =>
+      dimensionTitles.some((title) => subtask.title === `${title}: ${task.title}`)
+    );
+  }
+
+  /**
+   * Fatoriza uma tarefa em subtarefas. A operação é idempotente para permitir
+   * retomar uma fatoração interrompida sem duplicar subtarefas já persistidas.
+   */
   static async factorizeTask(task: any): Promise<number[]> {
     console.log(`[Orchestrator] Fatorando tarefa ${task.id}: ${task.title}`);
-    
+
     const subtaskIds: number[] = [];
+    const existingSubtasks = await db.getTasksByParentId(task.id);
     const dimensions = [
       { title: "Análise Estrutural", suffix: "[ESTRUTURAL]" },
       { title: "Análise Operacional", suffix: "[OPERACIONAL]" },
@@ -83,26 +95,31 @@ export class SofiaOrchestrator {
     ];
 
     for (const dim of dimensions) {
+      const subtaskTitle = `${dim.title}: ${task.title}`;
+      const existing = existingSubtasks.find((subtask) => subtask.title === subtaskTitle);
+      if (existing) {
+        subtaskIds.push(existing.id);
+        continue;
+      }
+
       const result = await db.createTask({
         createdBy: task.createdBy,
         creatorType: task.creatorType === "system" ? "system" : "user",
-        agentId: task.agentId,
+        agentId: task.agentId ?? undefined,
         agentPinned: task.agentPinned,
-        title: `${dim.title}: ${task.title}`,
+        title: subtaskTitle,
         description: `${dim.suffix} ${task.description}`,
         statusId: await db.getTaskStatusIdByName(STATUS_STAGED),
         priorityId: task.priorityId,
         parentTaskId: task.id
       });
-      
+
       const insertId = (result as any)[0]?.id;
       if (insertId) {
         subtaskIds.push(insertId);
-        
-        // Criar log de atividade
         const eventType = await db.getOrCreateActivityEventType("task_factorization");
         await db.createActivityLog({
-          agentId: task.agentId || 0,
+          agentId: task.agentId ?? null,
           taskId: task.id,
           eventTypeId: eventType.id,
           details: `Subtarefa criada: ${dim.title} (ID: ${insertId})`
@@ -162,7 +179,7 @@ export class SofiaOrchestrator {
 
     const existingSubtasks = await db.getTasksByParentId(taskId);
     let subtaskIds: number[] = [];
-    const factorized = this.shouldFactorize(task) && existingSubtasks.length === 0;
+    const factorized = this.shouldFactorize(task) && (existingSubtasks.length === 0 || this.hasFactorizationSubtasks(task, existingSubtasks));
 
     if (factorized) {
       subtaskIds = await this.factorizeTask(task);
@@ -244,7 +261,7 @@ export class SofiaOrchestrator {
     }
 
     const existingSubtasks = await db.getTasksByParentId(taskId);
-    const factorized = this.shouldFactorize(claimedTask) && existingSubtasks.length === 0;
+    const factorized = this.shouldFactorize(claimedTask) && (existingSubtasks.length === 0 || this.hasFactorizationSubtasks(claimedTask, existingSubtasks));
 
     try {
       if (factorized) {
@@ -298,7 +315,7 @@ export class SofiaOrchestrator {
         await db.updateTaskStatus(taskId, await db.getTaskStatusIdByName("FAIL"));
         const eventType = await db.getOrCreateActivityEventType("task_execution_failed");
         await db.createActivityLog({
-          agentId: task.agentId ?? 0,
+          agentId: task.agentId ?? null,
           taskId,
           eventTypeId: eventType.id,
           details: message,
