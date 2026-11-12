@@ -207,4 +207,4 @@ Este modelo econômico prevê suporte a saldos fiat e a ordens de ativos externo
 
 ## Fonte canônica dos parâmetros
 
-Aplicam-se a [Diretriz de arquitetura — Configuração e governança de parâmetros](../../CONFIGURATION_AND_PARAMETER_GOVERNANCE.md) e o [Registro canônico de parâmetros](../../parameters/README.md). A relação UMS/MWN é referenciada exclusivamente pela chave `UMS_PER_MWN`; a fonte runtime versionada deve ser implementada/verificada antes da ativação operacional.
+Aplicam-se a [Diretriz de arquitetura — Configuração e governança de parâmetros](../../CONFIGURATION_AND_PARAMETER_GOVERNANCE.md), à [Governança de parâmetros econômicos e dados de mercado](../../ECONOMIC_PARAMETER_GOVERNANCE.md) e ao [Registro canônico de parâmetros](../../parameters/README.md). A relação UMS/MWN é referenciada exclusivamente pela chave `UMS_PER_MWN`; a fonte runtime versionada deve ser implementada/verificada antes da ativação operacional. Valores fiduciários, cotações, preços executáveis, spreads e taxas não estão definidos por inferência neste modelo; devem ter contratos e fontes próprios.
