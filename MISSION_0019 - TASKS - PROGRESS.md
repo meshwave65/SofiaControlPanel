@@ -11,7 +11,7 @@
 | 19.1 | Especificar contrato, autoridade e modelo de execução do Oracle Dispatcher | DONE | ChatGPT | Contrato CLI/worker, estados, decisões, permissões, lock, idempotência, falhas e handoff documentados |
 | 19.2 | Implementar worker determinístico de fila e revisão estrutural de ORs | DONE | Manus (sandbox) | Worker funcional em dry-run/escrita por fixtures; valida OR, frontmatter, artefatos e referências; bloqueia índice legado real sem normalização |
 | 19.3 | Implementar atualização atômica do índice, locks e recuperação | DONE | Manus (sandbox) | Patch por spans preserva bytes; anomalias hashadas; lock/manifesto/recovery fail-closed exercitados em fixtures; OR-20261109-0001 pendente de Oracle |
-| 19.4 | Implementar geração condicional de FOR e integração de missão | STAGED | — | FOR só é produzido quando a cobertura/aceite permite; missões incompletas permanecem abertas com pendências explícitas |
+| 19.4 | Implementar geração condicional de FOR e integração de missão | PROGRESS | Manus (sandbox) | FOR só é produzido quando a cobertura/aceite permite; missões incompletas permanecem abertas com pendências explícitas |
 | 19.5 | Testar o dispatcher com fixtures, ORs válidos/inválidos e cenários de falha | STAGED | — | Testes automatizados reproduzíveis cobrem sucesso, bloqueio, CSV legado, lock, idempotência e ausência de evidência |
 | 19.6 | Documentar operação, segurança, handoff e integração futura | STAGED | — | Guia para outro agente executar/retomar; limites e integração SCP/GitHub Actions claramente separados |
 | 19.7 | Revisão cruzada, validação end-to-end e continuidade | STAGED | — | Outro agente reproduz a execução; divergências resolvidas; ORs, índice e backlog atualizados |
@@ -60,3 +60,10 @@
 - Validações: 14/14 testes específicos; `pnpm check`; `pnpm test` (3 arquivos/9 testes); `node --check` nos dois módulos; Prettier e `git diff --check` — todos passaram.
 - Dry-run real pré-publicação selecionou OR-20261108-0033 como `PARTIALLY_ACCEPTED`, listou nove anomalias e preservou o SHA-256 do índice (`6549c6ceef11c269b1a223dc8c47dcd260770fd80081631cdccf75214686d684`). A linha única do OR-20261109-0001 foi anexada preservando todos os bytes anteriores; dry-run posterior validou o próprio OR como `PARTIALLY_ACCEPTED`, sem erros estruturais, e manteve o SHA-256 `7ec6dca650511d40ebd56e33b5aa913f31aa85584a1e547e0454b2d839dafe02` idêntico antes/depois. Nenhum OR da fila foi escrito.
 - 19.4–19.7 permanecem `STAGED`; nenhum FOR foi gerado. Próximo desbloqueio: revisão Oracle deste OR e execução autônoma da próxima tarefa somente após nova atribuição.
+
+## Assunção 19.4 — Manus (sandbox), 2026-11-12
+
+- Tarefa 19.4 atribuída a `Manus (sandbox)` antes de qualquer alteração funcional; branch `main`, base `6bb92df4638ec0e443fa2edcff8f7031a05f0107`, sincronizada com `origin/main`, árvore limpa e sem lock/journal do dispatcher.
+- A atribuição concorrente de `MISSION_0020 / 20.3` a `Agente Mateus` foi preservada; nenhuma alteração foi feita nessa missão.
+- Dependências 19.1–19.3 consultadas; a tarefa 19.4 estava `STAGED`, sem instância atribuída. Skill específica consultada: `skill-governance-oracle` 1.1.0, commit `35ca3757ae5a6a3e602bcabd754c05f7040c5592`; ciclo do repositório consultado: `operational-task-lifecycle` 0.2.0-DRAFT.
+- Escopo: implementar apenas geração condicional e integração de estado; nenhum FOR será criado se cobertura, reviews/aceite ou evidências forem insuficientes. Nenhuma revisão real ou decisão humana será fabricada.

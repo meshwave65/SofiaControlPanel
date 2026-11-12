@@ -1,10 +1,10 @@
 # Blueprint da Missão 0019 — Oracle Dispatcher e Worker de Governança
 
-**Missão:** `MISSION_0019`  
-**Estado:** STAGED  
-**Orquestrador:** SofiaControlPanel (SCP)  
-**Projeto:** Projeto Triangulo  
-**E-mail do usuário Manus:** 2.15080907e+08+meshwave65@users.noreply.github.com  
+**Missão:** `MISSION_0019`
+**Estado:** PROGRESS
+**Orquestrador:** SofiaControlPanel (SCP)
+**Projeto:** Projeto Triangulo
+**E-mail do usuário Manus:** 2.15080907e+08+meshwave65@users.noreply.github.com
 **Data e hora de criação:** 08/11/2026, 23:13 (-03:00)
 
 ## 1. Motivação

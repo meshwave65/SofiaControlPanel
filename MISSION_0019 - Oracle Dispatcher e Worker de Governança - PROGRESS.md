@@ -24,9 +24,9 @@ A missão foi criada como `STAGED` e agora foi assumida como `PROGRESS` pela ins
 - **Última tarefa concluída:** 19.3 — Implementar atualização atômica do índice, locks e recuperação.
 - **Instância:** Manus (sandbox).
 - **Status da tarefa 19.3:** DONE em implementação/validação; OR-20261109-0001 submetido para revisão independente (`PENDING`).
-- **Próxima tarefa:** 19.4 — Implementar geração condicional de FOR e integração de missão; permanece `STAGED` e não foi assumida nesta unidade.
+- **Tarefa em execução:** 19.4 — Implementar geração condicional de FOR e integração de missão; `PROGRESS`, atribuída a `Manus (sandbox)` em 2026-11-12.
 - **Reconciliação:** o worker agora reconhece as nove caudas legadas somente quando os campos precedentes são válidos, registra hashes e faz patch lossless dos dois campos autorizados. Anomalias ambíguas continuam bloqueantes; nenhuma normalização histórica foi executada.
 
 ## Handoff
 
-Tarefas 19.1, 19.2 e 19.3 estão concluídas em seus respectivos escopos; a MISSION_0019 permanece `PROGRESS`. OR-20261108-0033 e OR-20261109-0001 aguardam revisão independente. 19.4–19.7 continuam `STAGED`; nenhum FOR foi gerado. A leitura e a escrita lossless de 19.3 não normalizam notas históricas, e a revisão real do dispatcher permaneceu em dry-run.
+Tarefas 19.1, 19.2 e 19.3 estão concluídas em seus respectivos escopos; 19.4 está `PROGRESS` e 19.5–19.7 permanecem `STAGED`. OR-20261108-0033 e OR-20261109-0001 aguardam revisão independente. Nenhum FOR foi gerado. A leitura e a escrita lossless de 19.3 não normalizam notas históricas, e a revisão real do dispatcher permaneceu em dry-run.
