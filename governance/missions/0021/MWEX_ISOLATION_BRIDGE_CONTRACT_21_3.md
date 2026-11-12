@@ -210,4 +210,4 @@ A escolha define a prioridade de consumo, não uma conversão direta. O sistema 
 
 ## Governança de configuração
 
-Aplicam-se a [Diretriz de arquitetura — Configuração e governança de parâmetros](../../CONFIGURATION_AND_PARAMETER_GOVERNANCE.md) e o [Registro canônico de parâmetros](../../parameters/README.md). Nenhuma implementação pode replicar valores mutáveis; operações devem persistir o ID/versão do parâmetro aplicado.
+Aplicam-se a [Diretriz de arquitetura — Configuração e governança de parâmetros](../../CONFIGURATION_AND_PARAMETER_GOVERNANCE.md), à [Governança de parâmetros econômicos e dados de mercado](../../ECONOMIC_PARAMETER_GOVERNANCE.md) e ao [Registro canônico de parâmetros](../../parameters/README.md). Nenhuma implementação pode replicar valores mutáveis; operações devem persistir o ID/versão do parâmetro aplicado e a proveniência/temporalidade dos dados de mercado utilizados.
