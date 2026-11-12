@@ -49,7 +49,9 @@ export function useAuth() {
   const logout = useCallback(async () => {
     await supabase.auth.signOut();
     setUser(null);
-    utils.auth.me.invalidate();
+    await utils.auth.me.invalidate();
+    // Leave protected routes after ending the Supabase session.
+    window.location.replace("/");
   }, [utils]);
 
   const state = useMemo(
