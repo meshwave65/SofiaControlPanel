@@ -35,7 +35,14 @@ export default function TaskDetail() {
   );
   const statuses = lookupsQuery.data?.statuses ?? [];
   const priorities = lookupsQuery.data?.priorities ?? [];
-  const [subtasks, setSubtasks] = useState<any[]>([]);
+  const subtasksQuery = trpc.tasks.getChildren.useQuery(
+    { taskId },
+    {
+      enabled: canLoadTask && Boolean(taskQuery.data) && !taskQuery.data.parentTaskId,
+      retry: false,
+    },
+  );
+  const subtasks = subtasksQuery.data ?? [];
   const [isStarting, setIsStarting] = useState(false);
   const [isFactorizing, setIsFactorizing] = useState(false);
   const [isConsolidating, setIsConsolidating] = useState(false);
@@ -86,26 +93,14 @@ export default function TaskDetail() {
     ensureArcAssessmentMutation.isPending,
   ]);
 
-  // Buscar subtarefas se a tarefa tiver parentTaskId = null (é uma tarefa gênesis)
-  useEffect(() => {
-    if (task && !task.parentTaskId) {
-      // Buscar subtarefas via API
-      fetch(`/api/public/subtasks/${taskId}`)
-        .then(res => res.json())
-        .then(data => setSubtasks(data.tasks || []))
-        .catch(err => console.error("Erro ao buscar subtarefas:", err));
-    }
-  }, [task, taskId]);
-
   const handleFactorize = async () => {
     setIsFactorizing(true);
     try {
       await factorizeTaskMutation.mutateAsync({ taskId });
       // Recarregar dados
-      await taskQuery.refetch();
-      await messagesQuery.refetch();
+      await Promise.all([taskQuery.refetch(), messagesQuery.refetch(), subtasksQuery.refetch()]);
     } catch (error) {
-      console.error("Erro ao fatorizar:", error);
+      toast.error(error instanceof Error ? error.message : "Não foi possível fatorizar a missão.");
     } finally {
       setIsFactorizing(false);
     }
@@ -115,7 +110,7 @@ export default function TaskDetail() {
     setIsStarting(true);
     try {
       const result = await startTaskMutation.mutateAsync({ taskId });
-      await Promise.all([taskQuery.refetch(), messagesQuery.refetch(), consolidatedReportQuery.refetch()]);
+      await Promise.all([taskQuery.refetch(), messagesQuery.refetch(), subtasksQuery.refetch(), consolidatedReportQuery.refetch()]);
       if (result?.started) {
         toast.success(result.factorized ? "Missão iniciada e fatorada em subtarefas." : "Missão iniciada.");
       } else {
