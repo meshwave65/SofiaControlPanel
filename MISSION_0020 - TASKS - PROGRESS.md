@@ -9,7 +9,7 @@
 |---|---|---|---|---|
 | 20.1 | Inventariar funcionalidades, contratos e evidências do runtime; localizar a primeira fronteira de falha | DONE | Manus (sandbox) | Matriz baseline de módulos/ações e hipótese testável; logs/config apenas pertinentes e sanitizados; nenhuma causa conjecturada como fato |
 | 20.2 | Reproduzir falha de missão em ambiente local/de teste e fechar causa-raiz do ciclo de execução | DONE | Manus (sandbox) — 2026-11-11/12 | Harness controlado reproduz claim/despacho, criação Manus mockada, polling, persistência, espera por agente inelegível, falha explícita e estados DONE/PAUSED/FAIL; smoke test externo permanece bloqueado por credenciais/autorização ausentes |
-| 20.3 | Corrigir causas-raiz confirmadas no fluxo de execução e adicionar regressões | STAGED | — | Correções pequenas e atribuídas, testes falhando antes/passando depois, idempotência/concorrência/erros cobertos sem chamada real não autorizada |
+| 20.3 | Corrigir causas-raiz confirmadas no fluxo de execução e adicionar regressões | PROGRESS | Agente Mateus | Correções pequenas e atribuídas, testes falhando antes/passando depois, idempotência/concorrência/erros cobertos sem chamada real não autorizada |
 | 20.4 | Auditar as funcionalidades do produto constantes do inventário e resolver falhas prioritárias independentes | STAGED | — | Matriz atualizada com PASS/FAIL/BLOCKED/NOT_APPLICABLE por critério e evidência; sem duplicar MISSION_0019 |
 | 20.5 | Executar validação integrada e, somente se autorizado, smoke test externo de baixo impacto | STAGED | — | `pnpm check`, `pnpm test`, `pnpm build`, integração repetível; gate externo comprovado ou explicitamente bloqueado |
 | 20.6 | Documentar operação/observabilidade, revisar cruzadamente e preparar handoff final | STAGED | — | Checklist sem segredos, procedimento reproduzível, limites e dependências registrados; todos os ORs e índices reconciliados |
@@ -22,3 +22,12 @@
 - Usar testes e ambientes descartáveis por padrão. Chamada real Manus, consumo de crédito, alteração de dados ou deploy exigem autorização específica e ambiente aprovado.
 - Não assumir nem duplicar tarefas da MISSION_0019; dependências/interseções devem ser documentadas e coordenadas.
 - Cada tarefa concluída, parcial, bloqueada ou malsucedida requer Operational Report próprio, atualização do quadro e handoff conforme `AGENTS.md`.
+
+
+## Checkpoint 20.3 — assunção formal (2026-11-12)
+- **Instância:** Agente Mateus.
+- **Status:** PROGRESS.
+- **Escopo assumido:** corrigir somente causas-raiz confirmadas no fluxo de execução e adicionar regressões reproduzíveis.
+- **Guardrails:** sem chamada real à API Manus, consumo de créditos, alteração de produção ou deploy; não duplicar a MISSION_0019.
+- **Base de entrada:** MISSION_0020 / tarefa 20.2 concluída com harness controlado; smoke test externo permanece bloqueado por credenciais/autorização ausentes.
+- **Próximo passo:** revisar o diff e os testes associados ao fluxo de claim/despacho antes de editar qualquer código.
