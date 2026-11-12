@@ -117,7 +117,7 @@ A evolução de granularidade não deve exigir descartar ou reescrever eventos h
 
 ## 10. Pendências que bloqueiam uma decisão de schema
 
-1. Identificar a fonte canônica do preço interno MWN. A consulta read-only à base correta MeshWave65 (`ufylccbdjfzydbwhpmpp`) encontrou `public.mwc_sale_prices.price_per_mwc`, mas essa tabela representa preço de aquisição legado MWC, não o preço interno MWN. Seus valores atuais são BRL `0.02160500` e EUR `0.00382918`; o valor informado `0.0021605` não coincide com o valor BRL observado.
+1. Identificar a fonte canônica do preço interno MWN. A consulta read-only à base correta MeshWave65 (`ufylccbdjfzydbwhpmpp`) encontrou `public.mwc_sale_prices.price_per_mwc`, mas essa tabela representa preço de aquisição legado MWC, não o preço interno MWN. Seus valores atuais são BRL `0.02160500` e EUR `0.00382918`; o valor digitado anteriormente como `0.0021605` foi corrigido pelo responsável para `0.021605`, que coincide numericamente com o BRL observado; a semântica da tabela continua sem comprovação como preço interno MWN.
 2. Confirmar a unidade/moeda desse preço e seu significado econômico (preço de referência, preço definido por parâmetro, último preço de execução ou outro).
 3. Identificar todos os caminhos que podem alterar esse valor: UI/admin, RPC, Edge Function, backend, job ou operação de mercado.
 4. Confirmar quem/qual processo tem autoridade para alterá-lo e quais aprovações são exigidas.
