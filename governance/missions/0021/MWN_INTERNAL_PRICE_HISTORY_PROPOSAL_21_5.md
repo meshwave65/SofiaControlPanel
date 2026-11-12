@@ -117,15 +117,15 @@ A evolução de granularidade não deve exigir descartar ou reescrever eventos h
 
 ## 10. Pendências que bloqueiam uma decisão de schema
 
-1. Identificar no Supabase a tabela/coluna que atualmente contém o preço 0,0021605 e confirmar o valor atual.
+1. Identificar a fonte canônica do preço interno MWN. A consulta read-only à base correta MeshWave65 (`ufylccbdjfzydbwhpmpp`) encontrou `public.mwc_sale_prices.price_per_mwc`, mas essa tabela representa preço de aquisição legado MWC, não o preço interno MWN. Seus valores atuais são BRL `0.02160500` e EUR `0.00382918`; o valor informado `0.0021605` não coincide com o valor BRL observado.
 2. Confirmar a unidade/moeda desse preço e seu significado econômico (preço de referência, preço definido por parâmetro, último preço de execução ou outro).
 3. Identificar todos os caminhos que podem alterar esse valor: UI/admin, RPC, Edge Function, backend, job ou operação de mercado.
 4. Confirmar quem/qual processo tem autoridade para alterá-lo e quais aprovações são exigidas.
 5. Definir o fuso horário de fechamento diário.
 6. Verificar volume esperado de eventos, consultas e retenção.
-7. Verificar schema, RLS, grants, políticas e exposição da tabela antes de qualquer DDL.
+7. Verificar o modelo de acesso documentado e, somente para a fonte efetivamente pertinente, confirmar grants/policies e fluxo transacional antes de qualquer DDL.
 
-A tentativa de leitura do projeto Supabase `mwn` nesta interação falhou com erro de autenticação do usuário read-only (`28P01`). Portanto, a tabela e a coluna do preço não foram verificadas. Nenhuma alteração foi feita no banco.
+**Correção da inspeção de origem (OR-20261112-0058):** a consulta anterior foi feita no projeto alternativo `mwn`, não na base canônica. O `AGENTS.md` determina o uso exclusivo do projeto MeshWave65 (`ufylccbdjfzydbwhpmpp`) para estado financeiro. A conexão MeshWave65/Primary acessa essa base corretamente. Na base correta, `mwc_sale_prices` é preço de aquisição legado MWC; não foi localizada tabela/parâmetro explícito de preço interno MWN nem histórico de eventos. Nenhuma alteração foi feita no banco.
 
 ## 11. Estado de decisão nesta interação
 
