@@ -18,7 +18,9 @@ Este registro aponta as chaves e suas fontes canônicas. A política geral está
 
 ## Parâmetros econômicos ainda não cadastrados
 
-Os valores fiduciários/de mercado de UMS e MWN, fontes de cotação, preços executáveis, spreads, tarifas futuras e limites econômicos ainda não possuem chaves/contratos ativos neste registro. Não atribuir nomes, valores, provedores, vigências ou status por inferência. Cada item deverá ser especificado e aprovado antes de ser cadastrado como parâmetro ativo. A norma econômica define os metadados e distinções obrigatórios.
+A cotação fiduciária observável a ser cadastrada é a da MWN em relação à moeda fiduciária. A UMS não possui cotação fiduciária independente: seu valor fiduciário implícito é calculado a partir da cotação MWN/fiat dividida pela versão vigente de `UMS_PER_MWN`. Portanto, não cadastrar um preço independente da UMS como se fosse dado de mercado.
+
+Ainda precisam de especificação e aprovação: fonte/provedor e contrato da cotação MWN; metodologia e dados de benchmark de serviços externos; preços executáveis, spreads, tarifas futuras e limites econômicos. O valor fiduciário implícito da UMS é dado derivado, que deve preservar a cotação MWN e a versão de `UMS_PER_MWN` usadas no cálculo, não uma cotação independente. Não atribuir valores, provedores, vigências ou status por inferência.
 
 ## Regra de manutenção
 
