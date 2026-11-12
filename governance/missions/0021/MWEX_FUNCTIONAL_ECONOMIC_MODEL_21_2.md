@@ -20,7 +20,7 @@ A MW-Ex deve ser uma carteira/razão privada de MWN com transferências internas
 | Termo | Significado operacional | Pode ser exibido como |
 |---|---|---|
 | Saldo MWN | Quantidade efetivamente registrada no ledger MW-Ex do usuário | Saldo disponível MWN |
-| UMS potencial | `saldo MWN × 1.000`, equivalência matemática sem crédito na carteira UMS | Equivalência potencial, nunca saldo UMS |
+| UMS potencial | `saldo MWN × UMS_PER_MWN`, equivalência matemática sem crédito na carteira UMS | Equivalência potencial, nunca saldo UMS |
 | Cotação indicativa | Referência externa ou interna claramente identificada, com fonte e horário, sem garantia de execução | Indicativa / não executável |
 | Preço executável | Preço aceito por uma contraparte disponível para uma transação autorizada | Só após mecanismo de contraparte aprovado |
 | Valor de carteira | `saldo MWN × cotação` somente se cotação atual, proveniência e frescor forem válidos | Valor estimado, com fonte e timestamp |
@@ -104,7 +104,7 @@ Até essas respostas, pode-se implementar apenas carteira, transferência intern
 
 ## 5. Precisão, arredondamento e resíduos
 
-Parâmetro de referência: **1 MWN = 1.000 UMS**.
+Parâmetro de referência: **`UMS_PER_MWN`** (valor inicial documentado no registro canônico; sujeito a aprovação e revisão).
 
 Proposta segura para implementação, sujeita à confirmação normativa:
 
@@ -113,7 +113,7 @@ Proposta segura para implementação, sujeita à confirmação normativa:
 - UMS efetivo mantém até 6 casas decimais conforme modelo contábil existente;
 - MWN deve ter escala definida antes do schema; não assumir que o legado `mwc_quantity` é a escala normativa;
 - conversão UMS→MWN deve rejeitar quantidade que não possa ser representada exatamente ou aplicar regra de arredondamento aprovada, registrando resíduo;
-- conversão MWN→UMS deve multiplicar por 1.000 e validar escala/overflow;
+- conversão MWN→UMS deve multiplicar pelo valor da versão de `UMS_PER_MWN` vinculada à operação e validar escala/overflow;
 - nunca arredondar silenciosamente em favor do sistema ou usuário;
 - soma de débito e crédito de cada ponte deve ser igual em unidades atômicas e moeda contábil correspondente;
 - qualquer resíduo deve ter conta/evento explícito, proprietário e política de reconciliação;
@@ -125,7 +125,7 @@ Proposta segura para implementação, sujeita à confirmação normativa:
 
 | Gate | Status | Evidência/ação necessária |
 |---|---|---|
-| Relação 1:1.000 | Registrada como requisito/referência | Reconfirmar como regra normativa antes de operação |
+| `UMS_PER_MWN` | Referência inicial registrada; fonte runtime versionada pendente de implementação/verificação | Aprovar versão ativa antes de operação |
 | Ledger MWN separado | Ausente no estado auditado | Especificar em 21.3; implementar somente depois |
 | Fonte de cotação MWN | Não aprovada | Decidir fonte, símbolo, moeda, TTL, fallback e limites |
 | Preço executável | Não definido | Definir contraparte, mecanismo e autorização; não presumir liquidez |
@@ -140,7 +140,7 @@ Proposta segura para implementação, sujeita à confirmação normativa:
 
 Estas decisões não foram inventadas pelo agente e bloqueiam a operação real:
 
-1. A relação **1 MWN = 1.000 UMS** é normativa e definitiva para a primeira versão?
+1. Qual versão inicial de `UMS_PER_MWN` deve ser aprovada para a primeira operação? O parâmetro deverá permanecer revisável por nova versão, sem alterar o histórico.
 2. Qual escala/precisão normativa do MWN e qual política de arredondamento/resíduo deve ser usada?
 3. O MVP deve limitar-se a ledger/transferência interna e conversões sintéticas, sem preço executável?
 4. Qual será a fonte aprovada de cotação indicativa MWN, moeda-base, TTL e fallback?
@@ -197,10 +197,14 @@ A prioridade de consumo não altera a rota de conversão. Não existe aresta dir
 - MWN é inteiro, sem unidades fracionárias.
 - Quantidades exibidas na interface são apresentadas sem casas decimais, por truncamento para baixo. Isso é apenas formatação visual.
 - O ledger e a carteira UMS preservam a precisão integral; a interface não pode alterar o saldo contábil.
-- A referência vigente é **1.000 UMS = 1 MWN**, sujeita à revisão após estudo da emissão total de UMS e da valoração dos serviços. A taxa deve ser centralizada, configurável e versionada; transações históricas mantêm a versão aplicada.
+- A relação vigente é a versão ativa do parâmetro **`UMS_PER_MWN`**, sujeita à revisão após estudo da emissão total de UMS e da valoração dos serviços. O parâmetro deve ser centralizado, configurável e versionado; transações históricas mantêm o ID/versão e o valor aplicado.
 - Nenhum resíduo UMS pode ser perdido silenciosamente quando a conversão exigir MWN inteiro. A política operacional de conversão parcial/resíduo ainda precisa ser especificada e aprovada.
 - Taxas atuais de corretagem/administrativas são zero. Eventuais taxas futuras serão debitadas exclusivamente em UMS na carteira interna, nunca em MWN ou fiat.
 
 ### 10.5 Escopo e autorização
 
 Este modelo econômico prevê suporte a saldos fiat e a ordens de ativos externos por meio da rota acima, mas não afirma que depósito/saque fiat, meios de pagamento, custódia, integração de contraparte ou execução externa estejam implementados. Essas capacidades exigem especificação técnica, operacional e de conformidade, além de autorização explícita, antes de qualquer transação real.
+
+## Fonte canônica dos parâmetros
+
+Aplicam-se a [Diretriz de arquitetura — Configuração e governança de parâmetros](../../CONFIGURATION_AND_PARAMETER_GOVERNANCE.md) e o [Registro canônico de parâmetros](../../parameters/README.md). A relação UMS/MWN é referenciada exclusivamente pela chave `UMS_PER_MWN`; a fonte runtime versionada deve ser implementada/verificada antes da ativação operacional.
