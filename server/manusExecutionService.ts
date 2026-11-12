@@ -106,14 +106,28 @@ export async function syncAgentCredits(agentId: number) {
     throw new Error("O agente não possui uma API key Manus configurada.");
   }
 
-  const response = await manusRequest<ManusTaskResponse & { data?: { total_credits?: number } }>(
+  const response = await manusRequest<ManusTaskResponse & {
+    request_id?: string;
+    data?: unknown;
+  }>(
     credentials.manusToken,
     "/usage.availableCredits",
     { method: "GET" },
   );
-  const credits = response.data?.total_credits;
+  const data = response.data;
+  const dataObject = data && typeof data === "object" && !Array.isArray(data)
+    ? data as Record<string, unknown>
+    : null;
+  const credits = dataObject?.total_credits;
   if (typeof credits !== "number" || !Number.isFinite(credits)) {
-    throw new Error("A API Manus não retornou total_credits válido.");
+    const topLevelKeys = Object.keys(response).sort().join(", ") || "(nenhuma)";
+    const dataType = Array.isArray(data) ? "array" : data === null ? "null" : typeof data;
+    const dataKeys = dataObject ? Object.keys(dataObject).sort().join(", ") || "(nenhuma)" : "(indisponível)";
+    const creditsType = credits === null ? "null" : typeof credits;
+    const requestId = response.request_id || "(não informado)";
+    throw new Error(
+      `Resposta de créditos Manus sem data.total_credits numérico. request_id=${requestId}; top_level_keys=[${topLevelKeys}]; data_type=${dataType}; data_keys=[${dataKeys}]; total_credits_type=${creditsType}.`,
+    );
   }
 
   await db.updateAgentCredits(agentId, credits);
