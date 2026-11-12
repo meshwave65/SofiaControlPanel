@@ -28,7 +28,7 @@ export const appRouter = router({
   // ============================================
   agents: router({
     list: protectedProcedure.query(async ({ ctx }) => {
-      return db.getAgentsByOwnerId(ctx.user.id);
+      return db.getAgentsByOwnerId(ctx.user.id, ctx.user.role === "admin");
     }),
 
     create: protectedProcedure
@@ -55,7 +55,7 @@ export const appRouter = router({
     getById: protectedProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ input, ctx }) => {
-        return db.getAgentByIdForOwner(input.id, ctx.user.id);
+        return db.getAgentByIdForOwner(input.id, ctx.user.id, ctx.user.role === "admin");
       }),
 
     validateManusConnection: protectedProcedure
@@ -63,7 +63,7 @@ export const appRouter = router({
       .mutation(async ({ input, ctx }) => {
         let credentials: Awaited<ReturnType<typeof db.getManusCredentialsForAgentForOwner>>;
         try {
-          credentials = await db.getManusCredentialsForAgentForOwner(input.id, ctx.user.id);
+          credentials = await db.getManusCredentialsForAgentForOwner(input.id, ctx.user.id, ctx.user.role === "admin");
         } catch (error) {
           console.error("[Manus] Credential retrieval failed:", error instanceof Error ? error.message : "unknown error");
           throw new TRPCError({
@@ -166,7 +166,7 @@ export const appRouter = router({
     refreshCredits: protectedProcedure
       .input(z.object({ id: z.number().int().positive() }))
       .mutation(async ({ input, ctx }) => {
-        const agent = await db.getAgentByIdForOwner(input.id, ctx.user.id);
+        const agent = await db.getAgentByIdForOwner(input.id, ctx.user.id, ctx.user.role === "admin");
         if (!agent && ctx.user.role !== "admin") {
           throw new TRPCError({ code: "NOT_FOUND", message: "Agente não encontrado." });
         }
@@ -183,7 +183,7 @@ export const appRouter = router({
       }),
 
     refreshAllCredits: protectedProcedure.mutation(async ({ ctx }) => {
-      const agents = await db.getAgentsByOwnerId(ctx.user.id);
+      const agents = await db.getAgentsByOwnerId(ctx.user.id, ctx.user.role === "admin");
       const configuredAgents = agents.filter((agent) => agent.hasCredential);
 
       const results = await Promise.all(configuredAgents.map(async (agent) => {
@@ -323,7 +323,17 @@ export const appRouter = router({
     getByAgent: protectedProcedure
       .input(z.object({ agentId: z.number() }))
       .query(async ({ input, ctx }) => {
-        return db.getTasksByAgentIdForOwner(input.agentId, ctx.user.id);
+        return db.getTasksByAgentIdForOwner(input.agentId, ctx.user.id, ctx.user.role === "admin");
+      }),
+
+    getChildren: protectedProcedure
+      .input(z.object({ taskId: z.number().int().positive() }))
+      .query(async ({ input, ctx }) => {
+        const parent = await db.getTaskById(input.taskId);
+        if (!parent || (parent.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+        }
+        return db.getTasksByParentId(input.taskId);
       }),
 
     updateStatus: protectedProcedure
@@ -429,7 +439,11 @@ export const appRouter = router({
 
     getByTask: protectedProcedure
       .input(z.object({ taskId: z.number() }))
-      .query(async ({ input }) => {
+      .query(async ({ input, ctx }) => {
+        const task = await db.getTaskById(input.taskId);
+        if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+        }
         return db.getMessagesByTaskId(input.taskId);
       }),
 
@@ -464,7 +478,7 @@ export const appRouter = router({
     getByAgent: protectedProcedure
       .input(z.object({ agentId: z.number() }))
       .query(async ({ input, ctx }) => {
-        return db.getActivityLogsByAgentIdForOwner(input.agentId, ctx.user.id);
+        return db.getActivityLogsByAgentIdForOwner(input.agentId, ctx.user.id, ctx.user.role === "admin");
       }),
 
     getRecent: protectedProcedure
