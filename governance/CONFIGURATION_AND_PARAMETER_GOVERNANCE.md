@@ -14,6 +14,8 @@ Todo parâmetro que possa variar por ambiente, usuário, operação, política, 
 
 O princípio é **centralizar e controlar**, não impor uma tecnologia única de persistência. A escolha do mecanismo deve respeitar a natureza, o ciclo de vida, os requisitos de segurança e a forma de consumo de cada informação. A diretriz também abrange outros parâmetros mutáveis — limites, prazos, TTLs, flags operacionais, endpoints configuráveis e critérios de elegibilidade — sem presumir que todos devam residir no banco de dados. Constantes matemáticas e valores intrínsecos ao protocolo podem permanecer no código quando forem realmente invariáveis; a classificação deve ser explícita, não presumida.
 
+Para parâmetros econômicos e dados de mercado, aplicar também a norma específica [ECONOMIC_PARAMETER_GOVERNANCE.md](ECONOMIC_PARAMETER_GOVERNANCE.md), que diferencia relações internas de conversão, cotações fiduciárias, preços executáveis, spreads, taxas e limites.
+
 ## 2. Onde armazenar
 
 A escolha depende do ciclo de vida e da natureza do parâmetro:
