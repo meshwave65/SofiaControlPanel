@@ -205,6 +205,18 @@ A prioridade de consumo não altera a rota de conversão. Não existe aresta dir
 
 Este modelo econômico prevê suporte a saldos fiat e a ordens de ativos externos por meio da rota acima, mas não afirma que depósito/saque fiat, meios de pagamento, custódia, integração de contraparte ou execução externa estejam implementados. Essas capacidades exigem especificação técnica, operacional e de conformidade, além de autorização explícita, antes de qualquer transação real.
 
+### 10.6 Valoração fiduciária derivada da UMS e comparação econômica de serviços
+
+A UMS não possui cotação fiduciária própria e independente. Seu valor fiduciário implícito é derivado da cotação de mercado da MWN dividida pela relação interna `UMS_PER_MWN` vigente no instante da aferição:
+
+`valor_fiduciario_implicito_UMS = cotacao_MWN_fiat / UMS_PER_MWN`
+
+Exemplo ilustrativo: MWN a R$ 10,00 e relação de 1.000 UMS por MWN implicam valor de R$ 0,01 por UMS. Um serviço externo comparável a R$ 10,00 (por exemplo, 1 GB de armazenamento por 30 dias) equivale, nessa aferição, a 1 MWN ou 1.000 UMS. Se o mesmo serviço custar 1.100 UMS no ecossistema, estará 10% acima da referência externa normalizada; a 900 UMS, estará 10% abaixo.
+
+Esse mecanismo permite avaliar a inflação/deflação relativa dos preços de serviços no ecossistema e sua competitividade externa. A comparação exige equivalência de escopo, qualidade, região, duração, disponibilidade, transferência, SLA, tributos e demais componentes relevantes. Um serviço isolado mede desvio relativo daquele serviço; um índice agregado exige cesta, pesos, período-base, metodologia e série histórica definidos.
+
+Toda aferição deve preservar a cotação MWN/fiat, fonte e timestamps; a versão e o valor de `UMS_PER_MWN`; o preço externo de referência e sua fonte; a especificação comparável do serviço; e o cálculo aplicado. Variações no preço de mercado da MWN alteram a valoração fiduciária implícita da UMS mesmo quando a tarifa nominal do serviço em UMS não muda.
+
 ## Fonte canônica dos parâmetros
 
-Aplicam-se a [Diretriz de arquitetura — Configuração e governança de parâmetros](../../CONFIGURATION_AND_PARAMETER_GOVERNANCE.md), à [Governança de parâmetros econômicos e dados de mercado](../../ECONOMIC_PARAMETER_GOVERNANCE.md) e ao [Registro canônico de parâmetros](../../parameters/README.md). A relação UMS/MWN é referenciada exclusivamente pela chave `UMS_PER_MWN`; a fonte runtime versionada deve ser implementada/verificada antes da ativação operacional. Valores fiduciários, cotações, preços executáveis, spreads e taxas não estão definidos por inferência neste modelo; devem ter contratos e fontes próprios.
+Aplicam-se a [Diretriz de arquitetura — Configuração e governança de parâmetros](../../CONFIGURATION_AND_PARAMETER_GOVERNANCE.md), à [Governança de parâmetros econômicos e dados de mercado](../../ECONOMIC_PARAMETER_GOVERNANCE.md) e ao [Registro canônico de parâmetros](../../parameters/README.md). A relação UMS/MWN é referenciada exclusivamente pela chave `UMS_PER_MWN`; a fonte runtime versionada deve ser implementada/verificada antes da ativação operacional. A cotação observável é a da MWN; a valoração fiduciária da UMS é derivada, não cotada independentemente. Fonte de cotação MWN, benchmarks externos de serviços, preços executáveis, spreads e taxas devem ter contratos e fontes próprios.
