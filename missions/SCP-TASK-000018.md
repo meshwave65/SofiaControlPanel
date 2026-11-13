@@ -40,3 +40,11 @@ Corrigir a comunicação do terminal de mensagens do SCP para que uma mensagem e
 - GitHub path: `missions/SCP-TASK-000018.md`
 - Alterações de execução e status devem ser persistidas no Supabase e espelhadas neste arquivo.
 - Alterações manuais neste arquivo não executam a missão automaticamente.
+
+## Execution evidence
+
+- Implementação publicada no commit `06be92e0c741873c25135909bba935ddd3845539`.
+- `pnpm check`: aprovado.
+- `pnpm build`: aprovado.
+- `pnpm test`: 20 testes aprovados e 1 falha preexistente no teste de fatoração do orquestrador; a falha não percorre o fluxo de mensagens desta missão.
+- Migration aplicada no Supabase: `add_assistant_flag_to_messages`.
