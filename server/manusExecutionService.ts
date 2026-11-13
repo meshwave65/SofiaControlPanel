@@ -15,7 +15,7 @@ type ManusTaskResponse = {
 };
 
 type LocalTask = Awaited<ReturnType<typeof db.getTaskById>>;
-type ManusMessageEvent = { id?: string; type?: string; assistant_message?: { content?: string | Array<{ type?: string; text?: string }> } };
+export type ManusMessageEvent = { id?: string; type?: string; created_at?: string; assistant_message?: { content?: string | Array<{ type?: string; text?: string }> } };
 type ManusMessagesResponse = ManusTaskResponse & { messages?: ManusMessageEvent[] };
 
 function apiError(response: Response, payload: ManusTaskResponse) {
@@ -110,19 +110,45 @@ function assistantText(message: ManusMessageEvent) {
     .trim();
 }
 
+function assistantSignature(message: ManusMessageEvent, text: string) {
+  return message.id ? `id:${message.id}` : `content:${text}`;
+}
+
+/** Retorna somente uma resposta assistant que não existia no snapshot anterior. */
+export function findNewAssistantReply(before: ManusMessageEvent[], after: ManusMessageEvent[]) {
+  const previousCounts = new Map<string, number>();
+  for (const message of before) {
+    if (message.type !== "assistant_message") continue;
+    const text = assistantText(message);
+    if (!text) continue;
+    const signature = assistantSignature(message, text);
+    previousCounts.set(signature, (previousCounts.get(signature) || 0) + 1);
+  }
+
+  for (const message of after) {
+    if (message.type !== "assistant_message") continue;
+    const text = assistantText(message);
+    if (!text) continue;
+    const signature = assistantSignature(message, text);
+    const previousCount = previousCounts.get(signature) || 0;
+    if (previousCount > 0) {
+      previousCounts.set(signature, previousCount - 1);
+      continue;
+    }
+    return text;
+  }
+  return null;
+}
+
 /** Encaminha uma mensagem do SCP para a tarefa Manus e aguarda uma resposta nova. */
 export async function sendManusMessageAndWait(task: NonNullable<LocalTask>, text: string) {
   const before = await listManusMessages(task);
-  const beforeIds = new Set(before.map((message) => message.id).filter(Boolean));
   await sendManusMessage(task, text);
 
   for (let attempt = 0; attempt < 8; attempt += 1) {
     await new Promise((resolve) => setTimeout(resolve, 1500));
     const messages = await listManusMessages(task);
-    const answer = messages
-      .filter((message) => message.type === "assistant_message" && (!message.id || !beforeIds.has(message.id)))
-      .map(assistantText)
-      .find(Boolean);
+    const answer = findNewAssistantReply(before, messages);
     if (answer) return answer;
   }
 

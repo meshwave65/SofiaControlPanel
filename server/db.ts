@@ -1,4 +1,4 @@
-import { eq, and, desc, isNull, sql } from "drizzle-orm";
+import { eq, and, asc, desc, isNull, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { InsertUser, InsertAgent, users, agents, tasks, messages, activityLogs, contextReports, taskStatuses, taskPriorities, messageTypes, activityEventTypes, arcPolicies, arcAssessments, arcEvidence, arcAccessEvents, arcDeviceProfiles, arcConfidenceSnapshots } from "../drizzle/schema";
@@ -786,11 +786,39 @@ export async function createMessage(data: { taskId: number; senderId: number; pa
   return message;
 }
 
-export async function getMessagesByTaskId(taskId: number) {
+export async function getMessageTypeById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const [messageType] = await db.select().from(messageTypes).where(eq(messageTypes.id, id)).limit(1);
+  return messageType ?? null;
+}
+export async function getMessageByIdForTask(id: number, taskId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const [message] = await db
+    .select()
+    .from(messages)
+    .where(and(eq(messages.id, id), eq(messages.taskId, taskId)))
+    .limit(1);
+  return message ?? null;
+}
+export async function getMessagesByTaskId(taskId: number, limit?: number) {
   const db = await getDb();
   if (!db) return [];
-
-  return db.select().from(messages).where(eq(messages.taskId, taskId)).orderBy(messages.createdAt);
+  if (limit !== undefined) {
+    const recent = await db
+      .select()
+      .from(messages)
+      .where(eq(messages.taskId, taskId))
+      .orderBy(desc(messages.createdAt), desc(messages.id))
+      .limit(limit);
+    return recent.reverse();
+  }
+  return db
+    .select()
+    .from(messages)
+    .where(eq(messages.taskId, taskId))
+    .orderBy(asc(messages.createdAt), asc(messages.id));
 }
 
 export async function getMessagesByParentId(parentMessageId: number) {

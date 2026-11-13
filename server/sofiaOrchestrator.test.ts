@@ -248,6 +248,10 @@ describe("SofiaOrchestrator.factorizeTask", () => {
 
 
 describe("SofiaOrchestrator factorization depth", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it("does not recursively factorize a task that already has a parent", async () => {
     const subtask = {
       id: 6,

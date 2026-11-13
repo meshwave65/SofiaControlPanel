@@ -2,7 +2,7 @@
 
 Este diretório contém somente os espelhos das tarefas/missões operacionais registradas em `sofia.tasks` no Supabase do projeto `ufylccbdjfzydbwhpmpp`.
 
-Atualmente existem 15 arquivos, de `SCP-TASK-000002.md` a `SCP-TASK-000016.md`. Eles correspondem a 15 registros do Supabase, não à série documental `MISSION_0001`–`MISSION_0023`.
+Atualmente existem 17 arquivos operacionais, de `SCP-TASK-000002.md` a `SCP-TASK-000019.md`, com a lacuna histórica do `SCP-TASK-000017`. Eles correspondem aos registros operacionais espelhados do Supabase, não à série documental `MISSION_0001`–`MISSION_0023`.
 
 ## Hierarquia atual
 

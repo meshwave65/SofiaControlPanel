@@ -16,6 +16,7 @@ export default function Messages() {
   const [messageContent, setMessageContent] = useState("");
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [replyToId, setReplyToId] = useState<number | null>(null);
+  const [lastResponseStatus, setLastResponseStatus] = useState<"idle" | "processing" | "replied" | "pending" | "failed">("idle");
 
   const tasksQuery = trpc.tasks.list.useQuery(undefined, {
     enabled: isAuthenticated,
@@ -26,12 +27,20 @@ export default function Messages() {
     { enabled: selectedTaskId !== null, refetchInterval: autoRefresh ? 5000 : false }
   );
   const createMessageMutation = trpc.messages.create.useMutation({
-    onSuccess: () => {
+    onSuccess: (result) => {
       void messagesQuery.refetch();
-      toast.success("Sofia respondeu ao canal operacional.");
+      setLastResponseStatus(result.responseStatus);
+      if (result.responseStatus === "replied") {
+        toast.success("Sofia respondeu ao canal operacional.");
+      } else if (result.responseStatus === "pending") {
+        toast.info("Mensagem persistida e encaminhada; a resposta externa ainda está pendente.");
+      } else {
+        toast.error("Mensagem persistida, mas Sofia não conseguiu responder agora.");
+      }
     },
     onError: (error) => {
       void messagesQuery.refetch();
+      setLastResponseStatus("failed");
       toast.error(error.message || "Não foi possível processar a transmissão.");
     },
   });
@@ -64,6 +73,7 @@ export default function Messages() {
       typeId: 1,
       content: messageContent.trim(),
     });
+    setLastResponseStatus("processing");
     setMessageContent("");
     setReplyToId(null);
   };
@@ -107,6 +117,7 @@ export default function Messages() {
                       onClick={() => {
                         setSelectedTaskId(task.id);
                         setReplyToId(null);
+                        setLastResponseStatus("idle");
                       }}
                       className={`w-full text-left p-4 rounded-none transition-all border-2 ${
                         selectedTaskId === task.id 
@@ -159,8 +170,10 @@ export default function Messages() {
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                      <span className="text-[9px] font-black uppercase text-green-500">Sincronizado</span>
+                      <div className={`w-2 h-2 rounded-full ${lastResponseStatus === "failed" ? "bg-red-500" : lastResponseStatus === "pending" || lastResponseStatus === "processing" ? "bg-amber-500 animate-pulse" : "bg-green-500 animate-pulse"}`}></div>
+                      <span className={`text-[9px] font-black uppercase ${lastResponseStatus === "failed" ? "text-red-500" : lastResponseStatus === "pending" || lastResponseStatus === "processing" ? "text-amber-500" : "text-green-500"}`}>
+                        {lastResponseStatus === "processing" ? "Processando" : lastResponseStatus === "pending" ? "Resposta pendente" : lastResponseStatus === "failed" ? "Falha registrada" : "Sincronizado"}
+                      </span>
                     </div>
                   </div>
 
@@ -236,6 +249,7 @@ export default function Messages() {
                           placeholder="Compor nova transmissão..."
                           value={messageContent}
                           onChange={(e) => setMessageContent(e.target.value)}
+                          maxLength={12000}
                           className="bg-foreground/5 border-2 border-foreground/10 resize-none font-mono text-xs focus:border-accent min-h-[100px] p-4 font-bold"
                         />
                         <div className="absolute bottom-2 right-2 text-[8px] font-black text-muted-foreground uppercase">Modo: Criptografado</div>

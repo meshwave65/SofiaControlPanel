@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { buildSofiaConversation, extractTextContent, normalizeOperatorMessage, OPERATOR_MESSAGE_MAX_LENGTH } from "./messageService";
 
 /**
  * Testes Vitest para database helpers
@@ -49,5 +50,33 @@ describe("Router Type Validation", () => {
     
     expect(routers.appRouter).toBeDefined();
     expect(typeof routers.appRouter).toBe("object");
+  });
+});
+
+describe("Message service - contrato do canal operador/Sofia", () => {
+  it("normaliza espaços e rejeita conteúdo vazio ou acima do limite", () => {
+    expect(normalizeOperatorMessage("  executar diagnóstico  ")).toBe("executar diagnóstico");
+    expect(() => normalizeOperatorMessage("   ")).toThrow("não pode ficar vazia");
+    expect(() => normalizeOperatorMessage("x".repeat(OPERATOR_MESSAGE_MAX_LENGTH + 1)))
+      .toThrow("excede o limite");
+  });
+
+  it("mantém operador e Sofia em papéis distintos no contexto", () => {
+    const context = buildSofiaConversation(
+      { title: "Missão fixture", description: "Validar canal" },
+      [
+        { content: "pergunta do operador", isAssistant: false },
+        { content: "resposta da Sofia", isAssistant: true },
+      ],
+    );
+    expect(context[0]).toMatchObject({ role: "system" });
+    expect(context.slice(1).map((message) => message.role)).toEqual(["user", "assistant"]);
+  });
+
+  it("extrai texto de respostas simples e em blocos", () => {
+    expect(extractTextContent(" resposta ")).toBe("resposta");
+    expect(extractTextContent([{ type: "text", text: "parte 1" }, { type: "text", text: "parte 2" }]))
+      .toBe("parte 1\nparte 2");
+    expect(extractTextContent([{ type: "image_url" }])).toBe("");
   });
 });

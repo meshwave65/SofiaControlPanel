@@ -10,6 +10,7 @@ import { getConsolidatedTaskReport, uploadConsolidatedTaskReport } from "./contr
 import { sendManusMessageAndWait, syncAgentCredits } from "./manusExecutionService";
 import { mirrorTaskToGitHub } from "./githubMissionMirror";
 import { invokeLLM } from "./_core/llm";
+import { buildSofiaConversation, extractTextContent, normalizeOperatorMessage, OPERATOR_MESSAGE_MAX_LENGTH } from "./messageService";
 
 export const appRouter = router({
   system: systemRouter,
@@ -423,10 +424,10 @@ export const appRouter = router({
   messages: router({
     create: protectedProcedure
       .input(z.object({
-        taskId: z.number(),
-        parentMessageId: z.number().optional(),
-        typeId: z.number(),
-        content: z.string().min(1),
+        taskId: z.number().int().positive(),
+        parentMessageId: z.number().int().positive().optional(),
+        typeId: z.number().int().positive(),
+        content: z.string().trim().min(1).max(OPERATOR_MESSAGE_MAX_LENGTH),
       }))
       .mutation(async ({ input, ctx }) => {
         const task = await db.getTaskById(input.taskId);
@@ -434,49 +435,50 @@ export const appRouter = router({
           throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
         }
 
+        const messageType = await db.getMessageTypeById(input.typeId);
+        if (!messageType) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Tipo de mensagem inválido." });
+        }
+        if (input.parentMessageId !== undefined) {
+          const parentMessage = await db.getMessageByIdForTask(input.parentMessageId, input.taskId);
+          if (!parentMessage) {
+            throw new TRPCError({ code: "BAD_REQUEST", message: "A mensagem pai não pertence à missão selecionada." });
+          }
+        }
+
+        const content = normalizeOperatorMessage(input.content);
         const operatorMessage = await db.createMessage({
           taskId: input.taskId,
           senderId: ctx.user.id,
           parentMessageId: input.parentMessageId,
           typeId: input.typeId,
-          content: input.content,
+          content,
         });
-
-        const previousMessages = await db.getMessagesByTaskId(input.taskId);
-        const conversation = previousMessages
-          .filter(message => message.id !== operatorMessage?.id)
-          .slice(-30)
-          .map(message => ({
-            role: message.isAssistant ? "assistant" as const : "user" as const,
-            content: message.content,
-          }));
+        const previousMessages = await db.getMessagesByTaskId(input.taskId, 30);
 
         let assistantContent: string;
+        let responseStatus: "replied" | "pending" | "failed" = "replied";
         try {
           if (task.agentId && task.manusTaskId) {
-            const externalReply = await sendManusMessageAndWait(task, input.content);
+            const externalReply = await sendManusMessageAndWait(task, content);
             assistantContent = externalReply
               ? externalReply
               : "Mensagem encaminhada para a execução Manus, mas ainda não houve resposta. Abra o canal da missão novamente em alguns segundos.";
+            if (!externalReply) responseStatus = "pending";
           } else {
             const response = await invokeLLM({
-              messages: [
-                {
-                  role: "system",
-                  content: `Você é Sofia, a IA operacional do SofiaControlPanel. Responda em português do Brasil, de forma objetiva e útil. A conversa pertence à missão "${task.title}". Descrição da missão: ${task.description || "não informada"}. Não alegue ter executado ações externas; diferencie claramente análise, proposta e ação efetivamente confirmada.`,
-                },
-                ...conversation,
-                { role: "user", content: input.content },
-              ],
+              messages: buildSofiaConversation(task, previousMessages),
             });
-            const content = response.choices?.[0]?.message?.content;
-            assistantContent = typeof content === "string" && content.trim()
-              ? content.trim()
+            const generatedContent = extractTextContent(response.choices?.[0]?.message?.content);
+            assistantContent = generatedContent
+              ? generatedContent
               : "Recebi a mensagem, mas a IA retornou uma resposta vazia.";
+            if (!generatedContent) responseStatus = "failed";
           }
         } catch (error) {
           console.error(`[Messages] Sofia response failed for task ${input.taskId}:`, error);
           assistantContent = "A mensagem foi registrada, mas a Sofia não conseguiu processá-la agora. Verifique a configuração do serviço de IA e tente novamente.";
+          responseStatus = "failed";
         }
 
         const assistantMessage = await db.createMessage({
@@ -488,7 +490,7 @@ export const appRouter = router({
           isAssistant: true,
         });
 
-        return { message: operatorMessage, reply: assistantMessage };
+        return { message: operatorMessage, reply: assistantMessage, responseStatus };
       }),
 
     getByTask: protectedProcedure

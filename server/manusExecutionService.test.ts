@@ -13,6 +13,7 @@ vi.mock("./db", () => dbMock);
 
 import {
   createManusTask,
+  findNewAssistantReply,
   syncAgentCredits,
   syncRunningManusTasks,
 } from "./manusExecutionService";
@@ -123,5 +124,16 @@ describe("manusExecutionService — fluxo controlado de execução", () => {
     await expect(createManusTask({ id: 103, agentId: 7, title: "Sem ID" } as any))
       .rejects.toThrow("A API Manus não retornou task_id.");
     expect(dbMock.updateTaskExecution).not.toHaveBeenCalled();
+  });
+
+  it("não trata resposta assistant antiga como retorno novo sem ID", () => {
+    const before = [
+      { type: "assistant_message", assistant_message: { content: "resposta anterior" } },
+    ];
+    const after = [
+      { type: "assistant_message", assistant_message: { content: "resposta nova" } },
+      ...before,
+    ];
+    expect(findNewAssistantReply(before, after)).toBe("resposta nova");
   });
 });
