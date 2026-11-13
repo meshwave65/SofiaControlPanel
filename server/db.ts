@@ -778,18 +778,19 @@ export async function listArcConfidenceSnapshotsByTask(taskId: number, ownerId: 
 // MESSAGES HELPERS
 // ============================================
 
-export async function createMessage(data: { taskId: number; senderId: number; parentMessageId?: number; typeId: number; content: string }) {
+export async function createMessage(data: { taskId: number; senderId: number; parentMessageId?: number; typeId: number; content: string; isAssistant?: boolean }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  return db.insert(messages).values(data);
+  const [message] = await db.insert(messages).values(data).returning();
+  return message;
 }
 
 export async function getMessagesByTaskId(taskId: number) {
   const db = await getDb();
   if (!db) return [];
 
-  return db.select().from(messages).where(eq(messages.taskId, taskId)).orderBy(desc(messages.createdAt));
+  return db.select().from(messages).where(eq(messages.taskId, taskId)).orderBy(messages.createdAt);
 }
 
 export async function getMessagesByParentId(parentMessageId: number) {
@@ -810,7 +811,7 @@ export async function markMessageAsRead(id: number) {
 // ACTIVITY LOGS HELPERS
 // ============================================
 
-export async function createActivityLog(data: { agentId: number; taskId?: number; eventTypeId: number; details?: string }) {
+export async function createActivityLog(data: { agentId?: number | null; taskId?: number; eventTypeId: number; details?: string }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 

@@ -38,7 +38,7 @@ export default function TaskDetail() {
   const subtasksQuery = trpc.tasks.getChildren.useQuery(
     { taskId },
     {
-      enabled: canLoadTask && Boolean(taskQuery.data) && !taskQuery.data.parentTaskId,
+      enabled: canLoadTask && Boolean(taskQuery.data) && !taskQuery.data?.parentTaskId,
       retry: false,
     },
   );

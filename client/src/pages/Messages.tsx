@@ -26,7 +26,14 @@ export default function Messages() {
     { enabled: selectedTaskId !== null, refetchInterval: autoRefresh ? 5000 : false }
   );
   const createMessageMutation = trpc.messages.create.useMutation({
-    onSuccess: () => messagesQuery.refetch(),
+    onSuccess: () => {
+      void messagesQuery.refetch();
+      toast.success("Sofia respondeu ao canal operacional.");
+    },
+    onError: (error) => {
+      void messagesQuery.refetch();
+      toast.error(error.message || "Não foi possível processar a transmissão.");
+    },
   });
   const tasks = tasksQuery.data || [];
   const allMessages = messagesQuery.data || [];
@@ -59,7 +66,6 @@ export default function Messages() {
     });
     setMessageContent("");
     setReplyToId(null);
-    toast.success("Transmissão enviada com sucesso!");
   };
   if (!isAuthenticated) {
     return (
@@ -165,15 +171,15 @@ export default function Messages() {
                         threadedMessages.map((thread) => (
                           <div key={thread.id} className="space-y-4">
                             {/* Root Message */}
-                            <div className={`flex ${thread.senderId === user?.id ? "justify-end" : "justify-start"}`}>
-                              <div className={`max-w-[85%] space-y-2 ${thread.senderId === user?.id ? "items-end" : "items-start"} flex flex-col`}>
+                            <div className={`flex ${thread.isAssistant ? "justify-start" : "justify-end"}`}>
+                              <div className={`max-w-[85%] space-y-2 ${thread.isAssistant ? "items-start" : "items-end"} flex flex-col`}>
                                 <div className="flex items-center gap-3 mb-1">
-                                  {thread.senderId === user?.id ? <User className="w-3 h-3 text-accent" /> : <Cpu className="w-3 h-3 text-muted-foreground" />}
-                                  <span className="text-[9px] font-black uppercase tracking-widest">{thread.senderId === user?.id ? "Operador" : "Sofia Kernel"}</span>
+                                  {thread.isAssistant ? <Cpu className="w-3 h-3 text-muted-foreground" /> : <User className="w-3 h-3 text-accent" />}
+                                  <span className="text-[9px] font-black uppercase tracking-widest">{thread.isAssistant ? "Sofia Kernel" : "Operador"}</span>
                                   <span className="text-[9px] font-mono opacity-40 font-bold">{new Date(thread.createdAt).toLocaleTimeString()}</span>
                                 </div>
                                 <div className={`px-5 py-4 border-2 ${
-                                  thread.senderId === user?.id 
+                                  !thread.isAssistant
                                     ? "bg-accent/10 border-accent/40 text-foreground" 
                                     : "bg-card border-foreground/10 text-foreground"
                                 }`}>
@@ -190,14 +196,14 @@ export default function Messages() {
 
                             {/* Replies */}
                             {thread.replies.map((reply: any) => (
-                              <div key={reply.id} className={`flex ${reply.senderId === user?.id ? "justify-end" : "justify-start"} ml-12`}>
-                                <div className={`max-w-[85%] space-y-2 ${reply.senderId === user?.id ? "items-end" : "items-start"} flex flex-col`}>
+                              <div key={reply.id} className={`flex ${reply.isAssistant ? "justify-start" : "justify-end"} ml-12`}>
+                                <div className={`max-w-[85%] space-y-2 ${reply.isAssistant ? "items-start" : "items-end"} flex flex-col`}>
                                   <div className="flex items-center gap-3 mb-1">
-                                    <span className="text-[9px] font-black uppercase tracking-widest opacity-60">{reply.senderId === user?.id ? "Operador" : "Sofia Kernel"}</span>
+                                    <span className="text-[9px] font-black uppercase tracking-widest opacity-60">{reply.isAssistant ? "Sofia Kernel" : "Operador"}</span>
                                     <span className="text-[9px] font-mono opacity-40 font-bold">{new Date(reply.createdAt).toLocaleTimeString()}</span>
                                   </div>
                                   <div className={`px-4 py-3 border-l-4 ${
-                                    reply.senderId === user?.id 
+                                    !reply.isAssistant
                                       ? "bg-accent/5 border-accent text-foreground" 
                                       : "bg-foreground/5 border-foreground/20 text-foreground"
                                   }`}>
@@ -236,11 +242,11 @@ export default function Messages() {
                       </div>
                       <Button
                         onClick={handleSendMessage}
-                        disabled={!messageContent.trim()}
+                        disabled={!messageContent.trim() || createMessageMutation.isPending}
                         className="bg-accent text-accent-foreground hover:bg-accent/90 self-stretch px-8 flex flex-col gap-2 font-black uppercase text-[10px] tracking-widest"
                       >
-                        <Send className="w-5 h-5" />
-                        Enviar
+                        {createMessageMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                        {createMessageMutation.isPending ? "Processando" : "Enviar"}
                       </Button>
                     </div>
                   </div>

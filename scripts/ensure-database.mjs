@@ -28,6 +28,7 @@ try {
   );
 
   const columns = [
+    ['isAssistant', 'boolean NOT NULL DEFAULT false'],
     ['agentPinned', 'boolean NOT NULL DEFAULT false'],
     ['creatorType', "varchar(16) NOT NULL DEFAULT 'user'"],
     ['missionKey', 'varchar(64)'],

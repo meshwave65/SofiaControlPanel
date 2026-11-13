@@ -202,7 +202,7 @@ router.post("/message", async (req, res) => {
     res.json({
       success: true,
       message: "Mensagem enviada com sucesso",
-      messageId: (result as any).insertId || result,
+      messageId: result?.id,
     });
   } catch (error) {
     console.error("[Public API] Message error:", error);

@@ -174,6 +174,7 @@ export const messages = sofia.table(
     parentMessageId: integer("parentMessageId"),
     typeId: integer("typeId").notNull(),
     content: text("content").notNull(),
+    isAssistant: boolean("isAssistant").default(false).notNull(),
     isRead: boolean("isRead").default(false).notNull(),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
