@@ -52,6 +52,6 @@ Corrigir estruturalmente o SofiaControlPanel para que mensagens enviadas pelo op
 - `pnpm check`: aprovado.
 - `pnpm build`: aprovado; apenas avisos existentes de chunk grande e baseline-browser-mapping.
 - Commit publicado no GitHub: `92ab7f4c2ddca51a430c26f7d74b2f61a21c3d48`.
-- Registro Supabase atualizado: `githubPath=missions/SCP-TASK-000019.md`, `githubSha=92ab7f4c2ddca51a430c26f7d74b2f61a21c3d48`, `githubSyncStatus=synced`.
+- Registro Supabase atualizado: `githubPath=missions/SCP-TASK-000019.md`, `githubSyncStatus=synced`; o SHA do último conteúdo publicado é mantido no registro operacional.
 - `pnpm test`: 6 arquivos e 27 testes aprovados, incluindo o fluxo `messages.create`; o isolamento do teste preexistente de fatoração foi corrigido para eliminar falso negativo entre casos.
 - Ensaio real com credencial Manus/LLM não executado, conforme o gate do blueprint; não houve consumo de créditos nem gravação de mensagens de teste no Supabase.
