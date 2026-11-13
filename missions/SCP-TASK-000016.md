@@ -1,6 +1,6 @@
-# Sincronizar missões no Supabase e no GitHub
+# sincronzar missões no supabase e no github
 
-> Espelho operacional provisório do SofiaControlPanel. A fonte executável é o registro da tarefa no Supabase; este arquivo é a fonte versionada de proveniência e contexto.
+> Espelho operacional do SofiaControlPanel. A fonte executável é o registro da tarefa no Supabase; este arquivo é a fonte versionada de proveniência e contexto.
 
 ## Metadata
 
@@ -8,30 +8,20 @@
 | --- | --- |
 | missionKey | SCP-TASK-000016 |
 | taskId | 16 |
-| source | Solicitação da Missão Sofia #16 |
-| mirrorState | provisional-github-only |
-| statusId | não verificado — acesso ao Supabase indisponível nesta execução |
-| priorityId | não verificado — acesso ao Supabase indisponível nesta execução |
-| parentTaskId | não verificado — acesso ao Supabase indisponível nesta execução |
+| source | SofiaControlPanel interface |
+| creator | info@meshwave.com.br |
+| creatorType | user |
+| status | PROGRESS |
+| statusId | 2 |
+| priority | Crítica |
+| priorityId | 4 |
+| parentTaskId |  |
 | githubPath | missions/SCP-TASK-000016.md |
+| mirroredAt | 2026-11-13T00:13:07.521843Z |
 
-## Objetivo
+## Description
 
-Sincronizar as missões e sub-missões entre o Supabase e o diretório `missions` do GitHub, eliminando o descompasso entre as duas fontes.
-
-## Escopo
-
-1. Auditar o conjunto de missões existente no Supabase.
-2. Auditar o conjunto de arquivos existente em `missions/` no GitHub.
-3. Comparar identificadores estáveis, conteúdo, estado, prioridade e relações pai-filho.
-4. Corrigir divergências de forma rastreável, preservando a fonte executável e os vínculos das sub-missões.
-5. Produzir evidências, limitações e próximos passos.
-
-## Estado desta execução
-
-O arquivo foi criado no GitHub como espelho provisório a partir da solicitação recebida. O backfill e a confirmação dos campos executáveis no Supabase permanecem pendentes porque a sessão não possui `DATABASE_URL`, credencial server-side do Supabase nem sessão autenticada no painel publicado.
-
-Não foram inventados status, prioridade, relação pai-filho ou sub-missões. Nenhuma sub-missão foi confirmada nesta execução.
+Existe um discincronismo entre as missões no supabase e em github (diretorio missions), e isto é um problrma... estes dois locais tem de ser espelados em termoos de missões e sub missoes
 
 ## Synchronization contract
 
@@ -39,4 +29,3 @@ Não foram inventados status, prioridade, relação pai-filho ou sub-missões. N
 - GitHub path: `missions/SCP-TASK-000016.md`
 - Alterações de execução e status devem ser persistidas no Supabase e espelhadas neste arquivo.
 - Alterações manuais neste arquivo não executam a missão automaticamente.
-- O campo `mirrorState` deve ser substituído por `synced` somente após backfill/validação no Supabase e confirmação da hierarquia de sub-missões.
