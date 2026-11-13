@@ -32,7 +32,7 @@ Corrigir estruturalmente o SofiaControlPanel para que mensagens enviadas pelo op
 - [x] A interface exibe operador, Sofia, processamento, pendência e falha sem declarar sucesso indevido.
 - [x] O schema Drizzle, a migration `0009_messages_assistant_flag.sql`, o script de garantia e o schema Supabase preservam `isAssistant`.
 - [x] Testes, typecheck e build são executados antes do fechamento; limitações não relacionadas são registradas.
-- [ ] O espelho GitHub e o registro Supabase permanecem vinculados por `missionKey` e `githubPath` — publicação do SHA e atualização do registro ainda são o passo final.
+- [x] O espelho GitHub e o registro Supabase permanecem vinculados por `missionKey` e `githubPath`.
 
 ## Synchronization contract
 
@@ -51,5 +51,7 @@ Corrigir estruturalmente o SofiaControlPanel para que mensagens enviadas pelo op
 - Schema confirmado ao vivo no Supabase: `sofia.messages.isAssistant` existe como `boolean NOT NULL DEFAULT false`; a migration `drizzle/0009_messages_assistant_flag.sql` e `scripts/ensure-database.mjs` mantêm a mesma definição.
 - `pnpm check`: aprovado.
 - `pnpm build`: aprovado; apenas avisos existentes de chunk grande e baseline-browser-mapping.
+- Commit publicado no GitHub: `92ab7f4c2ddca51a430c26f7d74b2f61a21c3d48`.
+- Registro Supabase atualizado: `githubPath=missions/SCP-TASK-000019.md`, `githubSha=92ab7f4c2ddca51a430c26f7d74b2f61a21c3d48`, `githubSyncStatus=synced`.
 - `pnpm test`: 6 arquivos e 27 testes aprovados, incluindo o fluxo `messages.create`; o isolamento do teste preexistente de fatoração foi corrigido para eliminar falso negativo entre casos.
 - Ensaio real com credencial Manus/LLM não executado, conforme o gate do blueprint; não houve consumo de créditos nem gravação de mensagens de teste no Supabase.
