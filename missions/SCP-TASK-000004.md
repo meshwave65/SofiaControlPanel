@@ -11,9 +11,13 @@
 | source | SofiaControlPanel interface |
 | creator | info@meshwave.com.br |
 | creatorType | user |
-| status | STAGED |
+| status | DONE |
+| statusId | 4 |
 | priority | Baixa |
-| mirroredAt | 2026-11-09 |
+| priorityId | 1 |
+| parentTaskId | 3 |
+| githubPath | missions/SCP-TASK-000004.md |
+| mirroredAt | 2026-11-13T00:13:07.521843Z |
 
 ## Description
 
