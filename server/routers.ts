@@ -7,7 +7,7 @@ import * as db from "./db";
 import { SofiaOrchestrator } from "./sofiaOrchestrator";
 import { TRPCError } from "@trpc/server";
 import { getConsolidatedTaskReport, uploadConsolidatedTaskReport } from "./controlPanelStorage";
-import { syncAgentCredits } from "./manusExecutionService";
+import { sendManusMessageAndWait, syncAgentCredits } from "./manusExecutionService";
 import { mirrorTaskToGitHub } from "./githubMissionMirror";
 import { invokeLLM } from "./_core/llm";
 
@@ -453,20 +453,27 @@ export const appRouter = router({
 
         let assistantContent: string;
         try {
-          const response = await invokeLLM({
-            messages: [
-              {
-                role: "system",
-                content: `Você é Sofia, a IA operacional do SofiaControlPanel. Responda em português do Brasil, de forma objetiva e útil. A conversa pertence à missão "${task.title}". Descrição da missão: ${task.description || "não informada"}. Não alegue ter executado ações externas; diferencie claramente análise, proposta e ação efetivamente confirmada.`,
-              },
-              ...conversation,
-              { role: "user", content: input.content },
-            ],
-          });
-          const content = response.choices?.[0]?.message?.content;
-          assistantContent = typeof content === "string" && content.trim()
-            ? content.trim()
-            : "Recebi a mensagem, mas a IA retornou uma resposta vazia.";
+          if (task.agentId && task.manusTaskId) {
+            const externalReply = await sendManusMessageAndWait(task, input.content);
+            assistantContent = externalReply
+              ? externalReply
+              : "Mensagem encaminhada para a execução Manus, mas ainda não houve resposta. Abra o canal da missão novamente em alguns segundos.";
+          } else {
+            const response = await invokeLLM({
+              messages: [
+                {
+                  role: "system",
+                  content: `Você é Sofia, a IA operacional do SofiaControlPanel. Responda em português do Brasil, de forma objetiva e útil. A conversa pertence à missão "${task.title}". Descrição da missão: ${task.description || "não informada"}. Não alegue ter executado ações externas; diferencie claramente análise, proposta e ação efetivamente confirmada.`,
+                },
+                ...conversation,
+                { role: "user", content: input.content },
+              ],
+            });
+            const content = response.choices?.[0]?.message?.content;
+            assistantContent = typeof content === "string" && content.trim()
+              ? content.trim()
+              : "Recebi a mensagem, mas a IA retornou uma resposta vazia.";
+          }
         } catch (error) {
           console.error(`[Messages] Sofia response failed for task ${input.taskId}:`, error);
           assistantContent = "A mensagem foi registrada, mas a Sofia não conseguiu processá-la agora. Verifique a configuração do serviço de IA e tente novamente.";

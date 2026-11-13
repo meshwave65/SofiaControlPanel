@@ -15,7 +15,7 @@ type ManusTaskResponse = {
 };
 
 type LocalTask = Awaited<ReturnType<typeof db.getTaskById>>;
-type ManusMessageEvent = { type?: string; assistant_message?: { content?: string } };
+type ManusMessageEvent = { id?: string; type?: string; assistant_message?: { content?: string | Array<{ type?: string; text?: string }> } };
 type ManusMessagesResponse = ManusTaskResponse & { messages?: ManusMessageEvent[] };
 
 function apiError(response: Response, payload: ManusTaskResponse) {
@@ -88,14 +88,51 @@ export async function sendManusMessage(task: NonNullable<LocalTask>, text: strin
   });
 }
 
-export async function getManusCheckpoint(task: NonNullable<LocalTask>) {
-  if (!task.agentId || !task.manusTaskId) return "";
+async function listManusMessages(task: NonNullable<LocalTask>) {
+  if (!task.agentId || !task.manusTaskId) return [];
   const credentials = await db.getManusCredentialsForAgent(task.agentId);
-  if (!credentials?.manusToken) return "";
-  const response = await manusRequest<ManusMessagesResponse>(credentials.manusToken, `/task.listMessages?task_id=${encodeURIComponent(task.manusTaskId)}&order=desc&limit=20`, { method: "GET" });
-  return (response.messages || [])
+  if (!credentials?.manusToken) return [];
+  const response = await manusRequest<ManusMessagesResponse>(
+    credentials.manusToken,
+    `/task.listMessages?task_id=${encodeURIComponent(task.manusTaskId)}&order=desc&limit=20`,
+    { method: "GET" },
+  );
+  return response.messages || [];
+}
+
+function assistantText(message: ManusMessageEvent) {
+  const content = message.assistant_message?.content;
+  if (typeof content === "string") return content.trim();
+  return (content || [])
+    .filter((part) => part.type === "text" && part.text)
+    .map((part) => part.text)
+    .join("\n")
+    .trim();
+}
+
+/** Encaminha uma mensagem do SCP para a tarefa Manus e aguarda uma resposta nova. */
+export async function sendManusMessageAndWait(task: NonNullable<LocalTask>, text: string) {
+  const before = await listManusMessages(task);
+  const beforeIds = new Set(before.map((message) => message.id).filter(Boolean));
+  await sendManusMessage(task, text);
+
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    const messages = await listManusMessages(task);
+    const answer = messages
+      .filter((message) => message.type === "assistant_message" && (!message.id || !beforeIds.has(message.id)))
+      .map(assistantText)
+      .find(Boolean);
+    if (answer) return answer;
+  }
+
+  return null;
+}
+
+export async function getManusCheckpoint(task: NonNullable<LocalTask>) {
+  return (await listManusMessages(task))
     .filter((item) => item.type === "assistant_message" && item.assistant_message?.content)
-    .map((item) => item.assistant_message!.content!)
+    .map((item) => assistantText(item))
     .join("\n\n")
     .slice(0, 18000);
 }
