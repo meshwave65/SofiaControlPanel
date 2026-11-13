@@ -68,6 +68,14 @@ sofia
 
 Esse isolamento foi necessário porque o banco já continha tabelas legadas em `public`, como `messages`, `message_types` e `task_priorities`, com estrutura incompatível.
 
+### Contexto histórico de contas e migração MWN
+
+O ambiente Supabase foi historicamente utilizado como base para vários projetos sob a conta `meshwave65`. Por isso, a presença de tabelas no mesmo projeto não prova que elas pertençam ao SofiaControlPanel: o catálogo reúne estruturas do SCP, MeshWave, MWN, integrações e legados.
+
+Foi iniciada uma migração da estrutura MWN para uma nova conta/projeto `mwn`, mas ela permaneceu parcial. O ponto mais sensível e ainda não esclarecido é a transferência de `auth.users` e dos usuários dependentes, juntamente com perfis, UUIDs, sessões, referências, triggers e funções. Até a reconciliação dessa migração, tabelas públicas antigas devem ser tratadas como estruturas potencialmente compartilhadas ou retidas no ambiente histórico, não como componentes automaticamente pertencentes ao SCP.
+
+Esse histórico também muda a interpretação do RLS: a ausência de RLS em uma tabela pública não é, isoladamente, prova de uma falha específica do SCP, mas tampouco deve ser considerada segura. Ela deve ser analisada junto com o proprietário funcional, consumidores, estado de migração e exposição efetiva. O mapa relacional e os relatórios de auditoria permanecem os registros técnicos para esse diagnóstico; nenhuma política deve ser alterada indiscriminadamente durante a investigação.
+
 ### Tabelas criadas em `sofia`
 
 - `users`
