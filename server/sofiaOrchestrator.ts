@@ -18,7 +18,7 @@ export class SofiaOrchestrator {
     const progressStatusId = await db.getTaskStatusIdByName(STATUS_PROGRESS);
     const results: Array<{ taskId: number; action: string; agentId: number }> = [];
     for (const task of waiting) {
-      if (!(await db.hasValidatedMissionTR(task.id))) {
+      if (!(await db.hasExecutionReadyMissionDocuments(task.id))) {
         console.warn(`[Orchestrator] Resume bloqueado para missão ${task.id}: TR não validado.`);
         continue;
       }
@@ -90,7 +90,7 @@ export class SofiaOrchestrator {
    * retomar uma fatoração interrompida sem duplicar subtarefas já persistidas.
    */
   static async factorizeTask(task: any): Promise<number[]> {
-    if (!(await db.hasValidatedMissionTR(task.id))) {
+    if (!(await db.hasExecutionReadyMissionDocuments(task.id))) {
       throw new Error("Fatoração bloqueada: a missão principal ainda não possui TR validado.");
     }
     if (task.parentTaskId != null) {
@@ -188,7 +188,7 @@ export class SofiaOrchestrator {
     if (task.statusId !== stagedStatusId) {
       return { task, started: false, factorized: false, subtaskIds: [] };
     }
-    if (!(await db.hasValidatedMissionTR(taskId))) {
+    if (!(await db.hasExecutionReadyMissionDocuments(taskId))) {
       throw new Error("Execução bloqueada: a missão ainda não possui um TR validado e publicado.");
     }
 
@@ -218,7 +218,7 @@ export class SofiaOrchestrator {
     const task = await db.getTaskById(taskId);
     if (!task) return null;
 
-    if (!(await db.hasValidatedMissionTR(taskId))) {
+    if (!(await db.hasExecutionReadyMissionDocuments(taskId))) {
       throw new Error("Execução bloqueada: a missão não possui TR validado. Subtarefas herdam a validação da missão principal.");
     }
 
