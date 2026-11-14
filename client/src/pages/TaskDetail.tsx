@@ -71,9 +71,53 @@ export default function TaskDetail() {
     { taskId },
     { enabled: canLoadTask && Boolean(taskQuery.data), retry: false },
   );
+  const documentsQuery = trpc.tasks.documents.list.useQuery(
+    { taskId },
+    { enabled: canLoadTask && Boolean(taskQuery.data), retry: false },
+  );
+  const [selectedDocumentId, setSelectedDocumentId] = useState<number | null>(null);
+  const [trCorrection, setTrCorrection] = useState("");
+  const documents = documentsQuery.data ?? [];
+  const selectedDocument = documents.find((document) => document.id === selectedDocumentId)
+    ?? documents.find((document) => document.typeKey === "TR")
+    ?? documents[0];
+  const selectedDocumentVersionQuery = trpc.tasks.documents.getVersion.useQuery(
+    {
+      taskId,
+      documentId: selectedDocument?.id ?? 0,
+      version: selectedDocument?.latestVersion?.version ?? 0,
+    },
+    { enabled: canLoadTask && Boolean(selectedDocument?.latestVersion), retry: false },
+  );
+  const reviseInitialTRMutation = trpc.tasks.documents.reviseInitialTR.useMutation({
+    onSuccess: async () => {
+      await documentsQuery.refetch();
+      toast.success("Correção registrada em nova versão do TR.");
+    },
+    onError: (error) => toast.error(error.message),
+  });
+  const regenerateInitialTRMutation = trpc.tasks.documents.regenerateInitialTR.useMutation({
+    onSuccess: async () => {
+      await documentsQuery.refetch();
+      toast.success("Nova versão inicial do TR gerada pela SOFIA.");
+    },
+    onError: (error) => toast.error(error.message),
+  });
+  const validateTRMutation = trpc.tasks.documents.validateTR.useMutation({
+    onSuccess: async () => {
+      await Promise.all([documentsQuery.refetch(), taskQuery.refetch()]);
+      toast.success("TR validado. A missão foi liberada para STAGED.");
+    },
+    onError: (error) => toast.error(error.message),
+  });
 
   const task = taskQuery.data;
   const messages = messagesQuery.data || [];
+
+  useEffect(() => {
+    const content = selectedDocumentVersionQuery.data?.version.content;
+    if (typeof content === "string") setTrCorrection(content);
+  }, [selectedDocumentVersionQuery.data?.version.id]);
 
   useEffect(() => {
     const assessmentNotFound = arcAssessmentQuery.isError
@@ -284,6 +328,122 @@ export default function TaskDetail() {
           </div>
 
           {/* Main Content */}
+          {/* Mission document viewer — TR is the default human-facing view. */}
+          <Card className="cad-card mb-6">
+            <CardHeader className="border-b border-foreground/10">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <CardTitle className="text-xl">Documentos da missão</CardTitle>
+                  <CardDescription className="mt-1">
+                    Contexto, planejamento e registros da missão em um único visualizador.
+                  </CardDescription>
+                </div>
+                <div className="w-full sm:max-w-sm">
+                  <label htmlFor="mission-document-select" className="mb-1 block text-xs text-muted-foreground">Documento</label>
+                  <select
+                    id="mission-document-select"
+                    className="cad-box w-full rounded-md border bg-background px-3 py-2 text-sm"
+                    value={selectedDocument?.id ?? ""}
+                    onChange={(event) => setSelectedDocumentId(event.target.value ? Number(event.target.value) : null)}
+                    disabled={documentsQuery.isLoading || documents.length === 0}
+                  >
+                    {documents.length === 0 && <option value="">Nenhum documento disponível</option>}
+                    {documents.map((document) => (
+                      <option key={document.id} value={document.id}>
+                        {document.typeLabel} — {document.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-5">
+              {documentsQuery.isLoading ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />Carregando documentos...</div>
+              ) : documentsQuery.isError ? (
+                <div className="rounded-md border border-red-500/30 p-4 text-sm text-red-500">
+                  Não foi possível carregar o catálogo documental. {documentsQuery.error.message}
+                </div>
+              ) : !selectedDocument ? (
+                <div className="rounded-md border border-dashed p-5 text-sm text-muted-foreground">
+                  O TR inicial ainda não está disponível. A missão permanece bloqueada para execução até que o documento seja gerado e validado.
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                    <Badge variant="outline">{selectedDocument.typeKey}</Badge>
+                    {selectedDocument.latestVersion ? (
+                      <>
+                        <Badge variant="secondary">v{selectedDocument.latestVersion.version}</Badge>
+                        <Badge variant="outline">{selectedDocument.latestVersion.state}</Badge>
+                        <span>Atualizado em {new Date(selectedDocument.latestVersion.createdAt).toLocaleString()}</span>
+                      </>
+                    ) : <Badge variant="outline">Sem versão publicada</Badge>}
+                  </div>
+                  {selectedDocumentVersionQuery.isLoading ? (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />Carregando versão...</div>
+                  ) : selectedDocumentVersionQuery.isError ? (
+                    <p className="text-sm text-red-500">{selectedDocumentVersionQuery.error.message}</p>
+                  ) : (
+                    <pre className="max-h-[560px] overflow-auto whitespace-pre-wrap break-words rounded-md border bg-muted/20 p-4 font-sans text-sm leading-6 text-foreground">
+                      {selectedDocumentVersionQuery.data?.version.content ?? "Conteúdo não disponível."}
+                    </pre>
+                  )}
+                  {selectedDocument.typeKey === "TR" && selectedDocument.latestVersion?.state === "DRAFT" && (
+                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-amber-500/30 bg-amber-500/5 p-3">
+                      <p className="text-sm text-amber-600">A geração cognitiva do TR está pendente. A execução continua bloqueada.</p>
+                      <Button
+                        variant="outline"
+                        onClick={() => regenerateInitialTRMutation.mutate({ taskId })}
+                        disabled={regenerateInitialTRMutation.isPending}
+                      >
+                        {regenerateInitialTRMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Tentar gerar TR novamente
+                      </Button>
+                    </div>
+                  )}
+                  {selectedDocument.typeKey === "TR" && ["DRAFT", "AWAITING_HUMAN_VALIDATION"].includes(selectedDocument.latestVersion?.state ?? "") && (
+                    <div className="space-y-3 rounded-md border p-4">
+                      <div>
+                        <p className="text-sm font-semibold">Revisão do operador</p>
+                        <p className="mt-1 text-xs text-muted-foreground">Edite o entendimento da SOFIA. Salvar cria uma nova versão e mantém a anterior no histórico.</p>
+                      </div>
+                      <Textarea
+                        value={trCorrection}
+                        onChange={(event) => setTrCorrection(event.target.value)}
+                        rows={10}
+                        className="font-mono text-xs leading-5"
+                        disabled={selectedDocument.latestVersion?.state === "DRAFT"}
+                      />
+                      <div className="flex flex-wrap justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => reviseInitialTRMutation.mutate({ taskId, content: trCorrection })}
+                          disabled={selectedDocument.latestVersion?.state !== "AWAITING_HUMAN_VALIDATION" || reviseInitialTRMutation.isPending || !trCorrection.trim()}
+                        >
+                          {reviseInitialTRMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          Salvar correção
+                        </Button>
+                        <Button
+                          onClick={() => validateTRMutation.mutate({ taskId })}
+                          disabled={selectedDocument.latestVersion?.state !== "AWAITING_HUMAN_VALIDATION" || validateTRMutation.isPending}
+                        >
+                          {validateTRMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          Validar TR e liberar missão
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                  {selectedDocument.typeKey === "TR" && ["VALIDATED", "ACTIVE", "REORIENTED"].includes(selectedDocument.latestVersion?.state ?? "") && (
+                    <p className="rounded-md border border-green-500/30 p-3 text-sm text-green-600">
+                      O TR vigente foi validado. A execução está autorizada dentro do escopo registrado.
+                    </p>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             {/* Descrição e Ações */}
             <div className="lg:col-span-2">
