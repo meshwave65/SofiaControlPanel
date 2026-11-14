@@ -1,0 +1,2 @@
+skill_name,version,status,source_repo,source_ref,trigger_summary,owner,last_or_id,last_or_status,last_validation
+linkedin-ocint-mapper,1.0.0,ACTIVE,<shared-repository>,<commit-or-tag>,public professional mapping with locks and source registers,<owner>,<OR-ID>,PENDING,NOT_RUN

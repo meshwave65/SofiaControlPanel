@@ -1,0 +1,67 @@
+name: SOFIA validation
+
+on:
+  push:
+    branches:
+      - feat/sofia-cognitive-control-plane
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  application:
+    name: TypeScript, tests and production build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: TypeScript check
+        run: pnpm check
+      - name: Unit tests
+        run: pnpm test
+      - name: Production build
+        run: pnpm build
+
+  migration:
+    name: PostgreSQL migration 0010 syntax and DDL
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: sofia_migration_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d sofia_migration_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Prepare isolated prerequisite schema
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d sofia_migration_test -v ON_ERROR_STOP=1 -f scripts/ci/mission-document-migration-fixture.sql
+      - name: Apply migration 0010 to disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d sofia_migration_test -v ON_ERROR_STOP=1 -f drizzle/0010_mission_document_catalog.sql

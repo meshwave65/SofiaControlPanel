@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Sofia Control Panel</title>
+  <desc id="desc">Ícone hexagonal do painel Sofia</desc>
+  <rect width="64" height="64" rx="14" fill="#0a0f19"/>
+  <path d="M32 8 52 19.5v25L32 56 12 44.5v-25L32 8Z" fill="none" stroke="#72e6c1" stroke-width="4"/>
+  <path d="m22 25 10-6 10 6v14l-10 6-10-6V25Z" fill="#72e6c1" fill-opacity=".18" stroke="#72e6c1" stroke-width="3"/>
+  <circle cx="32" cy="32" r="5" fill="#72e6c1"/>
+</svg>

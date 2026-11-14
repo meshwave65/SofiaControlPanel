@@ -1,0 +1,11 @@
+{
+  "master_id": "<MASTER_ID>",
+  "contact": "<FULL_NAME>",
+  "agent": "<AGENT_ID>",
+  "environment": "<ENVIRONMENT_ID>",
+  "timestamp_utc": "<ISO-8601-UTC>",
+  "commit_base": "<SHORT_COMMIT>",
+  "state": "IN_PROGRESS",
+  "scope": "generic professional identity/source mapping only; no project convergence evaluation",
+  "lock_protocol": "<REPOSITORY_PROTOCOL_PATH>"
+}
