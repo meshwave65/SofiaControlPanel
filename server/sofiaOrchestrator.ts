@@ -281,11 +281,10 @@ export class SofiaOrchestrator {
       }
 
       // No eligible agent: keep the mission STAGED. Heartbeat retries when credits/status change.
-      await db.updateTaskExecution(taskId, {
-        manusStatus: latestTask.agentPinned ? "waiting_for_pinned_agent" : "waiting_for_available_agent",
-      });
+      const waitingStatus = latestTask.agentPinned ? "waiting_for_pinned_agent" : "waiting_for_available_agent";
+      await db.updateTaskExecution(taskId, { manusStatus: waitingStatus });
       return {
-        task: await db.getTaskById(taskId),
+        task: { ...latestTask, manusStatus: waitingStatus },
         started: false,
         factorized: false,
         subtaskIds: [],
