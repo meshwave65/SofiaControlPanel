@@ -54,11 +54,12 @@ export default function Tasks() {
 
   const utils = trpc.useUtils();
   const createTaskMutation = trpc.tasks.create.useMutation({
-    onSuccess: async () => {
+    onSuccess: async (createdTask) => {
       await utils.tasks.list.invalidate();
-      toast.success("Tarefa criada com sucesso");
+      toast.success("Missão criada em PAUSED. Revise o TR inicial para liberar a execução.");
       setIsOpen(false);
       form.reset();
+      navigate(`/tasks/${createdTask.id}`);
     },
     onError: (error) => toast.error(`Erro ao criar tarefa: ${error.message}`),
   });
