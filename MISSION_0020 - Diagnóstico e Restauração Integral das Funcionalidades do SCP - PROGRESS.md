@@ -291,3 +291,6 @@ A procedure genérica de status foi endurecida: a promoção para `PROGRESS` é 
 ### Incremento C — pipeline de validação reproduzível (2026-11-14)
 
 Foi criado workflow dedicado para executar `pnpm check`, `pnpm test`, `pnpm build` com dependências congeladas e validar a migration 0010 em PostgreSQL 16 descartável, usando fixture isolado de pré-requisitos. O resultado do workflow ainda não foi confirmado nesta etapa. A migration não foi aplicada a banco persistente; nenhum deploy, restart, dispatch, chamada real a LLM/Manus ou consumo de créditos ocorreu. Task 20.3/Mateus permanece intocada. OR-20261114-0030.
+
+
+- CI parcial: migration 0010 passou em PostgreSQL 16 descartável, incluindo criação de tabelas, políticas, catálogo e triggers. O job da aplicação não chegou ao check/test/build por conflito de versão pnpm duplicada no workflow; conflito removido, aguardando nova execução. Sem conexão ou alteração de banco persistente. OR-20261114-0030.
