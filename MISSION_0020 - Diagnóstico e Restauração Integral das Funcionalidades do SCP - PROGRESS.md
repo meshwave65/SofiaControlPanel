@@ -137,3 +137,11 @@ Esta matriz é preliminar: ações marcadas BLOCKED exigem reprodução autentic
 - TaskDetail mantém a mesma condição de iniciar; PROGRESS com manusTaskId existente e PAUSED continuam sem retomada manual. Tasks, orchestrator e heartbeat permanecem iguais no diff consultado; pause/resume/transferência manual seguem sem implementação dedicada.
 - ensure-database continua com lock_timeout 15s e DDL de agentPinned; main não elimina o risco de lock observado.
 - Conclusão: main contém melhoria Messenger ainda não validada, mas não é release candidate integralmente seguro para produção. Nenhum código de produto foi alterado ou implantado.
+
+
+### Checkpoint 20.4 — risco de reserva de agente na fatorização (2026-11-14)
+- Análise estática identificou conflito: `startTask` coloca a missão pai em PROGRESS e reserva agente antes de criar subtarefas; `factorizeTask` copia agente e agentPinned do pai para cada filha. A consulta de claim rejeita agente já ocupado por outra missão PROGRESS, inclusive o pai. Mesmo sem conflito com o pai, o primeiro filho em PROGRESS bloqueia o mesmo agente para os demais filhos concorrentes.
+- O comportamento esperado de dispatch automático de todas as subtarefas não está demonstrado pelos testes atuais, que mockam DB/Manus e não validam ocupação real entre pai e filhos. Registrar como risco estático de alta confiança, pendente de confirmar função trigger real e regras de status no banco.
+- Handler de consolidação ainda registra erro somente em console, sem toast visível; também não mostra confirmação explícita de sucesso.
+- Próximo passo: localizar/inspecionar trigger real e criar testes determinísticos para 1 agente, múltiplas subtarefas, múltiplos agentes e retry parcial. Não alterar reserva sem definir semântica do status do pai.
+- Nenhuma alteração de código, dado de produção, dispatch, chamada externa, deploy ou restart.
