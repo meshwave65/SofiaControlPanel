@@ -1,9 +1,0 @@
--- DEPRECATED: este arquivo descrevia um esquema antigo de MySQL/TiDB.
--- Sofia Control Panel atualmente usa PostgreSQL, com schema definido em drizzle/schema.ts.
--- NÃO execute o SQL legado. Configure DATABASE_URL e aplique o schema com:
---   pnpm db:push
---
--- Variáveis de runtime para autenticação Supabase:
---   SUPABASE_URL e SUPABASE_ANON_KEY
--- Para conceder o papel admin inicial, configure OWNER_OPEN_ID com o UUID do usuário
--- Supabase Auth proprietário antes do primeiro login.

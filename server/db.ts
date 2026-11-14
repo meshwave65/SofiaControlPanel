@@ -307,7 +307,7 @@ export async function createTask(data: {
   const result = await db.insert(tasks).values({
     ...data,
     creatorType: data.creatorType ?? "user",
-    agentPinned: data.agentPinned ?? data.agentId !== undefined,
+    agentPinned: data.agentPinned ?? false,
   }).returning({ id: tasks.id });
 
   const taskId = result[0]?.id;
@@ -341,7 +341,7 @@ export async function createMissionWithInitialDocuments(input: {
       .values({
         ...input.task,
         creatorType: input.task.creatorType ?? "user",
-        agentPinned: input.task.agentPinned ?? input.task.agentId !== undefined,
+        agentPinned: input.task.agentPinned ?? false,
       })
       .returning();
 
@@ -1531,6 +1531,122 @@ export async function createMissionDocumentRevision(input: {
 
     await transaction
       .update(missionDocuments)
+      .set({ updatedAt: new Date() })
+      .where(eq(missionDocuments.id, document.id));
+
+    return createdVersion;
+  });
+}
+
+
+/**
+ * Atomically reorients a human-origin mission before its first external execution.
+ * The task row lock serializes this operation against the STAGED -> PROGRESS claim.
+ */
+export async function reorientMissionTRBeforeExecution(input: {
+  taskId: number;
+  documentId: number;
+  ownerId: number;
+  content: string;
+}) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+
+  return database.transaction(async (transaction) => {
+    const [task] = await transaction
+      .select({
+        id: tasks.id,
+        createdBy: tasks.createdBy,
+        parentTaskId: tasks.parentTaskId,
+        statusId: tasks.statusId,
+        manusTaskId: tasks.manusTaskId,
+        manusStatus: tasks.manusStatus,
+      })
+      .from(tasks)
+      .where(and(eq(tasks.id, input.taskId), eq(tasks.createdBy, input.ownerId)))
+      .limit(1)
+      .for("update");
+
+    if (!task || task.parentTaskId !== null) {
+      throw new Error("Only the mission owner can reorient a top-level mission TR");
+    }
+    if (task.manusTaskId || task.manusStatus !== "awaiting_tr_validation") {
+      throw new Error("Mission has already left the initial execution gate");
+    }
+
+    const statuses = await transaction
+      .select({ id: taskStatuses.id, name: taskStatuses.name })
+      .from(taskStatuses)
+      .where(sql`upper(${taskStatuses.name}) in ('PAUSED', 'STAGED')`);
+    const pausedStatusId = statuses.find((status) => status.name.toUpperCase() === "PAUSED")?.id;
+    const allowedStatusIds = statuses.map((status) => status.id);
+    if (!pausedStatusId || !allowedStatusIds.includes(task.statusId)) {
+      throw new Error("TR reorientation is allowed only while the mission is PAUSED or STAGED before execution");
+    }
+
+    const [document] = await transaction
+      .select({
+        id: missionDocuments.id,
+        taskId: missionDocuments.taskId,
+        typeKey: missionDocumentTypes.typeKey,
+        taskOwnerId: tasks.createdBy,
+      })
+      .from(missionDocuments)
+      .innerJoin(tasks, eq(missionDocuments.taskId, tasks.id))
+      .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
+      .where(and(
+        eq(missionDocuments.id, input.documentId),
+        eq(missionDocuments.taskId, task.id),
+        eq(missionDocumentTypes.typeKey, "TR"),
+      ))
+      .limit(1)
+      .for("update");
+
+    if (!document) throw new Error("Canonical mission TR not found");
+
+    const [latest] = await transaction
+      .select({ id: missionDocumentVersions.id, version: missionDocumentVersions.version, state: missionDocumentVersions.state })
+      .from(missionDocumentVersions)
+      .where(eq(missionDocumentVersions.documentId, document.id))
+      .orderBy(desc(missionDocumentVersions.version))
+      .limit(1);
+
+    if (!latest || !["DRAFT", "AWAITING_HUMAN_VALIDATION", "VALIDATED", "ACTIVE", "REORIENTED"].includes(latest.state)) {
+      throw new Error("Current TR state does not allow pre-execution reorientation");
+    }
+
+    // Move STAGED back to PAUSED while holding the same task lock used by the dispatcher claim.
+    if (task.statusId !== pausedStatusId) {
+      await transaction.update(tasks)
+        .set({ statusId: pausedStatusId, manusStatus: "awaiting_tr_validation", updatedAt: new Date() })
+        .where(eq(tasks.id, task.id));
+    }
+
+    await validateMissionDocumentAuthor(transaction, document.taskOwnerId, {
+      authorType: "HUMAN",
+      authorUserId: input.ownerId,
+    });
+
+    const [createdVersion] = await transaction
+      .insert(missionDocumentVersions)
+      .values({
+        documentId: document.id,
+        version: latest.version + 1,
+        state: "AWAITING_HUMAN_VALIDATION",
+        content: input.content,
+        authorType: "HUMAN",
+        authorUserId: input.ownerId,
+        provenance: {
+          origin: "HUMAN",
+          action: "operator_reorientation_before_execution",
+          supersedesVersion: latest.version,
+        },
+        changeSummary: "Reorientação do operador antes da primeira execução; nova validação obrigatória",
+        publishedAt: new Date(),
+      })
+      .returning();
+
+    await transaction.update(missionDocuments)
       .set({ updatedAt: new Date() })
       .where(eq(missionDocuments.id, document.id));
 

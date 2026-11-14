@@ -399,9 +399,8 @@ export const appRouter = router({
           const task = await db.getTaskById(input.taskId);
           if (!task || task.createdBy !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND", message: "Somente o operador que criou a missão pode corrigir ou validar seu TR." });
           if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR pertence à missão principal; tarefas-filhas não podem alterá-lo." });
-          const pausedStatusId = await db.getTaskStatusIdByName("PAUSED");
-          if (task.statusId !== pausedStatusId || task.manusTaskId || task.manusStatus !== "awaiting_tr_validation") {
-            throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A revisão do TR só é permitida antes da primeira execução, enquanto a missão estiver no gate inicial de validação." });
+          if (task.manusTaskId || task.manusStatus !== "awaiting_tr_validation") {
+            throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A revisão do TR só é permitida antes da primeira execução externa." });
           }
           const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, false);
           const tr = docs.find((document) => document.typeKey === "TR" && document.documentKey === "TR");
@@ -411,15 +410,20 @@ export const appRouter = router({
           if (!tr?.latestVersion || (!["DRAFT", "AWAITING_HUMAN_VALIDATION"].includes(tr.latestVersion.state) && !canReorientBeforeExecution)) {
             throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR só pode ser corrigido antes da primeira execução; após validação, a reorientação exige missão ainda PAUSED e sem execução externa." });
           }
-          return db.createMissionDocumentRevision({
-            taskId: input.taskId, documentId: tr.id, ownerId: ctx.user.id, canViewAll: ctx.user.role === "admin",
-            version: {
-              content: input.content, state: "AWAITING_HUMAN_VALIDATION", authorType: "HUMAN", authorUserId: ctx.user.id,
-              provenance: { origin: "HUMAN", action: canReorientBeforeExecution ? "operator_reorientation_before_execution" : "operator_correction", supersedesVersion: tr.latestVersion.version },
-              changeSummary: canReorientBeforeExecution ? "Reorientação do operador antes da primeira execução; nova validação obrigatória" : "Correção do operador; aguardando validação explícita",
-              publishedAt: new Date(),
-            },
-          });
+          try {
+            return await db.reorientMissionTRBeforeExecution({
+              taskId: input.taskId,
+              documentId: tr.id,
+              ownerId: ctx.user.id,
+              content: input.content,
+            });
+          } catch (error) {
+            throw new TRPCError({
+              code: "PRECONDITION_FAILED",
+              message: error instanceof Error ? error.message : "Não foi possível reorientar o TR antes da execução.",
+              cause: error,
+            });
+          }
         }),
       regenerateInitialTR: protectedProcedure.input(z.object({ taskId: z.number().int().positive() })).mutation(async ({ input, ctx }) => {
         const task = await db.getTaskById(input.taskId);

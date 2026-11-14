@@ -336,7 +336,7 @@ export default function TaskDetail() {
   const operationalReports = messages.filter(m => m.typeId === 2); // OperationalReport type
   const currentStatusName = statuses.find((status) => status.id === task.statusId)?.name.toUpperCase();
   const canStartExecution = currentStatusName === "STAGED" && !task.manusTaskId;
-  const canReorientTR = currentStatusName === "PAUSED" && !task.manusTaskId && task.manusStatus === "awaiting_tr_validation" && task.parentTaskId == null;
+  const canReorientTR = ["PAUSED", "STAGED"].includes(currentStatusName ?? "") && !task.manusTaskId && task.manusStatus === "awaiting_tr_validation" && task.parentTaskId == null;
   const canFactorize = task.parentTaskId == null && ["STAGED", "PROGRESS"].includes(currentStatusName ?? "") && blueprintReady;
 
   return (
