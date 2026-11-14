@@ -65,8 +65,8 @@ export default function TaskCreate() {
 
       setSuccess(true);
       setTimeout(() => {
-        navigate("/tasks");
-      }, 1500);
+        navigate("/tasks/" + result.id);
+      }, 1200);
     } catch (error) {
       console.error("Erro ao criar tarefa:", error);
       alert("Erro ao criar tarefa. Tente novamente.");
