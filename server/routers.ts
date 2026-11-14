@@ -44,10 +44,11 @@ async function generateInitialMissionBlueprint(title: string, trVersion: number,
         "Não amplie objetivo, escopo, entregáveis, permissões, orçamento, recursos ou prazos além do que está explícito no TR.",
         "Não invente credenciais, ferramentas autorizadas, agentes, custos, limites ou dependências.",
         "Quando faltar informação necessária, marque como BLOQUEIO/PENDÊNCIA e não presuma autorização.",
-        "Inclua: identificação e versão exata do TR de origem; objetivo operacional; escopo e exclusões; premissas; etapas/unidades de trabalho; dependências e paralelismo; perfil/capacidade do executor; entradas e contexto autorizado; restrições e riscos; critérios objetivos de aceite; evidências exigidas; validação/consolidação; contingência/retry/substituição; pontos que exigem gate humano/política.",
+        "Inclua exatamente estes títulos de seção: Objetivo operacional; Escopo executável; Exclusões e premissas; Etapas e unidades de trabalho; Dependências e paralelismo; Perfil/capacidade do executor; Entradas e contexto autorizado; Restrições e riscos; Critérios objetivos de aceite; Evidências exigidas; Validação e consolidação; Contingência; Bloqueios e gates pendentes.",
         "Cada unidade de trabalho deve ter resultado esperado, pré-condições, entradas, passos, dependências, critério de aceite e evidência.",
         "Se o TR não permite decomposição segura, explique os bloqueios e não invente tarefas.",
-        "Finalize com uma seção 'Verificações determinísticas pendentes'; READY significa somente que a estrutura do plano foi gerada e vinculada, não que gates de risco/orçamento/credenciais foram dispensados."
+        "Na seção Bloqueios e gates pendentes, escreva exatamente 'BLOQUEIOS NÃO RESOLVIDOS: NENHUM' somente se não houver bloqueio de escopo; caso contrário, enumere cada bloqueio explicitamente.",
+        "READY significa somente que a estrutura do plano foi gerada e vinculada; não dispensa verificações de risco, orçamento, credenciais ou elegibilidade do executor."
       ].join("\n") },
       { role: "user", content: "Missão: " + title + "\nVersão do TR de origem: " + trVersion + "\n\nTR validado:\n" + trContent }
     ],
@@ -55,6 +56,20 @@ async function generateInitialMissionBlueprint(title: string, trVersion: number,
   });
   const content = extractTextContent(response.choices?.[0]?.message?.content);
   if (!content.trim()) throw new Error("A SOFIA não retornou conteúdo para o Blueprint.");
+  const requiredSections = [
+    "Objetivo operacional", "Escopo executável", "Exclusões e premissas",
+    "Etapas e unidades de trabalho", "Dependências e paralelismo",
+    "Perfil/capacidade do executor", "Entradas e contexto autorizado",
+    "Restrições e riscos", "Critérios objetivos de aceite", "Evidências exigidas",
+    "Validação e consolidação", "Contingência", "Bloqueios e gates pendentes",
+  ];
+  const missingSections = requiredSections.filter((section) => !content.toLocaleLowerCase().includes(section.toLocaleLowerCase()));
+  if (missingSections.length > 0) {
+    throw new Error("Blueprint incompleto; faltam seções obrigatórias: " + missingSections.join(", "));
+  }
+  if (!content.includes("BLOQUEIOS NÃO RESOLVIDOS: NENHUM")) {
+    throw new Error("Blueprint contém bloqueios não resolvidos ou não declarou explicitamente a ausência deles; execução permanece bloqueada.");
+  }
   return content.trim();
 }
 
@@ -77,7 +92,16 @@ async function persistMissionBlueprint(input: {
     return existing.latestVersion;
   }
 
-  const content = await generateInitialMissionBlueprint(input.title, input.trVersionNumber, input.trContent);
+  const generatedContent = await generateInitialMissionBlueprint(input.title, input.trVersionNumber, input.trContent);
+  const content = [
+    "# Blueprint — " + input.title,
+    "",
+    "**Versão exata do TR de origem:** v" + input.trVersionNumber,
+    "**Registro da versão TR:** #" + input.trVersionId,
+    "**Estado documental:** READY — estrutura gerada e vinculada; gates adicionais permanecem aplicáveis.",
+    "",
+    generatedContent,
+  ].join("\n");
   const version = {
     content,
     state: "READY",
