@@ -152,3 +152,17 @@ MISSION_0023 permanece PROGRESS e mantém seu próprio escopo de integridade ope
 - Monitoramento agregado Vercel consultado após deploy: nenhum erro runtime encontrado na janela retornada. Consulta de logs detalhados não disponível por limite de retenção do plano.
 - Análise de Mercado continua como aba futura independente; ativos de referência não são inseridos no patrimônio.
 - OR: [OR-20261114-0010](../../operational_reports/OR-20261114-0010.md).
+
+## Fila administrativa de créditos FIAT — 2026-11-14
+
+- Diagnóstico: a aba **Créditos FIAT** já existia no Dashboard MWN e `MwexFiatAdminQueue` também, mas faltava a condição JSX para renderizar o componente quando `activeTab === 'fiat'`. A aba ficava vazia.
+- PR #34: https://github.com/meshwave65/newsite/pull/34 — MERGED.
+- Branch: `fix/mwex-fiat-admin-tab-render`; commit `ecebabf4c663d0af6d84c4f1af962cf3a037ff08`; merge commit `9cb7b3308297a4a311f759396a19a68d9e28db39`.
+- Correção limitada a `src/pages/MwcDashboard.jsx`: renderização do componente de fila existente na aba FIAT.
+- Produção Vercel: deployment `dpl_5bEjXYbYGJCLGwm2X6Y7hZWa9rHT` — READY; aliases oficiais `www.meshwave.com.br` e `meshwave.com.br`.
+- Acesso administrativo: `/mwn/operacao` (ou `/mwn/dashboard`) → aba **Créditos FIAT**.
+- Preview READY: `dpl_5VuHGzV9WcGuosPn6Ev1iUKSwB9b`; Preview protegido por Vercel SSO. QA visual autenticado permanece pendente.
+- Build Vite: 210 módulos transformados, 3,60 s; warning não bloqueante de bundle principal acima de 500 kB.
+- Caso Genesis confirmado por consulta read-only: aquisição `5620db80-922d-4b43-830c-b18df8d8c5f2`, código `MWEX-FIAT-442CB186DDFB`, BRL 100,00 via PIX, status `pending_validation`. Referência e comprovante ausentes; saldo PENDING 100, AVAILABLE 0, RESERVED 0. Ledger e audit log contêm somente a solicitação pendente; nenhum evento de pagamento ou confirmação.
+- Nenhuma confirmação/rejeição executada, nenhuma escrita financeira, migration, alteração de banco/RLS/grants/RPC.
+- OR: [OR-20261114-0011](../../operational_reports/OR-20261114-0011.md).
