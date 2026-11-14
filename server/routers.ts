@@ -393,7 +393,7 @@ export const appRouter = router({
         const created = await db.createTask({
           agentId: input.agentId, createdBy: ctx.user.id, title: input.title,
           description: input.description, statusId: pausedStatusId, priorityId: input.priorityId,
-          parentTaskId: input.parentTaskId, dueDate: input.dueDate,
+          parentTaskId: input.parentTaskId, dueDate: input.dueDate, manusStatus: "awaiting_tr_validation",
         });
         const taskId = created[0]?.id;
         if (!taskId) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "A missão não foi persistida." });
