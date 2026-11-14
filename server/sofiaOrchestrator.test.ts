@@ -288,6 +288,7 @@ describe("SofiaOrchestrator.factorizeTask", () => {
 
     const ids = await SofiaOrchestrator.factorizeTask({
       id: 7,
+      statusId: 1,
       title: "PoUW-01",
       description: "Análise detalhada em múltiplas etapas.",
       createdBy: 152,
