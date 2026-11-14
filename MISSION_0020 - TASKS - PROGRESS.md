@@ -208,3 +208,15 @@
 - Missão humana aguardando validação terá correção/validação no próprio TR e indicação inequívoca de execução bloqueada. Missão SOFIA-originada mostrará origem e permitirá inspeção/intervenção sem aprovação humana preliminar.
 - AC-016 registrado na arquitetura/contexto; OR-20261114-0027 criado e indexado.
 - Estado: decisão de UX persistida; UI ainda não implementada. Implementação fica no Incremento D, após APIs e persistência A–C. Sem alterações funcionais/DB/produção/dispatch/LLM/Manus/créditos/deploy/restart. Task 20.3/Mateus intocada.
+
+
+### Checkpoint 20.4 — AC-017: visualizador dinâmico de documentos (2026-11-14)
+
+- Decisão: Gerenciar Missão terá um único visualizador de documentos, com dropdown dinâmico alimentado pelo catálogo e pelas instâncias documentais da missão; não serão criadas abas fixas TR/Blueprint nem uma tela por tipo.
+- TR é selecionado por padrão; Blueprint, ORs, FOR e documentos futuros aparecem somente quando houver instância existente e acessível. A seleção apenas altera o documento exibido.
+- Modelo separa catálogo de tipos (metadados e regras de apresentação) de instâncias documentais (missão, tipo, versão, estado, conteúdo/referência segura, autoria, datas e proveniência). Permite múltiplos ORs ou outras instâncias do mesmo tipo.
+- Descrição original permanece fonte histórica separada; não pode ser tratada como TR nem Blueprint.
+- Segurança de listagem/conteúdo é server-side/RLS; estados de ausência, elaboração, carregamento, erro e acesso negado são distintos.
+- Especificação: governance/architecture/MISSION_DOCUMENT_CATALOG_SPECIFICATION.md; integração registrada nos contratos TR/Blueprint e arquitetura geral. OR-20261114-0028 criado.
+- Estado: contrato de UX/modelo lógico documentado; catálogo, persistência, APIs, RLS e UI ainda não implementados. Próximo passo é incorporar catálogo/instâncias ao desenho físico do Incremento A após verificar schema e ownership reais; UI vem após APIs de leitura.
+- Apenas documentação. Sem código funcional, schema/migration, banco, produção, dispatch, LLM/Manus, créditos, deploy ou restart. Task 20.3/Mateus intocada.
