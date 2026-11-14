@@ -644,8 +644,12 @@ export const appRouter = router({
         if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
           throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
         }
-        const requestedStatus = await db.getTaskStatusNameById(input.statusId);
-        if (requestedStatus?.toUpperCase() === "STAGED" && !(await db.hasExecutionReadyMissionDocuments(input.id))) {
+        const requestedStatus = (await db.getTaskStatusNameById(input.statusId))?.toUpperCase();
+        const currentStatus = (await db.getTaskStatusNameById(task.statusId))?.toUpperCase();
+        if (requestedStatus === "PROGRESS" && currentStatus !== "PROGRESS") {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A transição para PROGRESS é exclusiva do orquestrador após claim atômico ou da retomada de execução externa existente." });
+        }
+        if (requestedStatus === "STAGED" && !(await db.hasExecutionReadyMissionDocuments(input.id))) {
           throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A missão não pode entrar em STAGED sem TR validado e Blueprint READY vinculado à versão vigente." });
         }
         const result = await db.updateTaskStatus(input.id, input.statusId);
