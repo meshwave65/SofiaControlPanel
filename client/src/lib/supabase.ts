@@ -13,15 +13,29 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
-// Keep the current access token in memory. Auth events include INITIAL_SESSION,
-// SIGNED_IN, TOKEN_REFRESHED and SIGNED_OUT, so API transport never needs to
-// re-enter Supabase's session lock while a request is being prepared.
+// Keep the current access token and bootstrap state in memory. Register this
+// listener immediately after createClient so INITIAL_SESSION cannot be missed
+// by React effects that subscribe later.
 let currentAccessToken: string | null = null;
+let authSessionReady = false;
+let hasSupabaseSession = false;
 
 supabase.auth.onAuthStateChange((_event, session) => {
   currentAccessToken = session?.access_token ?? null;
+  hasSupabaseSession = Boolean(session?.access_token);
+  authSessionReady = true;
 });
 
 export function getSupabaseAccessToken(): string | null {
   return currentAccessToken;
+}
+
+export function getSupabaseAuthSnapshot(): {
+  ready: boolean;
+  hasSession: boolean;
+} {
+  return {
+    ready: authSessionReady,
+    hasSession: hasSupabaseSession,
+  };
 }
