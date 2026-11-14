@@ -19,7 +19,7 @@ export class SofiaOrchestrator {
     const results: Array<{ taskId: number; action: string; agentId: number }> = [];
     for (const task of waiting) {
       if (!(await db.hasExecutionReadyMissionDocuments(task.id))) {
-        console.warn(`[Orchestrator] Retomada bloqueada para missão ${task.id}: TR não validado.`);
+        console.warn(`[Orchestrator] Retomada bloqueada para missão ${task.id}: TR/Blueprint não estão elegíveis.`);
         continue;
       }
       const agents = await db.getAllAgentsGlobal();
@@ -91,7 +91,7 @@ export class SofiaOrchestrator {
    */
   static async factorizeTask(task: any): Promise<number[]> {
     if (!(await db.hasExecutionReadyMissionDocuments(task.id))) {
-      throw new Error("Fatoração bloqueada: a missão principal ainda não possui TR validado.");
+      throw new Error("Fatoração bloqueada: a missão principal exige TR validado e Blueprint READY vinculado à versão vigente.");
     }
     if (task.parentTaskId != null) {
       throw new Error("Esta tarefa já é uma subtarefa. A fatoração deve ser feita na missão principal.");
@@ -189,7 +189,7 @@ export class SofiaOrchestrator {
       return { task, started: false, factorized: false, subtaskIds: [] };
     }
     if (!(await db.hasExecutionReadyMissionDocuments(taskId))) {
-      throw new Error("Execução bloqueada: a missão ainda não possui um TR validado e publicado.");
+      throw new Error("Execução bloqueada: a missão exige TR validado e Blueprint READY vinculado à versão vigente.");
     }
 
     const existingSubtasks = await db.getTasksByParentId(taskId);
@@ -223,7 +223,10 @@ export class SofiaOrchestrator {
     }
 
     const stagedStatusId = await db.getTaskStatusIdByName(STATUS_STAGED);
-    const alreadyClaimedWithoutExecution = task.statusId !== stagedStatusId && Boolean(task.agentId) && !task.manusTaskId;
+    const progressStatusId = await db.getTaskStatusIdByName(STATUS_PROGRESS);
+    // Only a task already claimed into PROGRESS may use the recovery path.
+    // PAUSED must never be interpreted as an in-flight claim, even if an agent is assigned.
+    const alreadyClaimedWithoutExecution = task.statusId === progressStatusId && Boolean(task.agentId) && !task.manusTaskId;
     if (task.statusId !== stagedStatusId && !alreadyClaimedWithoutExecution) {
       return {
         task,
@@ -258,7 +261,6 @@ export class SofiaOrchestrator {
       }
     }));
 
-    const progressStatusId = await db.getTaskStatusIdByName(STATUS_PROGRESS);
     const claimedTask = alreadyClaimedWithoutExecution
       ? task
       : await db.claimStagedTaskWithAvailableAgent(taskId, stagedStatusId, progressStatusId);
