@@ -494,7 +494,7 @@ export const appRouter = router({
           throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
         }
         const requestedStatus = await db.getTaskStatusNameById(input.statusId);
-        if (requestedStatus?.toUpperCase() === "STAGED" && !(await db.hasValidatedMissionTR(input.id))) {
+        if (requestedStatus?.toUpperCase() === "STAGED" && !(await db.hasExecutionReadyMissionDocuments(input.id))) {
           throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A missão não pode entrar em STAGED antes da validação explícita do TR." });
         }
         const result = await db.updateTaskStatus(input.id, input.statusId);
@@ -633,7 +633,7 @@ export const appRouter = router({
             if (!task.agentId || !task.manusTaskId) {
               assistantContent = "Entendi que você deseja encaminhar uma instrução, mas esta missão não possui agente atribuído e execução externa identificada. Não enviei a mensagem.";
               responseStatus = "failed";
-            } else if (!(await db.hasValidatedMissionTR(input.taskId))) {
+            } else if (!(await db.hasExecutionReadyMissionDocuments(input.taskId))) {
               assistantContent = "A instrução não foi enviada: a missão ainda não possui TR validado pelo operador responsável.";
               responseStatus = "failed";
             } else {
