@@ -124,7 +124,10 @@ describe("messages.create — persistência e resposta Sofia", () => {
       "Continue a análise a partir do checkpoint."
     );
     expect(result.responseStatus).toBe("replied");
-    expect(result.reply.content).toContain("Checkpoint retomado.");
+    expect(dbMock.createMessage).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      content: expect.stringContaining("Checkpoint retomado."),
+      isAssistant: true,
+    }));
   });
 
   it("responde perguntas pela Sofia sem encaminhá-las automaticamente ao agente", async () => {
