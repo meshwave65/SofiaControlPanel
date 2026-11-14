@@ -76,6 +76,57 @@ describe("messages.create — persistência e resposta Sofia", () => {
     expect(result.reply).toMatchObject({ id: 101, isAssistant: true });
   });
 
+  it("mantém a Sofia como mediadora antes de encaminhar uma instrução explícita ao agente", async () => {
+    dbMock.getTaskById.mockResolvedValue({
+      id: 19,
+      createdBy: 152,
+      title: "Missão fixture",
+      description: "Validar comunicação",
+      agentId: 7,
+      manusTaskId: "manus-task-19",
+      agentPinned: false,
+      manusStatus: "running",
+    });
+    invokeLLMMock.mockResolvedValue({
+      choices: [{
+        message: {
+          role: "assistant",
+          content: null,
+          tool_calls: [{
+            id: "call-forward-1",
+            type: "function",
+            function: {
+              name: "forward_operator_instruction_to_assigned_agent",
+              arguments: JSON.stringify({ message: "Continue a análise a partir do checkpoint." }),
+            },
+          }],
+        },
+      }],
+    });
+    sendManusMessageAndWaitMock.mockResolvedValue("Checkpoint retomado.");
+
+    const result = await appRouter.createCaller(context).messages.create({
+      taskId: 19,
+      typeId: 1,
+      content: "Envie ao agente: continue a análise a partir do checkpoint.",
+    });
+
+    expect(invokeLLMMock).toHaveBeenCalledWith(expect.objectContaining({
+      tools: expect.arrayContaining([
+        expect.objectContaining({
+          function: expect.objectContaining({ name: "forward_operator_instruction_to_assigned_agent" }),
+        }),
+      ]),
+      toolChoice: "auto",
+    }));
+    expect(sendManusMessageAndWaitMock).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 19, agentId: 7, manusTaskId: "manus-task-19" }),
+      "Continue a análise a partir do checkpoint."
+    );
+    expect(result.responseStatus).toBe("replied");
+    expect(result.reply.content).toContain("Checkpoint retomado.");
+  });
+
   it("recusa mensagem pai de outra missão antes de persistir ou chamar a IA", async () => {
     dbMock.getMessageByIdForTask.mockResolvedValue(null);
 
