@@ -294,3 +294,12 @@ Foi criado workflow dedicado para executar `pnpm check`, `pnpm test`, `pnpm buil
 
 
 - CI parcial: migration 0010 passou em PostgreSQL 16 descartável, incluindo criação de tabelas, políticas, catálogo e triggers. O job da aplicação não chegou ao check/test/build por conflito de versão pnpm duplicada no workflow; conflito removido, aguardando nova execução. Sem conexão ou alteração de banco persistente. OR-20261114-0030.
+
+### Checkpoint 20.4 — OR-20261114-0031: correção das falhas do CI (2026-11-14)
+
+- O job de aplicação instalou dependências e passou em `pnpm check`; a suíte executou 41 testes (36 aprovados, 5 falharam). O build foi interrompido pela sequência fail-fast.
+- Corrigido falso positivo do validador de Blueprint que detectava `PENDÊNCIA` dentro da palavra `Dependências`.
+- Corrigido retorno do orquestrador quando não há agente elegível, removendo releitura redundante após a atualização de `manusStatus`.
+- Corrigidos fixtures de `messages.test.ts`: mock da verificação documental e tool call explícito no cenário sem agente. Segurança do fluxo não foi afrouxada.
+- Correções persistidas na branch `feat/sofia-cognitive-control-plane`; novas execuções automáticas aguardando conclusão. Ver OR-20261114-0031.
+- Migration 0010 validada apenas em PostgreSQL descartável. Sem alteração em banco persistente/produção, deploy, restart, dispatch, chamada real LLM/Manus ou consumo de créditos. Task 20.3/Mateus intocada.
