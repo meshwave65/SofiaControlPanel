@@ -164,3 +164,19 @@ A chamada LLM e a chamada Manus existentes só são invocadas pelo fluxo de runt
 - Nenhuma ferramenta ignora ownership, pinagem, estado ou políticas.
 - `pnpm check`, `pnpm test` e `pnpm build` passam antes de integrar.
 - Nenhum deploy, restart, alteração de DB/produção, dispatch ou consumo de créditos sem gate específico.
+
+
+## 13. TR — compreensão, validação e memória evolutiva das missões (AC-014)
+
+Toda missão deve receber um primeiro TR após sua criação e antes da execução. O TR é um documento narrativo vivo, versionado e rastreável que permite compreender origem, motivação, objetivo, escopo, evolução, resultados comprovados, situação atual, decisões, relações e próximos passos.
+
+- **Origem humana:** a SOFIA gera o TR inicial e o apresenta ao operador solicitante. A execução depende da validação explícita do entendimento; o operador pode corrigir ou redirecionar e cada versão é preservada.
+- **Origem SOFIA:** a SOFIA também gera o TR inicial e pode prosseguir sem validação humana preliminar, desde que permaneça dentro das permissões e políticas de autonomia. Deve registrar que a iniciativa e a motivação operacional são do sistema, com evidências.
+- **Intervenção:** o operador pode consultar e reorientar qualquer missão durante sua execução, respeitando os gates de governança aplicáveis.
+- **Integridade:** o TR não inventa motivação ou resultados. Distingue declarações, fatos, decisões, interpretações, hipóteses, reconstruções e dados não localizados. Para missão antiga sem justificativa, declara que a motivação original não foi localizada; reconstrução é sempre rotulada. Resultados realizados exigem evidência.
+- **Ciclo documental:** captura de eventos/fontes, consolidação narrativa e publicação versionada são etapas distintas; versões anteriores não são sobrescritas.
+- **SCP:** ao abrir missão, o TR é a visão principal; tarefas, ORs, checkpoints, decisões, evidências e FOR são detalhamento secundário.
+- **Correlação:** relações entre missões só são apresentadas com fundamento e proveniência. Similaridade de termos não basta.
+- **TR ≠ FOR:** TR atende à compreensão humana e preserva contexto vivo; FOR consolida aprendizado operacional para melhorar a SOFIA.
+
+O contrato completo, estados documentais e critérios de aceite estão em governance/architecture/MISSION_TR_SPECIFICATION.md. Esta definição não presume que geração, versionamento, eventos ou UI já estejam implementados.
