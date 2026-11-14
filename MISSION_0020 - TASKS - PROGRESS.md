@@ -305,3 +305,10 @@
 
 - **Resultado final do CI:** run `43649190436` no commit `ecc45754464511e2d15e567910a97707b46ed7c5` concluiu SUCCESS. `pnpm check` passou; `pnpm test` passou com 41/41 testes; `pnpm build` passou; migration 0010 executou com sucesso em PostgreSQL 16 descartável. OR-20261114-0031 atualizado.
 - A aprovação refere-se ao código e ao fixture descartável. Migration 0010 não foi aplicada a banco persistente/produção. Sem deploy, restart, dispatch, chamadas reais LLM/Manus ou consumo de créditos. PR #15 permanece Draft; Task 20.3/Mateus intocada.
+
+### Checkpoint 20.4 — OR-20261114-0032: revisão final do PR #15 (2026-11-14)
+
+- Revisão final identificou persistência não atômica da missão e dos documentos iniciais; corrigida com `createMissionWithInitialDocuments`, que grava tarefa, ORIGINAL_REQUEST e TR na mesma transação. Espelhamento GitHub passou a ocorrer somente após o commit documental.
+- Corrigido o visualizador: ao trocar o documento, a UI limpa a versão histórica selecionada e retorna à versão vigente do documento escolhido.
+- CI no head `42f059e805427ea2426bb458385849714771d9f1`: runs `43650002480` (push) e `43650006606` (PR) SUCCESS; check, 41/41 testes, build e migration 0010 em PostgreSQL 16 descartável aprovados.
+- PR #15 continua sem merge; pronto para revisão humana. Migration não aplicada a banco persistente; sem deploy/restart/dispatch/LLM/Manus real/créditos. Task 20.3/Mateus intocada. OR-20261114-0032.
