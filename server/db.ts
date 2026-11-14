@@ -353,6 +353,7 @@ export async function createMissionWithInitialDocuments(input: {
       .set({ missionKey, githubSyncStatus: "pending", updatedAt: new Date() })
       .where(eq(tasks.id, insertedTask.id))
       .returning();
+    if (!task) throw new Error("Mission metadata could not be finalized");
 
     const persistInitialDocument = async (
       typeKey: "ORIGINAL_REQUEST" | "TR",
