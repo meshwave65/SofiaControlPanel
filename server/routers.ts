@@ -619,6 +619,9 @@ export const appRouter = router({
             if (!task.agentId || !task.manusTaskId) {
               assistantContent = "Entendi que você deseja encaminhar uma instrução, mas esta missão não possui agente atribuído e execução externa identificada. Não enviei a mensagem.";
               responseStatus = "failed";
+            } else if (!(await db.hasValidatedMissionTR(input.taskId))) {
+              assistantContent = "A instrução não foi enviada: a missão ainda não possui TR validado pelo operador responsável.";
+              responseStatus = "failed";
             } else {
               const externalReply = await sendManusMessageAndWait(task, forwardedMessage);
               assistantContent = externalReply
