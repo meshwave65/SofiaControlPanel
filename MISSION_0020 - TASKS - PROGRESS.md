@@ -60,3 +60,7 @@
 - Factorize é idempotente no orchestrator e a UI refaz consultas, mas não confirma sucesso visualmente; consolidate registra falha apenas no console.
 - messages.test.ts cobre o ramo de resposta LLM interna, não o ramo Manus; sendManusMessageAndWait não tem teste integrado de ciclo before/send/poll/after.
 - Testes atuais são mocks e não substituem validação de banco, trigger, runtime ou conta externa.
+### Matriz preliminar 20.4
+- **FAIL:** Messenger live sem despacho/resposta; retomada manual com manusTaskId existente; pausa operacional dedicada; transferência manual; indicador de conexão não real.
+- **BLOCKED:** listagem/criação/início STAGED/fatorização/consolidação em runtime autenticado; rota Messenger de main ainda não implantada; identidade externa esperada não definida.
+- **Evidência estática:** factorizeTask idempotente; start/claim/dispatch e consolidate têm código presente. Testes atuais são mockados e não substituem integração.
