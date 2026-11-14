@@ -55,3 +55,4 @@
 - Script prestart define lock_timeout=15s e executa ALTER TABLE ... ADD COLUMN IF NOT EXISTS para tasks.agentPinned; o comportamento persiste no código atual. O lock holder não foi identificado.
 - Classificação: timeout DDL no startup = causa imediata confirmada; sessão bloqueadora = desconhecida; startup em 14/11 passou posteriormente.
 - Nenhuma consulta ao banco, escrita, DDL, restart ou deploy foi executado.
+- **Precisão sobre pausa:** tasks.updateStatus genérico existe e aceita statusId; não equivale a pause/resume operacional, pois não define transições nem coordena execução externa. A UI não oferece ação de pausa. Transferência manual segue sem fluxo identificado.
