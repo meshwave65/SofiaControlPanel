@@ -186,3 +186,11 @@ Esta matriz é preliminar: ações marcadas BLOCKED exigem reprodução autentic
 - Pinagem humana impede transferência silenciosa; se o agente fixado ficar impedido, sinalizar ao operador.
 - Missão e papel consolidador persistem; identidade do executor não.
 - Referência: OR-20261114-0018, aditivo de 2026-11-14.
+
+
+## Requisitos em avaliação — Messenger e identificação de execução (2026-11-14)
+- Exibir o **Agent Task ID / Manus Task ID** associado à missão, distinguindo-o do ID local da missão e do Agent ID. Disponibilizar cópia do identificador; quando não houver execução externa, indicar isso explicitamente.
+- Oferecer conversa direta com a conta original do agente, independente de sua atribuição atual a uma missão. O canal deve ser independente do ciclo de execução da missão e utilizar a credencial vinculada ao Agent ID.
+- Manter histórico próprio para a conversa direta e permitir anexar/fornecer contexto de missão de forma explícita e controlada. A conversa não deve alterar automaticamente estado, atribuição, Draft ou conclusão de missão.
+- A API conhecida exige task_id em /task.sendMessage; validar se existe endpoint de inbox ou se será necessária uma execução Manus dedicada e persistente para a conversa direta. Não presumir recebimento em inbox genérica.
+- Classificação: proposta de produto do responsável; desenho técnico pendente. Referência: OR-20261114-0018, aditivo e AC-011. Sem implementação ou chamadas externas nesta etapa.
