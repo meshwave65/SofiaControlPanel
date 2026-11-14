@@ -47,7 +47,7 @@ async function generateInitialMissionBlueprint(title: string, trVersion: number,
         "Inclua exatamente estes títulos de seção: Objetivo operacional; Escopo executável; Exclusões e premissas; Etapas e unidades de trabalho; Dependências e paralelismo; Perfil/capacidade do executor; Entradas e contexto autorizado; Restrições e riscos; Critérios objetivos de aceite; Evidências exigidas; Validação e consolidação; Contingência; Bloqueios e gates pendentes.",
         "Cada unidade de trabalho deve ter resultado esperado, pré-condições, entradas, passos, dependências, critério de aceite e evidência.",
         "Se o TR não permite decomposição segura, explique os bloqueios e não invente tarefas.",
-        "Na seção Bloqueios e gates pendentes, escreva exatamente 'BLOQUEIOS NÃO RESOLVIDOS: NENHUM' somente se não houver bloqueio de escopo; caso contrário, enumere cada bloqueio explicitamente.",
+        "Na seção Bloqueios e gates pendentes, escreva em uma linha isolada exatamente 'BLOQUEIOS NÃO RESOLVIDOS: NENHUM' somente se não houver bloqueio de escopo; caso contrário, enumere cada bloqueio explicitamente.",
         "READY significa somente que a estrutura do plano foi gerada e vinculada; não dispensa verificações de risco, orçamento, credenciais ou elegibilidade do executor."
       ].join("\n") },
       { role: "user", content: "Missão: " + title + "\nVersão do TR de origem: " + trVersion + "\n\nTR validado:\n" + trContent }
@@ -67,8 +67,11 @@ async function generateInitialMissionBlueprint(title: string, trVersion: number,
   if (missingSections.length > 0) {
     throw new Error("Blueprint incompleto; faltam seções obrigatórias: " + missingSections.join(", "));
   }
-  if (!content.includes("BLOQUEIOS NÃO RESOLVIDOS: NENHUM")) {
-    throw new Error("Blueprint contém bloqueios não resolvidos ou não declarou explicitamente a ausência deles; execução permanece bloqueada.");
+  const declaresNoScopeBlockers = content.split(/\\r?\\n/).some(
+    (line) => line.trim().toLocaleUpperCase() === "BLOQUEIOS NÃO RESOLVIDOS: NENHUM"
+  );
+  if (!declaresNoScopeBlockers) {
+    throw new Error("Blueprint contém bloqueios não resolvidos ou não declarou explicitamente a ausência deles em linha própria; execução permanece bloqueada.");
   }
   return content.trim();
 }
