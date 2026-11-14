@@ -291,3 +291,13 @@
 
 
 - Primeiro ciclo CI: migration 0010 executou com sucesso em PostgreSQL 16 descartável. Job da aplicação parou antes da instalação por declaração duplicada da versão pnpm; configuração corrigida para usar o pin do package.json. TypeScript/testes/build aguardam nova execução. O teste descartável não autoriza migração de produção. OR-20261114-0030.
+
+### Checkpoint 20.4 — OR-20261114-0031: diagnóstico e correção das falhas de CI (2026-11-14)
+
+- Analisado o job `132612505589` do run `43647344694`: instalação concluída e `pnpm check` passou; Vitest executou 41 testes, com 36 aprovados e 5 falhas; build não foi executado devido ao fail-fast após falha nos testes.
+- Causa 1 (implementação): validador de Blueprint confundia `Dependências` com `PENDÊNCIA` por busca de substring. Corrigida detecção para respeitar fronteiras de palavra.
+- Causa 2 (implementação): no caminho sem agente elegível, `startTask` fazia uma releitura redundante após persistir `manusStatus`, retornando `undefined` no fixture sem terceira resposta. Agora retorna o registro relido, acrescido do estado persistido.
+- Causa 3 (testes): `messages.test.ts` não mockava `hasExecutionReadyMissionDocuments` e o cenário sem agente não configurava tool call; os fixtures foram corrigidos sem relaxar os gates de segurança.
+- Correções em `server/missionBlueprint.ts`, `server/sofiaOrchestrator.ts` e `server/messages.test.ts`, persistidas na branch da PR #15. OR-20261114-0031.
+- Novas execuções automáticas iniciadas no novo head; resultados ainda pendentes. Não declarar CI aprovado até consultar os jobs completos.
+- Sem alteração de banco persistente, Supabase, produção, deploy, restart, dispatch, chamadas reais LLM/Manus ou créditos. PR #15 permanece Draft. Task 20.3/Mateus intocada.
