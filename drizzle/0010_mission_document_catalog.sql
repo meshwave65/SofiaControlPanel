@@ -121,7 +121,7 @@ ON CONFLICT ("typeKey") DO NOTHING;
 
 -- Execution gate: a validated latest TR plus a READY Blueprint derived from
 -- that exact TR version release the top-level mission. Child tasks inherit it.
-CREATE OR REPLACE FUNCTION sofia.enforce_validated_tr_before_staged()
+CREATE OR REPLACE FUNCTION sofia.enforce_execution_documents_before_staged()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -176,7 +176,7 @@ BEGIN
   RETURN NEW;
 END;
 $function$;
-REVOKE ALL ON FUNCTION sofia.enforce_validated_tr_before_staged() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION sofia.enforce_execution_documents_before_staged() FROM PUBLIC, anon, authenticated;
 DROP TRIGGER IF EXISTS tasks_require_validated_tr ON sofia.tasks;
 CREATE TRIGGER tasks_require_validated_tr BEFORE INSERT OR UPDATE OF "statusId", "agentId" ON sofia.tasks
-  FOR EACH ROW EXECUTE FUNCTION sofia.enforce_validated_tr_before_staged();
+  FOR EACH ROW EXECUTE FUNCTION sofia.enforce_execution_documents_before_staged();
