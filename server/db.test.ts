@@ -43,6 +43,7 @@ describe("Database Helpers - Type Validation", () => {
     expect(typeof db.updateContextReportGitHub).toBe("function");
 
     // Mission documents and execution governance
+    expect(typeof db.getMissionRootTaskId).toBe("function");
     expect(typeof db.hasValidatedMissionTR).toBe("function");
     expect(typeof db.getTaskStatusNameById).toBe("function");
     expect(typeof db.getMissionDocumentTypes).toBe("function");
