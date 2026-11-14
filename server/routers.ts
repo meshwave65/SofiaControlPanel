@@ -417,13 +417,18 @@ export const appRouter = router({
         if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR pertence à missão principal; tarefas-filhas não podem alterá-lo." });
           const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, ctx.user.role === "admin");
           const tr = docs.find((document) => document.typeKey === "TR");
-          if (!tr?.latestVersion || !["DRAFT", "AWAITING_HUMAN_VALIDATION"].includes(tr.latestVersion.state)) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A revisão nesta etapa só é permitida antes da primeira validação do TR." });
+          const canReorientBeforeExecution = tr?.latestVersion?.state === "VALIDATED"
+            && (await db.getTaskStatusNameById(task.statusId))?.toUpperCase() === "PAUSED"
+            && !task.manusTaskId;
+          if (!tr?.latestVersion || (!["DRAFT", "AWAITING_HUMAN_VALIDATION"].includes(tr.latestVersion.state) && !canReorientBeforeExecution)) {
+            throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR só pode ser corrigido antes da primeira execução; após validação, a reorientação exige missão ainda PAUSED e sem execução externa." });
+          }
           return db.createMissionDocumentRevision({
             taskId: input.taskId, documentId: tr.id, ownerId: ctx.user.id, canViewAll: ctx.user.role === "admin",
             version: {
               content: input.content, state: "AWAITING_HUMAN_VALIDATION", authorType: "HUMAN", authorUserId: ctx.user.id,
-              provenance: { origin: "HUMAN", action: "operator_correction", supersedesVersion: tr.latestVersion.version },
-              changeSummary: "Correção do operador; aguardando validação explícita",
+              provenance: { origin: "HUMAN", action: canReorientBeforeExecution ? "operator_reorientation_before_execution" : "operator_correction", supersedesVersion: tr.latestVersion.version },
+              changeSummary: canReorientBeforeExecution ? "Reorientação do operador antes da primeira execução; nova validação obrigatória" : "Correção do operador; aguardando validação explícita",
               publishedAt: new Date(),
             },
           });
