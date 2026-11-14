@@ -12,6 +12,28 @@ import { mirrorTaskToGitHub } from "./githubMissionMirror";
 import { invokeLLM } from "./_core/llm";
 import { buildSofiaConversation, extractTextContent, normalizeOperatorMessage, OPERATOR_MESSAGE_MAX_LENGTH, SOFIA_MESSAGE_TOOLS } from "./messageService";
 
+async function generateInitialMissionTR(title: string, description?: string | null): Promise<string> {
+  const response = await invokeLLM({
+    messages: [
+      { role: "system", content: [
+        "Você é SOFIA, responsável por compreender missões.",
+        "Produza a primeira versão de um TR em português, legível e conciso.",
+        "É uma interpretação inicial, não um relatório de execução: nenhum trabalho foi realizado ainda.",
+        "Não invente motivação, decisões, fatos, resultados, prazos, recursos ou critérios ausentes.",
+        "Separe declaração original, fatos documentados, interpretação da SOFIA, hipóteses e informações desconhecidas.",
+        "Quando a motivação não estiver expressa, declare que não foi informada; não a deduza como fato.",
+        "Inclua origem humana, objetivo compreendido, escopo conhecido, lacunas, critérios apenas se informados e próximos passos propostos.",
+        "A validação humana ainda não ocorreu."
+      ].join("\\n") },
+      { role: "user", content: "Título da missão: " + title + "\\n\\nDescrição original:\\n" + (description?.trim() || "Não foi fornecida descrição adicional.") }
+    ],
+    maxTokens: 5000,
+  });
+  const content = extractTextContent(response.choices?.[0]?.message?.content);
+  if (!content.trim()) throw new Error("A SOFIA não retornou conteúdo para o TR inicial.");
+  return content.trim();
+}
+
 export const appRouter = router({
   system: systemRouter,
   auth: router({
@@ -255,6 +277,63 @@ export const appRouter = router({
   // TASKS ROUTER
   // ============================================
   tasks: router({
+    documents: router({
+      list: protectedProcedure.input(z.object({ taskId: z.number().int().positive() })).query(async ({ input, ctx }) => {
+        const task = await db.getTaskById(input.taskId);
+        if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+        return db.getMissionDocumentsForTask(input.taskId, ctx.user.id, ctx.user.role === "admin");
+      }),
+      getVersion: protectedProcedure.input(z.object({ taskId: z.number().int().positive(), documentId: z.number().int().positive(), version: z.number().int().positive() }))
+        .query(async ({ input, ctx }) => {
+          const result = await db.getMissionDocumentVersionForTask(input.taskId, input.documentId, input.version, ctx.user.id, ctx.user.role === "admin");
+          if (!result) throw new TRPCError({ code: "NOT_FOUND", message: "Versão documental não encontrada." });
+          return result;
+        }),
+      history: protectedProcedure.input(z.object({ taskId: z.number().int().positive(), documentId: z.number().int().positive() }))
+        .query(async ({ input, ctx }) => {
+          const task = await db.getTaskById(input.taskId);
+          if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+          return db.listMissionDocumentVersionsForTask(input.taskId, input.documentId, ctx.user.id, ctx.user.role === "admin");
+        }),
+      reviseInitialTR: protectedProcedure.input(z.object({ taskId: z.number().int().positive(), content: z.string().trim().min(1).max(50000) }))
+        .mutation(async ({ input, ctx }) => {
+          const task = await db.getTaskById(input.taskId);
+          if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+          const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, ctx.user.role === "admin");
+          const tr = docs.find((document) => document.typeKey === "TR");
+          if (!tr?.latestVersion || !["DRAFT", "AWAITING_HUMAN_VALIDATION"].includes(tr.latestVersion.state)) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A revisão nesta etapa só é permitida antes da primeira validação do TR." });
+          return db.createMissionDocumentRevision({
+            taskId: input.taskId, documentId: tr.id, ownerId: ctx.user.id, canViewAll: ctx.user.role === "admin",
+            version: {
+              content: input.content, state: "AWAITING_HUMAN_VALIDATION", authorType: "HUMAN", authorUserId: ctx.user.id,
+              provenance: { origin: "HUMAN", action: "operator_correction", supersedesVersion: tr.latestVersion.version },
+              changeSummary: "Correção do operador; aguardando validação explícita",
+            },
+          });
+        }),
+      validateTR: protectedProcedure.input(z.object({ taskId: z.number().int().positive() })).mutation(async ({ input, ctx }) => {
+        const task = await db.getTaskById(input.taskId);
+        if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+        const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, ctx.user.role === "admin");
+        const tr = docs.find((document) => document.typeKey === "TR");
+        if (!tr?.latestVersion || tr.latestVersion.state !== "AWAITING_HUMAN_VALIDATION") throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Não existe uma versão do TR aguardando validação." });
+        const current = await db.getMissionDocumentVersionForTask(input.taskId, tr.id, tr.latestVersion.version, ctx.user.id, ctx.user.role === "admin");
+        if (!current) throw new TRPCError({ code: "NOT_FOUND", message: "Conteúdo do TR não encontrado." });
+        const validated = await db.createMissionDocumentRevision({
+          taskId: input.taskId, documentId: tr.id, ownerId: ctx.user.id, canViewAll: ctx.user.role === "admin",
+          version: {
+            content: current.version.content, state: "VALIDATED", authorType: "HUMAN", authorUserId: ctx.user.id,
+            provenance: { origin: "HUMAN", action: "explicit_tr_validation", validatedVersion: tr.latestVersion.version },
+            changeSummary: "Validação explícita pelo operador da versão " + tr.latestVersion.version,
+            publishedAt: new Date(),
+          },
+        });
+        const stagedStatusId = await db.getTaskStatusIdByName("STAGED");
+        await db.updateTaskStatus(input.taskId, stagedStatusId);
+        return { validatedVersion: validated.version, statusId: stagedStatusId };
+      }),
+    }),
+
     list: protectedProcedure.query(async ({ ctx }) => {
       return db.getAllTasks(ctx.user.id, ctx.user.role === "admin");
     }),
@@ -274,42 +353,73 @@ export const appRouter = router({
         dueDate: z.date().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
+        // Human-origin missions stay PAUSED until the initial TR is validated.
+        const pausedStatusId = await db.getTaskStatusIdByName("PAUSED");
+        if (!pausedStatusId) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O status PAUSED não está configurado; criação segura bloqueada." });
         const created = await db.createTask({
-          agentId: input.agentId,
-          createdBy: ctx.user.id,
-          title: input.title,
-          description: input.description,
-          statusId: input.statusId,
-          priorityId: input.priorityId,
-          parentTaskId: input.parentTaskId,
-          dueDate: input.dueDate,
+          agentId: input.agentId, createdBy: ctx.user.id, title: input.title,
+          description: input.description, statusId: pausedStatusId, priorityId: input.priorityId,
+          parentTaskId: input.parentTaskId, dueDate: input.dueDate,
         });
         const taskId = created[0]?.id;
         if (!taskId) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "A missão não foi persistida." });
-
         const mirror = await mirrorTaskToGitHub({
-          id: taskId,
-          missionKey: `SCP-TASK-${String(taskId).padStart(6, "0")}`,
-          title: input.title,
-          description: input.description,
-          statusId: input.statusId,
-          priorityId: input.priorityId,
-          parentTaskId: input.parentTaskId,
-          dueDate: input.dueDate,
-          createdBy: ctx.user.id,
-          creatorType: "user",
-          creatorName: ctx.user.name,
-          creatorEmail: ctx.user.email,
+          id: taskId, missionKey: "SCP-TASK-" + String(taskId).padStart(6, "0"),
+          title: input.title, description: input.description, statusId: pausedStatusId,
+          priorityId: input.priorityId, parentTaskId: input.parentTaskId, dueDate: input.dueDate,
+          createdBy: ctx.user.id, creatorType: "user", creatorName: ctx.user.name, creatorEmail: ctx.user.email,
         });
         await db.updateTaskGitHubSync(taskId, {
-          missionKey: mirror.missionKey,
-          githubPath: mirror.path,
-          githubSha: mirror.sha,
-          githubSyncStatus: mirror.status,
-          githubSyncError: mirror.error ?? null,
+          missionKey: mirror.missionKey, githubPath: mirror.path, githubSha: mirror.sha,
+          githubSyncStatus: mirror.status, githubSyncError: mirror.error ?? null,
         });
-
-        return { ...created[0], missionKey: mirror.missionKey, githubPath: mirror.path, githubSyncStatus: mirror.status };
+        const originalContent = [
+          "# Solicitação original — " + input.title, "",
+          "**Origem:** operador humano (usuário #" + ctx.user.id + ")",
+          "**Registrada em:** " + new Date().toISOString(), "",
+          "## Descrição original", input.description?.trim() || "Nenhuma descrição adicional foi fornecida."
+        ].join("\\n");
+        await db.createMissionDocumentWithVersion({
+          taskId, ownerId: ctx.user.id, canViewAll: ctx.user.role === "admin",
+          typeKey: "ORIGINAL_REQUEST", documentKey: "ORIGINAL_REQUEST", title: "Solicitação original",
+          version: {
+            content: originalContent, state: "PUBLISHED", authorType: "HUMAN", authorUserId: ctx.user.id,
+            provenance: { origin: "HUMAN", source: "tasks.create" },
+            changeSummary: "Snapshot imutável da solicitação original",
+          },
+        });
+        let trGenerationError: string | null = null;
+        let trContent: string;
+        let trState = "AWAITING_HUMAN_VALIDATION";
+        try {
+          trContent = await generateInitialMissionTR(input.title, input.description);
+        } catch (error) {
+          trGenerationError = error instanceof Error ? error.message : "Falha ao gerar o TR inicial.";
+          trState = "DRAFT";
+          trContent = [
+            "# TR inicial — " + input.title, "",
+            "**Estado:** DRAFT — geração cognitiva pendente; validação indisponível.",
+            "**Origem:** solicitação humana registrada no documento Solicitação original.", "",
+            "## Informações disponíveis",
+            "- Título declarado: " + input.title,
+            "- Descrição declarada: " + (input.description?.trim() || "Não informada."), "",
+            "## Limite de conhecimento",
+            "A interpretação da SOFIA não foi concluída. Nenhuma motivação, decisão, escopo adicional ou resultado foi presumido."
+          ].join("\\n");
+        }
+        await db.createMissionDocumentWithVersion({
+          taskId, ownerId: ctx.user.id, canViewAll: ctx.user.role === "admin",
+          typeKey: "TR", documentKey: "TR", title: "TR — " + input.title,
+          version: {
+            content: trContent, state: trState, authorType: "SOFIA",
+            provenance: { origin: "HUMAN", source: "tasks.create", originalRequestDocumentKey: "ORIGINAL_REQUEST" },
+            changeSummary: "Primeira compreensão da missão pela SOFIA; aguardando validação humana",
+          },
+        });
+        return {
+          ...created[0], statusId: pausedStatusId, missionKey: mirror.missionKey,
+          githubPath: mirror.path, githubSyncStatus: mirror.status, trState, trGenerationError,
+        };
       }),
 
     getById: protectedProcedure
@@ -347,6 +457,10 @@ export const appRouter = router({
         const task = await db.getTaskById(input.id);
         if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
           throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+        }
+        const requestedStatus = await db.getTaskStatusNameById(input.statusId);
+        if (requestedStatus?.toUpperCase() === "STAGED" && !(await db.hasValidatedMissionTR(input.id))) {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A missão não pode entrar em STAGED antes da validação explícita do TR." });
         }
         const result = await db.updateTaskStatus(input.id, input.statusId);
         if (task.missionKey) {
