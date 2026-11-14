@@ -129,13 +129,16 @@ SET search_path = pg_catalog, sofia
 AS $function$
 DECLARE
   staged_status_id integer;
+  progress_status_id integer;
   mission_id integer;
+  mission_status_id integer;
   latest_tr_id integer;
   latest_tr_state text;
   latest_blueprint_state text;
   latest_blueprint_source_id integer;
 BEGIN
   SELECT id INTO staged_status_id FROM sofia."taskStatuses" WHERE name = 'STAGED' LIMIT 1;
+  SELECT id INTO progress_status_id FROM sofia."taskStatuses" WHERE name = 'PROGRESS' LIMIT 1;
   IF staged_status_id IS NULL OR NEW."statusId" IS DISTINCT FROM staged_status_id THEN RETURN NEW; END IF;
   IF NEW."parentTaskId" IS NULL THEN
     mission_id := NEW.id;
@@ -152,6 +155,17 @@ BEGIN
     SELECT id INTO mission_id FROM ancestors WHERE "parentTaskId" IS NULL LIMIT 1;
   END IF;
   IF mission_id IS NULL THEN RAISE EXCEPTION 'Execution blocked: top-level mission could not be resolved for task %', NEW.id; END IF;
+
+  IF NEW.id = mission_id THEN
+    mission_status_id := NEW."statusId";
+  ELSE
+    SELECT "statusId" INTO mission_status_id FROM sofia.tasks WHERE id = mission_id;
+  END IF;
+  IF mission_status_id IS DISTINCT FROM staged_status_id
+     AND mission_status_id IS DISTINCT FROM progress_status_id THEN
+    RAISE EXCEPTION 'Execution blocked: root mission % must be STAGED or PROGRESS before child tasks can be dispatched', mission_id;
+  END IF;
+
   SELECT version_row.id, version_row.state
     INTO latest_tr_id, latest_tr_state
     FROM sofia."missionDocuments" document_row
