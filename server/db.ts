@@ -1248,7 +1248,7 @@ export async function getMissionDocumentsForTask(
     })
     .from(missionDocuments)
     .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
-    .where(and(eq(missionDocuments.taskId, taskId), eq(missionDocumentTypes.isActive, true)))
+    .where(eq(missionDocuments.taskId, taskId))
     .orderBy(asc(missionDocumentTypes.sortOrder), asc(missionDocuments.createdAt));
 
   return Promise.all(documents.map(async (document) => {
@@ -1392,6 +1392,9 @@ export async function createMissionDocumentRevision(input: {
       .limit(1)
       .for("update");
     if (!document) throw new Error("Mission document not found or access denied");
+    if (document.typeKey === "ORIGINAL_REQUEST") {
+      throw new Error("The original mission request is immutable and cannot be revised");
+    }
 
     await validateMissionDocumentAuthor(transaction, document.taskOwnerId, input.version);
     await validateMissionDocumentSource(transaction, document.taskId, document.typeKey, input.version.sourceDocumentVersionId);
