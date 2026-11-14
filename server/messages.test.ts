@@ -6,6 +6,7 @@ const dbMock = vi.hoisted(() => ({
   getMessageByIdForTask: vi.fn(),
   createMessage: vi.fn(),
   getMessagesByTaskId: vi.fn(),
+  hasExecutionReadyMissionDocuments: vi.fn(),
 }));
 const invokeLLMMock = vi.hoisted(() => vi.fn());
 const sendManusMessageAndWaitMock = vi.hoisted(() => vi.fn());
@@ -28,6 +29,7 @@ const context = {
 describe("messages.create — persistência e resposta Sofia", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    dbMock.hasExecutionReadyMissionDocuments.mockResolvedValue(true);
     dbMock.getTaskById.mockResolvedValue({
       id: 19,
       createdBy: 152,
@@ -155,6 +157,23 @@ describe("messages.create — persistência e resposta Sofia", () => {
   });
 
   it("bloqueia encaminhamento quando a missão não tem execução externa identificada", async () => {
+    invokeLLMMock.mockResolvedValue({
+      choices: [{
+        message: {
+          role: "assistant",
+          content: null,
+          tool_calls: [{
+            id: "call-forward-no-agent",
+            type: "function",
+            function: {
+              name: "forward_operator_instruction_to_assigned_agent",
+              arguments: JSON.stringify({ message: "Continue." }),
+            },
+          }],
+        },
+      }],
+    });
+    /* ORIGINAL_TOOL_CALL_FIX_BOUNDARY */
     invokeLLMMock.mockResolvedValue({
       choices: [{
         message: {
