@@ -85,3 +85,12 @@ Identificar, com evidências reproduzíveis, por que o SofiaControlPanel não ex
 - **Controles de missão:** TaskDetail.tsx permanece essencialmente igual entre live e main; canStartExecution continua bloqueando PROGRESS com manusTaskId e PAUSED. Tasks.tsx, sofiaOrchestrator.ts e heartbeat.ts não apresentaram diferenças no comparativo. A auditoria anterior não encontrou endpoints/ações de pausa ou transferência manual.
 - **Causa confirmada até aqui:** Messenger live não tem caminho de resposta; correção de código existe em main, mas não foi publicada. Não executar deploy automático: Render aponta para rollback e há 146 commits de divergência; é necessário reconciliar intencionalidade do rollback e segurança da versão.
 - **Status da tarefa 20.4:** PROGRESS. Próxima etapa: revisar histórico/razão do rollback e diferenças de release; inspecionar erros sanitizados dos exits; verificar se a rota Manus da main está coberta por testes e contrato; não disparar mensagens nem tarefas reais.
+## Checkpoint 2026-11-14 — causa dos exits no Render (tarefa 20.4)
+
+- Logs filtrados de 12/11 mostram **sete falhas** do prestart entre 20:25:30 e 20:37:00 UTC.
+- Cada falha registra PostgresError: canceling statement due to lock timeout durante Verify tasks.agentPinned, antes das demais verificações do inicializador.
+- O prestart executa scripts/ensure-database.mjs; o script define lock_timeout=15s e executa ALTER TABLE sofia.tasks ADD COLUMN IF NOT EXISTS agentPinned. O mesmo comportamento relevante está no commit que falhou, no rollback live e em main.
+- **Causa imediata confirmada:** timeout ao adquirir lock para a operação DDL de tasks.agentPinned; o prestart retorna exit code 1 e o Render tenta reiniciar.
+- **Causa subjacente não identificada:** os logs não mostram qual sessão/transação detinha o lock. Não afirmar que era migration, query ou schema sem consultar pg_locks/pg_stat_activity.
+- Em 14/11 a inicialização posterior passou pelas verificações de schema e conexão; o incidente não estava bloqueando continuamente o startup naquele momento.
+- Não foi executada consulta ao Supabase, DDL, restart ou reprodução. Próxima etapa DB exige sessão read-only autorizada e captura do lock holder; sem isso, manter a causa subjacente como desconhecida.
