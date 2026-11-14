@@ -321,6 +321,92 @@ export async function createTask(data: {
   return result;
 }
 
+
+/**
+ * Creates a human-origin mission and its immutable source request + initial TR
+ * in one database transaction. A failure cannot leave a mission without its
+ * mandatory initial documents.
+ */
+export async function createMissionWithInitialDocuments(input: {
+  task: Parameters<typeof createTask>[0];
+  originalRequest: MissionDocumentVersionInput;
+  tr: MissionDocumentVersionInput;
+}) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+
+  return database.transaction(async (transaction) => {
+    const [insertedTask] = await transaction
+      .insert(tasks)
+      .values({
+        ...input.task,
+        creatorType: input.task.creatorType ?? "user",
+        agentPinned: input.task.agentPinned ?? input.task.agentId !== undefined,
+      })
+      .returning();
+
+    if (!insertedTask) throw new Error("Mission could not be created");
+
+    const missionKey = `SCP-TASK-${String(insertedTask.id).padStart(6, "0")}`;
+    const [task] = await transaction
+      .update(tasks)
+      .set({ missionKey, githubSyncStatus: "pending", updatedAt: new Date() })
+      .where(eq(tasks.id, insertedTask.id))
+      .returning();
+
+    const persistInitialDocument = async (
+      typeKey: "ORIGINAL_REQUEST" | "TR",
+      documentKey: "ORIGINAL_REQUEST" | "TR",
+      title: string,
+      versionInput: MissionDocumentVersionInput,
+    ) => {
+      const [documentType] = await transaction
+        .select()
+        .from(missionDocumentTypes)
+        .where(and(eq(missionDocumentTypes.typeKey, typeKey), eq(missionDocumentTypes.isActive, true)))
+        .limit(1);
+      if (!documentType) throw new Error(`Required mission document type is inactive or missing: ${typeKey}`);
+
+      if (typeKey === "ORIGINAL_REQUEST" && (versionInput.authorType === "AGENT" || versionInput.state !== "PUBLISHED")) {
+        throw new Error("The original mission request must be published as a HUMAN or SOFIA source snapshot");
+      }
+
+      await validateMissionDocumentAuthor(transaction, insertedTask.createdBy, versionInput);
+      await validateMissionDocumentSource(transaction, insertedTask.id, typeKey, versionInput.sourceDocumentVersionId);
+
+      const [document] = await transaction
+        .insert(missionDocuments)
+        .values({ taskId: insertedTask.id, documentTypeId: documentType.id, documentKey, title })
+        .returning();
+
+      await transaction.insert(missionDocumentVersions).values({
+        documentId: document.id,
+        version: 1,
+        state: versionInput.state ?? "DRAFT",
+        content: versionInput.content,
+        authorType: versionInput.authorType,
+        authorUserId: versionInput.authorUserId ?? null,
+        authorAgentId: versionInput.authorAgentId ?? null,
+        sourceDocumentVersionId: versionInput.sourceDocumentVersionId ?? null,
+        provenance: versionInput.provenance ?? {},
+        changeSummary: versionInput.changeSummary ?? "Initial version",
+        contentHash: versionInput.contentHash ?? null,
+        publishedAt: versionInput.publishedAt ?? (typeKey === "ORIGINAL_REQUEST" ? new Date() : null),
+      });
+    };
+
+    await persistInitialDocument(
+      "ORIGINAL_REQUEST",
+      "ORIGINAL_REQUEST",
+      "Solicitação original",
+      input.originalRequest,
+    );
+    await persistInitialDocument("TR", "TR", "TR — " + insertedTask.title, input.tr);
+
+    return task;
+  });
+}
+
 export async function updateTaskGitHubSync(
   taskId: number,
   data: {
