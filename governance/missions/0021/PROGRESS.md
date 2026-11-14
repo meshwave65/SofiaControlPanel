@@ -80,3 +80,35 @@ MISSION_0023 permanece PROGRESS e mantém seu próprio escopo de integridade ope
 - [OR-20261114-0003](../../operational_reports/OR-20261114-0003.md)
 - [OR-20261114-0004](../../operational_reports/OR-20261114-0004.md)
 - [OR-20261114-0005](../../operational_reports/OR-20261114-0005.md)
+
+
+## Segurança de perfis e preparação do rollout — 2026-11-14
+
+### PR #31 — RLS e cadastro controlado
+- PR draft: https://github.com/meshwave65/newsite/pull/31
+- Branch: `fix/profiles-rls-safe-onboarding`
+- Head: `c9f0c3c7c6e46ed0b225c4ff71a6b59720323649`
+- Migration proposta: `20261114150000_secure_profiles_rls_and_signup.sql`.
+- Escopo: RLS owner-only em `profiles`, sem INSERT/DELETE direto pelo cliente; criação via trigger em `auth.users`; RPC administrativa retorna somente IDs e nomes; signup e painéis atualizados.
+- Migration não aplicada; PR draft, sem merge ou deploy de produção.
+- Preview do commit anterior `cb6ee263` READY; o deployment do head atual `c9f0c3c` estava BUILDING no checkpoint.
+- Lint exploratório identificou 6 erros preexistentes e 2 warnings; a tentativa de tornar lint bloqueante foi revertida para não ampliar o escopo. Lint não validado.
+
+### Dados existentes e dependências
+- `auth.users` contém 77 contas; 40 não possuem linha correspondente em `public.profiles`.
+- Entre as 40, 4 são MeshWalkers elegíveis e 3 têm aquisições. A migration não faz backfill dessas contas.
+- PR #30 foi corrigida para pesquisar a partir de `mwc_meshwalker_profiles` e usar LEFT JOIN de `profiles`, preservando a busca desses elegíveis sem linha de perfil.
+- PR #30: https://github.com/meshwave65/newsite/pull/30 — head `483bafc8038ba1304eabcb17b7e3152c3504cb39`; Preview READY em https://newsite-hoy4u3lz8-meshwaves-projects.vercel.app. Nenhuma migration aplicada.
+
+### Gate adicional — `public.clients`
+- RLS habilitado, mas políticas permitem SELECT aberto para `anon` e `authenticated`, INSERT aberto para ambos e UPDATE aberto para `authenticated`.
+- Grants diretos incluem TRUNCATE para `anon` e `authenticated`.
+- Colunas incluem nome, e-mail, telefone, UUIDs e invite_code.
+- Não foram encontrados views, triggers ou funções públicas dependentes. O repositório consulta o registro próprio e usa nomes nos painéis administrativos.
+- Não alterar ainda: auditar consumidores externos antes de revogar grants/policies. Este é gate separado para aprovação de segurança global.
+
+### QA e rollout
+- Não foi criada branch de banco Supabase: a ferramenta exigiu confirmação de custo. Nenhuma cobrança ocorreu.
+- Necessário obter autorização para consultar o custo e criar branch de QA na organização `remwpkmiaavakbgcftob`.
+- Testes RLS anon/owner/admin, signup com e sem confirmação de e-mail, indicação, migration isolada e QA visual autenticado permanecem pendentes.
+- PR #30 e PR #31 não devem ser integradas/publicadas antes desses gates. Migration em produção, merge e deploy continuam ações separadas.
