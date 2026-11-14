@@ -58,6 +58,14 @@ describe("validateMissionBlueprintContent", () => {
     expect(() => validateMissionBlueprintContent(missingDeclaration)).toThrow("execução permanece bloqueada");
   });
 
+  it("rejects unresolved blockers declared outside the blockers section", () => {
+    const blockerOutsideSection = validBlueprint.replace(
+      "Não presumir credenciais nem permissões.",
+      "BLOQUEIO: credencial de execução ainda não autorizada.",
+    );
+    expect(() => validateMissionBlueprintContent(blockerOutsideSection)).toThrow("execução permanece bloqueada");
+  });
+
   it("rejects contradictory blocker statements even if no-blockers is also declared", () => {
     const contradictory = validBlueprint.replace(
       "BLOQUEIOS NÃO RESOLVIDOS: NENHUM",
