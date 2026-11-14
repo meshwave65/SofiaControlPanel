@@ -144,3 +144,13 @@
 - Não implementados ainda: ferramentas read-only de estado/elegibilidade, transferência, pausa/retomada, plano persistente/confirmável, memória operacional persistente e UI de telemetria.
 - Sem deploy, restart, alteração de DB/produção, chamada LLM/Manus real, mensagem externa, dispatch ou consumo de créditos. Task 20.3/Mateus intocada.
 - OR: `OR-20261114-0022.md` (SUBMITTED; Oracle PENDING).
+
+
+### Checkpoint 20.4 — correção da identidade arquitetural SOFIA (2026-11-14)
+- Decisão AC-013: SOFIA é o sistema integrado e modular; SCP é somente seu painel central de comando/frontend, não um módulo independente nem sinônimo de *control plane*.
+- Terminologia oficial de conhecimento: BBC = Base Bruta de Conhecimento; BCE = Base de Conhecimento Evolutivo curada.
+- Fluxo conceitual: SWE → BBC → SCur → BCE → SVec. SVec consome a BCE curada; não usa a BBC como fonte primária de vetorização.
+- Cognição, governança, segurança e orquestração são capacidades transversais do SOFIA. Módulos especializados mantêm contratos e responsabilidades próprios.
+- Documento atualizado: `governance/architecture/SOFIA_COGNITIVE_ORCHESTRATION_ARCHITECTURE.md`; nome ambíguo `SOFIA_COGNITIVE_CONTROL_PLANE.md` removido.
+- Foundation_MeshWave consultado: `KNOWLEDGE/` preserva fontes brutas e `BCE/` contém documentos curados. A decisão BBC não altera diretórios nem arquivos do Foundation.
+- Esta alteração é documental/arquitetural; pipeline SWE/BBC/SCur/BCE/SVec não está declarado implementado. PR #15 permanece isolada; testes/check/build pendentes; sem merge, deploy, DB ou produção. Task 20.3/Mateus intocada.
