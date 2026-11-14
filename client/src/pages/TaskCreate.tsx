@@ -28,12 +28,12 @@ export default function TaskCreate() {
   const priorities = lookupsQuery.data?.priorities ?? [];
 
   useEffect(() => {
-    const staged = statuses.find((status) => status.name.toUpperCase() === "STAGED");
+    const paused = statuses.find((status) => status.name.toUpperCase() === "PAUSED");
     const defaultPriority = priorities.find((priority) => priority.name.toLowerCase() === "baixa")
       ?? [...priorities].sort((a, b) => a.level - b.level)[0];
     setFormData((prev) => ({
       ...prev,
-      statusId: prev.statusId || (staged ? String(staged.id) : ""),
+      statusId: prev.statusId || (paused ? String(paused.id) : ""),
       priorityId: prev.priorityId || (defaultPriority ? String(defaultPriority.id) : ""),
     }));
   }, [lookupsQuery.data]);
@@ -83,7 +83,7 @@ export default function TaskCreate() {
             <CardContent className="pt-6 text-center">
               <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
               <h2 className="text-xl font-bold text-foreground mb-2">Tarefa Criada!</h2>
-              <p className="text-sm text-muted-foreground">Redirecionando para a lista de tarefas...</p>
+              <p className="text-sm text-muted-foreground">O TR inicial foi registrado. Revise e valide o documento antes de liberar a execução.</p>
             </CardContent>
           </Card>
         </div>
@@ -153,15 +153,15 @@ export default function TaskCreate() {
                 {/* Status */}
                 <div>
                   <Label htmlFor="status" className="text-foreground">
-                    Status Inicial
+                    Estado inicial — aguardando validação do TR
                   </Label>
                   <Select value={formData.statusId} onValueChange={(value) => handleChange("statusId", value)}>
                     <SelectTrigger className="mt-2 bg-input border-foreground/30">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {statuses.map((status) => (
-                        <SelectItem key={status.id} value={String(status.id)}>{status.name}</SelectItem>
+                      {statuses.filter((status) => status.name.toUpperCase() === "PAUSED").map((status) => (
+                        <SelectItem key={status.id} value={String(status.id)}>PAUSED — aguardando validação do TR</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -235,7 +235,8 @@ export default function TaskCreate() {
               <ul className="text-sm text-foreground space-y-1">
                 <li>✓ Crie uma tarefa com descrição detalhada</li>
                 <li>✓ O sistema irá fatorizar a tarefa em subtarefas</li>
-                <li>✓ Agentes irão executar cada subtarefa</li>
+                <li>✓ Revise e valide o TR inicial antes de liberar a execução</li>
+                <li>✓ Agentes irão executar cada subtarefa após a validação</li>
                 <li>✓ Resultados serão consolidados automaticamente</li>
               </ul>
             </CardContent>
