@@ -159,3 +159,17 @@ O Blueprint terá área/aba própria na mesma tela. A organização recomendada 
 Para missão humana em `AWAITING_HUMAN_VALIDATION`, o TR deve disponibilizar correção e validação explícita, deixando o bloqueio de execução inequívoco. Para missão SOFIA-originada, mostrar origem e motivação/evidências autônomas, permitindo inspeção e intervenção do operador sem criar gate humano preliminar.
 
 A implementação visual fica no Incremento D, após as APIs e persistência dos Incrementos A–C. Não apresentar a descrição atual como TR ou Blueprint provisório.
+
+
+## Incremento A — adendo AC-017: catálogo e instâncias documentais
+
+A persistência de TR/Blueprint deve ser integrada ao modelo genérico de documentos da missão, sem criar tabelas ou APIs exclusivas para cada tipo. Separar conceitualmente:
+
+1. **Catálogo de tipos documentais:** chave estável, nome, finalidade/categoria, público, ordenação, indicação de padrão, renderizador suportado, visibilidade/permissões e estado ativo/depreciado.
+2. **Instâncias documentais:** missão, tipo, identidade, versão, estado, conteúdo ou referência segura, autoria/origem, timestamps, proveniência, auditoria e eventual referência à versão de outro documento (Blueprint → TR exato).
+
+O modelo deve admitir múltiplas instâncias do mesmo tipo por missão, em especial ORs por tarefa/etapa. A API de leitura deve listar somente instâncias existentes e acessíveis; a seleção no frontend não é controle de acesso. Não aceitar caminhos arbitrários de Storage fornecidos pelo cliente. Versões publicadas são imutáveis.
+
+A tela Gerenciar Missão terá um visualizador único, com dropdown dinâmico baseado no catálogo e nas instâncias. TR é o documento padrão; Blueprint, OR, FOR e tipos futuros aparecem quando existirem e forem autorizados. A descrição original permanece fonte histórica separada. A troca de documento é somente leitura e não altera execução.
+
+O desenho físico precisa ser reconciliado com schema, ownership, estratégia de RLS e convenções existentes antes de migrations. A UI do visualizador fica no incremento posterior, após APIs de listagem e conteúdo. Especificação: governance/architecture/MISSION_DOCUMENT_CATALOG_SPECIFICATION.md.
