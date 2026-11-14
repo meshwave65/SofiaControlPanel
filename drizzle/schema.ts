@@ -611,3 +611,113 @@ export const contextReportsRelations = relations(contextReports, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+
+// ============================================
+// MISSION DOCUMENT CATALOG AND VERSIONED INSTANCES
+// ============================================
+
+export const missionDocumentTypes = sofia.table("missionDocumentTypes", {
+  id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
+  typeKey: varchar("typeKey", { length: 64 }).notNull().unique(),
+  label: varchar("label", { length: 128 }).notNull(),
+  description: text("description"),
+  category: varchar("category", { length: 32 }).notNull(),
+  audience: varchar("audience", { length: 32 }).notNull(),
+  sortOrder: integer("sortOrder").notNull().default(100),
+  isDefault: boolean("isDefault").notNull().default(false),
+  renderer: varchar("renderer", { length: 32 }).notNull().default("markdown"),
+  isActive: boolean("isActive").notNull().default(true),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+}, (table) => ({
+  categoryIdx: index("missionDocumentTypes_category_idx").on(table.category),
+  activeSortIdx: index("missionDocumentTypes_active_sort_idx").on(table.isActive, table.sortOrder),
+}));
+
+export type MissionDocumentType = typeof missionDocumentTypes.$inferSelect;
+export type InsertMissionDocumentType = typeof missionDocumentTypes.$inferInsert;
+
+export const missionDocuments = sofia.table("missionDocuments", {
+  id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
+  taskId: integer("taskId").notNull(),
+  documentTypeId: integer("documentTypeId").notNull(),
+  documentKey: varchar("documentKey", { length: 128 }).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  currentVersion: integer("currentVersion").notNull().default(1),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+}, (table) => ({
+  taskIdIdx: index("missionDocuments_taskId_idx").on(table.taskId),
+  documentTypeIdx: index("missionDocuments_documentTypeId_idx").on(table.documentTypeId),
+  taskDocumentKeyUnique: uniqueIndex("missionDocuments_task_documentKey_unique").on(table.taskId, table.documentKey),
+  taskIdFk: foreignKey({ columns: [table.taskId], foreignColumns: [tasks.id] }).onDelete("restrict"),
+  documentTypeIdFk: foreignKey({ columns: [table.documentTypeId], foreignColumns: [missionDocumentTypes.id] }).onDelete("restrict"),
+}));
+
+export type MissionDocument = typeof missionDocuments.$inferSelect;
+export type InsertMissionDocument = typeof missionDocuments.$inferInsert;
+
+export const missionDocumentVersions = sofia.table("missionDocumentVersions", {
+  id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
+  documentId: integer("documentId").notNull(),
+  version: integer("version").notNull(),
+  state: varchar("state", { length: 32 }).notNull().default("DRAFT"),
+  content: text("content").notNull(),
+  authorType: varchar("authorType", { length: 16 }).notNull(),
+  authorUserId: integer("authorUserId"),
+  authorAgentId: integer("authorAgentId"),
+  sourceDocumentVersionId: integer("sourceDocumentVersionId"),
+  provenance: jsonb("provenance").notNull().default({}),
+  changeSummary: text("changeSummary"),
+  contentHash: varchar("contentHash", { length: 64 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  publishedAt: timestamp("publishedAt"),
+}, (table) => ({
+  documentIdIdx: index("missionDocumentVersions_documentId_idx").on(table.documentId),
+  sourceVersionIdx: index("missionDocumentVersions_sourceVersion_idx").on(table.sourceDocumentVersionId),
+  documentVersionUnique: uniqueIndex("missionDocumentVersions_document_version_unique").on(table.documentId, table.version),
+  documentIdFk: foreignKey({ columns: [table.documentId], foreignColumns: [missionDocuments.id] }).onDelete("restrict"),
+  authorUserIdFk: foreignKey({ columns: [table.authorUserId], foreignColumns: [users.id] }).onDelete("restrict"),
+  authorAgentIdFk: foreignKey({ columns: [table.authorAgentId], foreignColumns: [agents.id] }).onDelete("restrict"),
+  sourceDocumentVersionIdFk: foreignKey({ columns: [table.sourceDocumentVersionId], foreignColumns: [missionDocumentVersions.id] }).onDelete("restrict"),
+}));
+
+export type MissionDocumentVersion = typeof missionDocumentVersions.$inferSelect;
+export type InsertMissionDocumentVersion = typeof missionDocumentVersions.$inferInsert;
+
+export const missionDocumentTypesRelations = relations(missionDocumentTypes, ({ many }) => ({
+  documents: many(missionDocuments),
+}));
+
+export const missionDocumentsRelations = relations(missionDocuments, ({ one, many }) => ({
+  task: one(tasks, {
+    fields: [missionDocuments.taskId],
+    references: [tasks.id],
+  }),
+  documentType: one(missionDocumentTypes, {
+    fields: [missionDocuments.documentTypeId],
+    references: [missionDocumentTypes.id],
+  }),
+  versions: many(missionDocumentVersions),
+}));
+
+export const missionDocumentVersionsRelations = relations(missionDocumentVersions, ({ one }) => ({
+  document: one(missionDocuments, {
+    fields: [missionDocumentVersions.documentId],
+    references: [missionDocuments.id],
+  }),
+  authorUser: one(users, {
+    fields: [missionDocumentVersions.authorUserId],
+    references: [users.id],
+  }),
+  authorAgent: one(agents, {
+    fields: [missionDocumentVersions.authorAgentId],
+    references: [agents.id],
+  }),
+  sourceVersion: one(missionDocumentVersions, {
+    fields: [missionDocumentVersions.sourceDocumentVersionId],
+    references: [missionDocumentVersions.id],
+    relationName: "sourceVersion",
+  }),
+}));
