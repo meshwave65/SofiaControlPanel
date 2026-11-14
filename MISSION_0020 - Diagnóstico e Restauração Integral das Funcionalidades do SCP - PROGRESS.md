@@ -177,3 +177,12 @@ Esta matriz é preliminar: ações marcadas BLOCKED exigem reprodução autentic
 - Esta regra não redefine documentos vivos nem a composição recursiva por `parent_task_id`. Esse campo é contextual e não deve ser interpretado universalmente como mecanismo de composição documental.
 - Consequência: separar agente consolidador do pai e agentes executores das filhas; não copiar `agentId`/`agentPinned` do pai para as filhas; filhas concluídas não concluem a missão sem consolidação do pai.
 - Referência: OR-20261114-0018, aditivo de 2026-11-14.
+
+
+## Decisão do responsável — agente consolidador efêmero (2026-11-14)
+- O papel consolidador pertence funcionalmente ao pai; não pertence ao agente que o iniciou ou assumiu primeiro.
+- A atribuição do agente ao pai é temporária. Em impedimento, o SCP pode transferir a continuidade para qualquer agente elegível, salvo pinagem humana explícita.
+- A transferência preserva Draft, contexto, histórico, resultados das filhas, dependências e estado de consolidação; o novo agente continua a mesma missão.
+- Pinagem humana impede transferência silenciosa; se o agente fixado ficar impedido, sinalizar ao operador.
+- Missão e papel consolidador persistem; identidade do executor não.
+- Referência: OR-20261114-0018, aditivo de 2026-11-14.
