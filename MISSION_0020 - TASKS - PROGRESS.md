@@ -276,3 +276,5 @@
 - Testes adicionados/atualizados para os gates acima; **não executados**. Check/build/parser SQL/integration continuam pendentes. Migration 0010 não aplicada; sem produção/deploy/dispatch/LLM real/Manus/créditos. Task 20.3 intocada. OR-20261114-0030.
 
 - Revisão adicional do estado: `tasks.updateStatus` não pode promover diretamente para `PROGRESS`; migration 0010 permite claim `STAGED→PROGRESS` e retomada `PAUSED→PROGRESS` somente com `manusTaskId` existente, verificando novamente os documentos. Fatoração de filhas depende da raiz `STAGED/PROGRESS`. OR-20261114-0030.
+
+- Criação de missão agora faz preflight do catálogo e exige `ORIGINAL_REQUEST`, `TR` e `BLUEPRINT` ativos antes de inserir a linha em `tasks`; migration 0010 ausente/incompleta não deixa missão órfã. OR-20261114-0030.
