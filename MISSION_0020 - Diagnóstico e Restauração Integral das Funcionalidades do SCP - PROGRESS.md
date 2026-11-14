@@ -223,3 +223,14 @@ Esta matriz é preliminar: ações marcadas BLOCKED exigem reprodução autentic
 - Integridade documental: não inventar motivação, decisões ou resultados; classificar fatos, declarações, interpretações, hipóteses, reconstruções e dados não localizados. Missão antiga sem justificativa deve declarar ausência de localização; reconstrução precisa ser identificada. Resultados exigem evidência.
 - TR versionado e atualizado continuamente; TR é a visão principal ao abrir missão no SCP. Correlações entre missões exigem justificativa e proveniência. TR e FOR são distintos.
 - Especificação: governance/architecture/MISSION_TR_SPECIFICATION.md. Implementação pendente; nenhuma alteração de runtime/DB/produção/deploy nesta etapa. Task 20.3/Mateus intocada.
+
+
+### OR-20261114-0024 — Diagnóstico técnico do caminho de criação e início da missão
+- A auditoria da branch confirmou que `sofia.tasks` é o registro operacional atual; não foi localizada tabela `missions` separada no schema analisado.
+- Os dados de intenção capturados na criação são essencialmente título e descrição. O formulário oferece status inicial e usa STAGED como padrão.
+- A migration `0003_automatic_task_dispatch.sql` define trigger após INSERT/UPDATE para dispatch quando a missão entra em STAGED. A definição está no repositório; sua instalação/ativação em produção não foi consultada.
+- **Implicação:** a geração/validação do TR deve anteceder a transição que dispara o dispatch. A implementação precisa fechar caminhos alternativos (status selecionável, `tasks.start`, endpoint interno e subtarefas fatoradas).
+- Mensagens e ORs são armazenados em `messages`; logs pontuais em `activityLogs`; relatório consolidado em Storage. O mirror GitHub da missão contém metadados e descrição, não TR versionado.
+- UI atual de detalhe não tem TR e inicia pela descrição/ações; tabs atuais: subtarefas, relatórios e consolidado.
+- Sem alterações de código funcional, schema, banco, produção, dispatch, chamadas externas, créditos, deploy ou restart. Task 20.3/Mateus intocada. Estado de produção não verificado.
+- Próximo passo: especificar gate pré-dispatch e contrato de TR inicial para origem humana, origem SOFIA e subtarefas antes de implementar.
