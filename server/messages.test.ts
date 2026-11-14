@@ -127,6 +127,59 @@ describe("messages.create — persistência e resposta Sofia", () => {
     expect(result.reply.content).toContain("Checkpoint retomado.");
   });
 
+  it("responde perguntas pela Sofia sem encaminhá-las automaticamente ao agente", async () => {
+    dbMock.getTaskById.mockResolvedValue({
+      id: 19,
+      createdBy: 152,
+      title: "Missão fixture",
+      description: "Validar comunicação",
+      agentId: 7,
+      manusTaskId: "manus-task-19",
+      agentPinned: false,
+      manusStatus: "running",
+    });
+    invokeLLMMock.mockResolvedValue({
+      choices: [{ message: { role: "assistant", content: "A missão está em execução." } }],
+    });
+
+    await appRouter.createCaller(context).messages.create({
+      taskId: 19,
+      typeId: 1,
+      content: "Qual é a situação da missão?",
+    });
+
+    expect(sendManusMessageAndWaitMock).not.toHaveBeenCalled();
+  });
+
+  it("bloqueia encaminhamento quando a missão não tem execução externa identificada", async () => {
+    invokeLLMMock.mockResolvedValue({
+      choices: [{
+        message: {
+          role: "assistant",
+          content: null,
+          tool_calls: [{
+            id: "call-forward-2",
+            type: "function",
+            function: {
+              name: "forward_operator_instruction_to_assigned_agent",
+              arguments: JSON.stringify({ message: "Continue." }),
+            },
+          }],
+        },
+      }],
+    });
+
+    const result = await appRouter.createCaller(context).messages.create({
+      taskId: 19,
+      typeId: 1,
+      content: "Encaminhe ao agente: continue.",
+    });
+
+    expect(sendManusMessageAndWaitMock).not.toHaveBeenCalled();
+    expect(result.responseStatus).toBe("failed");
+    expect(result.reply.content).toContain("não possui agente atribuído");
+  });
+
   it("recusa mensagem pai de outra missão antes de persistir ou chamar a IA", async () => {
     dbMock.getMessageByIdForTask.mockResolvedValue(null);
 
