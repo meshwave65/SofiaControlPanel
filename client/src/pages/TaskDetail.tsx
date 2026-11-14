@@ -87,6 +87,7 @@ export default function TaskDetail() {
   const blueprintDocument = documents.find((document) => document.typeKey === "BLUEPRINT" && document.documentKey === "BLUEPRINT");
   const blueprintReady = Boolean(
     trDocument?.latestVersion
+    && ["VALIDATED", "ACTIVE", "REORIENTED"].includes(trDocument.latestVersion.state)
     && blueprintDocument?.latestVersion
     && ["READY", "ACTIVE"].includes(blueprintDocument.latestVersion.state)
     && blueprintDocument.latestVersion.sourceDocumentVersionId === trDocument.latestVersion.id
