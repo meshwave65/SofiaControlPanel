@@ -77,3 +77,16 @@ Registrar cada nova entrada com data, OR/FOR, missão/etapa, orientação anteri
 - **Autoridade:** decisão explícita do responsável; princípios de arquitetura/contrato devem ser revistos pelo Oracle conforme governança.
 - **Documentos:** OR-20261114-0018; MISSION_0020 PROGRESS; MISSION_0020 TASKS PROGRESS.
 - **Validação:** documentos versionados e relidos no remoto. Nenhum código, DB ou produção alterados; nenhum dispatch/consumo de crédito/Manus/LLM/deploy/restart.
+
+
+### AC-009 — 2026-11-14 — Missão fatorizada permanece um único resultado consolidado
+- **Missão/etapa:** MISSION_0020 / tarefa 20.4 — contrato de fatorização e consolidação.
+- **Orientação anterior:** AC-008 definiu titularidade sistêmica das missões, atribuição temporária de agentes e deixou pendente a pinagem humana em missão fatorizada.
+- **Decisão explícita do responsável:** pai é a missão principal/consolidadora e único resultado final. O agente fixado excepcionalmente pelo operador permanece no pai, gera Draft e aguarda a execução das filhas. Filhas são auxiliares, não entregáveis finais independentes; seus resultados são curados e integrados pelo pai. O pai só conclui a missão após consolidar seu resultado.
+- **Exemplo:** Capítulo pai + Subcapítulos 1, 2 e 3 filhos = um Capítulo integrado, não quatro documentos separados.
+- **Regra de atribuição:** pinagem do agente consolidador não é herdada automaticamente pelas filhas; filhas são distribuídas a outros agentes elegíveis sem bloqueio pelo pai.
+- **Distinção de domínio:** não confundir a hierarquia de tarefas com o sistema de documentos vivos que compõe recursivamente fragmentos/parágrafos via `parent_task_id`; o campo é contextual e não tem semântica universal única.
+- **Classificação:** decisão arquitetural explícita do responsável.
+- **Autoridade:** responsável pelo produto.
+- **Documentos:** OR-20261114-0018 (aditivo); MISSION_0020 PROGRESS; MISSION_0020 TASKS PROGRESS.
+- **Validação:** atualização documental versionada no GitHub; nenhuma implementação de produto, alteração de DB, dispatch, consumo de créditos, chamada Manus/LLM, deploy ou restart.
