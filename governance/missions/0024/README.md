@@ -45,3 +45,16 @@ App-first, premium, profissional e sóbrio. A interface deve priorizar leitura f
 ## Regra de segurança
 
 Nenhuma transação real deve ser realizada para validar a interface. Não modificar qualquer fluxo financeiro para “facilitar” a apresentação. Se uma mudança visual exigir alteração de comportamento ou contrato, interromper esse ponto e manter o comportamento existente.
+
+
+## Encerramento — 2026-11-14
+
+**Estado:** DONE — publicada em produção.
+
+- PR #37 merged; PR #35 foi encerrada como branch anterior superada.
+- A implementação visual foi publicada em https://www.meshwave.com.br/mw-ex.
+- Deploy final: `dpl_CydYBqVoGy6x1xDY2g9oAg4dRbSP` — READY.
+- OR de conclusão: [OR-20261114-0015](../../operational_reports/OR-20261114-0015.md).
+- O responsável avaliou positivamente o Preview e autorizou o deploy. A QA visual automatizada autenticada não foi possível devido ao login MeshWave.
+- A busca de destinatários MWN foi entregue separadamente na MISSION_0021/PR #36 e preservada no deploy final.
+- Migração de hospedagem, domínios e segregação de deploys permanecem fora desta missão.
