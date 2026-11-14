@@ -119,3 +119,11 @@ Identificar, com evidências reproduzíveis, por que o SofiaControlPanel não ex
 | Indicador de conexão | Link Ativo hardcoded / Sincronizado sem handshake — FAIL |
 
 Esta matriz é preliminar: ações marcadas BLOCKED exigem reprodução autenticada controlada; não declarar sucesso a partir de testes mockados.
+
+### Checkpoint 20.4 — reconciliação do rollback Render (2026-11-14)
+- Evento Render confirma rollback manual iniciado em 13/11 00:53:36 UTC pelo usuário proprietário conectado, com destino explícito no deploy `dep-dbr5c5n6km5c73c44dr0`, commit `255a016`.
+- Deploy imediatamente anterior era `fef7880`, concluído com sucesso; o diff desse commit contém somente documentação/índice de missões, sem alterações em código de aplicação. Logo, o rollback conhecido não prova reversão de uma versão de código mais recente.
+- O evento não informa motivo do rollback. Issue/PR #14 não tem comentários; não foi encontrada justificativa rastreável. Não associar o rollback ao lock timeout de `496dd00` sem evidência.
+- `496dd00` falhou no prestart por lock timeout; deploys posteriores ocorreram e o destino atual do rollback é posterior a essa falha.
+- Comparação atual informa main 167 commits à frente de live 255a016 (era 146 no checkpoint anterior); a distância mudou com novos commits em main, incluindo registros de governança. Não interpretar o número como quantidade de funcionalidades ausentes.
+- Nenhum deploy, restart, operação DB, dispatch, chamada Manus/LLM ou envio de mensagem executado.
