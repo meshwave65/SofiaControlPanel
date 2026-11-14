@@ -1525,6 +1525,7 @@ export async function hasValidatedMissionTR(taskId: number): Promise<boolean> {
     .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
     .where(and(
       eq(missionDocuments.taskId, missionId),
+      eq(missionDocuments.documentKey, "TR"),
       eq(missionDocumentTypes.typeKey, "TR"),
       sql`${missionDocumentVersions.version} = (
         SELECT MAX(v2."version") FROM sofia."missionDocumentVersions" v2
@@ -1551,7 +1552,7 @@ export async function hasExecutionReadyMissionDocuments(taskId: number): Promise
     .from(missionDocumentVersions)
     .innerJoin(missionDocuments, eq(missionDocumentVersions.documentId, missionDocuments.id))
     .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
-    .where(and(eq(missionDocuments.taskId, missionId), eq(missionDocumentTypes.typeKey, "TR")))
+    .where(and(eq(missionDocuments.taskId, missionId), eq(missionDocuments.documentKey, "TR"), eq(missionDocumentTypes.typeKey, "TR")))
     .orderBy(desc(missionDocumentVersions.version))
     .limit(1);
   if (!tr || !["VALIDATED", "ACTIVE", "REORIENTED"].includes(tr.state)) return false;
@@ -1564,7 +1565,7 @@ export async function hasExecutionReadyMissionDocuments(taskId: number): Promise
     .from(missionDocumentVersions)
     .innerJoin(missionDocuments, eq(missionDocumentVersions.documentId, missionDocuments.id))
     .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
-    .where(and(eq(missionDocuments.taskId, missionId), eq(missionDocumentTypes.typeKey, "BLUEPRINT")))
+    .where(and(eq(missionDocuments.taskId, missionId), eq(missionDocuments.documentKey, "BLUEPRINT"), eq(missionDocumentTypes.typeKey, "BLUEPRINT")))
     .orderBy(desc(missionDocumentVersions.version))
     .limit(1);
 
