@@ -253,3 +253,5 @@ A migration não foi conectada ao ensure-database/startup e não foi aplicada a 
 
 
 A camada server-side de persistência também foi adicionada em server/db.ts: catálogo, listagem, consulta de versões, histórico, criação transacional de documento + versão inicial e criação serializada de revisões. Ownership é validado pelo registro da missão; Blueprint só aceita versão TR da mesma missão. Ainda sem procedures tRPC, UI ou testes executáveis. OR-20261114-0029 atualizado.
+
+- server/db.test.ts recebeu assertions de exportação para as seis funções de persistência; teste escrito, ainda não executado. OR-20261114-0029 registra limites.
