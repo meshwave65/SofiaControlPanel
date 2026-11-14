@@ -83,7 +83,7 @@ export default function TaskDetail() {
     ?? documents.find((document) => document.typeKey === "TR" && document.documentKey === "TR")
     ?? null;
   const selectedVersion = selectedVersionNumber ?? selectedDocument?.latestVersion?.version ?? 0;
-  const trDocument = documents.find((document) => document.typeKey === "TR");
+  const trDocument = documents.find((document) => document.typeKey === "TR" && document.documentKey === "TR");
   const blueprintDocument = documents.find((document) => document.typeKey === "BLUEPRINT" && document.documentKey === "BLUEPRINT");
   const blueprintReady = Boolean(
     trDocument?.latestVersion
