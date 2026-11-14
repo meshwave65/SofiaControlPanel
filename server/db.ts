@@ -1272,6 +1272,7 @@ export async function getMissionDocumentsForTask(
         authorType: missionDocumentVersions.authorType,
         createdAt: missionDocumentVersions.createdAt,
         publishedAt: missionDocumentVersions.publishedAt,
+        sourceDocumentVersionId: missionDocumentVersions.sourceDocumentVersionId,
         changeSummary: missionDocumentVersions.changeSummary,
       })
       .from(missionDocumentVersions)
@@ -1532,4 +1533,44 @@ export async function hasValidatedMissionTR(taskId: number): Promise<boolean> {
       sql`${missionDocumentVersions.state} IN ('VALIDATED', 'ACTIVE', 'REORIENTED')`,
     )).limit(1);
   return Boolean(validated);
+}
+
+
+/**
+ * A task may execute only when its root mission has a validated current TR
+ * and a READY/ACTIVE Blueprint derived from that exact TR version.
+ */
+export async function hasExecutionReadyMissionDocuments(taskId: number): Promise<boolean> {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+  const missionId = await resolveMissionRootTaskId(database, taskId);
+  if (missionId == null) return false;
+
+  const [tr] = await database
+    .select({ id: missionDocumentVersions.id, state: missionDocumentVersions.state })
+    .from(missionDocumentVersions)
+    .innerJoin(missionDocuments, eq(missionDocumentVersions.documentId, missionDocuments.id))
+    .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
+    .where(and(eq(missionDocuments.taskId, missionId), eq(missionDocumentTypes.typeKey, "TR")))
+    .orderBy(desc(missionDocumentVersions.version))
+    .limit(1);
+  if (!tr || !["VALIDATED", "ACTIVE", "REORIENTED"].includes(tr.state)) return false;
+
+  const [blueprint] = await database
+    .select({
+      state: missionDocumentVersions.state,
+      sourceDocumentVersionId: missionDocumentVersions.sourceDocumentVersionId,
+    })
+    .from(missionDocumentVersions)
+    .innerJoin(missionDocuments, eq(missionDocumentVersions.documentId, missionDocuments.id))
+    .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
+    .where(and(eq(missionDocuments.taskId, missionId), eq(missionDocumentTypes.typeKey, "BLUEPRINT")))
+    .orderBy(desc(missionDocumentVersions.version))
+    .limit(1);
+
+  return Boolean(
+    blueprint
+    && ["READY", "ACTIVE"].includes(blueprint.state)
+    && blueprint.sourceDocumentVersionId === tr.id
+  );
 }
