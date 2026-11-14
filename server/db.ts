@@ -299,6 +299,7 @@ export async function createTask(data: {
   parentTaskId?: number;
   dueDate?: Date;
   completedAt?: Date;
+  manusStatus?: string;
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
