@@ -113,8 +113,8 @@ export class SofiaOrchestrator {
       const result = await db.createTask({
         createdBy: task.createdBy,
         creatorType: task.creatorType === "system" ? "system" : "user",
-        agentId: task.agentId ?? undefined,
-        agentPinned: task.agentPinned,
+        // Child execution units inherit the validated mission scope, not the
+        // parent's temporary executor lease or an explicit pin on that executor.
         title: subtaskTitle,
         description: `${dim.suffix} ${task.description}`,
         statusId: await db.getTaskStatusIdByName(STATUS_STAGED),
