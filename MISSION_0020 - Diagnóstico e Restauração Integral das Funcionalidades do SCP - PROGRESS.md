@@ -250,3 +250,6 @@ Esta matriz é preliminar: ações marcadas BLOCKED exigem reprodução autentic
 O modelo físico inicial do catálogo e versionamento foi adicionado à branch (schema Drizzle + migration SQL 0010). Tabelas: missionDocumentTypes, missionDocuments e missionDocumentVersions. Ownership deriva de tasks.createdBy; versões são append-only; Blueprint pode apontar para versão exata do TR; catálogo inicial inclui ORIGINAL_REQUEST, TR, BLUEPRINT, OR e FOR.
 
 A migration não foi conectada ao ensure-database/startup e não foi aplicada a banco. APIs, serviços, geração, backfill e UI permanecem pendentes. Não houve testes executáveis, deploy, restart ou chamadas externas. OR-20261114-0029.
+
+
+A camada server-side de persistência também foi adicionada em server/db.ts: catálogo, listagem, consulta de versões, histórico, criação transacional de documento + versão inicial e criação serializada de revisões. Ownership é validado pelo registro da missão; Blueprint só aceita versão TR da mesma missão. Ainda sem procedures tRPC, UI ou testes executáveis. OR-20261114-0029 atualizado.
