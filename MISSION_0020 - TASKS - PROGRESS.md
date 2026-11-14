@@ -40,3 +40,13 @@
 - **Contexto:** o responsável relata que não consegue iniciar, transferir, pausar ou fatorizar missões pela interface e que o Messenger não envia/recebe mensagens com a conta. A MISSION_0020 já cobre a restauração integral do SCP; a tarefa 20.4 é a unidade apropriada e independente da tarefa 20.3, que permanece atribuída a Agente Mateus.
 - **Primeira evidência estática:** a UI de Tasks só abre o detalhe; o detalhe expõe iniciar/fatorizar/consolidar, mas não há fluxo de pausa nem transferência manual; o botão de iniciar depende de `status` e `manusTaskId`; o Messenger declara `Link Ativo` sem checagem e alterna entre serviço LLM interno e tarefa Manus conforme os identificadores da missão. Isso ainda não comprova o comportamento do deploy/runtime.
 - **Guardrails:** nenhuma chamada Manus, consumo de créditos, escrita no banco de produção, alteração de credenciais ou deploy; validar com testes/ambiente controlado e manter qualquer smoke test externo condicionado à autorização e ambiente aprovados.
+
+### Checkpoint 20.4 — Render e reconciliação produção/main (2026-11-14)
+- **Render:** serviço SofiaControlPanel-web não suspenso; deploy live é rollback para 255a016, com auto-deploy desligado.
+- **Divergência:** main está 146 commits à frente do commit live. A produção não contém a revisão atual da auditoria.
+- **Causa confirmada no Messenger live:** no commit publicado, messages.create somente persiste a mensagem do operador; não aciona Manus/LLM nem cria resposta. Em main, existe implementação que encaminha para a tarefa Manus associada ou LLM interno, persiste a resposta e retorna replied/pending/failed; ainda não está implantada.
+- **UI Messenger:** Link Ativo permanece hardcoded; Sincronizado não representa handshake real.
+- **Missões:** TaskDetail mantém o bloqueio de iniciar quando PROGRESS já possui manusTaskId e não permite PAUSED; não há evidência de pausa/transferência manual adicionada em main.
+- **Runtime:** processo, heartbeat e DB iniciaram/verificaram em 14/11; exits com código 1 em 12/11 seguem sem causa isolada.
+- **Próxima etapa:** reconciliar intenção do rollback, revisar deltas de release e logs de erro; não fazer deploy/restart, dispatch de missão, envio de mensagem ou chamada Manus/LLM sem gate específico.
+- **OR:** OR-20261114-0017 atualizado com evidências de Render e causa do Messenger live.
