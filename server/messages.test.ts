@@ -7,6 +7,10 @@ const dbMock = vi.hoisted(() => ({
   createMessage: vi.fn(),
   getMessagesByTaskId: vi.fn(),
   hasExecutionReadyMissionDocuments: vi.fn(),
+  getMissionRootTaskId: vi.fn(),
+  getTasksByParentId: vi.fn(),
+  getTaskStatusNameById: vi.fn(),
+  getAgentsByOwnerId: vi.fn(),
 }));
 const invokeLLMMock = vi.hoisted(() => vi.fn());
 const sendManusMessageAndWaitMock = vi.hoisted(() => vi.fn());
@@ -30,6 +34,10 @@ describe("messages.create — persistência e resposta Sofia", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     dbMock.hasExecutionReadyMissionDocuments.mockResolvedValue(true);
+    dbMock.getMissionRootTaskId.mockResolvedValue(19);
+    dbMock.getTasksByParentId.mockResolvedValue([]);
+    dbMock.getTaskStatusNameById.mockResolvedValue("PROGRESS");
+    dbMock.getAgentsByOwnerId.mockResolvedValue([]);
     dbMock.getTaskById.mockResolvedValue({
       id: 19,
       createdBy: 152,
@@ -154,6 +162,118 @@ describe("messages.create — persistência e resposta Sofia", () => {
     });
 
     expect(sendManusMessageAndWaitMock).not.toHaveBeenCalled();
+  });
+
+  it("consulta estado, tarefas-filhas e agentes atribuídos sem executar ações ou expor credenciais", async () => {
+    dbMock.getTaskById.mockResolvedValue({
+      id: 19,
+      createdBy: 152,
+      title: "Missão fixture",
+      description: "Validar comunicação",
+      statusId: 2,
+      agentId: 7,
+      manusTaskId: "manus-task-19",
+      agentPinned: false,
+      manusStatus: "running",
+      createdAt: new Date("2026-11-14T10:00:00.000Z"),
+      updatedAt: new Date("2026-11-14T11:00:00.000Z"),
+    });
+    dbMock.getTasksByParentId.mockResolvedValue([
+      {
+        id: 20,
+        createdBy: 152,
+        title: "Filha válida",
+        parentTaskId: 19,
+        statusId: 3,
+        agentId: 8,
+        agentPinned: false,
+        manusTaskId: "manus-child-20",
+        manusStatus: "completed",
+        creditsUsed: 12,
+        completedAt: new Date("2026-11-14T12:00:00.000Z"),
+      },
+      {
+        id: 21,
+        createdBy: 999,
+        title: "Registro de outro proprietário",
+        parentTaskId: 19,
+        statusId: 3,
+        agentId: 99,
+      },
+    ]);
+    dbMock.getTaskStatusNameById
+      .mockResolvedValueOnce("PROGRESS")
+      .mockResolvedValueOnce("DONE");
+    dbMock.getAgentsByOwnerId.mockResolvedValue([
+      {
+        id: 7,
+        ownerId: 152,
+        name: "Agente principal",
+        status: "online",
+        connectionStatus: "connected",
+        version: "1.0",
+        lastHeartbeat: new Date("2026-11-14T12:00:00.000Z"),
+        creditsRemaining: "80.00",
+        creditsUpdatedAt: new Date(),
+        manusToken: "MUST_NOT_LEAK",
+      },
+      {
+        id: 8,
+        ownerId: 152,
+        name: "Agente filho",
+        status: "offline",
+        connectionStatus: "configured",
+        creditsRemaining: "20.00",
+        creditsUpdatedAt: null,
+      },
+      {
+        id: 99,
+        ownerId: 999,
+        name: "Agente de outro proprietário",
+        status: "online",
+        manusToken: "FOREIGN_SECRET",
+      },
+    ]);
+    invokeLLMMock
+      .mockResolvedValueOnce({
+        choices: [{
+          message: {
+            role: "assistant",
+            content: null,
+            tool_calls: [{
+              id: "call-inspect-1",
+              type: "function",
+              function: { name: "inspect_current_mission", arguments: "{}" },
+            }],
+          },
+        }],
+      })
+      .mockResolvedValueOnce({
+        choices: [{ message: { role: "assistant", content: "A missão está em PROGRESS e possui uma filha concluída." } }],
+      });
+
+    const result = await appRouter.createCaller(context).messages.create({
+      taskId: 19,
+      typeId: 1,
+      content: "Qual é o estado da missão e das subtarefas?",
+    });
+
+    expect(dbMock.getMissionRootTaskId).toHaveBeenCalledWith(19);
+    expect(dbMock.getAgentsByOwnerId).toHaveBeenCalledWith(152, false);
+    expect(invokeLLMMock).toHaveBeenCalledTimes(2);
+    const followUpMessages = invokeLLMMock.mock.calls[1][0].messages;
+    const toolContext = followUpMessages[followUpMessages.length - 1].content;
+    expect(toolContext).toContain('"missionId":19');
+    expect(toolContext).toContain('"taskId":20');
+    expect(toolContext).not.toContain("Registro de outro proprietário");
+    expect(toolContext).not.toContain("MUST_NOT_LEAK");
+    expect(toolContext).not.toContain("FOREIGN_SECRET");
+    expect(sendManusMessageAndWaitMock).not.toHaveBeenCalled();
+    expect(result.responseStatus).toBe("replied");
+    expect(result.reply).toMatchObject({
+      content: "A missão está em PROGRESS e possui uma filha concluída.",
+      isAssistant: true,
+    });
   });
 
   it("bloqueia encaminhamento quando a missão não tem execução externa identificada", async () => {
