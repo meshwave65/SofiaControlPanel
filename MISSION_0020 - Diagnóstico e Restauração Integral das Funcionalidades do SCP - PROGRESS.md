@@ -234,3 +234,12 @@ Esta matriz é preliminar: ações marcadas BLOCKED exigem reprodução autentic
 - UI atual de detalhe não tem TR e inicia pela descrição/ações; tabs atuais: subtarefas, relatórios e consolidado.
 - Sem alterações de código funcional, schema, banco, produção, dispatch, chamadas externas, créditos, deploy ou restart. Task 20.3/Mateus intocada. Estado de produção não verificado.
 - Próximo passo: especificar gate pré-dispatch e contrato de TR inicial para origem humana, origem SOFIA e subtarefas antes de implementar.
+
+
+### Checkpoint 20.4 — AC-017: visualizador dinâmico de documentos (2026-11-14)
+
+- Definido visualizador genérico de documentos na tela Gerenciar, com dropdown dinâmico e TR como seleção padrão; Blueprint, ORs, FOR e tipos futuros são exibidos no mesmo espaço quando existirem e forem acessíveis.
+- Catálogo de tipos documentais é separado das instâncias/versionamentos vinculados à missão; modelo permite múltiplas instâncias por tipo.
+- Descrição original é preservada como fonte da solicitação e não substitui TR/Blueprint. Seleção é somente leitura; backend/RLS garantem acesso.
+- Especificação: governance/architecture/MISSION_DOCUMENT_CATALOG_SPECIFICATION.md; OR-20261114-0028 indexado. Contratos TR, Blueprint e arquitetura geral atualizados.
+- Implementação permanece pendente; sem runtime/schema/banco/produção/dispatch/LLM/Manus/créditos/deploy/restart. Task 20.3/Mateus intocada.
