@@ -182,7 +182,10 @@ describe("messages.create — persistência e resposta Sofia", () => {
 
     expect(sendManusMessageAndWaitMock).not.toHaveBeenCalled();
     expect(result.responseStatus).toBe("failed");
-    expect(result.reply.content).toContain("não possui agente atribuído");
+    expect(dbMock.createMessage).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      content: expect.stringContaining("não possui agente atribuído"),
+      isAssistant: true,
+    }));
   });
 
   it("recusa mensagem pai de outra missão antes de persistir ou chamar a IA", async () => {
