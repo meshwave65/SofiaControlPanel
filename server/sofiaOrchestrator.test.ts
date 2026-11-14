@@ -141,6 +141,18 @@ describe("SofiaOrchestrator.startTask", () => {
     expect(manusMock.syncAgentCredits).not.toHaveBeenCalled();
   });
 
+  it("does not start a PROGRESS task again when its external task ID is still absent", async () => {
+    const claimedButNotDispatched = { ...stagedTask, statusId: 2, manusTaskId: null };
+    dbMock.getTaskById.mockResolvedValueOnce(claimedButNotDispatched);
+
+    const result = await SofiaOrchestrator.startTask(30);
+
+    expect(result).toMatchObject({ started: false, executionStarted: false });
+    expect(dbMock.hasExecutionReadyMissionDocuments).not.toHaveBeenCalled();
+    expect(dbMock.claimStagedTaskWithAvailableAgent).not.toHaveBeenCalled();
+    expect(manusMock.createManusTask).not.toHaveBeenCalled();
+  });
+
   it("atomically claims a staged task and creates one Manus execution", async () => {
     dbMock.getTaskById.mockResolvedValueOnce(stagedTask);
     dbMock.claimStagedTaskWithAvailableAgent.mockResolvedValueOnce(claimedTask);
@@ -166,6 +178,7 @@ describe("SofiaOrchestrator.startTask", () => {
     const result = await SofiaOrchestrator.startTask(30);
 
     expect(result).toMatchObject({ started: false, executionStarted: false });
+    expect(dbMock.updateTaskExecution).not.toHaveBeenCalled();
     expect(manusMock.createManusTask).not.toHaveBeenCalled();
   });
 
