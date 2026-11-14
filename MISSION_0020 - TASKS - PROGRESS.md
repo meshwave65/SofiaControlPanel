@@ -154,3 +154,14 @@
 - Documento atualizado: `governance/architecture/SOFIA_COGNITIVE_ORCHESTRATION_ARCHITECTURE.md`; nome ambíguo `SOFIA_COGNITIVE_CONTROL_PLANE.md` removido.
 - Foundation_MeshWave consultado: `KNOWLEDGE/` preserva fontes brutas e `BCE/` contém documentos curados. A decisão BBC não altera diretórios nem arquivos do Foundation.
 - Esta alteração é documental/arquitetural; pipeline SWE/BBC/SCur/BCE/SVec não está declarado implementado. PR #15 permanece isolada; testes/check/build pendentes; sem merge, deploy, DB ou produção. Task 20.3/Mateus intocada.
+
+
+### Checkpoint 20.4 — AC-014: TR como contrato do ciclo de vida da missão (2026-11-14)
+- Decisão do responsável registrada: toda missão deve receber primeiro TR antes da execução.
+- Missão humana: primeiro TR apresenta a compreensão da SOFIA e aguarda validação explícita do operador solicitante; correções/redirecionamentos criam novas versões preservando histórico.
+- Missão originada pela SOFIA: primeiro TR obrigatório, sem validação humana preliminar; autonomia permanece subordinada a permissões, políticas e limites vigentes. Operador pode intervir e reorientar a qualquer momento.
+- TR não inventa motivação, decisão ou resultado. Fatos, declarações, interpretações, hipóteses, reconstruções e dados não localizados devem ser distinguidos. Missões antigas sem justificativa declaram que a motivação original não foi localizada.
+- TR vivo, versionado e sustentado por eventos/fontes; abertura da missão no SCP deve mostrar TR primeiro. Correlações exigem evidência. TR e FOR permanecem distintos.
+- Especificação: governance/architecture/MISSION_TR_SPECIFICATION.md; arquitetura: governance/architecture/SOFIA_COGNITIVE_ORCHESTRATION_ARCHITECTURE.md.
+- **Estado:** requisito e documentação registrados; geração/versionamento/UI não implementados nem presumidos. Inspeção de schema, eventos, APIs e UI será necessária antes da implementação.
+- Nenhuma alteração de runtime, DB, produção, dispatch, chamada externa, crédito, deploy ou restart. Task 20.3/Mateus intocada.
