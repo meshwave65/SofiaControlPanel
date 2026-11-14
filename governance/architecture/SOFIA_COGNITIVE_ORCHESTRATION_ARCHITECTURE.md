@@ -209,3 +209,18 @@ Na mesma tela, o **Blueprint — Plano de trabalho** fica disponível em área/a
 Identificação, estado da missão e controles governados permanecem visíveis. Em missão humana aguardando validação, o próprio TR oferece leitura, correção e validação explícita e informa que a execução está bloqueada até essa validação. Em missão de origem SOFIA, a interface informa a origem autônoma e permite inspeção/intervenção sem exigir aprovação humana preliminar.
 
 A descrição original não deve ser exibida como se fosse um TR já consolidado ou um plano de execução. Esta é uma decisão de UX; sua implementação depende das APIs e da persistência versionada de TR/Blueprint.
+
+
+## 16. Visualizador dinâmico de documentos da missão (AC-017)
+
+A tela Gerenciar Missão utiliza um único espaço de leitura, controlado por seletor dinâmico alimentado por catálogo de tipos documentais e pelas instâncias efetivamente existentes e acessíveis da missão. Não haverá abas fixas nem páginas específicas para cada tipo.
+
+- TR é selecionado por padrão e permanece a visão prioritária do operador.
+- Blueprint, ORs, FOR e futuros documentos são apresentados no mesmo espaço quando existirem e forem autorizados.
+- O catálogo descreve tipos, rótulos, finalidade, ordenação, renderização e regras de visibilidade; instâncias registram documentos concretos, versões, estado, autoria, proveniência e vínculo com a missão.
+- O modelo permite várias instâncias do mesmo tipo, por exemplo ORs por tarefa ou etapa.
+- A descrição original da solicitação permanece preservada separadamente como fonte/proveniência; não é TR nem Blueprint.
+- Selecionar um documento altera somente a visualização. Não altera missão, execução, atribuição ou gates.
+- Backend/RLS são responsáveis por ownership e acesso; a UI lista apenas documentos existentes e acessíveis e distingue ausência, elaboração, carregamento, erro e acesso negado.
+
+Contrato normativo: governance/architecture/MISSION_DOCUMENT_CATALOG_SPECIFICATION.md. A decisão define UX e modelo lógico; persistência, APIs, RLS e UI ainda dependem de implementação.
