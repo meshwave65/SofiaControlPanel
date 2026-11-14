@@ -56,3 +56,7 @@
 - Classificação: timeout DDL no startup = causa imediata confirmada; sessão bloqueadora = desconhecida; startup em 14/11 passou posteriormente.
 - Nenhuma consulta ao banco, escrita, DDL, restart ou deploy foi executado.
 - **Precisão sobre pausa:** tasks.updateStatus genérico existe e aceita statusId; não equivale a pause/resume operacional, pois não define transições nem coordena execução externa. A UI não oferece ação de pausa. Transferência manual segue sem fluxo identificado.
+### Checkpoint 20.4 — feedback UI e limites de testes
+- Factorize é idempotente no orchestrator e a UI refaz consultas, mas não confirma sucesso visualmente; consolidate registra falha apenas no console.
+- messages.test.ts cobre o ramo de resposta LLM interna, não o ramo Manus; sendManusMessageAndWait não tem teste integrado de ciclo before/send/poll/after.
+- Testes atuais são mocks e não substituem validação de banco, trigger, runtime ou conta externa.
