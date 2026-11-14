@@ -258,10 +258,26 @@ export class SofiaOrchestrator {
 
     const claimedTask = await db.claimStagedTaskWithAvailableAgent(taskId, stagedStatusId, progressStatusId);
 
-    // No eligible agent: keep the mission STAGED. Heartbeat retries when credits/status change.
     if (!claimedTask) {
+      // The atomic claim returns null both when no agent is eligible and when
+      // another dispatcher has already moved the task out of STAGED. Re-read
+      // before writing a wait state so we never overwrite another dispatcher's claim.
+      const latestTask = await db.getTaskById(taskId);
+      if (!latestTask) return null;
+      if (latestTask.statusId !== stagedStatusId) {
+        return {
+          task: latestTask,
+          started: false,
+          factorized: false,
+          subtaskIds: [],
+          executionStarted: Boolean(latestTask.manusTaskId),
+          externalTaskIds: latestTask.manusTaskId ? [latestTask.manusTaskId] : [],
+        };
+      }
+
+      // No eligible agent: keep the mission STAGED. Heartbeat retries when credits/status change.
       await db.updateTaskExecution(taskId, {
-        manusStatus: task.agentPinned ? "waiting_for_pinned_agent" : "waiting_for_available_agent",
+        manusStatus: latestTask.agentPinned ? "waiting_for_pinned_agent" : "waiting_for_available_agent",
       });
       return {
         task: await db.getTaskById(taskId),
