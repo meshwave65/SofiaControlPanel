@@ -45,6 +45,14 @@ describe("validateMissionBlueprintContent", () => {
     expect(() => validateMissionBlueprintContent(emptySection)).toThrow("seção sem conteúdo: Objetivo operacional");
   });
 
+  it("rejects required sections in a different order", () => {
+    const reordered = validBlueprint.replace(
+      "## Objetivo operacional\\nResultado esperado: concluir o objetivo declarado.",
+      "## Escopo executável\\nSomente as atividades descritas no TR.\\n## Objetivo operacional\\nResultado esperado: concluir o objetivo declarado.",
+    ).replace("\\n## Escopo executável\\nSomente as atividades descritas no TR.", "");
+    expect(() => validateMissionBlueprintContent(reordered)).toThrow("ordem operacional definida");
+  });
+
   it("rejects missing no-blockers declaration", () => {
     const missingDeclaration = validBlueprint.replace("BLOQUEIOS NÃO RESOLVIDOS: NENHUM", "Sem observações.");
     expect(() => validateMissionBlueprintContent(missingDeclaration)).toThrow("execução permanece bloqueada");
