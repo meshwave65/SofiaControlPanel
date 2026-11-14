@@ -413,8 +413,6 @@ export const appRouter = router({
           const task = await db.getTaskById(input.taskId);
           if (!task || task.createdBy !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND", message: "Somente o operador que criou a missão pode corrigir ou validar seu TR." });
         if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR pertence à missão principal; tarefas-filhas não podem alterá-lo." });
-        if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR pertence à missão principal; tarefas-filhas não podem alterá-lo." });
-        if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR pertence à missão principal; tarefas-filhas não podem alterá-lo." });
           const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, ctx.user.role === "admin");
           const tr = docs.find((document) => document.typeKey === "TR");
           const canReorientBeforeExecution = tr?.latestVersion?.state === "VALIDATED"
@@ -436,6 +434,10 @@ export const appRouter = router({
       regenerateInitialTR: protectedProcedure.input(z.object({ taskId: z.number().int().positive() })).mutation(async ({ input, ctx }) => {
         const task = await db.getTaskById(input.taskId);
         if (!task || task.createdBy !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND", message: "Somente o operador que criou a missão pode corrigir ou validar seu TR." });
+        const pausedStatusId = await db.getTaskStatusIdByName("PAUSED");
+        if (task.statusId !== pausedStatusId || task.manusTaskId) {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A regeneração do TR só pode ocorrer enquanto a missão estiver PAUSED e sem execução externa." });
+        }
         const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, ctx.user.role === "admin");
         const tr = docs.find((document) => document.typeKey === "TR");
         if (!tr?.latestVersion || tr.latestVersion.state !== "DRAFT") {
@@ -455,6 +457,10 @@ export const appRouter = router({
       validateTR: protectedProcedure.input(z.object({ taskId: z.number().int().positive() })).mutation(async ({ input, ctx }) => {
         const task = await db.getTaskById(input.taskId);
         if (!task || task.createdBy !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND", message: "Somente o operador que criou a missão pode corrigir ou validar seu TR." });
+        const pausedStatusId = await db.getTaskStatusIdByName("PAUSED");
+        if (task.statusId !== pausedStatusId || task.manusTaskId) {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A validação inicial do TR só pode liberar uma missão ainda PAUSED e sem execução externa." });
+        }
         if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR pertence à missão principal; tarefas-filhas não podem alterá-lo." });
         const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, false);
         const tr = docs.find((document) => document.typeKey === "TR");
@@ -493,6 +499,10 @@ export const appRouter = router({
       generateBlueprint: protectedProcedure.input(z.object({ taskId: z.number().int().positive() })).mutation(async ({ input, ctx }) => {
         const task = await db.getTaskById(input.taskId);
         if (!task || task.createdBy !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND", message: "Somente o operador que criou a missão pode liberar seu plano de trabalho." });
+        const pausedStatusId = await db.getTaskStatusIdByName("PAUSED");
+        if (task.statusId !== pausedStatusId || task.manusTaskId) {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A geração/retenção do Blueprint só pode liberar uma missão ainda PAUSED e sem execução externa." });
+        }
         if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O Blueprint pertence à missão principal." });
         const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, false);
         const tr = docs.find((document) => document.typeKey === "TR");
