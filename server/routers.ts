@@ -311,6 +311,24 @@ export const appRouter = router({
             },
           });
         }),
+      regenerateInitialTR: protectedProcedure.input(z.object({ taskId: z.number().int().positive() })).mutation(async ({ input, ctx }) => {
+        const task = await db.getTaskById(input.taskId);
+        if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+        const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, ctx.user.role === "admin");
+        const tr = docs.find((document) => document.typeKey === "TR");
+        if (!tr?.latestVersion || tr.latestVersion.state !== "DRAFT") {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A regeneração só é permitida enquanto o TR inicial estiver em DRAFT." });
+        }
+        const content = await generateInitialMissionTR(task.title, task.description);
+        return db.createMissionDocumentRevision({
+          taskId: input.taskId, documentId: tr.id, ownerId: ctx.user.id, canViewAll: ctx.user.role === "admin",
+          version: {
+            content, state: "AWAITING_HUMAN_VALIDATION", authorType: "SOFIA",
+            provenance: { origin: "HUMAN", source: "operator_requested_regeneration", supersedesVersion: tr.latestVersion.version },
+            changeSummary: "SOFIA regenerou o TR inicial após falha anterior",
+          },
+        });
+      }),
       validateTR: protectedProcedure.input(z.object({ taskId: z.number().int().positive() })).mutation(async ({ input, ctx }) => {
         const task = await db.getTaskById(input.taskId);
         if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
