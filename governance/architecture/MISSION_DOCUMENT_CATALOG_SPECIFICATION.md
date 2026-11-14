@@ -137,3 +137,12 @@ As linhas de `missionDocumentVersions` são append-only: trigger bloqueia UPDATE
 A migration 0010 **não foi adicionada ao `scripts/ensure-database.mjs`** e não foi aplicada a banco algum. A rotina de inicialização atual executa verificações e instala explicitamente somente migrations já selecionadas; ligar 0010 ao startup poderia alterar banco automaticamente durante deploy. A aplicação fica reservada a uma etapa de migração controlada, após validação do SQL, backup/rollback e autorização específica.
 
 A migration é compatível com o padrão server-only observado em `drizzle/0004_arc_server_only_rls.sql` e `drizzle/0007_arc_telemetry_confidence.sql`, mas a presença do arquivo no repositório não comprova execução no banco.
+
+
+## 10. Estado de implementação — Incremento B (2026-11-14)
+
+Na branch de implementação, foram adicionadas procedures server-side para listar instâncias, obter conteúdo por versão, listar histórico, revisar o TR inicial, regenerá-lo após falha e validá-lo explicitamente. A criação de missão humana registra ORIGINAL_REQUEST e o primeiro TR; o visualizador de TaskDetail usa as instâncias retornadas pelo backend, seleciona TR por padrão e permite consultar versões anteriores.
+
+A listagem do visualizador é baseada nas instâncias documentais vinculadas à missão e nos rótulos do catálogo. Tipos sem instância não aparecem. A migration 0010 permanece não aplicada; logo, APIs e UI dependem de sua aplicação controlada antes de qualquer deploy.
+
+Ainda não estão implementados geração de Blueprint, fluxo de missão autônoma SOFIA-originada, atualização event-driven do TR, backfill de missões legadas, diff visual ou geração de OR/FOR no ciclo completo. OR-20261114-0030.
