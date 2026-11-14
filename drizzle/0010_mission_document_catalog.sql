@@ -27,7 +27,6 @@ CREATE TABLE IF NOT EXISTS "sofia"."missionDocuments" (
   "documentTypeId" integer NOT NULL REFERENCES "sofia"."missionDocumentTypes"("id") ON DELETE RESTRICT,
   "documentKey" varchar(128) NOT NULL,
   "title" varchar(255) NOT NULL,
-  "currentVersion" integer NOT NULL DEFAULT 1,
   "createdAt" timestamp NOT NULL DEFAULT now(),
   "updatedAt" timestamp NOT NULL DEFAULT now(),
   CONSTRAINT "missionDocuments_task_documentKey_unique" UNIQUE ("taskId", "documentKey")
