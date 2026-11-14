@@ -64,3 +64,10 @@
 - **FAIL:** Messenger live sem despacho/resposta; retomada manual com manusTaskId existente; pausa operacional dedicada; transferência manual; indicador de conexão não real.
 - **BLOCKED:** listagem/criação/início STAGED/fatorização/consolidação em runtime autenticado; rota Messenger de main ainda não implantada; identidade externa esperada não definida.
 - **Evidência estática:** factorizeTask idempotente; start/claim/dispatch e consolidate têm código presente. Testes atuais são mockados e não substituem integração.
+
+### Checkpoint 20.4 — motivo do rollback ainda não rastreado (2026-11-14)
+- Render confirmou rollback manual em 13/11 00:53:36 UTC para o deploy de `255a016`; o deploy imediatamente anterior era `fef7880`, cujo diff é documental, sem mudança em código de aplicação.
+- O evento não registra justificativa. A falha de prestart em `496dd00` ocorreu antes e não pode ser declarada causa do rollback.
+- Distância atual entre live e main: 167 commits (146 no checkpoint anterior), número móvel que inclui documentação; comparar arquivos de aplicação separadamente.
+- Estado: alvo do rollback conhecido; motivação operacional desconhecida. Não implantar main até revisar deltas de código e critérios de release.
+- Nenhuma ação mutável ou chamada externa foi executada.
