@@ -81,7 +81,7 @@ export default function TaskDetail() {
   const documents = documentsQuery.data ?? [];
   const selectedDocument = documents.find((document) => document.id === selectedDocumentId)
     ?? documents.find((document) => document.typeKey === "TR")
-    ?? documents[0];
+    ?? null;
   const selectedVersion = selectedVersionNumber ?? selectedDocument?.latestVersion?.version ?? 0;
   const documentHistoryQuery = trpc.tasks.documents.history.useQuery(
     { taskId, documentId: selectedDocument?.id ?? 0 },
