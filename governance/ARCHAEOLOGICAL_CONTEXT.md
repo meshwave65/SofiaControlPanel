@@ -167,3 +167,14 @@ Registrar cada nova entrada com data, OR/FOR, missão/etapa, orientação anteri
 - **Classificação:** decisão arquitetural explícita; especificação documental aprovada para orientar a implementação.
 - **Documento normativo:** `governance/architecture/MISSION_BLUEPRINT_SPECIFICATION.md`; relação TR/Blueprint também registrada em `MISSION_TR_SPECIFICATION.md` e na arquitetura de orquestração.
 - **Limites:** definição documental apenas. Nenhum schema, runtime, UI, banco, produção, dispatch, chamada externa, crédito, deploy ou restart alterado. Task 20.3/Mateus permanece intocada.
+
+### AC-016 — 2026-11-14 — TR como visão principal em Gerenciar Missão
+
+- **Proposta do responsável:** a ação atual **Gerenciar**, na listagem de Missões, deve abrir a missão apresentando o TR, pois a descrição hoje exibida se aproxima de um plano operacional e mistura funções.
+- **Decisão:** a tela `/tasks/:id` passa a ter o TR como visão principal e padrão para o operador. O Blueprint fica em área/aba própria, como plano de trabalho direcionado aos executores.
+- **Proveniência:** a descrição original submetida na criação permanece preservada como fonte do pedido; não é o TR consolidado nem o Blueprint.
+- **Hierarquia da tela:** TR; Blueprint; Execução (subtarefas, ORs, checkpoints/evidências); Consolidação (entregável e FOR).
+- **Gate visual:** missão humana aguardando validação deve permitir corrigir/validar o TR e exibir bloqueio de execução até validação explícita. Missão SOFIA-originada mostra origem autônoma e permite inspeção/intervenção, sem exigir aprovação humana preliminar.
+- **Estado:** decisão de UX especificada; UI/runtime ainda não alterados. Implementação visual depende das APIs e persistência versionada TR/Blueprint e está alocada ao Incremento D.
+- **Evidência:** OR-20261114-0027; inspeção de `Tasks.tsx` e `TaskDetail.tsx`.
+- **Limites:** sem schema, runtime, banco, produção, dispatch, LLM/Manus, créditos, deploy ou restart. Task 20.3/Mateus intocada.
