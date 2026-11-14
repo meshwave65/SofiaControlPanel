@@ -281,11 +281,17 @@ export const appRouter = router({
       list: protectedProcedure.input(z.object({ taskId: z.number().int().positive() })).query(async ({ input, ctx }) => {
         const task = await db.getTaskById(input.taskId);
         if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
-        return db.getMissionDocumentsForTask(input.taskId, ctx.user.id, ctx.user.role === "admin");
+        const missionRootId = await db.getMissionRootTaskId(input.taskId);
+        if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
+        return db.getMissionDocumentsForTask(missionRootId, ctx.user.id, ctx.user.role === "admin");
       }),
       getVersion: protectedProcedure.input(z.object({ taskId: z.number().int().positive(), documentId: z.number().int().positive(), version: z.number().int().positive() }))
         .query(async ({ input, ctx }) => {
-          const result = await db.getMissionDocumentVersionForTask(input.taskId, input.documentId, input.version, ctx.user.id, ctx.user.role === "admin");
+          const task = await db.getTaskById(input.taskId);
+          if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+          const missionRootId = await db.getMissionRootTaskId(input.taskId);
+          if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
+          const result = await db.getMissionDocumentVersionForTask(missionRootId, input.documentId, input.version, ctx.user.id, ctx.user.role === "admin");
           if (!result) throw new TRPCError({ code: "NOT_FOUND", message: "Versão documental não encontrada." });
           return result;
         }),
@@ -293,12 +299,17 @@ export const appRouter = router({
         .query(async ({ input, ctx }) => {
           const task = await db.getTaskById(input.taskId);
           if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
-          return db.listMissionDocumentVersionsForTask(input.taskId, input.documentId, ctx.user.id, ctx.user.role === "admin");
+          const missionRootId = await db.getMissionRootTaskId(input.taskId);
+          if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
+          return db.listMissionDocumentVersionsForTask(missionRootId, input.documentId, ctx.user.id, ctx.user.role === "admin");
         }),
       reviseInitialTR: protectedProcedure.input(z.object({ taskId: z.number().int().positive(), content: z.string().trim().min(1).max(50000) }))
         .mutation(async ({ input, ctx }) => {
           const task = await db.getTaskById(input.taskId);
           if (!task || task.createdBy !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND", message: "Somente o operador que criou a missão pode corrigir ou validar seu TR." });
+        if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR pertence à missão principal; tarefas-filhas não podem alterá-lo." });
+        if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR pertence à missão principal; tarefas-filhas não podem alterá-lo." });
+        if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR pertence à missão principal; tarefas-filhas não podem alterá-lo." });
           const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, ctx.user.role === "admin");
           const tr = docs.find((document) => document.typeKey === "TR");
           if (!tr?.latestVersion || !["DRAFT", "AWAITING_HUMAN_VALIDATION"].includes(tr.latestVersion.state)) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A revisão nesta etapa só é permitida antes da primeira validação do TR." });
