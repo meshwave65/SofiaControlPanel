@@ -96,6 +96,10 @@ export class SofiaOrchestrator {
     if (task.parentTaskId != null) {
       throw new Error("Esta tarefa já é uma subtarefa. A fatoração deve ser feita na missão principal.");
     }
+    const currentStatusName = (await db.getTaskStatusNameById(task.statusId))?.toUpperCase();
+    if (currentStatusName !== STATUS_STAGED && currentStatusName !== STATUS_PROGRESS) {
+      throw new Error("Fatoração bloqueada: a missão principal precisa estar STAGED ou PROGRESS; PAUSED não libera unidades de execução.");
+    }
     console.log(`[Orchestrator] Fatorando tarefa ${task.id}: ${task.title}`);
 
     const subtaskIds: number[] = [];
