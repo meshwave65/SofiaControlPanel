@@ -193,3 +193,19 @@ Para missões humanas, a validação explícita do TR inicial precede a liberaç
 O Blueprint referencia a versão exata do TR, não amplia silenciosamente o escopo aprovado e é versionado quando houver replanejamento material. A missão-pai mantém o Blueprint mestre; tarefas-filhas referenciam a unidade de trabalho que executam. Agentes recebem pacotes de trabalho limitados ao contexto e às permissões necessários, e sua atribuição permanece temporária.
 
 OR documenta a execução e suas evidências; TR consolida a narrativa da missão; FOR consolida o aprendizado operacional final. O contrato completo está em `governance/architecture/MISSION_BLUEPRINT_SPECIFICATION.md`. Esta decisão arquitetural não implica implementação atual do Blueprint em schema, UI ou runtime.
+
+## 15. Interface de missão orientada pelo TR (AC-016)
+
+A ação **Gerenciar** na listagem de Missões deve abrir a tela de detalhe diretamente na visão **TR — Missão**. O TR é o conteúdo principal e a visão padrão para o operador, não uma aba secundária.
+
+A descrição original informada na criação permanece preservada como fonte primária da missão e proveniência do pedido. Ela não deve ser confundida com o TR consolidado nem com o Blueprint.
+
+Na mesma tela, o **Blueprint — Plano de trabalho** fica disponível em área/aba própria, como visão operacional direcionada aos executores. A ordem de leitura deve privilegiar:
+1. TR — compreensão, origem, motivação, objetivo, escopo, evolução, decisões, resultados comprovados e estado atual;
+2. Blueprint — plano operacional versionado, etapas, unidades de trabalho, dependências, executores, critérios de aceite e evidências;
+3. Execução — subtarefas, ORs, checkpoints e evidências;
+4. Consolidação — entregável final e FOR.
+
+Identificação, estado da missão e controles governados permanecem visíveis. Em missão humana aguardando validação, o próprio TR oferece leitura, correção e validação explícita e informa que a execução está bloqueada até essa validação. Em missão de origem SOFIA, a interface informa a origem autônoma e permite inspeção/intervenção sem exigir aprovação humana preliminar.
+
+A descrição original não deve ser exibida como se fosse um TR já consolidado ou um plano de execução. Esta é uma decisão de UX; sua implementação depende das APIs e da persistência versionada de TR/Blueprint.
