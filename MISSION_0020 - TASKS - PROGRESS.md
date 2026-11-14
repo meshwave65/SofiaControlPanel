@@ -301,3 +301,7 @@
 - Correções em `server/missionBlueprint.ts`, `server/sofiaOrchestrator.ts` e `server/messages.test.ts`, persistidas na branch da PR #15. OR-20261114-0031.
 - Novas execuções automáticas iniciadas no novo head; resultados ainda pendentes. Não declarar CI aprovado até consultar os jobs completos.
 - Sem alteração de banco persistente, Supabase, produção, deploy, restart, dispatch, chamadas reais LLM/Manus ou créditos. PR #15 permanece Draft. Task 20.3/Mateus intocada.
+
+
+- **Resultado final do CI:** run `43649190436` no commit `ecc45754464511e2d15e567910a97707b46ed7c5` concluiu SUCCESS. `pnpm check` passou; `pnpm test` passou com 41/41 testes; `pnpm build` passou; migration 0010 executou com sucesso em PostgreSQL 16 descartável. OR-20261114-0031 atualizado.
+- A aprovação refere-se ao código e ao fixture descartável. Migration 0010 não foi aplicada a banco persistente/produção. Sem deploy, restart, dispatch, chamadas reais LLM/Manus ou consumo de créditos. PR #15 permanece Draft; Task 20.3/Mateus intocada.
