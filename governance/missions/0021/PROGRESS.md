@@ -115,10 +115,10 @@ MISSION_0023 permanece PROGRESS e mantém seu próprio escopo de integridade ope
 
 ## Reavaliação read-only no banco de produção — 2026-11-14
 
-- O proprietário decidiu não criar branch Supabase de QA; consultas e validações serão conduzidas no projeto canônico, de forma controlada. Nenhuma branch foi criada e nenhum custo foi incorrido.
-- OR: [OR-20261114-0008](../../operational_reports/OR-20261114-0008.md).
-- Rechecagem confirmou `public.profiles` com RLS desabilitado e grants amplos para `anon`/`authenticated`, incluindo TRUNCATE.
-- `public.clients` mantém RLS habilitado, porém policies abertas de SELECT para anon/authenticated, INSERT para ambos e UPDATE para authenticated; grants incluem TRUNCATE.
-- Security Advisors reportam 30 tabelas públicas com RLS desabilitado, 15 tabelas com RLS sem policies, 3 funções com search_path mutável e múltiplas funções SECURITY DEFINER acessíveis por authenticated. A lista requer avaliação por tabela/função; não prova exposição pública de todas elas.
+- OR-0008 corrigida após recuperação do documento de 2026-11-04 e reconciliação da OR-20261113-0015.
+- O alerta de 30 tabelas públicas sem RLS corresponde a **29 tabelas legadas de outros projetos**, deliberadamente fora do escopo MW-Ex/MWN, mais **`public.mwex_business_configs`**, criada posteriormente e a ser avaliada individualmente.
+- As 29 tabelas legadas não são pendência desta missão; não executar limpeza, migração, ativação de RLS ou revogação de grants nelas.
+- Os estados técnicos observados de `profiles` e `clients` permanecem registrados, mas sua classificação de escopo exige cruzamento nominal com o inventário e confirmação de consumidores. Não presumir pertencimento à MW-Ex.
+- A contagem agregada do Advisor não deve voltar a ser apresentada como 30 problemas novos da MW-Ex.
 - Nenhuma alteração DDL, grant, policy, dado ou fluxo financeiro foi realizada. PR #30 e PR #31 permanecem abertas; migrations não aplicadas; sem merge/deploy.
-- Próxima fase: mapear consumidores e permissões reais de profiles/clients e revisar RPCs privilegiadas relevantes antes de preparar correções pequenas e testáveis diretamente no banco canônico.
+- Próxima etapa: reconciliar nominalmente `profiles` e `clients` e avaliar somente as estruturas efetivamente pertencentes ao escopo da MW-Ex/MWN.
