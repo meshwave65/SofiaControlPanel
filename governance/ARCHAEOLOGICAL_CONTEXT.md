@@ -139,3 +139,19 @@ Registrar cada nova entrada com data, OR/FOR, missão/etapa, orientação anteri
 - **Classificação:** decisão arquitetural explícita do responsável; nomenclatura e responsabilidades conceituais adotadas. Não implica implementação dos módulos ou do pipeline completo.
 - **Documentos afetados:** substituído `governance/architecture/SOFIA_COGNITIVE_CONTROL_PLANE.md` por `governance/architecture/SOFIA_COGNITIVE_ORCHESTRATION_ARCHITECTURE.md`; OR-20261114-0022; PR #15.
 - **Autoridade:** responsável pelo produto.
+
+
+### AC-014 — 2026-11-14 — TR como compreensão, validação e memória evolutiva das missões
+
+- **Decisão explícita do responsável:** toda missão deve receber um primeiro TR após sua criação e antes de qualquer execução. O TR inicial documenta a compreensão da SOFIA sobre origem, motivação, objetivo, escopo, resultados esperados, estratégia, premissas, dúvidas e critérios de conclusão.
+- **Missão originada por humano:** o primeiro TR deve ser apresentado ao operador solicitante para validar se a SOFIA compreendeu a intenção. O operador pode corrigir, complementar ou redirecionar; a execução só começa após validação explícita. Versões anteriores devem ser preservadas.
+- **Missão originada pela SOFIA:** também exige primeiro TR, mas não exige avaliação/aprovação humana preliminar. A SOFIA pode executar autonomamente dentro das permissões, políticas e limites de autonomia; deve registrar a origem, motivação operacional e evidências que sustentam a iniciativa.
+- **Intervenção contínua:** um operador pode consultar, questionar e reorientar qualquer missão durante seu ciclo de vida, respeitando gates de governança e impacto.
+- **Integridade documental:** TR não inventa motivação, decisões, progresso ou resultados. Deve distinguir declaração do operador, fato documentado, decisão, interpretação da SOFIA, hipótese/inferência, reconstrução e informação não localizada. Missão antiga sem justificativa deve declarar que a motivação original não foi localizada; eventual reconstrução deve ser rotulada e fundamentada. Resultados realizados exigem evidência.
+- **Documento vivo:** atualizar e versionar após eventos materiais, preservando histórico, autoria/origem, fontes e alterações. Captura de eventos, consolidação narrativa e publicação da versão são responsabilidades separadas.
+- **Experiência SCP:** ao abrir missão, TR é a visão principal; tarefas, ORs, checkpoints, decisões, evidências e FOR ficam acessíveis como detalhamento secundário. Estados documentais não se confundem com estados técnicos de missão/tarefa.
+- **Correlação:** relações entre missões (origem comum, dependência, continuidade, complementaridade, conflito/sobreposição) exigem evidência e justificativa; similaridade temática não basta.
+- **Distinção TR/FOR:** TR é narrativa viva de compreensão humana da missão; FOR é aprendizado operacional final para evolução dos procedimentos e eficiência da SOFIA. Não são intercambiáveis.
+- **Classificação:** decisão arquitetural explícita do responsável; contrato aprovado, implementação pendente.
+- **Documento normativo:** governance/architecture/MISSION_TR_SPECIFICATION.md. Referência sistêmica: governance/architecture/SOFIA_COGNITIVE_ORCHESTRATION_ARCHITECTURE.md.
+- **Limites:** nenhum schema, runtime, UI, DB, produção, dispatch, chamada externa, crédito ou deploy alterado nesta etapa. Task 20.3/Mateus permanece intocada.
