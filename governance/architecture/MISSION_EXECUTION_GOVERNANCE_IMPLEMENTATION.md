@@ -185,3 +185,8 @@ A fundação física inicial foi adicionada à branch:
 - Blueprint poderá referenciar a versão exata do TR via sourceDocumentVersionId; serviço deve validar missão e tipo de origem.
 
 A migration 0010 não está conectada ao startup/ensure-database e não foi aplicada a banco. Não executar até haver validação SQL, backup/rollback e gate específico. Ainda faltam camada de serviço, APIs, geração/versionamento em runtime, criação de snapshots ORIGINAL_REQUEST, UI e testes executáveis. OR-20261114-0029 registra limites e verificação.
+
+
+### Camada de repositório server-side (Incremento A)
+
+server/db.ts agora expõe operações de catálogo, listagem de instâncias, consulta de versão, listagem do histórico, criação transacional da instância + versão inicial e criação serializada de revisões append-only. As funções verificam acesso à missão via tasks.createdBy; autoria AGENT valida vínculo do agente ao proprietário; Blueprint exige referência a uma versão TR da mesma missão. Ainda não há procedures tRPC nem integração com UI. Ver OR-20261114-0029.
