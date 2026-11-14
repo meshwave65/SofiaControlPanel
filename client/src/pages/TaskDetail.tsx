@@ -105,6 +105,7 @@ export default function TaskDetail() {
   );
   const reviseInitialTRMutation = trpc.tasks.documents.reviseInitialTR.useMutation({
     onSuccess: async () => {
+      setSelectedVersionNumber(null);
       await documentsQuery.refetch();
       toast.success("Correção registrada em nova versão do TR.");
     },
@@ -112,6 +113,7 @@ export default function TaskDetail() {
   });
   const regenerateInitialTRMutation = trpc.tasks.documents.regenerateInitialTR.useMutation({
     onSuccess: async () => {
+      setSelectedVersionNumber(null);
       await documentsQuery.refetch();
       toast.success("Nova versão inicial do TR gerada pela SOFIA.");
     },
@@ -119,20 +121,24 @@ export default function TaskDetail() {
   });
   const validateTRMutation = trpc.tasks.documents.validateTR.useMutation({
     onSuccess: async () => {
+      setSelectedVersionNumber(null);
       await Promise.all([documentsQuery.refetch(), taskQuery.refetch()]);
       toast.success("TR validado, Blueprint gerado e missão liberada para STAGED.");
     },
     onError: async (error) => {
+      setSelectedVersionNumber(null);
       await Promise.all([documentsQuery.refetch(), taskQuery.refetch()]);
       toast.error(error.message);
     },
   });
   const generateBlueprintMutation = trpc.tasks.documents.generateBlueprint.useMutation({
     onSuccess: async () => {
+      setSelectedVersionNumber(null);
       await Promise.all([documentsQuery.refetch(), taskQuery.refetch()]);
       toast.success("Blueprint READY, vinculado à versão vigente do TR. Missão liberada.");
     },
     onError: async (error) => {
+      setSelectedVersionNumber(null);
       await Promise.all([documentsQuery.refetch(), taskQuery.refetch()]);
       toast.error(error.message);
     },
