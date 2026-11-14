@@ -146,3 +146,10 @@ Na branch de implementação, foram adicionadas procedures server-side para list
 A listagem do visualizador é baseada nas instâncias documentais vinculadas à missão e nos rótulos do catálogo. Tipos sem instância não aparecem. A migration 0010 permanece não aplicada; logo, APIs e UI dependem de sua aplicação controlada antes de qualquer deploy.
 
 Ainda não estão implementados geração de Blueprint, fluxo de missão autônoma SOFIA-originada, atualização event-driven do TR, backfill de missões legadas, diff visual ou geração de OR/FOR no ciclo completo. OR-20261114-0030.
+
+
+## 11. Incremento B.1 — vínculo de Blueprint ao TR vigente
+
+O visualizador identifica o Blueprint canônico da missão e a versão de origem. A prontidão de execução não é inferida pela simples existência de um Blueprint: a versão mais recente precisa estar em READY/ACTIVE e seu `sourceDocumentVersionId` deve apontar exatamente para o ID da versão vigente do TR canônico, que precisa estar VALIDATED/ACTIVE/REORIENTED.
+
+A API e o trigger SQL aplicam a mesma condição. Uma nova versão/reorientação do TR torna o Blueprint anterior inelegível até que seja criada uma nova versão derivada do TR atualizado. Tarefas-filhas resolvem os documentos da missão raiz; não criam cópias documentais independentes. OR-20261114-0030.
