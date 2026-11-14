@@ -157,7 +157,7 @@ BEGIN
     FROM sofia."missionDocuments" document_row
     JOIN sofia."missionDocumentTypes" type_row ON type_row.id = document_row."documentTypeId"
     JOIN sofia."missionDocumentVersions" version_row ON version_row."documentId" = document_row.id
-   WHERE document_row."taskId" = mission_id AND type_row."typeKey" = 'TR'
+   WHERE document_row."taskId" = mission_id AND document_row."documentKey" = 'TR' AND type_row."typeKey" = 'TR'
    ORDER BY version_row.version DESC LIMIT 1;
 
   SELECT version_row.state, version_row."sourceDocumentVersionId"
@@ -165,7 +165,7 @@ BEGIN
     FROM sofia."missionDocuments" document_row
     JOIN sofia."missionDocumentTypes" type_row ON type_row.id = document_row."documentTypeId"
     JOIN sofia."missionDocumentVersions" version_row ON version_row."documentId" = document_row.id
-   WHERE document_row."taskId" = mission_id AND type_row."typeKey" = 'BLUEPRINT'
+   WHERE document_row."taskId" = mission_id AND document_row."documentKey" = 'BLUEPRINT' AND type_row."typeKey" = 'BLUEPRINT'
    ORDER BY version_row.version DESC LIMIT 1;
 
   IF latest_tr_id IS NULL OR latest_tr_state NOT IN ('VALIDATED', 'ACTIVE', 'REORIENTED')
