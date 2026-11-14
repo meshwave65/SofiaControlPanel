@@ -63,14 +63,45 @@ async function generateInitialMissionBlueprint(title: string, trVersion: number,
     "Restrições e riscos", "Critérios objetivos de aceite", "Evidências exigidas",
     "Validação e consolidação", "Contingência", "Bloqueios e gates pendentes",
   ];
-  const missingSections = requiredSections.filter((section) => !content.toLocaleLowerCase().includes(section.toLocaleLowerCase()));
-  if (missingSections.length > 0) {
-    throw new Error("Blueprint incompleto; faltam seções obrigatórias: " + missingSections.join(", "));
-  }
-  const declaresNoScopeBlockers = content.split(/\r?\n/).some(
-    (line) => line.trim().toLocaleUpperCase() === "BLOQUEIOS NÃO RESOLVIDOS: NENHUM"
+  const lines = content.split(/\r?\n/).map((line) => line.trim());
+  const normalizeHeading = (line: string) => line
+    .replace(/^#{1,6}\s*/, "")
+    .replace(/^\d+[.)]\s*/, "")
+    .replace(/^\*\*(.*)\*\*$/, "$1")
+    .replace(/:$/, "")
+    .trim()
+    .toLocaleLowerCase();
+  const headingIndexes = requiredSections.map((section) =>
+    lines.findIndex((line) => normalizeHeading(line) === section.toLocaleLowerCase())
   );
-  if (!declaresNoScopeBlockers) {
+  const missingSections = requiredSections.filter((_, index) => headingIndexes[index] < 0);
+  if (missingSections.length > 0) {
+    throw new Error("Blueprint incompleto; faltam títulos de seção próprios: " + missingSections.join(", "));
+  }
+  for (let index = 0; index < requiredSections.length; index++) {
+    const start = headingIndexes[index] + 1;
+    const nextHeading = headingIndexes
+      .filter((headingIndex) => headingIndex > headingIndexes[index])
+      .sort((a, b) => a - b)[0] ?? lines.length;
+    if (!lines.slice(start, nextHeading).some((line) => line.length > 0)) {
+      throw new Error("Blueprint incompleto; seção sem conteúdo: " + requiredSections[index]);
+    }
+  }
+  const blockersIndex = headingIndexes[requiredSections.length - 1];
+  const blockersEnd = headingIndexes
+    .filter((headingIndex) => headingIndex > blockersIndex)
+    .sort((a, b) => a - b)[0] ?? lines.length;
+  const blockerLines = lines.slice(blockersIndex + 1, blockersEnd);
+  const noBlockersDeclaration = "BLOQUEIOS NÃO RESOLVIDOS: NENHUM";
+  const declaresNoScopeBlockers = blockerLines.some(
+    (line) => line.toLocaleUpperCase() === noBlockersDeclaration
+  );
+  const contradictoryBlockerLines = blockerLines.filter((line) =>
+    line.length > 0
+    && line.toLocaleUpperCase() !== noBlockersDeclaration
+    && /(BLOQUEIO|PENDÊNCIA|PENDENTE|NÃO RESOLVIDO)/i.test(line)
+  );
+  if (!declaresNoScopeBlockers || contradictoryBlockerLines.length > 0) {
     throw new Error("Blueprint contém bloqueios não resolvidos ou não declarou explicitamente a ausência deles em linha própria; execução permanece bloqueada.");
   }
   return content.trim();
