@@ -346,6 +346,7 @@ export default function TaskDetail() {
                   <CardTitle className="text-xl">Documentos da missão</CardTitle>
                   <CardDescription className="mt-1">
                     Contexto, planejamento e registros da missão em um único visualizador.
+                    {task.parentTaskId != null && " Este documento é herdado da missão principal."}
                   </CardDescription>
                 </div>
                 <div className="w-full sm:max-w-sm">
