@@ -10,7 +10,7 @@ import { getConsolidatedTaskReport, uploadConsolidatedTaskReport } from "./contr
 import { sendManusMessageAndWait, syncAgentCredits } from "./manusExecutionService";
 import { mirrorTaskToGitHub } from "./githubMissionMirror";
 import { invokeLLM } from "./_core/llm";
-import { buildSofiaConversation, extractTextContent, normalizeOperatorMessage, OPERATOR_MESSAGE_MAX_LENGTH } from "./messageService";
+import { buildSofiaConversation, extractTextContent, normalizeOperatorMessage, OPERATOR_MESSAGE_MAX_LENGTH, SOFIA_MESSAGE_TOOLS } from "./messageService";
 
 export const appRouter = router({
   system: systemRouter,
@@ -459,20 +459,43 @@ export const appRouter = router({
         let assistantContent: string;
         let responseStatus: "replied" | "pending" | "failed" = "replied";
         try {
-          if (task.agentId && task.manusTaskId) {
-            const externalReply = await sendManusMessageAndWait(task, content);
-            assistantContent = externalReply
-              ? externalReply
-              : "Mensagem encaminhada para a execução Manus, mas ainda não houve resposta. Abra o canal da missão novamente em alguns segundos.";
-            if (!externalReply) responseStatus = "pending";
+          const response = await invokeLLM({
+            messages: buildSofiaConversation(task, previousMessages),
+            tools: SOFIA_MESSAGE_TOOLS,
+            toolChoice: "auto",
+          });
+          const assistantTurn = response.choices?.[0]?.message;
+          const forwardCall = assistantTurn?.tool_calls?.find(
+            (call) => call.function.name === "forward_operator_instruction_to_assigned_agent"
+          );
+
+          if (forwardCall) {
+            let toolArgs: { message?: string };
+            try {
+              toolArgs = JSON.parse(forwardCall.function.arguments) as { message?: string };
+            } catch {
+              throw new Error("A Sofia retornou argumentos inválidos para o encaminhamento.");
+            }
+
+            const forwardedMessage = toolArgs.message?.trim();
+            if (!forwardedMessage || forwardedMessage.length > OPERATOR_MESSAGE_MAX_LENGTH) {
+              throw new Error("A Sofia produziu uma instrução vazia ou acima do limite permitido.");
+            }
+            if (!task.agentId || !task.manusTaskId) {
+              assistantContent = "Entendi que você deseja encaminhar uma instrução, mas esta missão não possui agente atribuído e execução externa identificada. Não enviei a mensagem.";
+              responseStatus = "failed";
+            } else {
+              const externalReply = await sendManusMessageAndWait(task, forwardedMessage);
+              assistantContent = externalReply
+                ? `A instrução foi encaminhada à execução externa associada a esta missão. Resposta recebida:\n\n${externalReply}`
+                : "A solicitação de envio foi encaminhada à integração Manus, mas não foi possível confirmar uma resposta da execução dentro da janela de consulta. Isso não comprova leitura ou processamento.";
+              if (!externalReply) responseStatus = "pending";
+            }
           } else {
-            const response = await invokeLLM({
-              messages: buildSofiaConversation(task, previousMessages),
-            });
-            const generatedContent = extractTextContent(response.choices?.[0]?.message?.content);
+            const generatedContent = extractTextContent(assistantTurn?.content);
             assistantContent = generatedContent
               ? generatedContent
-              : "Recebi a mensagem, mas a IA retornou uma resposta vazia.";
+              : "Recebi a mensagem, mas a Sofia não produziu uma resposta textual.";
             if (!generatedContent) responseStatus = "failed";
           }
         } catch (error) {
