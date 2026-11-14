@@ -24,6 +24,7 @@ describe("Database Helpers - Type Validation", () => {
     
     // Tasks
     expect(typeof db.createTask).toBe("function");
+    expect(typeof db.createMissionWithInitialDocuments).toBe("function");
     expect(typeof db.getTasksByStatus).toBe("function");
     expect(typeof db.getTasksByAgentId).toBe("function");
     expect(typeof db.updateTaskStatus).toBe("function");
