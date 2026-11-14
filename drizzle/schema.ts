@@ -644,7 +644,6 @@ export const missionDocuments = sofia.table("missionDocuments", {
   documentTypeId: integer("documentTypeId").notNull(),
   documentKey: varchar("documentKey", { length: 128 }).notNull(),
   title: varchar("title", { length: 255 }).notNull(),
-  currentVersion: integer("currentVersion").notNull().default(1),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 }, (table) => ({
