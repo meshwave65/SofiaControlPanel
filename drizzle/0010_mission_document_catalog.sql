@@ -119,15 +119,21 @@ VALUES
 ON CONFLICT ("typeKey") DO NOTHING;
 
 
--- Execution gate: only a validated latest TR releases the top-level mission.
--- Child tasks inherit authorization from their root mission.
+-- Execution gate: a validated latest TR plus a READY Blueprint derived from
+-- that exact TR version release the top-level mission. Child tasks inherit it.
 CREATE OR REPLACE FUNCTION sofia.enforce_validated_tr_before_staged()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = pg_catalog, sofia
 AS $function$
-DECLARE staged_status_id integer; mission_id integer; latest_tr_state text;
+DECLARE
+  staged_status_id integer;
+  mission_id integer;
+  latest_tr_id integer;
+  latest_tr_state text;
+  latest_blueprint_state text;
+  latest_blueprint_source_id integer;
 BEGIN
   SELECT id INTO staged_status_id FROM sofia."taskStatuses" WHERE name = 'STAGED' LIMIT 1;
   IF staged_status_id IS NULL OR NEW."statusId" IS DISTINCT FROM staged_status_id THEN RETURN NEW; END IF;
@@ -146,14 +152,26 @@ BEGIN
     SELECT id INTO mission_id FROM ancestors WHERE "parentTaskId" IS NULL LIMIT 1;
   END IF;
   IF mission_id IS NULL THEN RAISE EXCEPTION 'Execution blocked: top-level mission could not be resolved for task %', NEW.id; END IF;
-  SELECT version_row.state INTO latest_tr_state
+  SELECT version_row.id, version_row.state
+    INTO latest_tr_id, latest_tr_state
     FROM sofia."missionDocuments" document_row
     JOIN sofia."missionDocumentTypes" type_row ON type_row.id = document_row."documentTypeId"
     JOIN sofia."missionDocumentVersions" version_row ON version_row."documentId" = document_row.id
    WHERE document_row."taskId" = mission_id AND type_row."typeKey" = 'TR'
    ORDER BY version_row.version DESC LIMIT 1;
-  IF latest_tr_state IS NULL OR latest_tr_state NOT IN ('VALIDATED', 'ACTIVE', 'REORIENTED') THEN
-    RAISE EXCEPTION 'Execution blocked: mission % has no validated current TR', mission_id;
+
+  SELECT version_row.state, version_row."sourceDocumentVersionId"
+    INTO latest_blueprint_state, latest_blueprint_source_id
+    FROM sofia."missionDocuments" document_row
+    JOIN sofia."missionDocumentTypes" type_row ON type_row.id = document_row."documentTypeId"
+    JOIN sofia."missionDocumentVersions" version_row ON version_row."documentId" = document_row.id
+   WHERE document_row."taskId" = mission_id AND type_row."typeKey" = 'BLUEPRINT'
+   ORDER BY version_row.version DESC LIMIT 1;
+
+  IF latest_tr_id IS NULL OR latest_tr_state NOT IN ('VALIDATED', 'ACTIVE', 'REORIENTED')
+     OR latest_blueprint_state NOT IN ('READY', 'ACTIVE')
+     OR latest_blueprint_source_id IS DISTINCT FROM latest_tr_id THEN
+    RAISE EXCEPTION 'Execution blocked: mission % requires a validated TR and a READY Blueprint derived from its latest version', mission_id;
   END IF;
   RETURN NEW;
 END;
