@@ -67,7 +67,7 @@ async function generateInitialMissionBlueprint(title: string, trVersion: number,
   if (missingSections.length > 0) {
     throw new Error("Blueprint incompleto; faltam seções obrigatórias: " + missingSections.join(", "));
   }
-  const declaresNoScopeBlockers = content.split(/\\r?\\n/).some(
+  const declaresNoScopeBlockers = content.split(/\r?\n/).some(
     (line) => line.trim().toLocaleUpperCase() === "BLOQUEIOS NÃO RESOLVIDOS: NENHUM"
   );
   if (!declaresNoScopeBlockers) {
