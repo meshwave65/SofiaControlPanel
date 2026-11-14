@@ -95,3 +95,12 @@
 - Heartbeat reprocessa tarefas em espera a cada 30s, mas não libera reserva do pai. Retorno `executionStarted` usa número de IDs de subtarefas, não confirmação de dispatch efetivo.
 - Testes de regressão pendentes: pinned/automatico com um agente; múltiplas filhas e múltiplos agentes; concorrência SKIP LOCKED; retry após liberação válida; semântica do pai e sinalizador executionStarted.
 - Não tocar na tarefa 20.3/Mateus. Nenhuma alteração de produto/DB ou chamada externa executada.
+
+
+### Decisão do responsável — contrato de atribuição e fatorização (2026-11-14)
+- Missões pertencem ao SCP; agentes não são proprietários. `agentId` é atribuição operacional/temporária.
+- Sem pinagem explícita, o SCP pode reatribuir a missão a outro agente elegível quando houver impedimento, especialmente falta de créditos. Pinagem humana é exceção e não pode ser ignorada silenciosamente.
+- Na fatorização padrão sem pinagem, o agente que iniciou assume uma tarefa executável e as demais são distribuídas a outros agentes disponíveis.
+- Pai/filhas é hierarquia estrutural para rastreabilidade e consolidação; pai sem trabalho próprio não reserva agente nem bloqueia claims.
+- Pendência antes da implementação: definir se a pinagem humana em missão fatorizada se aplica a todas as subtarefas ou apenas a uma tarefa. Também não estão definidos fairness/prioridade/limites de concorrência.
+- Referência: OR-20261114-0018; contexto arqueológico AC-008. Nenhuma implementação de produto nesta etapa.
