@@ -404,8 +404,9 @@ export const appRouter = router({
           }
           const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, false);
           const tr = docs.find((document) => document.typeKey === "TR" && document.documentKey === "TR");
+          const currentStatusName = (await db.getTaskStatusNameById(task.statusId))?.toUpperCase();
           const canReorientBeforeExecution = tr?.latestVersion?.state === "VALIDATED"
-            && (await db.getTaskStatusNameById(task.statusId))?.toUpperCase() === "PAUSED"
+            && ["PAUSED", "STAGED"].includes(currentStatusName ?? "")
             && !task.manusTaskId;
           if (!tr?.latestVersion || (!["DRAFT", "AWAITING_HUMAN_VALIDATION"].includes(tr.latestVersion.state) && !canReorientBeforeExecution)) {
             throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR só pode ser corrigido antes da primeira execução; após validação, a reorientação exige missão ainda PAUSED e sem execução externa." });
