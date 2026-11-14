@@ -668,7 +668,7 @@ export const appRouter = router({
         const requestedStatus = (await db.getTaskStatusNameById(input.statusId))?.toUpperCase();
         const currentStatus = (await db.getTaskStatusNameById(task.statusId))?.toUpperCase();
         if (requestedStatus === "PROGRESS" && currentStatus !== "PROGRESS") {
-          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A transição para PROGRESS é exclusiva do orquestrador após claim atômico ou da retomada de execução externa existente." });
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A transição para PROGRESS é exclusiva dos fluxos internos de claim atômico e retomada; a procedure genérica não pode promovê-la." });
         }
         if (requestedStatus === "STAGED" && !(await db.hasExecutionReadyMissionDocuments(input.id))) {
           throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A missão não pode entrar em STAGED sem TR validado e Blueprint READY vinculado à versão vigente." });
