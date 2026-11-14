@@ -166,3 +166,12 @@ A missão-pai mantém o TR e o Blueprint mestre. Tarefas-filhas são unidades au
 OR registra execução, tentativas, ocorrências e evidências; o TR consolida a evolução narrativa; FOR consolida o aprendizado operacional final. O OR pode motivar revisão do plano, mas não altera o Blueprint automaticamente.
 
 O contrato completo do plano de trabalho está em `governance/architecture/MISSION_BLUEPRINT_SPECIFICATION.md`. A definição é normativa para a arquitetura, mas não afirma que geração, persistência, versionamento, UI ou gates de runtime estejam implementados.
+
+
+## 13. Apresentação no visualizador dinâmico de documentos (AC-017)
+
+O TR é a seleção padrão do visualizador único de documentos da missão, quando houver versão publicada e acessível. Não terá uma tela isolada nem dependerá de uma aba fixa. O mesmo espaço de leitura apresenta Blueprint, ORs, FOR e outros tipos documentais conforme o operador os selecionar no catálogo/instâncias disponíveis.
+
+A descrição original da solicitação permanece preservada e acessível como proveniência, mas nunca substitui ou simula o TR. A seleção de documento é somente leitura e não altera estado, execução ou autorização da missão.
+
+Contrato completo: governance/architecture/MISSION_DOCUMENT_CATALOG_SPECIFICATION.md. A especificação define UX e modelo lógico; não afirma implementação de catálogo, APIs, RLS ou visualizador.
