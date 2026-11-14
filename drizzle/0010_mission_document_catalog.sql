@@ -117,3 +117,45 @@ VALUES
   ('OR', 'OR — Relatório operacional', 'Registro operacional e evidências de execução; admite múltiplas instâncias.', 'execution', 'operator', 30, false, 'markdown'),
   ('FOR', 'FOR — Relatório operacional final', 'Consolidação de aprendizados operacionais ao encerramento da missão.', 'closure', 'operator', 40, false, 'markdown')
 ON CONFLICT ("typeKey") DO NOTHING;
+
+
+-- Execution gate: only a validated latest TR releases the top-level mission.
+-- Child tasks inherit authorization from their root mission.
+CREATE OR REPLACE FUNCTION sofia.enforce_validated_tr_before_staged()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, sofia
+AS $function$
+DECLARE staged_status_id integer; mission_id integer; latest_tr_state text;
+BEGIN
+  SELECT id INTO staged_status_id FROM sofia."taskStatuses" WHERE name = 'STAGED' LIMIT 1;
+  IF staged_status_id IS NULL OR NEW."statusId" IS DISTINCT FROM staged_status_id THEN RETURN NEW; END IF;
+  IF NEW."parentTaskId" IS NULL THEN
+    mission_id := NEW.id;
+  ELSE
+    WITH RECURSIVE ancestors AS (
+      SELECT id, "parentTaskId" FROM sofia.tasks WHERE id = NEW."parentTaskId"
+      UNION ALL
+      SELECT parent.id, parent."parentTaskId"
+        FROM sofia.tasks parent JOIN ancestors child ON parent.id = child."parentTaskId"
+    )
+    SELECT id INTO mission_id FROM ancestors WHERE "parentTaskId" IS NULL LIMIT 1;
+  END IF;
+  IF mission_id IS NULL THEN RAISE EXCEPTION 'Execution blocked: top-level mission could not be resolved for task %', NEW.id; END IF;
+  SELECT version_row.state INTO latest_tr_state
+    FROM sofia."missionDocuments" document_row
+    JOIN sofia."missionDocumentTypes" type_row ON type_row.id = document_row."documentTypeId"
+    JOIN sofia."missionDocumentVersions" version_row ON version_row."documentId" = document_row.id
+   WHERE document_row."taskId" = mission_id AND type_row."typeKey" = 'TR'
+   ORDER BY version_row.version DESC LIMIT 1;
+  IF latest_tr_state NOT IN ('VALIDATED', 'ACTIVE', 'REORIENTED') THEN
+    RAISE EXCEPTION 'Execution blocked: mission % has no validated current TR', mission_id;
+  END IF;
+  RETURN NEW;
+END;
+$function$;
+REVOKE ALL ON FUNCTION sofia.enforce_validated_tr_before_staged() FROM PUBLIC, anon, authenticated;
+DROP TRIGGER IF EXISTS tasks_require_validated_tr ON sofia.tasks;
+CREATE TRIGGER tasks_require_validated_tr BEFORE INSERT OR UPDATE OF "statusId" ON sofia.tasks
+  FOR EACH ROW EXECUTE FUNCTION sofia.enforce_validated_tr_before_staged();
