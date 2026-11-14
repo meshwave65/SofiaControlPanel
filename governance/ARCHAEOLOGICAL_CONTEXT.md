@@ -65,3 +65,15 @@ Registrar cada nova entrada com data, OR/FOR, missão/etapa, orientação anteri
 - **Autoridade:** instrução explícita atual do responsável, com protocolo de não inferência.
 - **Documentos:** blocker report `meshwave65/network: docs/reports/MEETING_PREP_BLOCKER_2026-11-05_RENATO_0311.md`, commit `8c04332049239180508b00d2d8261be15bd62f09`; README existente, commit `524c17bd4f941871b95f42d2b22e5cf74ca86d4b`; briefing preliminar, commit `2b3f91d82661a0ff47abcdd1776d5f16882dfe61`; esclarecimento no OR Renato 06/11, commit `6d29ef3e00fd38ad46827238bb9bc6c6927d8177`.
 - **Validação:** placeholder e report relidos; nenhuma blueprint ou network_master alterada; nenhum envio ou ação externa.
+
+
+### AC-008 — 2026-11-14 — Missões pertencem ao sistema; agentes são executores atribuídos
+- **Missão/etapa:** MISSION_0020 / tarefa 20.4 — diagnóstico de ciclo de missão e fatorização.
+- **Orientação anterior:** código tratava `agentId` como reserva exclusiva enquanto tarefa permanecesse PROGRESS; fatorização colocava pai em PROGRESS e copiava agente/pin para filhas, criando bloqueio.
+- **Declaração e decisão explícita do responsável:** missões pertencem ao SCP, não aos agentes. Atribuição de agente é operacional/temporária. Sem pinagem humana, o sistema deve poder encaminhar/reatribuir para outro agente disponível quando houver impedimento, principalmente falta de créditos. Quando o operador fixa um agente específico, a restrição deve ser respeitada e impedimentos apresentados, sem transferência silenciosa.
+- **Decisão explícita sobre fatorização padrão:** agente que inicia a fatorização assume uma das tarefas; as demais são distribuídas a outros agentes disponíveis. Pai/filhas é estrutura de rastreabilidade/consolidação, não propriedade nem reserva. Registro de coordenação sem trabalho próprio não deve reservar agente nem bloquear tarefas executáveis.
+- **Classificação:** decisão arquitetural do responsável, motivada por conflito estático confirmado em OR-20261114-0017.
+- **Pendência não inferida:** semântica da pinagem humana quando uma missão é fatorizada (uma tarefa ou todas as subtarefas), bem como fairness, prioridades e limites de concorrência.
+- **Autoridade:** decisão explícita do responsável; princípios de arquitetura/contrato devem ser revistos pelo Oracle conforme governança.
+- **Documentos:** OR-20261114-0018; MISSION_0020 PROGRESS; MISSION_0020 TASKS PROGRESS.
+- **Validação:** documentos versionados e relidos no remoto. Nenhum código, DB ou produção alterados; nenhum dispatch/consumo de crédito/Manus/LLM/deploy/restart.
