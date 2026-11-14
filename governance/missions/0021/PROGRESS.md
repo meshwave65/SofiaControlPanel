@@ -91,7 +91,7 @@ MISSION_0023 permanece PROGRESS e mantém seu próprio escopo de integridade ope
 - Migration proposta: `20261114150000_secure_profiles_rls_and_signup.sql`.
 - Escopo: RLS owner-only em `profiles`, sem INSERT/DELETE direto pelo cliente; criação via trigger em `auth.users`; RPC administrativa retorna somente IDs e nomes; signup e painéis atualizados.
 - Migration não aplicada; PR draft, sem merge ou deploy de produção.
-- Preview do commit anterior `cb6ee263` READY; o deployment do head atual `c9f0c3c` estava BUILDING no checkpoint.
+- Preview do head atual `c9f0c3c` READY — deployment `dpl_Des6nhYyc63afWjyeYyCdUG9iFmr`; acesso público à rota `/mw-ex` redireciona para Vercel Login/SSO, então QA visual autenticado permanece pendente.
 - Lint exploratório identificou 6 erros preexistentes e 2 warnings; a tentativa de tornar lint bloqueante foi revertida para não ampliar o escopo. Lint não validado.
 
 ### Dados existentes e dependências
@@ -113,5 +113,3 @@ MISSION_0023 permanece PROGRESS e mantém seu próprio escopo de integridade ope
 - Testes RLS anon/owner/admin, signup com e sem confirmação de e-mail, indicação, migration isolada e QA visual autenticado permanecem pendentes.
 - PR #30 e PR #31 não devem ser integradas/publicadas antes desses gates. Migration em produção, merge e deploy continuam ações separadas.
 
-- Preview Vercel final do head PR #31 `c9f0c3c7c6e46ed0b225c4ff71a6b59720323649`: READY — deployment `dpl_Des6nhYyc63afWjyeYyCdUG9iFmr`, URL https://newsite-p66iyfrsb-meshwaves-projects.vercel.app; build Vite 4,06 s.
-- Tentativa read-only de QA visual em `/mw-ex` redirecionou para Vercel Login/SSO. Nenhuma autenticação ou alteração de proteção foi tentada; QA visual permanece pendente.
