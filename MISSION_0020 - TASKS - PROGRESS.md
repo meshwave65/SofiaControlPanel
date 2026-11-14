@@ -190,3 +190,11 @@
 - Especificação: `governance/architecture/MISSION_BLUEPRINT_SPECIFICATION.md`; relação adicionada a `MISSION_TR_SPECIFICATION.md` e à arquitetura SOFIA.
 - OR-20261114-0025 criado e indexado. Apenas documentação; sem schema/runtime/UI/DB/produção/dispatch/LLM/Manus/créditos/deploy/restart. Task 20.3/Mateus intocada.
 - Próxima etapa: projeto técnico do gate pré-dispatch e persistência/versionamento de TR e Blueprint, com testes para criação humana/autônoma, início direto, trigger interno e tarefas-filhas.
+### Checkpoint 20.4 — Plano técnico de persistência e gate TR/Blueprint (2026-11-14)
+
+- Inspeção complementar confirmou: `taskStatuses` é lookup; criação aceita status arbitrário; `updateStatus` permite promover qualquer tarefa; `startTask` possui caminho `alreadyClaimedWithoutExecution` fora de STAGED; `ensure-database.mjs` executa a migration do trigger durante inicialização.
+- Também foi confirmado que `factorizeTask` copia atualmente agente/pinagem do pai às filhas, divergindo da decisão de pai consolidador e filhas executadas por agentes elegíveis.
+- Criado `governance/architecture/MISSION_EXECUTION_GOVERNANCE_IMPLEMENTATION.md` com modelo append-only para versões de TR/Blueprint, vínculo exato Blueprint→TR, RLS/ownership, fluxo humano/autônomo, herança de escopo nas filhas e defesa em profundidade.
+- OR-20261114-0026 criado e indexado.
+- **Estado:** planejamento técnico; Incremento A (persistência/versionamento + RLS + testes) ainda não implementado. Sem schema/migration/runtime/UI/DB/produção/dispatch/LLM/Manus/créditos/deploy/restart. Task 20.3/Mateus intocada.
+- Próximo passo: implementar Incremento A após conferir o modelo real de autenticação/ownership e a estratégia de RLS do banco; não presumir que uma policy baseada em auth.uid() corresponda ao identificador inteiro de users.id.
