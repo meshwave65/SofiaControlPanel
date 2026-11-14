@@ -307,3 +307,10 @@ Foi criado workflow dedicado para executar `pnpm check`, `pnpm test`, `pnpm buil
 
 - **Resultado final do CI:** run `43649190436` no commit `ecc45754464511e2d15e567910a97707b46ed7c5` concluiu SUCCESS. `pnpm check` passou; `pnpm test` passou com 41/41 testes; `pnpm build` passou; migration 0010 executou com sucesso em PostgreSQL 16 descartável. OR-20261114-0031 atualizado.
 - A aprovação refere-se ao código e ao fixture descartável. Migration 0010 não foi aplicada a banco persistente/produção. Sem deploy, restart, dispatch, chamadas reais LLM/Manus ou consumo de créditos. PR #15 permanece Draft; Task 20.3/Mateus intocada.
+
+### Checkpoint 20.4 — revisão final e integridade da criação de missão (OR-20261114-0032)
+
+- A criação de missão foi tornada atômica com os documentos obrigatórios ORIGINAL_REQUEST e TR; falha documental reverte a transação inteira. Mirror GitHub ocorre depois do commit documental.
+- O visualizador agora reinicia a seleção de versão ao mudar de documento.
+- CI no head `42f059e805427ea2426bb458385849714771d9f1`: runs `43650002480` e `43650006606` SUCCESS; `pnpm check`, 41/41 testes, `pnpm build` e migration 0010 em PostgreSQL 16 descartável aprovados.
+- Integração runtime com banco persistente e tool calling Gemini/Manus ainda não testada. Migration 0010 não aplicada a banco persistente/produção. Sem deploy, restart, dispatch real ou consumo de créditos. PR #15 sem merge. Task 20.3/Mateus intocada. OR-20261114-0032.
