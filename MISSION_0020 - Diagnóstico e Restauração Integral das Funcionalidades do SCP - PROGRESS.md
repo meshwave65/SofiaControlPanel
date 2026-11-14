@@ -205,3 +205,11 @@ Esta matriz é preliminar: ações marcadas BLOCKED exigem reprodução autentic
 - Próximas fases: ferramentas read-only para estado/elegibilidade, planos estruturados com confirmação persistente, transferência/pausa/retomada governadas, memória operacional e UI de telemetria real.
 - Nenhuma chamada externa real, dispatch, consumo de crédito, alteração DB/produção, deploy ou restart. Task 20.3 permanece sob Mateus.
 - OR-20261114-0022 SUBMITTED; Oracle PENDING.
+
+
+## Checkpoint 2026-11-14 — definição sistêmica SOFIA / SCP e BBC / BCE
+- O responsável esclareceu que **SOFIA** é o sistema integrado completo e modular; **SCP (SOFIA Control Panel)** é exclusivamente o frontend/painel central de comando, não um módulo independente.
+- Módulos de conhecimento: **SWE** extrai fontes e alimenta a **BBC (Base Bruta de Conhecimento)**; **SCur (SOFIA Curator)** cura a BBC e mantém a **BCE (Base de Conhecimento Evolutivo)** por documentos vivos/estado da arte; **SVec** vetoriza a BCE curada, não a BBC como fonte primária.
+- Módulos arqueológicos, de otimização, segurança e demais especializações integram o SOFIA. Cognição, governança e orquestração são capacidades transversais do sistema.
+- AC-013 registra a decisão; documento normativo: `governance/architecture/SOFIA_COGNITIVE_ORCHESTRATION_ARCHITECTURE.md`.
+- A correção documental não implementa os módulos nem altera o pipeline atual; PR #15 continua sem validação de check/test/build, sem merge/deploy e sem alterações de DB/produção. Task 20.3 permanece atribuída a Mateus.
