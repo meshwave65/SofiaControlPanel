@@ -80,3 +80,10 @@
 - A UI melhorou o feedback, mas Link Ativo e Sincronizado ainda não provam conectividade.
 - Main não corrige retomada PROGRESS com manusTaskId, pausa operacional ou transferência manual; o código de lifecycle consultado permanece essencialmente igual ao live.
 - ensure-database mantém lock_timeout 15s; main não está liberada como release completa por esta auditoria.
+
+
+### Checkpoint 20.4 — fatorização e dispatch automático (2026-11-14)
+- Risco estático: missão pai é marcada PROGRESS/reserva agente antes de criar subtarefas; filhos herdam agente e a regra de elegibilidade exclui agentes já ocupados em outra missão PROGRESS. Um filho também pode bloquear os demais ao assumir PROGRESS. Validar trigger SQL real e semântica antes de corrigir.
+- Testes existentes não validam dispatch de todas as filhas com regras reais de ocupação; acrescentar casos de um/múltiplos agentes e retry parcial.
+- Consolidação ainda não fornece toast de sucesso/erro no handler UI.
+- Nenhuma execução ou alteração de produto/produção realizada.
