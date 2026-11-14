@@ -201,3 +201,16 @@ O gate foi implementado em `tasks.updateStatus`, no orquestrador (`startTask`, `
 As procedures documentais e o visualizador dinâmico foram conectados em TaskDetail, com TR padrão, conteúdo por versão, histórico, correção, regeneração de DRAFT e validação explícita. O estado inicial PAUSED também foi refletido nos formulários de criação.
 
 **Limites:** Blueprint ainda não é gerado automaticamente; missão SOFIA-originada, TR vivo/event-driven, backfill de missões antigas e revalidação de alterações materiais não foram implementados. Migration 0010 continua fora do startup e não aplicada. Check/test/build/parser SQL/integration permanecem pendentes. Não publicar o código antes de aplicar a migration em gate separado. OR-20261114-0030.
+
+
+## 12. Incremento B.1 — Blueprint como segundo gate documental
+
+O gate de execução foi atualizado para exigir duas condições simultâneas:
+1. TR canônico mais recente em estado VALIDATED/ACTIVE/REORIENTED.
+2. Blueprint canônico mais recente em READY/ACTIVE, com `sourceDocumentVersionId` exatamente igual ao ID da versão vigente do TR.
+
+A criação humana valida o TR, gera Blueprint e só depois libera STAGED. Se a geração falhar ou o plano declarar bloqueios de escopo, a missão permanece PAUSED; há retry de geração enquanto não existir execução externa. Reorientação do TR antes da primeira execução cria nova versão pendente de validação e torna o Blueprint anterior inelegível.
+
+O gate está implementado no helper `hasExecutionReadyMissionDocuments`, nos caminhos de API/orquestrador e na migration 0010 por trigger BEFORE, cobrindo também alteração de agente em tarefa já STAGED. Filhas herdam documentos da missão raiz e não podem alterar TR/Blueprint mestres.
+
+O estado READY representa geração estrutural do plano e vínculo documental. Não substitui motor completo de política determinística de risco, orçamento e permissões, ainda pendente. Também permanecem pendentes: origem SOFIA autônoma, atualização event-driven do TR, vínculo de unidades do Blueprint às filhas, backfill de missões legadas e testes executáveis. OR-20261114-0030.
