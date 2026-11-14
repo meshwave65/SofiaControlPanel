@@ -104,3 +104,15 @@
 - Pai/filhas é hierarquia estrutural para rastreabilidade e consolidação; pai sem trabalho próprio não reserva agente nem bloqueia claims.
 - Pendência antes da implementação: definir se a pinagem humana em missão fatorizada se aplica a todas as subtarefas ou apenas a uma tarefa. Também não estão definidos fairness/prioridade/limites de concorrência.
 - Referência: OR-20261114-0018; contexto arqueológico AC-008. Nenhuma implementação de produto nesta etapa.
+
+
+### Decisão do responsável — semântica final da fatorização (2026-11-14)
+- Pai = missão principal, Draft e consolidação; é o único registro cujo resultado final representa a missão cumprida.
+- Filhas = tarefas auxiliares; seus resultados são insumos curados/integrados pelo pai, não entregáveis finais autônomos. Permanecem como histórico/evidência arqueológica.
+- Na pinagem humana excepcional, o agente fixado permanece no pai, produz o Draft e aguarda as filhas; a pinagem não deve ser copiada às filhas, que precisam ser executadas por outros agentes elegíveis.
+- O pai conclui a missão somente depois de receber, avaliar, curar e integrar os resultados das filhas e finalizar seu próprio resultado.
+- Exemplo funcional: Capítulo (pai) + Subcapítulos 1–3 (filhas) = um Capítulo integrado, não quatro documentos distintos.
+- Não confundir essa hierarquia de missão com o sistema de documentos vivos que compõe fragmentos/parágrafos recursivamente usando `parent_task_id`; o campo tem semântica contextual e versátil.
+- Implicações de implementação: não herdar `agentId`/`agentPinned` do pai; separar lease do consolidador e leases dos executores; modelar estado de espera/consolidação do pai; não concluir missão ao concluir somente as filhas.
+- A pendência anterior sobre aplicação da pinagem em fatorização está resolvida por esta decisão. Fairness, prioridade, limites de concorrência e compatibilidade de capacidades continuam pendentes.
+- Referência: OR-20261114-0018, aditivo de 2026-11-14.
