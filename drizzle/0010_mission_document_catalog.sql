@@ -135,10 +135,13 @@ BEGIN
     mission_id := NEW.id;
   ELSE
     WITH RECURSIVE ancestors AS (
-      SELECT id, "parentTaskId" FROM sofia.tasks WHERE id = NEW."parentTaskId"
+      SELECT id, "parentTaskId", ARRAY[id] AS path
+        FROM sofia.tasks WHERE id = NEW."parentTaskId"
       UNION ALL
-      SELECT parent.id, parent."parentTaskId"
-        FROM sofia.tasks parent JOIN ancestors child ON parent.id = child."parentTaskId"
+      SELECT parent.id, parent."parentTaskId", child.path || parent.id
+        FROM sofia.tasks parent
+        JOIN ancestors child ON parent.id = child."parentTaskId"
+       WHERE NOT parent.id = ANY(child.path)
     )
     SELECT id INTO mission_id FROM ancestors WHERE "parentTaskId" IS NULL LIMIT 1;
   END IF;
