@@ -242,3 +242,15 @@
 - OR-20261114-0029 complementado com o estado da camada de repositório.
 
 - Teste estrutural em server/db.test.ts atualizado para verificar as seis funções documentais; escrito, mas não executado. Sem TypeScript/build/integration validation.
+
+
+### Incremento B — ciclo inicial do TR e gate de execução (2026-11-14)
+
+- `tasks.create` agora cria missões humanas em PAUSED, preserva ORIGINAL_REQUEST como snapshot e gera TR inicial pela SOFIA. Falha de geração produz TR DRAFT com fatos declarados e mantém a missão bloqueada.
+- APIs `tasks.documents`: listagem, conteúdo por versão, histórico, correção do TR inicial, regeneração após falha e validação explícita.
+- Validar TR cria nova versão VALIDATED e só depois promove a missão para STAGED.
+- Gate em `tasks.updateStatus`, `SofiaOrchestrator.startTask/processTask/factorizeTask`, helper de repositório e trigger BEFORE da migration 0010. Filhas herdam autorização do TR raiz.
+- Fatorização não copia mais agentId/agentPinned do pai às filhas; leases de execução são independentes.
+- TaskDetail ganhou visualizador dinâmico, TR padrão, histórico de versões e ações de correção/regeneração/validação. Formulários iniciam em PAUSED e encaminham ao detalhe para revisão.
+- OR-20261114-0030 registra arquivos, limites e sequência segura de validação.
+- Não executados check/test/build/parser SQL/integration tests. Migration 0010 não aplicada; sem banco, deploy, restart, dispatch, chamada LLM/Manus ou créditos. Task 20.3/Mateus intocada.
