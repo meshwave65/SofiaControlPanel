@@ -274,3 +274,5 @@
 - Fatoração só ocorre com missão raiz `STAGED` ou `PROGRESS`; UI e trigger SQL impedem gerar/dispatchar filhas a partir de missão `PAUSED`.
 - Visualizador avalia o TR canônico. Validador de Blueprint exige seções próprias, ordenadas, preenchidas e declaração não contraditória de ausência de bloqueios.
 - Testes adicionados/atualizados para os gates acima; **não executados**. Check/build/parser SQL/integration continuam pendentes. Migration 0010 não aplicada; sem produção/deploy/dispatch/LLM real/Manus/créditos. Task 20.3 intocada. OR-20261114-0030.
+
+- Revisão adicional do estado: `tasks.updateStatus` não pode promover diretamente para `PROGRESS`; migration 0010 permite claim `STAGED→PROGRESS` e retomada `PAUSED→PROGRESS` somente com `manusTaskId` existente, verificando novamente os documentos. Fatoração de filhas depende da raiz `STAGED/PROGRESS`. OR-20261114-0030.
