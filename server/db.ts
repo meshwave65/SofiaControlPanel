@@ -1326,7 +1326,7 @@ export async function createMissionDocumentWithVersion(input: {
       .limit(1);
     if (!documentType) throw new Error("Mission document type is not active or does not exist");
     if (documentType.typeKey === "ORIGINAL_REQUEST") {
-      if (input.version.authorType === "AGENT" || (input.version.state && input.version.state !== "PUBLISHED")) {
+      if (input.version.authorType === "AGENT" || input.version.state !== "PUBLISHED") {
         throw new Error("The original mission request must be published as a HUMAN or SOFIA source snapshot");
       }
     }
