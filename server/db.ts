@@ -617,6 +617,130 @@ export async function updateTaskStatus(id: number, statusId: number) {
 }
 
 /**
+ * Inspects agent eligibility for a STAGED task without locks or mutations.
+ * The predicates intentionally mirror claimStagedTaskWithAvailableAgent.
+ */
+export async function inspectTaskAgentEligibility(taskId: number, ownerId: number) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+
+  const [task] = await database.execute(sql`
+    SELECT t.id, t."createdBy", t."agentId", t."agentPinned", status.name AS "taskStatus"
+    FROM sofia.tasks t
+    JOIN sofia."taskStatuses" status ON status.id = t."statusId"
+    WHERE t.id = ${taskId} AND t."createdBy" = ${ownerId}
+    LIMIT 1
+  `) as any;
+  if (!task) return null;
+
+  const observedAt = new Date();
+  const agentsForOwner = await database.execute(sql`
+    SELECT
+      a.id,
+      a.name,
+      a.status,
+      a."connectionStatus",
+      a.version,
+      a."lastHeartbeat",
+      a."creditsRemaining",
+      a."creditsUpdatedAt",
+      (a."manusToken" IS NOT NULL) AS "hasCredential",
+      (a.status = 'online') AS "isOnline",
+      (a."connectionStatus" IN ('configured', 'connected')) AS "connectionEligible",
+      (a."creditsRemaining" IS NOT NULL AND a."creditsRemaining"::numeric > 0) AS "hasPositiveCredits",
+      (a."creditsUpdatedAt" >= NOW() - INTERVAL '60 seconds') AS "creditSnapshotFresh",
+      NOT EXISTS (
+        SELECT 1
+        FROM sofia.tasks active_task
+        JOIN sofia."taskStatuses" active_status ON active_status.id = active_task."statusId"
+        WHERE active_task."agentId" = a.id
+          AND active_task.id <> ${taskId}
+          AND active_status.name = 'PROGRESS'
+      ) AS "hasNoProgressTask"
+    FROM sofia.agents a
+    WHERE a."ownerId" = ${task.createdBy}
+  `) as any[];
+
+  const taskIsStaged = task.taskStatus === "STAGED";
+  const assignmentMode = task.agentPinned
+    ? task.agentId ? "PINNED" : "PINNED_WITHOUT_AGENT"
+    : "AUTOMATIC";
+
+  const candidates = agentsForOwner.map((agent: any) => {
+    const reasons: string[] = [];
+    const isPinnedTarget = assignmentMode !== "PINNED" || agent.id === task.agentId;
+
+    if (!taskIsStaged) reasons.push("task_not_staged");
+    if (!isPinnedTarget) reasons.push("excluded_by_human_pin");
+    if (assignmentMode === "PINNED_WITHOUT_AGENT") reasons.push("pin_without_agent");
+    if (!agent.isOnline) reasons.push("agent_not_online");
+    if (!agent.connectionEligible) reasons.push("connection_not_configured_or_connected");
+    if (!agent.hasCredential) reasons.push("credential_missing");
+    if (!agent.hasPositiveCredits) reasons.push("credits_not_positive");
+    if (!agent.creditSnapshotFresh) reasons.push("credit_snapshot_stale_or_missing");
+    if (!agent.hasNoProgressTask) reasons.push("agent_has_progress_task");
+
+    const eligible = taskIsStaged
+      && assignmentMode !== "PINNED_WITHOUT_AGENT"
+      && isPinnedTarget
+      && Boolean(agent.isOnline)
+      && Boolean(agent.connectionEligible)
+      && Boolean(agent.hasCredential)
+      && Boolean(agent.hasPositiveCredits)
+      && Boolean(agent.creditSnapshotFresh)
+      && Boolean(agent.hasNoProgressTask);
+
+    return {
+      agentId: Number(agent.id),
+      name: agent.name,
+      status: agent.status,
+      connectionStatus: agent.connectionStatus,
+      version: agent.version,
+      lastHeartbeat: agent.lastHeartbeat,
+      creditsRemaining: agent.creditsRemaining,
+      creditsUpdatedAt: agent.creditsUpdatedAt,
+      hasCredential: Boolean(agent.hasCredential),
+      isOnline: Boolean(agent.isOnline),
+      connectionEligible: Boolean(agent.connectionEligible),
+      hasPositiveCredits: Boolean(agent.hasPositiveCredits),
+      creditSnapshotFresh: Boolean(agent.creditSnapshotFresh),
+      hasNoProgressTask: Boolean(agent.hasNoProgressTask),
+      eligible,
+      reasons,
+    };
+  });
+
+  candidates.sort((left: any, right: any) => {
+    if (left.eligible !== right.eligible) return left.eligible ? -1 : 1;
+    const creditDelta = Number(right.creditsRemaining ?? 0) - Number(left.creditsRemaining ?? 0);
+    if (creditDelta !== 0) return creditDelta;
+    const leftUpdated = left.creditsUpdatedAt ? new Date(left.creditsUpdatedAt).getTime() : Number.NEGATIVE_INFINITY;
+    const rightUpdated = right.creditsUpdatedAt ? new Date(right.creditsUpdatedAt).getTime() : Number.NEGATIVE_INFINITY;
+    return leftUpdated - rightUpdated || left.agentId - right.agentId;
+  });
+
+  return {
+    observedAt: observedAt.toISOString(),
+    task: {
+      taskId: Number(task.id),
+      ownerId: Number(task.createdBy),
+      status: task.taskStatus,
+      assignedAgentId: task.agentId === null ? null : Number(task.agentId),
+      agentPinned: Boolean(task.agentPinned),
+      assignmentMode,
+    },
+    candidates,
+    interpretationLimits: [
+      "Consulta somente leitura, sem FOR UPDATE, SKIP LOCKED, reserva ou alteração de estado.",
+      "Os critérios de elegibilidade espelham o predicado atual de claimStagedTaskWithAvailableAgent.",
+      "O resultado é um snapshot; a elegibilidade pode mudar antes de um claim posterior.",
+      "A conexão 'configured' é aceita pelo claim atual, assim como 'connected'.",
+      "A ordem de candidatos elegíveis segue créditos decrescentes, snapshot mais antigo e Agent ID.",
+    ],
+  };
+}
+
+/**
  * Atomically claims a STAGED task and reserves one eligible agent.
  * Explicitly selected agents are pinned; automatic assignments may be changed.
  */
