@@ -213,3 +213,13 @@ Esta matriz é preliminar: ações marcadas BLOCKED exigem reprodução autentic
 - Módulos arqueológicos, de otimização, segurança e demais especializações integram o SOFIA. Cognição, governança e orquestração são capacidades transversais do sistema.
 - AC-013 registra a decisão; documento normativo: `governance/architecture/SOFIA_COGNITIVE_ORCHESTRATION_ARCHITECTURE.md`.
 - A correção documental não implementa os módulos nem altera o pipeline atual; PR #15 continua sem validação de check/test/build, sem merge/deploy e sem alterações de DB/produção. Task 20.3 permanece atribuída a Mateus.
+
+
+### AC-014 — TR como compreensão e memória viva da missão (2026-11-14)
+- Primeiro TR obrigatório após criação e antes de qualquer execução.
+- Missão humana: validação explícita do primeiro TR pelo operador solicitante antes da execução; correções e redirecionamentos geram versões preservadas.
+- Missão autônoma da SOFIA: primeiro TR obrigatório, sem aprovação humana preliminar; execução dentro das políticas e limites de autonomia, com motivação e evidências registradas.
+- Operador pode consultar e reorientar qualquer missão a qualquer momento, observadas as políticas de governança.
+- Integridade documental: não inventar motivação, decisões ou resultados; classificar fatos, declarações, interpretações, hipóteses, reconstruções e dados não localizados. Missão antiga sem justificativa deve declarar ausência de localização; reconstrução precisa ser identificada. Resultados exigem evidência.
+- TR versionado e atualizado continuamente; TR é a visão principal ao abrir missão no SCP. Correlações entre missões exigem justificativa e proveniência. TR e FOR são distintos.
+- Especificação: governance/architecture/MISSION_TR_SPECIFICATION.md. Implementação pendente; nenhuma alteração de runtime/DB/produção/deploy nesta etapa. Task 20.3/Mateus intocada.
