@@ -24,8 +24,8 @@ async function generateInitialMissionTR(title: string, description?: string | nu
         "Quando a motivação não estiver expressa, declare que não foi informada; não a deduza como fato.",
         "Inclua origem humana, objetivo compreendido, escopo conhecido, lacunas, critérios apenas se informados e próximos passos propostos.",
         "A validação humana ainda não ocorreu."
-      ].join("\\n") },
-      { role: "user", content: "Título da missão: " + title + "\\n\\nDescrição original:\\n" + (description?.trim() || "Não foi fornecida descrição adicional.") }
+      ].join("\n") },
+      { role: "user", content: "Título da missão: " + title + "\n\nDescrição original:\n" + (description?.trim() || "Não foi fornecida descrição adicional.") }
     ],
     maxTokens: 5000,
   });
@@ -396,7 +396,7 @@ export const appRouter = router({
           "**Origem:** operador humano (usuário #" + ctx.user.id + ")",
           "**Registrada em:** " + new Date().toISOString(), "",
           "## Descrição original", input.description?.trim() || "Nenhuma descrição adicional foi fornecida."
-        ].join("\\n");
+        ].join("\n");
         await db.createMissionDocumentWithVersion({
           taskId, ownerId: ctx.user.id, canViewAll: ctx.user.role === "admin",
           typeKey: "ORIGINAL_REQUEST", documentKey: "ORIGINAL_REQUEST", title: "Solicitação original",
@@ -423,7 +423,7 @@ export const appRouter = router({
             "- Descrição declarada: " + (input.description?.trim() || "Não informada."), "",
             "## Limite de conhecimento",
             "A interpretação da SOFIA não foi concluída. Nenhuma motivação, decisão, escopo adicional ou resultado foi presumido."
-          ].join("\\n");
+          ].join("\n");
         }
         await db.createMissionDocumentWithVersion({
           taskId, ownerId: ctx.user.id, canViewAll: ctx.user.role === "admin",
