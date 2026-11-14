@@ -165,3 +165,15 @@ Esta matriz é preliminar: ações marcadas BLOCKED exigem reprodução autentic
 - **Sem pai executor artificial:** não deve existir reserva separada de agente para um registro-pai que não execute trabalho próprio. O registro original pode permanecer como referência de coordenação/consolidação, mas não pode bloquear a seleção/claim de agentes para as tarefas efetivas.
 - **Consequência para o diagnóstico:** o conflito estático pai-PROGRESS/filhas continua confirmado no modelo atual; a correção deve alinhar claim, fatorização, pinagem, retentativa por falta de créditos e estado do registro de coordenação a estas regras. Não liberar reserva nem alterar status isoladamente sem revisar transições e concorrência.
 - **Limite desta decisão:** isto estabelece o princípio de propriedade/roteamento e o comportamento de fatorização no caso padrão. Não define ainda política de prioridade, fairness, limite de concorrência, compatibilidade de capacidades, nem execução das filhas quando existe pinagem humana; esses contratos devem ser especificados por evidência e necessidade antes de codificar.
+
+
+## Decisão do responsável — fatorização como missão única e pai consolidador (2026-11-14)
+- A tarefa pai permanece como missão principal e único resultado final apresentado como missão cumprida.
+- O pai é consolidador: o agente explicitamente designado pelo operador permanece atribuído ao pai, cria o Draft do resultado principal e aguarda as subtarefas necessárias.
+- As filhas são tarefas auxiliares de execução. Seus resultados alimentam o pai; não representam missões/entregáveis finais independentes. Podem permanecer como histórico arqueológico/evidências.
+- Ao terminar as filhas, o agente do pai avalia, cura e integra o conteúdo ao Draft/artefato principal. A missão só termina após a conclusão e consolidação do pai.
+- Exemplo: Capítulo + Subcapítulos 1, 2 e 3 resulta em um único Capítulo integrado, não quatro documentos separados.
+- Em pinagem humana excepcional, o agente fixado permanece no pai como responsável pelo Draft/consolidação. A pinagem não é herdada automaticamente pelas filhas; elas devem ser distribuídas a outros agentes elegíveis, sem bloqueio causado pela atribuição do pai.
+- Esta regra não redefine documentos vivos nem a composição recursiva por `parent_task_id`. Esse campo é contextual e não deve ser interpretado universalmente como mecanismo de composição documental.
+- Consequência: separar agente consolidador do pai e agentes executores das filhas; não copiar `agentId`/`agentPinned` do pai para as filhas; filhas concluídas não concluem a missão sem consolidação do pai.
+- Referência: OR-20261114-0018, aditivo de 2026-11-14.
