@@ -312,3 +312,9 @@
 - Corrigido o visualizador: ao trocar o documento, a UI limpa a versão histórica selecionada e retorna à versão vigente do documento escolhido.
 - CI no head `42f059e805427ea2426bb458385849714771d9f1`: runs `43650002480` (push) e `43650006606` (PR) SUCCESS; check, 41/41 testes, build e migration 0010 em PostgreSQL 16 descartável aprovados.
 - PR #15 continua sem merge; pronto para revisão humana. Migration não aplicada a banco persistente; sem deploy/restart/dispatch/LLM/Manus real/créditos. Task 20.3/Mateus intocada. OR-20261114-0032.
+
+### Checkpoint 20.4 — OR-20261114-0033
+- Atribuição inicial de agente é temporária; `agentPinned` agora assume false por padrão nas criações comuns.
+- Reorientação do TR permitida em PAUSED/STAGED antes da primeira execução externa, com lock transacional da missão para competir com segurança contra o dispatcher.
+- CI run 43650701916 SUCCESS: check, testes, build e migration 0010 em PostgreSQL 16 descartável.
+- Sem migration persistente, merge, deploy, restart, dispatch real, LLM/Manus ou créditos. Task 20.3/Mateus intocada. OR-20261114-0033.
