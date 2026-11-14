@@ -90,3 +90,13 @@ Registrar cada nova entrada com data, OR/FOR, missão/etapa, orientação anteri
 - **Autoridade:** responsável pelo produto.
 - **Documentos:** OR-20261114-0018 (aditivo); MISSION_0020 PROGRESS; MISSION_0020 TASKS PROGRESS.
 - **Validação:** atualização documental versionada no GitHub; nenhuma implementação de produto, alteração de DB, dispatch, consumo de créditos, chamada Manus/LLM, deploy ou restart.
+
+
+### AC-010 — 2026-11-14 — Atribuição do consolidador é efêmera e transferível
+- **Missão/etapa:** MISSION_0020 / tarefa 20.4 — ciclo de vida de missão fatorizada.
+- **Orientação anterior:** AC-008/AC-009 definiram missão sistêmica, pai consolidador e filhas auxiliares; faltava explicitar a efemeridade do agente associado ao pai.
+- **Decisão explícita do responsável:** o agente consolidador não é proprietário do pai. É executor temporário. Qualquer agente elegível pode assumir a continuidade se o atual ficar impedido, preservando Draft, contexto, histórico, resultados das filhas, dependências e estado. Pinagem humana explícita impede transferência silenciosa; impedimento deve ser escalado ao operador.
+- **Classificação:** decisão arquitetural explícita do responsável.
+- **Autoridade:** responsável pelo produto.
+- **Documentos:** OR-20261114-0018 (aditivo); MISSION_0020 PROGRESS; MISSION_0020 TASKS PROGRESS.
+- **Validação:** atualização documental versionada e relida no GitHub; nenhuma implementação de produto/DB/produção ou execução externa.
