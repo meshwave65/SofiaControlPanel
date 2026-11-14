@@ -334,7 +334,7 @@ export default function TaskDetail() {
 
   const operationalReports = messages.filter(m => m.typeId === 2); // OperationalReport type
   const currentStatusName = statuses.find((status) => status.id === task.statusId)?.name.toUpperCase();
-  const canStartExecution = (currentStatusName === "STAGED" || currentStatusName === "PROGRESS") && !task.manusTaskId;
+  const canStartExecution = currentStatusName === "STAGED" && !task.manusTaskId;
   const canReorientTR = currentStatusName === "PAUSED" && !task.manusTaskId && task.manusStatus === "awaiting_tr_validation" && task.parentTaskId == null;
   const canFactorize = task.parentTaskId == null;
 
@@ -550,7 +550,7 @@ export default function TaskDetail() {
                     ) : (
                       <Play className="w-4 h-4 mr-2" />
                     )}
-                    {isStarting ? "Iniciando..." : currentStatusName === "PROGRESS" ? "Retomar execução" : "Iniciar missão"}
+                    {isStarting ? "Iniciando..." : "Iniciar missão"}
                   </Button>
                   <Button
                     onClick={handleFactorize}
