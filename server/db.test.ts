@@ -45,6 +45,7 @@ describe("Database Helpers - Type Validation", () => {
     // Mission documents and execution governance
     expect(typeof db.getMissionRootTaskId).toBe("function");
     expect(typeof db.hasValidatedMissionTR).toBe("function");
+    expect(typeof db.hasExecutionReadyMissionDocuments).toBe("function");
     expect(typeof db.getTaskStatusNameById).toBe("function");
     expect(typeof db.getMissionDocumentTypes).toBe("function");
     expect(typeof db.getMissionDocumentsForTask).toBe("function");
