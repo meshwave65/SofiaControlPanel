@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const dbMock = vi.hoisted(() => ({
   getTaskById: vi.fn(),
   getTaskStatusIdByName: vi.fn(),
+  hasExecutionReadyMissionDocuments: vi.fn(),
   getTasksByParentId: vi.fn(),
   updateTaskStatus: vi.fn(),
   claimStagedTask: vi.fn(),
@@ -28,6 +29,7 @@ import { SofiaOrchestrator } from "./sofiaOrchestrator";
 describe("SofiaOrchestrator.processTask", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    dbMock.hasExecutionReadyMissionDocuments.mockResolvedValue(true);
     dbMock.getTaskStatusIdByName.mockImplementation(async (name: string) => {
       if (name === "STAGED") return 1;
       if (name === "PROGRESS") return 2;
@@ -107,6 +109,7 @@ describe("SofiaOrchestrator.startTask", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    dbMock.hasExecutionReadyMissionDocuments.mockResolvedValue(true);
     dbMock.getTaskStatusIdByName.mockImplementation(async (name: string) => {
       if (name === "STAGED") return 1;
       if (name === "PROGRESS") return 2;
@@ -120,6 +123,22 @@ describe("SofiaOrchestrator.startTask", () => {
     dbMock.updateTaskStatus.mockResolvedValue(undefined);
     dbMock.getAgentsByOwnerId.mockResolvedValue([{ id: 6, hasCredential: true, status: "online", creditsUpdatedAt: new Date() }]);
     manusMock.syncAgentCredits.mockResolvedValue(100);
+  });
+
+  it("does not treat a PAUSED mission with an assigned agent as an in-flight claim", async () => {
+    dbMock.getTaskById.mockResolvedValueOnce({ ...stagedTask, statusId: 3 });
+
+    const result = await SofiaOrchestrator.startTask(30);
+
+    expect(result).toMatchObject({
+      started: false,
+      executionStarted: false,
+      externalTaskIds: [],
+    });
+    expect(dbMock.claimStagedTaskWithAvailableAgent).not.toHaveBeenCalled();
+    expect(dbMock.getAgentsByOwnerId).not.toHaveBeenCalled();
+    expect(manusMock.createManusTask).not.toHaveBeenCalled();
+    expect(manusMock.syncAgentCredits).not.toHaveBeenCalled();
   });
 
   it("atomically claims a staged task and creates one Manus execution", async () => {
@@ -192,6 +211,7 @@ describe("SofiaOrchestrator.startTask", () => {
 describe("SofiaOrchestrator.factorizeTask", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    dbMock.hasExecutionReadyMissionDocuments.mockResolvedValue(true);
     dbMock.getTasksByParentId.mockResolvedValue([]);
     dbMock.getTaskStatusIdByName.mockResolvedValue(1);
     dbMock.getOrCreateActivityEventType.mockResolvedValue({ id: 5 });
@@ -250,6 +270,7 @@ describe("SofiaOrchestrator.factorizeTask", () => {
 describe("SofiaOrchestrator factorization depth", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    dbMock.hasExecutionReadyMissionDocuments.mockResolvedValue(true);
   });
 
   it("does not recursively factorize a task that already has a parent", async () => {
