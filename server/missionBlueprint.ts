@@ -64,9 +64,10 @@ export function validateMissionBlueprintContent(content: string): string {
   const declaresNoScopeBlockers = blockerLines.some(
     (line) => line.toLocaleUpperCase() === NO_SCOPE_BLOCKERS_DECLARATION
   );
-  const contradictoryBlockerLines = blockerLines.filter((line) =>
+  const contradictoryBlockerLines = lines.filter((line) =>
     line.length > 0
     && line.toLocaleUpperCase() !== NO_SCOPE_BLOCKERS_DECLARATION
+    && normalizeHeading(line) !== "bloqueios e gates pendentes"
     && /(BLOQUEIO|PENDÊNCIA|PENDENTE|NÃO RESOLVIDO)/i.test(line)
   );
   if (!declaresNoScopeBlockers || contradictoryBlockerLines.length > 0) {
