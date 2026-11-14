@@ -298,7 +298,7 @@ export const appRouter = router({
       reviseInitialTR: protectedProcedure.input(z.object({ taskId: z.number().int().positive(), content: z.string().trim().min(1).max(50000) }))
         .mutation(async ({ input, ctx }) => {
           const task = await db.getTaskById(input.taskId);
-          if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+          if (!task || task.createdBy !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND", message: "Somente o operador que criou a missão pode corrigir ou validar seu TR." });
           const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, ctx.user.role === "admin");
           const tr = docs.find((document) => document.typeKey === "TR");
           if (!tr?.latestVersion || !["DRAFT", "AWAITING_HUMAN_VALIDATION"].includes(tr.latestVersion.state)) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A revisão nesta etapa só é permitida antes da primeira validação do TR." });
@@ -313,7 +313,7 @@ export const appRouter = router({
         }),
       regenerateInitialTR: protectedProcedure.input(z.object({ taskId: z.number().int().positive() })).mutation(async ({ input, ctx }) => {
         const task = await db.getTaskById(input.taskId);
-        if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+        if (!task || task.createdBy !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND", message: "Somente o operador que criou a missão pode corrigir ou validar seu TR." });
         const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, ctx.user.role === "admin");
         const tr = docs.find((document) => document.typeKey === "TR");
         if (!tr?.latestVersion || tr.latestVersion.state !== "DRAFT") {
@@ -331,7 +331,7 @@ export const appRouter = router({
       }),
       validateTR: protectedProcedure.input(z.object({ taskId: z.number().int().positive() })).mutation(async ({ input, ctx }) => {
         const task = await db.getTaskById(input.taskId);
-        if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+        if (!task || task.createdBy !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND", message: "Somente o operador que criou a missão pode corrigir ou validar seu TR." });
         const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, ctx.user.role === "admin");
         const tr = docs.find((document) => document.typeKey === "TR");
         if (!tr?.latestVersion || tr.latestVersion.state !== "AWAITING_HUMAN_VALIDATION") throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Não existe uma versão do TR aguardando validação." });
