@@ -42,6 +42,9 @@ export function validateMissionBlueprintContent(content: string): string {
   if (missingSections.length > 0) {
     throw new Error("Blueprint incompleto; faltam títulos de seção próprios: " + missingSections.join(", "));
   }
+  if (headingIndexes.some((headingIndex, index) => index > 0 && headingIndex <= headingIndexes[index - 1])) {
+    throw new Error("Blueprint incompleto; as seções obrigatórias precisam respeitar a ordem operacional definida.");
+  }
 
   for (let index = 0; index < REQUIRED_BLUEPRINT_SECTIONS.length; index++) {
     const start = headingIndexes[index] + 1;
