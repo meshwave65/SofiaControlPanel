@@ -336,7 +336,7 @@ export default function TaskDetail() {
   const currentStatusName = statuses.find((status) => status.id === task.statusId)?.name.toUpperCase();
   const canStartExecution = currentStatusName === "STAGED" && !task.manusTaskId;
   const canReorientTR = currentStatusName === "PAUSED" && !task.manusTaskId && task.manusStatus === "awaiting_tr_validation" && task.parentTaskId == null;
-  const canFactorize = task.parentTaskId == null;
+  const canFactorize = task.parentTaskId == null && ["STAGED", "PROGRESS"].includes(currentStatusName ?? "") && blueprintReady;
 
   return (
     <DashboardLayout>
