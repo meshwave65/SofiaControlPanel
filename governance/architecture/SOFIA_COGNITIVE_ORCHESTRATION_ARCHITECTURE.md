@@ -180,3 +180,16 @@ Toda missão deve receber um primeiro TR após sua criação e antes da execuç�
 - **TR ≠ FOR:** TR atende à compreensão humana e preserva contexto vivo; FOR consolida aprendizado operacional para melhorar a SOFIA.
 
 O contrato completo, estados documentais e critérios de aceite estão em governance/architecture/MISSION_TR_SPECIFICATION.md. Esta definição não presume que geração, versionamento, eventos ou UI já estejam implementados.
+
+## 14. Blueprint — plano de trabalho derivado do TR (AC-015)
+
+O Blueprint é o plano de trabalho operacional que a SOFIA deriva de uma versão específica do TR. TR e Blueprint não são sinônimos:
+
+- TR apresenta ao operador a compreensão e a evolução da missão.
+- Blueprint orienta o executor sobre etapas, tarefas, dependências, recursos, restrições, critérios de aceite e evidências.
+
+Para missões humanas, a validação explícita do TR inicial precede a liberação do trabalho. Para missões autônomas, o TR inicial continua obrigatório e a SOFIA pode produzir o Blueprint e prosseguir dentro dos limites de autonomia e governança.
+
+O Blueprint referencia a versão exata do TR, não amplia silenciosamente o escopo aprovado e é versionado quando houver replanejamento material. A missão-pai mantém o Blueprint mestre; tarefas-filhas referenciam a unidade de trabalho que executam. Agentes recebem pacotes de trabalho limitados ao contexto e às permissões necessários, e sua atribuição permanece temporária.
+
+OR documenta a execução e suas evidências; TR consolida a narrativa da missão; FOR consolida o aprendizado operacional final. O contrato completo está em `governance/architecture/MISSION_BLUEPRINT_SPECIFICATION.md`. Esta decisão arquitetural não implica implementação atual do Blueprint em schema, UI ou runtime.
