@@ -275,3 +275,8 @@ O helper server-side, os caminhos de início/retomada/fatoração/encaminhamento
 READY representa prontidão documental e estrutural; não substitui o motor completo de política para risco, orçamento e permissões. Missões SOFIA-originadas, atualização event-driven do TR, vínculo de unidades do Blueprint às filhas e backfill permanecem pendentes. OR-20261114-0030.
 
 Sem pnpm check/test/build, parser SQL ou testes de integração. Migration 0010 não aplicada; sem alteração em banco/produção, deploy, restart, dispatch, chamada LLM/Manus real ou créditos. Task 20.3/Mateus intocada.
+
+ 
+### Revisão técnica B.2 — defesa dos caminhos alternativos (2026-11-14)
+
+A revisão encontrou e corrigiu duas brechas de fluxo: o início de tarefa `PAUSED/PROGRESS` com agente atribuído e a fatoração direta de missão `PAUSED`, que poderia criar subtarefas `STAGED` e acionar o dispatch. Agora `startTask` aceita apenas `STAGED`; o claim concorrente é relido antes de gravar estado de espera; fatoração exige missão raiz `STAGED/PROGRESS`; migration 0010 verifica também o estado real da raiz antes de liberar subtarefa `STAGED`. A UI reflete os mesmos limites. O validador do Blueprint exige estrutura própria, ordenada e preenchida, com declaração de bloqueios consistente. Testes adicionados, ainda não executados. Sem check/build/parser SQL/integration; migration 0010 não aplicada; sem produção/deploy/dispatch/LLM real/Manus/créditos. OR-20261114-0030.
