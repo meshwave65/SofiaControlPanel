@@ -1075,6 +1075,14 @@ export async function getLookups() {
   return { statuses, priorities, messageTypes: mTypes, eventTypes: eTypes };
 }
 
+export async function getTaskStatusNameById(id: number): Promise<string | null> {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+  const [status] = await database.select({ name: taskStatuses.name }).from(taskStatuses)
+    .where(eq(taskStatuses.id, id)).limit(1);
+  return status?.name ?? null;
+}
+
 export async function getTaskStatusIdByName(name: string): Promise<number> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -1472,4 +1480,37 @@ export async function listMissionDocumentVersionsForTask(
     .from(missionDocumentVersions)
     .where(eq(missionDocumentVersions.documentId, documentId))
     .orderBy(desc(missionDocumentVersions.version));
+}
+
+
+/** Execution authorization is inherited by child tasks from the top-level mission. */
+export async function hasValidatedMissionTR(taskId: number): Promise<boolean> {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+  const [task] = await database.select({ id: tasks.id, parentTaskId: tasks.parentTaskId })
+    .from(tasks).where(eq(tasks.id, taskId)).limit(1);
+  if (!task) return false;
+  let missionId = task.id;
+  let parentId = task.parentTaskId;
+  while (parentId != null) {
+    const [parent] = await database.select({ id: tasks.id, parentTaskId: tasks.parentTaskId })
+      .from(tasks).where(eq(tasks.id, parentId)).limit(1);
+    if (!parent) return false;
+    missionId = parent.id;
+    parentId = parent.parentTaskId;
+  }
+  const [validated] = await database.select({ id: missionDocumentVersions.id })
+    .from(missionDocumentVersions)
+    .innerJoin(missionDocuments, eq(missionDocumentVersions.documentId, missionDocuments.id))
+    .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
+    .where(and(
+      eq(missionDocuments.taskId, missionId),
+      eq(missionDocumentTypes.typeKey, "TR"),
+      sql`${missionDocumentVersions.version} = (
+        SELECT MAX(v2."version") FROM sofia."missionDocumentVersions" v2
+        WHERE v2."documentId" = ${missionDocuments.id}
+      )`,
+      sql`${missionDocumentVersions.state} IN ('VALIDATED', 'ACTIVE', 'REORIENTED')`,
+    )).limit(1);
+  return Boolean(validated);
 }
