@@ -41,6 +41,14 @@ describe("Database Helpers - Type Validation", () => {
     expect(typeof db.createContextReport).toBe("function");
     expect(typeof db.getRecentContextReports).toBe("function");
     expect(typeof db.updateContextReportGitHub).toBe("function");
+
+    // Mission documents
+    expect(typeof db.getMissionDocumentTypes).toBe("function");
+    expect(typeof db.getMissionDocumentsForTask).toBe("function");
+    expect(typeof db.getMissionDocumentVersionForTask).toBe("function");
+    expect(typeof db.listMissionDocumentVersionsForTask).toBe("function");
+    expect(typeof db.createMissionDocumentWithVersion).toBe("function");
+    expect(typeof db.createMissionDocumentRevision).toBe("function");
   });
 });
 
