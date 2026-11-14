@@ -483,7 +483,7 @@ export const appRouter = router({
         const stagedStatusId = await db.getTaskStatusIdByName("STAGED");
         await db.updateTaskStatus(input.taskId, stagedStatusId);
         return { blueprintVersion: blueprint.version, statusId: stagedStatusId };
-      }),,
+      }),
     }),
 
     list: protectedProcedure.query(async ({ ctx }) => {
