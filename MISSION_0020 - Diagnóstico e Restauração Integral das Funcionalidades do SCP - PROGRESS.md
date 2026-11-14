@@ -64,3 +64,15 @@ Identificar, com evidências reproduzíveis, por que o SofiaControlPanel não ex
 - **Achados iniciais:** ausência de pausa/transferência manual na UI/API; condição de habilitação do botão iniciar impede retomada quando `manusTaskId` já existe e não cobre PAUSED; Messenger apresenta `Link Ativo` sem health-check e encaminha para LLM interno ou execução Manus conforme a missão, sem integração direta com conta externa do operador comprovada.
 - **Limite da evidência:** inspeção estática apenas. Commit efetivamente publicado, logs/health do Render, estado real do banco/agentes e conta externa pretendida ainda não foram verificados. Nenhuma chamada Manus/LLM, consumo de crédito, escrita de produção ou deploy.
 - **Operational Report:** `OR-20261114-0017.md` (SUBMITTED; Oracle PENDING).
+
+## Checkpoint 2026-11-14 — validação read-only do Render (tarefa 20.4)
+
+- **Serviço:** SofiaControlPanel-web, Render web service, não suspenso.
+- **Deploy live:** rollback para 255a01601ae3f95f40de2071d53508cf6a41faf5 em 13/11; deploy automático desativado.
+- **Divergência crítica:** comparação GitHub confirma main 146 commits à frente do commit live (0 commits atrás). A produção não executa a revisão atual auditada.
+- **Runtime:** logs de 14/11 confirmam processo Node iniciado, servidor escutando na porta 10000, heartbeat iniciado, conexão DB verificada e verificações de colunas/trigger concluídas. Avisos PostgreSQL 42701 são de colunas já existentes e foram tratados como skipping; não interromperam a inicialização observada.
+- **Histórico:** eventos registram processos encerrados com exit code 1 em 12/11; causa ainda não isolada.
+- **Classificação:** inicialização do serviço/DB = PASS limitado; alinhamento produção-main = FAIL; funcionalidade real de missões/Messenger = BLOCKED até comparação de versões e reprodução segura.
+- **Próximos passos:** comparar os arquivos de ciclo de missão, Messenger, DB e despacho entre o commit live e main; examinar logs sanitizados dos exits; confirmar readiness HTTP. Não fazer deploy, restart, ativar auto-deploy nem disparar tarefas externas durante o diagnóstico.
+- **Segurança:** consulta Render somente leitura; nenhum valor de variável de ambiente consultado; nenhuma escrita, chamada Manus/LLM, mensagem, consumo de crédito ou deploy.
+- **OR:** OR-20261114-0017.md, complemento de runtime registrado; status SUBMITTED / Oracle PENDING.
