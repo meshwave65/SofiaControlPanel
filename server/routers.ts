@@ -308,6 +308,7 @@ export const appRouter = router({
               content: input.content, state: "AWAITING_HUMAN_VALIDATION", authorType: "HUMAN", authorUserId: ctx.user.id,
               provenance: { origin: "HUMAN", action: "operator_correction", supersedesVersion: tr.latestVersion.version },
               changeSummary: "Correção do operador; aguardando validação explícita",
+              publishedAt: new Date(),
             },
           });
         }),
@@ -326,6 +327,7 @@ export const appRouter = router({
             content, state: "AWAITING_HUMAN_VALIDATION", authorType: "SOFIA",
             provenance: { origin: "HUMAN", source: "operator_requested_regeneration", supersedesVersion: tr.latestVersion.version },
             changeSummary: "SOFIA regenerou o TR inicial após falha anterior",
+            publishedAt: new Date(),
           },
         });
       }),
@@ -432,6 +434,7 @@ export const appRouter = router({
             content: trContent, state: trState, authorType: "SOFIA",
             provenance: { origin: "HUMAN", source: "tasks.create", originalRequestDocumentKey: "ORIGINAL_REQUEST" },
             changeSummary: "Primeira compreensão da missão pela SOFIA; aguardando validação humana",
+            publishedAt: trState === "AWAITING_HUMAN_VALIDATION" ? new Date() : null,
           },
         });
         return {
