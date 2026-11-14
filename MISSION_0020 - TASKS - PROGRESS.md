@@ -254,3 +254,14 @@
 - TaskDetail ganhou visualizador dinâmico, TR padrão, histórico de versões e ações de correção/regeneração/validação. Formulários iniciam em PAUSED e encaminham ao detalhe para revisão.
 - OR-20261114-0030 registra arquivos, limites e sequência segura de validação.
 - Não executados check/test/build/parser SQL/integration tests. Migration 0010 não aplicada; sem banco, deploy, restart, dispatch, chamada LLM/Manus ou créditos. Task 20.3/Mateus intocada.
+
+
+### Incremento B.1 — Blueprint obrigatório antes da liberação (2026-11-14)
+
+- O fluxo foi endurecido para cumprir AC-015: validar TR não libera execução sozinho. A SOFIA gera Blueprint a partir da versão exata do TR validado; o documento registra número e ID da versão-fonte.
+- O Blueprint só recebe estado READY se contiver as seções estruturais obrigatórias e declarar explicitamente ausência de bloqueios de escopo não resolvidos. Se houver bloqueio ou falha de geração, a missão permanece PAUSED.
+- `hasExecutionReadyMissionDocuments`, API, orquestrador e trigger SQL exigem TR vigente validado + Blueprint vigente READY/ACTIVE com `sourceDocumentVersionId` igual ao ID da versão atual do TR.
+- A API permite retry do Blueprint e liberação posterior enquanto a missão permanecer PAUSED e sem execução externa. Reorientação pré-execução do TR cria nova versão, invalida a referência do Blueprint anterior e exige nova validação/geração.
+- A tela mostra Blueprint pendente, permite retry e oferece liberação quando documento e vínculo estão prontos. Filhas visualizam documentos da missão raiz e não podem alterá-los.
+- READY é prontidão documental/estrutural, não substitui o motor completo de política de risco, orçamento e permissões, que permanece pendente.
+- OR-20261114-0030 atualizado. Sem check/test/build/parser SQL/integration; migration 0010 não aplicada; sem produção/deploy/dispatch/LLM real/Manus/créditos. Task 20.3/Mateus intocada.
