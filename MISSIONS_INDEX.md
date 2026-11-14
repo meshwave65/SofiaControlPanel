@@ -7,9 +7,9 @@ Este repositório contém **duas séries diferentes de registros**, além de seu
 | Camada | Fonte de verdade | Local no GitHub | Quantidade atual | O que representa |
 | --- | --- | --- | ---: | --- |
 | Missões operacionais do painel | Supabase `sofia.tasks` | `missions/SCP-TASK-XXXXXX.md` | 15 registros, IDs 2–16 | Tarefas/missões criadas ou materializadas pelo SofiaControlPanel, incluindo relações pai-filho. |
-| Missões de governança | Documentação versionada | `governance/missions/<ID>/` quando existe | 23 IDs, 0001–0023 | Programas de trabalho, blueprints, gates, checkpoints e continuidade. |
+| Missões de governança | Documentação versionada | `governance/missions/<ID>/` quando existe | 24 IDs, 0001–0024 | Programas de trabalho, blueprints, gates, checkpoints e continuidade. |
 | Snapshots legados de governança | Histórico Git | raiz, `MISSION_*.md` | 47 arquivos | Cópias/status históricos mantidos para preservar links e rastreabilidade. Não são 47 missões novas. |
-| Artefatos de missão | Git | dentro de `governance/missions/<ID>/` | 92 arquivos | Blueprints, progresso, tarefas, checkpoints, evidências e relatórios. Não são missões adicionais. |
+| Artefatos de missão | Git | dentro de `governance/missions/<ID>/` | 96 arquivos | Blueprints, progresso, tarefas, checkpoints, evidências e relatórios. Não são missões adicionais. |
 
 ## 2. Missões operacionais do Supabase
 
@@ -25,7 +25,7 @@ Todos os 15 registros possuem `missionKey`, `githubPath`, `githubSha` e `githubS
 
 ## 3. Missões de governança
 
-A numeração `MISSION_0001`–`MISSION_0023` é uma série documental distinta da numeração `SCP-TASK-*`. A localização canônica atual é:
+A numeração `MISSION_0001`–`MISSION_0024` é uma série documental distinta da numeração `SCP-TASK-*`. A localização canônica atual é:
 
 | ID | Estado/documento canônico | Local principal |
 | ---: | --- | --- |
@@ -52,6 +52,7 @@ A numeração `MISSION_0001`–`MISSION_0023` é uma série documental distinta 
 | 0021 | PROGRESS | `governance/missions/0021/BLUEPRINT.md` + artefatos |
 | 0022 | STAGED | `governance/missions/0022/README.md`, `BLUEPRINT.md`, `TASKS.md` |
 | 0023 | PROGRESS | `governance/missions/0023/README.md`, `BLUEPRINT.md`, `TASKS.md` |
+| 0024 | PROGRESS | `governance/missions/0024/README.md`, `BLUEPRINT.md`, `TASKS.md` |
 
 Os arquivos da raiz continuam versionados por compatibilidade histórica. Eles não devem ser apagados nem tratados como novos registros. Quando houver `governance/missions/<ID>/README.md` ou `BLUEPRINT.md`, esses documentos governam a continuidade da missão; os arquivos da raiz são snapshots/legado de execução anterior.
 
