@@ -264,3 +264,14 @@ Implementado na branch isolada: criação humana em PAUSED; snapshot ORIGINAL_RE
 TaskDetail agora usa visualizador documental único com TR padrão, seleção dinâmica por instâncias, histórico e controles de correção/regeneração/validação. Os formulários exibem PAUSED como estado inicial e levam o operador ao TR.
 
 **Não validado:** pnpm check/test/build, parser SQL e integração. Migration 0010 não aplicada e deve ser aplicada em gate separado antes de deploy deste código. Sem alterações de banco/produção, deploy, restart, dispatch, chamada LLM/Manus real ou consumo de créditos. OR-20261114-0030. Task 20.3/Mateus intocada.
+
+
+### Incremento B.1 — Blueprint e gate de liberação por versão exata (2026-11-14)
+
+A validação do TR deixou de liberar execução isoladamente. Após a validação humana, a SOFIA gera o Blueprint com referência ao ID e número da versão exata do TR. O Blueprint só é persistido como READY se cumprir seções estruturais obrigatórias e declarar ausência de bloqueios de escopo não resolvidos; falha ou bloqueio mantém missão PAUSED. Há procedure de retry para Blueprint e liberação posterior, restrita à missão PAUSED sem execução externa.
+
+O helper server-side, os caminhos de início/retomada/fatoração/encaminhamento e o trigger BEFORE da migration 0010 exigem TR vigente validado + Blueprint READY/ACTIVE cujo sourceDocumentVersionId corresponda exatamente à versão atual do TR. Reorientação do TR antes da primeira execução cria nova versão e torna o Blueprint anterior inelegível. O visualizador permite retry/liberação e filhas consultam o contexto documental da missão raiz.
+
+READY representa prontidão documental e estrutural; não substitui o motor completo de política para risco, orçamento e permissões. Missões SOFIA-originadas, atualização event-driven do TR, vínculo de unidades do Blueprint às filhas e backfill permanecem pendentes. OR-20261114-0030.
+
+Sem pnpm check/test/build, parser SQL ou testes de integração. Migration 0010 não aplicada; sem alteração em banco/produção, deploy, restart, dispatch, chamada LLM/Manus real ou créditos. Task 20.3/Mateus intocada.
