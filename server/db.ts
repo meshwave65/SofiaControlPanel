@@ -1325,6 +1325,11 @@ export async function createMissionDocumentWithVersion(input: {
       .where(and(eq(missionDocumentTypes.typeKey, input.typeKey), eq(missionDocumentTypes.isActive, true)))
       .limit(1);
     if (!documentType) throw new Error("Mission document type is not active or does not exist");
+    if (documentType.typeKey === "ORIGINAL_REQUEST") {
+      if (input.version.authorType === "AGENT" || (input.version.state && input.version.state !== "PUBLISHED")) {
+        throw new Error("The original mission request must be published as a HUMAN or SOFIA source snapshot");
+      }
+    }
 
     await validateMissionDocumentAuthor(transaction, task.createdBy, input.version);
     await validateMissionDocumentSource(transaction, task.id, documentType.typeKey, input.version.sourceDocumentVersionId);
@@ -1353,7 +1358,7 @@ export async function createMissionDocumentWithVersion(input: {
         provenance: input.version.provenance ?? {},
         changeSummary: input.version.changeSummary ?? "Initial version",
         contentHash: input.version.contentHash ?? null,
-        publishedAt: input.version.publishedAt ?? null,
+        publishedAt: input.version.publishedAt ?? (documentType.typeKey === "ORIGINAL_REQUEST" ? new Date() : null),
       })
       .returning();
 
