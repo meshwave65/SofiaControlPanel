@@ -1,5 +1,8 @@
 import { trpc } from "@/lib/trpc";
-import { supabase } from "@/lib/supabase";
+import {
+  getSupabaseAuthSnapshot,
+  supabase,
+} from "@/lib/supabase";
 import { useCallback, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -43,6 +46,14 @@ export function useAuth() {
         }
       });
     });
+
+    // The module-level listener is registered immediately after createClient.
+    // Read its snapshot in case INITIAL_SESSION arrived before this effect ran.
+    const initialSnapshot = getSupabaseAuthSnapshot();
+    if (initialSnapshot.ready) {
+      setHasSession(initialSnapshot.hasSession);
+      setSessionReady(true);
+    }
 
     return () => {
       mounted = false;
