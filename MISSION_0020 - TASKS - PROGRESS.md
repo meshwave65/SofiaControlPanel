@@ -116,3 +116,13 @@
 - Implicações de implementação: não herdar `agentId`/`agentPinned` do pai; separar lease do consolidador e leases dos executores; modelar estado de espera/consolidação do pai; não concluir missão ao concluir somente as filhas.
 - A pendência anterior sobre aplicação da pinagem em fatorização está resolvida por esta decisão. Fairness, prioridade, limites de concorrência e compatibilidade de capacidades continuam pendentes.
 - Referência: OR-20261114-0018, aditivo de 2026-11-14.
+
+
+### Decisão do responsável — agente consolidador também é efêmero (2026-11-14)
+- O pai não pertence ao agente que o iniciou/fatorizou/assumiu primeiro. O papel consolidador é funcional e está vinculado à tarefa pai.
+- O agente atribuído ao pai é executor temporário; em caso de impedimento, o SCP pode retirar a atribuição e encaminhar a continuidade a qualquer outro agente elegível, salvo pinagem humana explícita.
+- A transferência preserva Draft, contexto, histórico, resultados das filhas, dependências e estado de consolidação; o novo agente dá continuidade à mesma missão.
+- Se houver pinagem humana e o agente fixado ficar impedido, sinalizar o bloqueio ao operador; não transferir silenciosamente.
+- Agentes atribuídos às filhas também são temporários; a atribuição do pai não reserva nem bloqueia agentes necessários às filhas.
+- Síntese: missão e papel consolidador persistem; identidade do executor não. A continuidade é responsabilidade do SCP.
+- Referência: OR-20261114-0018, aditivo de 2026-11-14.
