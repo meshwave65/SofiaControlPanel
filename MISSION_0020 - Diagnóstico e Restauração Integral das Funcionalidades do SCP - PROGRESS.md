@@ -286,3 +286,8 @@ A procedure genérica de status foi endurecida: a promoção para `PROGRESS` é 
 - Criação de missão agora faz preflight do catálogo e exige `ORIGINAL_REQUEST`, `TR` e `BLUEPRINT` ativos antes de inserir a linha em `tasks`; migration 0010 ausente/incompleta não deixa missão órfã. OR-20261114-0030.
 
 - Limite de validação registrado: a ausência de bloqueios é verificada no conteúdo integral do Blueprint; a UI só sinaliza prontidão quando o TR vigente está validado. Testes/check/build continuam pendentes porque esta sessão não dispõe de checkout/dependências locais. OR-20261114-0030.
+
+
+### Incremento C — pipeline de validação reproduzível (2026-11-14)
+
+Foi criado workflow dedicado para executar `pnpm check`, `pnpm test`, `pnpm build` com dependências congeladas e validar a migration 0010 em PostgreSQL 16 descartável, usando fixture isolado de pré-requisitos. O resultado do workflow ainda não foi confirmado nesta etapa. A migration não foi aplicada a banco persistente; nenhum deploy, restart, dispatch, chamada real a LLM/Manus ou consumo de créditos ocorreu. Task 20.3/Mateus permanece intocada. OR-20261114-0030.
