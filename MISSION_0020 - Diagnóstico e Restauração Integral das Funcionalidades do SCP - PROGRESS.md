@@ -94,3 +94,4 @@ Identificar, com evidências reproduzíveis, por que o SofiaControlPanel não ex
 - **Causa subjacente não identificada:** os logs não mostram qual sessão/transação detinha o lock. Não afirmar que era migration, query ou schema sem consultar pg_locks/pg_stat_activity.
 - Em 14/11 a inicialização posterior passou pelas verificações de schema e conexão; o incidente não estava bloqueando continuamente o startup naquele momento.
 - Não foi executada consulta ao Supabase, DDL, restart ou reprodução. Próxima etapa DB exige sessão read-only autorizada e captura do lock holder; sem isso, manter a causa subjacente como desconhecida.
+- **Precisão sobre pausa:** existe tasks.updateStatus genérico em live e main (id + statusId), mas não uma operação dedicada de pause/resume nem lógica de transição/coordenação de execução externa; a UI TaskDetail não oferece botão de pausa. Alterar status para PAUSED por setter genérico não comprova pausa operacional segura.
