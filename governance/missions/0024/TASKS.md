@@ -6,7 +6,7 @@
 
 | ID | Tarefa | Estado | Responsável | Dependência | Saída/critério |
 |---|---|---|---|---|---|
-| 24.1 | Diagnóstico visual e inventário dos componentes | PROGRESS | ChatGPT / agente SCP | MISSION_0021 e código atual | Mapa de telas, hierarquia, inconsistências, riscos de regressão e baseline. |
+| 24.1 | Diagnóstico visual e inventário dos componentes | PROGRESS | ChatGPT / agente SCP | MISSION_0021 e código atual | Inspeção estática inicial concluída; baseline em navegador e inventário visual completo pendentes. OR-20261114-0012. |
 | 24.2 | Definir direção de arte e sistema visual | STAGED | ChatGPT / agente SCP | 24.1 | Tokens e regras de composição para uma experiência financeira premium. |
 | 24.3 | Redesenhar shell, navegação e carteira/patrimônio | STAGED | ChatGPT / agente SCP | 24.2 | Estrutura principal clara e consistente; sem alterar comportamento. |
 | 24.4 | Redesenhar mercado, ordens, operações, atividade e estados | STAGED | ChatGPT / agente SCP | 24.2, 24.3 | Todas as áreas existentes com linguagem visual unificada; nenhuma regra modificada. |
