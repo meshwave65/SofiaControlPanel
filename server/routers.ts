@@ -34,6 +34,87 @@ async function generateInitialMissionTR(title: string, description?: string | nu
   return content.trim();
 }
 
+
+async function generateInitialMissionBlueprint(title: string, trVersion: number, trContent: string): Promise<string> {
+  const response = await invokeLLM({
+    messages: [
+      { role: "system", content: [
+        "Você é SOFIA e deve transformar o TR validado em um Blueprint operacional.",
+        "O Blueprint é prescritivo e destinado aos executores; não reescreva o TR como narrativa.",
+        "Não amplie objetivo, escopo, entregáveis, permissões, orçamento, recursos ou prazos além do que está explícito no TR.",
+        "Não invente credenciais, ferramentas autorizadas, agentes, custos, limites ou dependências.",
+        "Quando faltar informação necessária, marque como BLOQUEIO/PENDÊNCIA e não presuma autorização.",
+        "Inclua: identificação e versão exata do TR de origem; objetivo operacional; escopo e exclusões; premissas; etapas/unidades de trabalho; dependências e paralelismo; perfil/capacidade do executor; entradas e contexto autorizado; restrições e riscos; critérios objetivos de aceite; evidências exigidas; validação/consolidação; contingência/retry/substituição; pontos que exigem gate humano/política.",
+        "Cada unidade de trabalho deve ter resultado esperado, pré-condições, entradas, passos, dependências, critério de aceite e evidência.",
+        "Se o TR não permite decomposição segura, explique os bloqueios e não invente tarefas.",
+        "Finalize com uma seção 'Verificações determinísticas pendentes'; READY significa somente que a estrutura do plano foi gerada e vinculada, não que gates de risco/orçamento/credenciais foram dispensados."
+      ].join("\n") },
+      { role: "user", content: "Missão: " + title + "\nVersão do TR de origem: " + trVersion + "\n\nTR validado:\n" + trContent }
+    ],
+    maxTokens: 7000,
+  });
+  const content = extractTextContent(response.choices?.[0]?.message?.content);
+  if (!content.trim()) throw new Error("A SOFIA não retornou conteúdo para o Blueprint.");
+  return content.trim();
+}
+
+async function persistMissionBlueprint(input: {
+  taskId: number;
+  ownerId: number;
+  canViewAll: boolean;
+  title: string;
+  trVersionId: number;
+  trVersionNumber: number;
+  trContent: string;
+}) {
+  const documents = await db.getMissionDocumentsForTask(input.taskId, input.ownerId, input.canViewAll);
+  const existing = documents.find((document) => document.typeKey === "BLUEPRINT");
+  if (
+    existing?.latestVersion
+    && ["READY", "ACTIVE"].includes(existing.latestVersion.state)
+    && existing.latestVersion.sourceDocumentVersionId === input.trVersionId
+  ) {
+    return existing.latestVersion;
+  }
+
+  const content = await generateInitialMissionBlueprint(input.title, input.trVersionNumber, input.trContent);
+  const version = {
+    content,
+    state: "READY",
+    authorType: "SOFIA" as const,
+    sourceDocumentVersionId: input.trVersionId,
+    provenance: {
+      origin: "HUMAN",
+      source: "validated_TR",
+      sourceTRVersionId: input.trVersionId,
+      sourceTRVersionNumber: input.trVersionNumber,
+    },
+    changeSummary: "Blueprint gerado pela SOFIA a partir do TR validado v" + input.trVersionNumber,
+    publishedAt: new Date(),
+  };
+
+  if (existing) {
+    return db.createMissionDocumentRevision({
+      taskId: input.taskId,
+      documentId: existing.id,
+      ownerId: input.ownerId,
+      canViewAll: input.canViewAll,
+      version,
+    });
+  }
+
+  const created = await db.createMissionDocumentWithVersion({
+    taskId: input.taskId,
+    ownerId: input.ownerId,
+    canViewAll: input.canViewAll,
+    typeKey: "BLUEPRINT",
+    documentKey: "BLUEPRINT",
+    title: "Blueprint — " + input.title,
+    version,
+  });
+  return created.version;
+}
+
 export const appRouter = router({
   system: systemRouter,
   auth: router({
