@@ -20,7 +20,7 @@ function normalizeHeading(line: string) {
   return line
     .replace(/^#{1,6}\s*/, "")
     .replace(/^\d+[.)]\s*/, "")
-    .replace(/^\*\*(.*)\*\*$/, "$1")
+    .replace(/^\*\*(.*)\*\*:?$/, "$1")
     .replace(/:$/, "")
     .trim()
     .toLocaleLowerCase();
