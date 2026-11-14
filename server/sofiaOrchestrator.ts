@@ -19,7 +19,7 @@ export class SofiaOrchestrator {
     const results: Array<{ taskId: number; action: string; agentId: number }> = [];
     for (const task of waiting) {
       if (!(await db.hasExecutionReadyMissionDocuments(task.id))) {
-        console.warn(`[Orchestrator] Resume bloqueado para missão ${task.id}: TR não validado.`);
+        console.warn(`[Orchestrator] Retomada bloqueada para missão ${task.id}: TR não validado.`);
         continue;
       }
       const agents = await db.getAllAgentsGlobal();
@@ -219,7 +219,7 @@ export class SofiaOrchestrator {
     if (!task) return null;
 
     if (!(await db.hasExecutionReadyMissionDocuments(taskId))) {
-      throw new Error("Execução bloqueada: a missão não possui TR validado. Subtarefas herdam a validação da missão principal.");
+      throw new Error("Execução bloqueada: a missão exige TR validado e Blueprint READY. Subtarefas herdam os documentos da missão principal.");
     }
 
     const stagedStatusId = await db.getTaskStatusIdByName(STATUS_STAGED);
