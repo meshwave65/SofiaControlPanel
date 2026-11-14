@@ -384,7 +384,10 @@ export default function TaskDetail() {
                     id="mission-document-select"
                     className="cad-box w-full rounded-md border bg-background px-3 py-2 text-sm"
                     value={selectedDocument?.id ?? ""}
-                    onChange={(event) => {\n                      setSelectedDocumentId(event.target.value ? Number(event.target.value) : null);\n                      setSelectedVersionNumber(null);\n                    }}
+                    onChange={(event) => {
+                      setSelectedDocumentId(event.target.value ? Number(event.target.value) : null);
+                      setSelectedVersionNumber(null);
+                    }}
                     disabled={documentsQuery.isLoading || documents.length === 0}
                   >
                     {documents.length === 0 && <option value="">Nenhum documento disponível</option>}
