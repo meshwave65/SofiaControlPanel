@@ -87,3 +87,11 @@
 - Testes existentes não validam dispatch de todas as filhas com regras reais de ocupação; acrescentar casos de um/múltiplos agentes e retry parcial.
 - Consolidação ainda não fornece toast de sucesso/erro no handler UI.
 - Nenhuma execução ou alteração de produto/produção realizada.
+
+
+### Checkpoint 20.4 — trigger e reserva de agentes aprofundados (2026-11-14)
+- Fonte do trigger localizada: `drizzle/0003_automatic_task_dispatch.sql`; instalação declarada em `scripts/ensure-database.mjs`. `net.http_post` dispara requisições assíncronas por filha STAGED. Catálogo do DB de produção não consultado; instalação ativa não comprovada.
+- Confirmado estaticamente: pai passa a PROGRESS e reserva agente antes da fatorização; filhos herdam `agentId`/`agentPinned`; claim exclui agente ocupado em outra tarefa PROGRESS. Pai com agente fixado bloqueia as filhas que herdam o pin; pai automático com um único agente também retém o único agente. Com múltiplos agentes, filhos automáticos podem ser distribuídos entre agentes livres via SKIP LOCKED.
+- Heartbeat reprocessa tarefas em espera a cada 30s, mas não libera reserva do pai. Retorno `executionStarted` usa número de IDs de subtarefas, não confirmação de dispatch efetivo.
+- Testes de regressão pendentes: pinned/automatico com um agente; múltiplas filhas e múltiplos agentes; concorrência SKIP LOCKED; retry após liberação válida; semântica do pai e sinalizador executionStarted.
+- Não tocar na tarefa 20.3/Mateus. Nenhuma alteração de produto/DB ou chamada externa executada.
