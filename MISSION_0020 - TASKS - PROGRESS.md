@@ -148,3 +148,12 @@
 - **Próximo passo:** obter caminho de deploy isolado do commit hotfix no serviço Render existente; depois validar login autenticado e observar `auth.me` no backend. Até lá, correção permanece preparada, não publicada.
 - **Guardrails:** tarefa 20.3/Mateus não foi tocada; nenhuma chamada Manus/LLM ou crédito consumido.
 - **OR:** OR-20261114-0022.
+
+
+### Checkpoint 20.4 — sonda runtime do 502 (2026-11-14)
+- Após o relato de `502 Bad Gateway` em `/api/trpc/auth.me`, foram consultados os dois domínios públicos sem autenticação.
+- Tanto `https://sofia-cp.meshwave.com.br/` quanto `https://sofiacontrolpanel-web.onrender.com/` carregaram a página.
+- A rota `auth.me` respondeu JSON válido nos dois domínios: `data.json = null`. Resultado esperado para chamada anônima sem bearer token; confirma que a rota tRPC estava alcançável no momento da sonda, mas não valida a sessão autenticada do operador.
+- Render: processo iniciou em `2026-11-14T23:36:15Z`; conexão DB confirmada em `23:36:45Z`. Não foram encontrados logs de erro, request logs ou métricas HTTP correspondentes ao 502 na janela consultada. Hipótese de falha transitória durante inicialização/restart é plausível, não comprovada.
+- Próximo passo: recarregar o SCP e repetir o login. Se persistir, capturar horário exato, response headers/body da requisição Network e cruzar com logs Render daquele minuto. Nenhuma alteração de produção ou deploy.
+- OR: OR-20261114-0022.
