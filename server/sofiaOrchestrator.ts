@@ -18,6 +18,10 @@ export class SofiaOrchestrator {
     const progressStatusId = await db.getTaskStatusIdByName(STATUS_PROGRESS);
     const results: Array<{ taskId: number; action: string; agentId: number }> = [];
     for (const task of waiting) {
+      if (!(await db.hasValidatedMissionTR(task.id))) {
+        console.warn(`[Orchestrator] Resume bloqueado para missão ${task.id}: TR não validado.`);
+        continue;
+      }
       const agents = await db.getAllAgentsGlobal();
       const current = agents.find((agent) => agent.id === task.agentId);
       if (!current) continue;
