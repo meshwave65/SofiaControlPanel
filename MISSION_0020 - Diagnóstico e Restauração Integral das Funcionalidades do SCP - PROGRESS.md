@@ -127,3 +127,13 @@ Esta matriz é preliminar: ações marcadas BLOCKED exigem reprodução autentic
 - `496dd00` falhou no prestart por lock timeout; deploys posteriores ocorreram e o destino atual do rollback é posterior a essa falha.
 - Comparação atual informa main 167 commits à frente de live 255a016 (era 146 no checkpoint anterior); a distância mudou com novos commits em main, incluindo registros de governança. Não interpretar o número como quantidade de funcionalidades ausentes.
 - Nenhum deploy, restart, operação DB, dispatch, chamada Manus/LLM ou envio de mensagem executado.
+
+
+### Checkpoint 20.4 — revisão do delta de código Messenger e ciclo de missão (2026-11-14)
+- Main melhora `messages.create`: valida propriedade da missão/tipo/mensagem pai, normaliza e limita conteúdo, persiste mensagem do operador, encaminha para tarefa Manus vinculada ou LLM interno e persiste resposta com status replied/pending/failed.
+- O ramo Manus envia para a execução associada ao agente e consulta mensagens por até 8 ciclos de 1,5s. A ausência de resposta gera placeholder pending; não é garantia de entrega/resposta real.
+- Testes de rota cobrem explicitamente LLM interno e validação de mensagem pai, mas não exercitam o ramo Manus nem o ciclo completo before/send/poll/after. Integração Manus permanece não validada.
+- A UI mostra estados de processamento/resposta/falha, mas Link Ativo continua hardcoded e Sincronizado não representa handshake.
+- TaskDetail mantém a mesma condição de iniciar; PROGRESS com manusTaskId existente e PAUSED continuam sem retomada manual. Tasks, orchestrator e heartbeat permanecem iguais no diff consultado; pause/resume/transferência manual seguem sem implementação dedicada.
+- ensure-database continua com lock_timeout 15s e DDL de agentPinned; main não elimina o risco de lock observado.
+- Conclusão: main contém melhoria Messenger ainda não validada, mas não é release candidate integralmente seguro para produção. Nenhum código de produto foi alterado ou implantado.
