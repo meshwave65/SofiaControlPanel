@@ -83,7 +83,7 @@ async function persistMissionBlueprint(input: {
   trContent: string;
 }) {
   const documents = await db.getMissionDocumentsForTask(input.taskId, input.ownerId, input.canViewAll);
-  const existing = documents.find((document) => document.typeKey === "BLUEPRINT");
+  const existing = documents.find((document) => document.typeKey === "BLUEPRINT" && document.documentKey === "BLUEPRINT");
   if (
     existing?.latestVersion
     && ["READY", "ACTIVE"].includes(existing.latestVersion.state)
@@ -418,7 +418,7 @@ export const appRouter = router({
             throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A revisão do TR só é permitida antes da execução, enquanto a missão estiver PAUSED e sem execução externa." });
           }
           const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, false);
-          const tr = docs.find((document) => document.typeKey === "TR");
+          const tr = docs.find((document) => document.typeKey === "TR" && document.documentKey === "TR");
           const canReorientBeforeExecution = tr?.latestVersion?.state === "VALIDATED"
             && (await db.getTaskStatusNameById(task.statusId))?.toUpperCase() === "PAUSED"
             && !task.manusTaskId;
@@ -444,7 +444,7 @@ export const appRouter = router({
         }
         if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR pertence à missão principal; tarefas-filhas não podem alterá-lo." });
         const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, false);
-        const tr = docs.find((document) => document.typeKey === "TR");
+        const tr = docs.find((document) => document.typeKey === "TR" && document.documentKey === "TR");
         if (!tr?.latestVersion || tr.latestVersion.state !== "DRAFT") {
           throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A regeneração só é permitida enquanto o TR inicial estiver em DRAFT." });
         }
@@ -468,7 +468,7 @@ export const appRouter = router({
         }
         if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR pertence à missão principal; tarefas-filhas não podem alterá-lo." });
         const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, false);
-        const tr = docs.find((document) => document.typeKey === "TR");
+        const tr = docs.find((document) => document.typeKey === "TR" && document.documentKey === "TR");
         if (!tr?.latestVersion || tr.latestVersion.state !== "AWAITING_HUMAN_VALIDATION") throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Não existe uma versão do TR aguardando validação." });
         const current = await db.getMissionDocumentVersionForTask(input.taskId, tr.id, tr.latestVersion.version, ctx.user.id, false);
         if (!current) throw new TRPCError({ code: "NOT_FOUND", message: "Conteúdo do TR não encontrado." });
@@ -510,7 +510,7 @@ export const appRouter = router({
         }
         if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O Blueprint pertence à missão principal." });
         const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, false);
-        const tr = docs.find((document) => document.typeKey === "TR");
+        const tr = docs.find((document) => document.typeKey === "TR" && document.documentKey === "TR");
         if (!tr?.latestVersion || !["VALIDATED", "ACTIVE", "REORIENTED"].includes(tr.latestVersion.state)) {
           throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR precisa estar validado antes da geração do Blueprint." });
         }
