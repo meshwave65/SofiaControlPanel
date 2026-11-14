@@ -30,6 +30,8 @@ jobs:
       - name: TypeScript check
         run: pnpm check
       - name: Unit tests
+        if: always()
         run: pnpm test
       - name: Production build
+        if: always()
         run: pnpm build
