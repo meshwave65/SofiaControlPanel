@@ -158,3 +158,15 @@ MISSION_0023 permanece PROGRESS e mantém seu próprio escopo de integridade ope
 - Caso Genesis confirmado por consulta read-only: aquisição `5620db80-922d-4b43-830c-b18df8d8c5f2`, código `MWEX-FIAT-442CB186DDFB`, BRL 100,00 via PIX, status `pending_validation`. Referência e comprovante ausentes; saldo PENDING 100, AVAILABLE 0, RESERVED 0. Ledger e audit log contêm somente a solicitação pendente; nenhum evento de pagamento ou confirmação.
 - Nenhuma confirmação/rejeição executada, nenhuma escrita financeira, migration, alteração de banco/RLS/grants/RPC.
 - OR: [OR-20261114-0011](../../operational_reports/OR-20261114-0011.md).
+
+## Incidente reportado — busca fiscal de destinatário MWN — 2026-11-14
+
+- O responsável reportou que a busca por número fiscal não localiza um MeshWalker na transferência direta de MWN.
+- A implementação não está ausente: UI em `src/pages/MwEx.jsx`, RPC pública/privada e migration `20261114143556_mwex_transfer_recipient_lookup` estão presentes em produção.
+- A busca exige CPF completo (11 dígitos) ou NIF completo (9 dígitos), normaliza pontuação e compara exatamente os campos `profiles.fiscal_document` e `mwc_meshwalker_profiles.tax_id`, sem devolver o documento.
+- Verificação read-only agregada no Supabase canônico: 25 MeshWalkers têm tax_id com comprimento esperado (23 CPF e 2 NIF); 7 têm carteira MW-Ex ACTIVE e 18 não possuem linha em `mwex_wallets`. Nenhum documento ou identificador individual foi consultado/exposto.
+- A causa da falha relatada ainda não foi reproduzida. O teste autenticado documentado na OR-0014 comprova um caso controlado, não todos os cadastros reais.
+- Não houve escrita no banco, migration, alteração de código/RPC, alteração de carteira/saldo/ledger ou transferência.
+- Próxima etapa: reproduzir com um destinatário identificado por nome/username, sem solicitar CPF/NIF no chat; verificar internamente o cadastro normalizado e a elegibilidade; corrigir apenas a causa comprovada e registrar novo OR.
+- **Estado:** ABERTO — a busca fiscal não deve ser considerada validada para encerramento da MISSION_0021 até o smoke test do caso reportado.
+- OR: [OR-20261114-0016](../../operational_reports/OR-20261114-0016.md).
