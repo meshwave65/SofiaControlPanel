@@ -218,16 +218,8 @@ export class SofiaOrchestrator {
     const task = await db.getTaskById(taskId);
     if (!task) return null;
 
-    if (!(await db.hasExecutionReadyMissionDocuments(taskId))) {
-      throw new Error("Execução bloqueada: a missão exige TR validado e Blueprint READY. Subtarefas herdam os documentos da missão principal.");
-    }
-
     const stagedStatusId = await db.getTaskStatusIdByName(STATUS_STAGED);
-    const progressStatusId = await db.getTaskStatusIdByName(STATUS_PROGRESS);
-    // Only a task already claimed into PROGRESS may use the recovery path.
-    // PAUSED must never be interpreted as an in-flight claim, even if an agent is assigned.
-    const alreadyClaimedWithoutExecution = task.statusId === progressStatusId && Boolean(task.agentId) && !task.manusTaskId;
-    if (task.statusId !== stagedStatusId && !alreadyClaimedWithoutExecution) {
+    if (task.statusId !== stagedStatusId) {
       return {
         task,
         started: false,
@@ -236,6 +228,9 @@ export class SofiaOrchestrator {
         executionStarted: Boolean(task.manusTaskId),
         externalTaskIds: task.manusTaskId ? [task.manusTaskId] : [],
       };
+    }
+    if (!(await db.hasExecutionReadyMissionDocuments(taskId))) {
+      throw new Error("Execução bloqueada: a missão exige TR validado e Blueprint READY. Subtarefas herdam os documentos da missão principal.");
     }
 
     // Refresh the selected account, or all online configured accounts for automatic assignment.
@@ -261,9 +256,7 @@ export class SofiaOrchestrator {
       }
     }));
 
-    const claimedTask = alreadyClaimedWithoutExecution
-      ? task
-      : await db.claimStagedTaskWithAvailableAgent(taskId, stagedStatusId, progressStatusId);
+    const claimedTask = await db.claimStagedTaskWithAvailableAgent(taskId, stagedStatusId, progressStatusId);
 
     // No eligible agent: keep the mission STAGED. Heartbeat retries when credits/status change.
     if (!claimedTask) {
