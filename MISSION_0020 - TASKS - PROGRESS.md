@@ -179,3 +179,14 @@
 - **Não verificado:** estado real das migrations/triggers no banco; dados de produção; execução real do dispatch; instalação de triggers; conteúdo e volume dos registros atuais. A auditoria foi somente leitura do código/migrations da branch.
 - **Sem alterações funcionais:** nenhum schema/migration, runtime, UI, DB, produção, dispatch, chamada Manus/LLM, consumo de crédito, deploy ou restart foi realizado. Task 20.3/Mateus intocada.
 - Próxima etapa: desenhar e validar arquitetura mínima de gate pré-dispatch, primeiro TR persistente/versionado e integração do TR inicial com os fluxos humano, SOFIA autônoma e subtarefas; depois implementar em PR com testes que provem que nenhuma rota/trigger inicia missão humana antes da validação.
+
+### Checkpoint 20.4 — AC-015: distinção TR / Blueprint (2026-11-14)
+
+- Decisão registrada: TR é a compreensão narrativa e viva da missão, voltada prioritariamente ao operador humano; Blueprint é o plano de trabalho operacional derivado de uma versão específica do TR, direcionado aos executores.
+- Em missão humana, validação explícita do TR inicial precede a liberação do Blueprint para execução. Em missão autônoma da SOFIA, TR inicial também é obrigatório, mas não há aprovação humana preliminar; a execução permanece dentro dos limites de autonomia e governança.
+- Blueprint decompõe o escopo validado em etapas, tarefas, dependências, recursos, restrições, critérios de aceite e evidências. Não pode ampliar silenciosamente o escopo.
+- Missão-pai mantém TR e Blueprint mestre; filhas referenciam a versão e unidade do plano. Agentes são executores temporários e recebem contexto mínimo autorizado.
+- OR registra execução/evidências; TR consolida a narrativa; FOR consolida aprendizado operacional.
+- Especificação: `governance/architecture/MISSION_BLUEPRINT_SPECIFICATION.md`; relação adicionada a `MISSION_TR_SPECIFICATION.md` e à arquitetura SOFIA.
+- OR-20261114-0025 criado e indexado. Apenas documentação; sem schema/runtime/UI/DB/produção/dispatch/LLM/Manus/créditos/deploy/restart. Task 20.3/Mateus intocada.
+- Próxima etapa: projeto técnico do gate pré-dispatch e persistência/versionamento de TR e Blueprint, com testes para criação humana/autônoma, início direto, trigger interno e tarefas-filhas.
