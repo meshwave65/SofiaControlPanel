@@ -116,13 +116,4 @@ VALUES
   ('BLUEPRINT', 'Blueprint — Plano de trabalho', 'Plano operacional derivado de uma versão específica do TR.', 'planning', 'executor', 20, false, 'markdown'),
   ('OR', 'OR — Relatório operacional', 'Registro operacional e evidências de execução; admite múltiplas instâncias.', 'execution', 'operator', 30, false, 'markdown'),
   ('FOR', 'FOR — Relatório operacional final', 'Consolidação de aprendizados operacionais ao encerramento da missão.', 'closure', 'operator', 40, false, 'markdown')
-ON CONFLICT ("typeKey") DO UPDATE SET
-  "label" = EXCLUDED."label",
-  "description" = EXCLUDED."description",
-  "category" = EXCLUDED."category",
-  "audience" = EXCLUDED."audience",
-  "sortOrder" = EXCLUDED."sortOrder",
-  "isDefault" = EXCLUDED."isDefault",
-  "renderer" = EXCLUDED."renderer",
-  "isActive" = true,
-  "updatedAt" = now();
+ON CONFLICT ("typeKey") DO NOTHING;
