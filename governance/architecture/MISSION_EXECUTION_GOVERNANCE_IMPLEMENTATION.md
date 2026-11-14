@@ -143,3 +143,19 @@ O trigger não deve tentar gerar TR ou Blueprint nem chamar LLM. Sua responsabil
 ## 9. Limites
 
 Este documento é plano técnico; não altera schema, migration, runtime, UI, banco ou produção. A instalação real do trigger e o estado da produção permanecem não verificados. A primeira implementação deve ocorrer na branch isolada, com testes e revisão, sem deploy automático ou execução real até gate específico.
+
+## 10. UX de gerenciamento da missão — AC-016
+
+A ação **Gerenciar** na listagem de Missões abre `/tasks/:id`; essa tela deve abrir diretamente na visão **TR — Missão**, que é a apresentação principal para o operador.
+
+A descrição original submetida na criação é preservada como fonte/proveniência, mas não substitui o TR e não deve ser rotulada como Blueprint.
+
+O Blueprint terá área/aba própria na mesma tela. A organização recomendada é:
+1. TR — visão padrão e narrativa principal;
+2. Blueprint — plano de trabalho versionado;
+3. Execução — subtarefas, ORs, checkpoints e evidências;
+4. Consolidação — entregável final e FOR.
+
+Para missão humana em `AWAITING_HUMAN_VALIDATION`, o TR deve disponibilizar correção e validação explícita, deixando o bloqueio de execução inequívoco. Para missão SOFIA-originada, mostrar origem e motivação/evidências autônomas, permitindo inspeção e intervenção do operador sem criar gate humano preliminar.
+
+A implementação visual fica no Incremento D, após as APIs e persistência dos Incrementos A–C. Não apresentar a descrição atual como TR ou Blueprint provisório.
