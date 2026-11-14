@@ -1429,3 +1429,39 @@ export async function createMissionDocumentRevision(input: {
     return createdVersion;
   });
 }
+
+
+export async function listMissionDocumentVersionsForTask(
+  taskId: number,
+  documentId: number,
+  ownerId: number,
+  canViewAll = false,
+) {
+  const database = await getDb();
+  await assertMissionDocumentAccess(database, taskId, ownerId, canViewAll);
+
+  const [document] = await database!
+    .select({ id: missionDocuments.id })
+    .from(missionDocuments)
+    .where(and(eq(missionDocuments.id, documentId), eq(missionDocuments.taskId, taskId)))
+    .limit(1);
+  if (!document) return [];
+
+  return database!
+    .select({
+      id: missionDocumentVersions.id,
+      version: missionDocumentVersions.version,
+      state: missionDocumentVersions.state,
+      authorType: missionDocumentVersions.authorType,
+      authorUserId: missionDocumentVersions.authorUserId,
+      authorAgentId: missionDocumentVersions.authorAgentId,
+      sourceDocumentVersionId: missionDocumentVersions.sourceDocumentVersionId,
+      changeSummary: missionDocumentVersions.changeSummary,
+      contentHash: missionDocumentVersions.contentHash,
+      createdAt: missionDocumentVersions.createdAt,
+      publishedAt: missionDocumentVersions.publishedAt,
+    })
+    .from(missionDocumentVersions)
+    .where(eq(missionDocumentVersions.documentId, documentId))
+    .orderBy(desc(missionDocumentVersions.version));
+}
