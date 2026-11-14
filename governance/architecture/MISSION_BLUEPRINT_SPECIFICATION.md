@@ -120,3 +120,12 @@ O Blueprint é apresentado no mesmo espaço de leitura do TR, selecionável por 
 O Blueprint só aparece como documento disponível quando houver uma instância persistida e acessível. Sua seleção não libera execução nem altera o estado da missão. O visualizador genérico também comporta ORs, FOR e tipos futuros, conforme o catálogo de documentos.
 
 Contrato completo: governance/architecture/MISSION_DOCUMENT_CATALOG_SPECIFICATION.md.
+
+
+## 10. Estado de implementação no SCP — Incremento B.1 (2026-11-14)
+
+A primeira geração de Blueprint foi conectada ao fluxo de validação humana do TR. O documento é persistido em `missionDocuments`/`missionDocumentVersions`, com `sourceDocumentVersionId` apontando para o registro exato da versão validada do TR e metadados legíveis de versão/ID no próprio conteúdo.
+
+A geração verifica a presença das seções estruturais obrigatórias e exige declaração explícita de ausência de bloqueios de escopo não resolvidos antes de marcar o documento como READY. Falha de geração, ausência de seção ou bloqueio mantém a missão PAUSED. A procedure permite retry e só libera STAGED quando o Blueprint vigente está READY/ACTIVE e ligado à versão corrente do TR.
+
+**Limite:** READY é prontidão documental/estrutural. Os gates completos de risco, orçamento e permissões ainda precisam ser implementados e não são dispensados pelo estado documental. Também faltam origem SOFIA autônoma, associação das unidades do Blueprint às tarefas-filhas, TR event-driven, backfill e testes executáveis. OR-20261114-0030.
