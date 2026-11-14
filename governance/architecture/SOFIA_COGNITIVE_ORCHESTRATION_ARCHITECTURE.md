@@ -131,7 +131,7 @@ O contexto deve ser minimizado, rastreável e delimitado por ownership. Não car
 - O servidor valida os argumentos e exige Agent ID e Agent Task ID existentes antes de enviar.
 - Perguntas e pedidos de análise ficam com a Sofia; não são encaminhados automaticamente ao agente.
 - A resposta distingue encaminhamento e resposta efetivamente recebida; ausência de resposta fica como `pending`, sem alegação de leitura/recebimento.
-- Testes de regressão foram adicionados, mas ainda não executados.
+- Testes de regressão foram adicionados e executados no CI do PR #15; o incremento de inspeção somente leitura passou em 41/41 testes, além de check, build e migration 0010 em PostgreSQL 16 descartável (OR-20261114-0034).
 
 ## 10. Próximas entregas
 
@@ -150,7 +150,7 @@ Esta definição arquitetural não declara todos os módulos implementados. Os i
 
 Não estão implementados por esta entrega: pipeline completo SWE/BBC/SCur/BCE/SVec, consulta de candidatos elegíveis e módulos, planos persistentes, confirmação humana vinculada a propostas, transferência, pausa/retomada, memória operacional persistente, telemetria completa do SCP ou canal independente de missão.
 
-A chamada LLM e a chamada Manus existentes só são invocadas pelo fluxo de runtime quando uma mensagem for enviada. Nenhum teste ou execução externa real foi disparado nesta implementação. Testes automatizados devem mockar ambos os adaptadores.
+A chamada LLM e a chamada Manus existentes só são invocadas pelo fluxo de runtime quando uma mensagem for enviada. Não houve execução externa real. Os testes automatizados foram executados com os adaptadores externos mockados; a integração real do tool calling com o gateway Manus Forge permanece não validada.
 
 ## 12. Critérios de aceite arquitetural
 
