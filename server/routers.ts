@@ -660,7 +660,7 @@ export const appRouter = router({
         }
         const requestedStatus = await db.getTaskStatusNameById(input.statusId);
         if (requestedStatus?.toUpperCase() === "STAGED" && !(await db.hasExecutionReadyMissionDocuments(input.id))) {
-          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A missão não pode entrar em STAGED antes da validação explícita do TR." });
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A missão não pode entrar em STAGED sem TR validado e Blueprint READY vinculado à versão vigente." });
         }
         const result = await db.updateTaskStatus(input.id, input.statusId);
         if (task.missionKey) {
@@ -799,7 +799,7 @@ export const appRouter = router({
               assistantContent = "Entendi que você deseja encaminhar uma instrução, mas esta missão não possui agente atribuído e execução externa identificada. Não enviei a mensagem.";
               responseStatus = "failed";
             } else if (!(await db.hasExecutionReadyMissionDocuments(input.taskId))) {
-              assistantContent = "A instrução não foi enviada: a missão ainda não possui TR validado pelo operador responsável.";
+              assistantContent = "A instrução não foi enviada: a missão ainda não possui TR validado e Blueprint READY vinculado à versão vigente.";
               responseStatus = "failed";
             } else {
               const externalReply = await sendManusMessageAndWait(task, forwardedMessage);
