@@ -214,3 +214,12 @@ A criação humana valida o TR, gera Blueprint e só depois libera STAGED. Se a 
 O gate está implementado no helper `hasExecutionReadyMissionDocuments`, nos caminhos de API/orquestrador e na migration 0010 por trigger BEFORE, cobrindo também alteração de agente em tarefa já STAGED. Filhas herdam documentos da missão raiz e não podem alterar TR/Blueprint mestres.
 
 O estado READY representa geração estrutural do plano e vínculo documental. Não substitui motor completo de política determinística de risco, orçamento e permissões, ainda pendente. Também permanecem pendentes: origem SOFIA autônoma, atualização event-driven do TR, vínculo de unidades do Blueprint às filhas, backfill de missões legadas e testes executáveis. OR-20261114-0030.
+
+ 
+## 13. Incremento B.2 — defesa dos caminhos alternativos
+
+A autorização documental não substitui a máquina de estados. `startTask` só inicia missões `STAGED`; `PAUSED` e `PROGRESS` não funcionam como autorização implícita para criar uma nova execução Manus. O claim continua atômico e, se não retornar tarefa, o orquestrador relê o estado antes de gravar `waiting_for_available_agent`, evitando sobrescrever uma claim concorrente.
+
+A fatoração requer missão raiz `STAGED` ou `PROGRESS`. A migration 0010 verifica o status da missão raiz antes de permitir subtarefa `STAGED`, além do gate TR+Blueprint. A UI aplica as mesmas condições. O visualizador avalia somente o TR canônico.
+
+A validação estrutural do Blueprint foi isolada em `server/missionBlueprint.ts` e agora exige títulos próprios em ordem, conteúdo por seção e declaração explícita e não contraditória de ausência de bloqueios. Testes unitários e de orquestração foram adicionados; ainda não executados. OR-20261114-0030.
