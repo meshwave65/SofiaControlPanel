@@ -562,38 +562,7 @@ export const appRouter = router({
         // Human-origin missions stay PAUSED until the initial TR is validated.
         const pausedStatusId = await db.getTaskStatusIdByName("PAUSED");
         if (!pausedStatusId) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O status PAUSED não está configurado; criação segura bloqueada." });
-        const created = await db.createTask({
-          agentId: input.agentId, createdBy: ctx.user.id, title: input.title,
-          description: input.description, statusId: pausedStatusId, priorityId: input.priorityId,
-          parentTaskId: input.parentTaskId, dueDate: input.dueDate, manusStatus: "awaiting_tr_validation",
-        });
-        const taskId = created[0]?.id;
-        if (!taskId) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "A missão não foi persistida." });
-        const mirror = await mirrorTaskToGitHub({
-          id: taskId, missionKey: "SCP-TASK-" + String(taskId).padStart(6, "0"),
-          title: input.title, description: input.description, statusId: pausedStatusId,
-          priorityId: input.priorityId, parentTaskId: input.parentTaskId, dueDate: input.dueDate,
-          createdBy: ctx.user.id, creatorType: "user", creatorName: ctx.user.name, creatorEmail: ctx.user.email,
-        });
-        await db.updateTaskGitHubSync(taskId, {
-          missionKey: mirror.missionKey, githubPath: mirror.path, githubSha: mirror.sha,
-          githubSyncStatus: mirror.status, githubSyncError: mirror.error ?? null,
-        });
-        const originalContent = [
-          "# Solicitação original — " + input.title, "",
-          "**Origem:** operador humano (usuário #" + ctx.user.id + ")",
-          "**Registrada em:** " + new Date().toISOString(), "",
-          "## Descrição original", input.description?.trim() || "Nenhuma descrição adicional foi fornecida."
-        ].join("\n");
-        await db.createMissionDocumentWithVersion({
-          taskId, ownerId: ctx.user.id, canViewAll: ctx.user.role === "admin",
-          typeKey: "ORIGINAL_REQUEST", documentKey: "ORIGINAL_REQUEST", title: "Solicitação original",
-          version: {
-            content: originalContent, state: "PUBLISHED", authorType: "HUMAN", authorUserId: ctx.user.id,
-            provenance: { origin: "HUMAN", source: "tasks.create" },
-            changeSummary: "Snapshot imutável da solicitação original",
-          },
-        });
+
         let trGenerationError: string | null = null;
         let trContent: string;
         let trState = "AWAITING_HUMAN_VALIDATION";
@@ -613,19 +582,77 @@ export const appRouter = router({
             "A interpretação da SOFIA não foi concluída. Nenhuma motivação, decisão, escopo adicional ou resultado foi presumido."
           ].join("\n");
         }
-        await db.createMissionDocumentWithVersion({
-          taskId, ownerId: ctx.user.id, canViewAll: ctx.user.role === "admin",
-          typeKey: "TR", documentKey: "TR", title: "TR — " + input.title,
-          version: {
-            content: trContent, state: trState, authorType: "SOFIA",
-            provenance: { origin: "HUMAN", source: "tasks.create", originalRequestDocumentKey: "ORIGINAL_REQUEST" },
-            changeSummary: "Primeira compreensão da missão pela SOFIA; aguardando validação humana",
-            publishedAt: trState === "AWAITING_HUMAN_VALIDATION" ? new Date() : null,
-          },
+
+        const originalContent = [
+          "# Solicitação original — " + input.title, "",
+          "**Origem:** operador humano (usuário #" + ctx.user.id + ")",
+          "**Registrada em:** " + new Date().toISOString(), "",
+          "## Descrição original", input.description?.trim() || "Nenhuma descrição adicional foi fornecida."
+        ].join("\n");
+
+        let created: Awaited<ReturnType<typeof db.createMissionWithInitialDocuments>>;
+        try {
+          created = await db.createMissionWithInitialDocuments({
+            task: {
+              agentId: input.agentId,
+              createdBy: ctx.user.id,
+              title: input.title,
+              description: input.description,
+              statusId: pausedStatusId,
+              priorityId: input.priorityId,
+              dueDate: input.dueDate,
+              manusStatus: "awaiting_tr_validation",
+            },
+            originalRequest: {
+              content: originalContent,
+              state: "PUBLISHED",
+              authorType: "HUMAN",
+              authorUserId: ctx.user.id,
+              provenance: { origin: "HUMAN", source: "tasks.create" },
+              changeSummary: "Snapshot imutável da solicitação original",
+            },
+            tr: {
+              content: trContent,
+              state: trState,
+              authorType: "SOFIA",
+              provenance: { origin: "HUMAN", source: "tasks.create", originalRequestDocumentKey: "ORIGINAL_REQUEST" },
+              changeSummary: "Primeira compreensão da missão pela SOFIA; aguardando validação humana",
+              publishedAt: trState === "AWAITING_HUMAN_VALIDATION" ? new Date() : null,
+            },
+          });
+        } catch (error) {
+          console.error("[Tasks] Atomic mission/document creation failed:", error);
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "A missão e seus documentos iniciais não puderam ser persistidos. Nenhuma missão parcial foi criada.",
+            cause: error,
+          });
+        }
+
+        // GitHub mirroring is deliberately outside the DB transaction and occurs
+        // only after the mission + mandatory source documents are safely persisted.
+        const mirror = await mirrorTaskToGitHub({
+          ...created,
+          createdBy: ctx.user.id,
+          creatorType: "user",
+          creatorName: ctx.user.name,
+          creatorEmail: ctx.user.email,
         });
+        await db.updateTaskGitHubSync(created.id, {
+          missionKey: mirror.missionKey,
+          githubPath: mirror.path,
+          githubSha: mirror.sha,
+          githubSyncStatus: mirror.status,
+          githubSyncError: mirror.error ?? null,
+        });
+
         return {
-          ...created[0], statusId: pausedStatusId, missionKey: mirror.missionKey,
-          githubPath: mirror.path, githubSyncStatus: mirror.status, trState, trGenerationError,
+          ...created,
+          missionKey: mirror.missionKey,
+          githubPath: mirror.path,
+          githubSyncStatus: mirror.status,
+          trState,
+          trGenerationError,
         };
       }),
 
