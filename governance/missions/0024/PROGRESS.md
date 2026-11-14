@@ -36,6 +36,21 @@ Redesenhar exclusivamente a experiência visual da MW-Ex para padrão de aplicat
 - Blueprint: ./BLUEPRINT.md
 - Quadro: ./TASKS.md
 
+## Diagnóstico estático inicial — 2026-11-14
+
+Inspecionados `MwEx.jsx`, `MwEx.css`, `MwExPortfolio.jsx` e `MwExAssetStatus.css` no repositório de produto.
+
+Achados preliminares:
+- `MwEx.css` contém camadas históricas de overrides e regras repetidas, com risco de inconsistência entre componentes.
+- O excesso de painéis escuros, bordas, gradientes e sombras faz as áreas competirem visualmente.
+- Rótulos uppercase pequenos e metadados comprimidos prejudicam a hierarquia de leitura.
+- Conversão e transferência mantêm apresentação de formulário administrativo.
+- Seletores estruturais `:nth-of-type()` controlam posicionamento e tornam o grid frágil.
+- Carteira/patrimônio, mercado, ordens, tabela de ativos e atividade precisam compartilhar uma linguagem visual.
+- Inspeção estática não substitui baseline em navegador; QA visual desktop/mobile permanece pendente.
+
+Nenhum arquivo de produto foi alterado; nenhuma escrita em Supabase, operação financeira, migration ou deploy foi executada.
+
 ## Próximo passo
 
-Concluir o diagnóstico visual de todos os componentes MW-Ex e registrar uma proposta de sistema visual antes da implementação abrangente. Não alterar produção nesta etapa.
+Concluir baseline visual e inventário; definir a direção de arte e o sistema visual antes da implementação abrangente. A implementação será isolada em branch dedicada e validada em Preview.
