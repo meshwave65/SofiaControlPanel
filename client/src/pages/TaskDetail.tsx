@@ -495,9 +495,18 @@ export default function TaskDetail() {
                     </div>
                   )}
                   {selectedDocument.typeKey === "TR" && ["VALIDATED", "ACTIVE", "REORIENTED"].includes(selectedDocument.latestVersion?.state ?? "") && blueprintReady && (
-                    <p className="rounded-md border border-green-500/30 p-3 text-sm text-green-600">
-                      TR validado e Blueprint READY vinculado à versão vigente. A missão foi liberada para execução dentro dos gates aplicáveis.
-                    </p>
+                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-green-500/30 p-3">
+                      <p className="text-sm text-green-600">TR validado e Blueprint READY vinculado à versão vigente.</p>
+                      {currentStatusName === "PAUSED" && !task.manusTaskId && (
+                        <Button
+                          onClick={() => generateBlueprintMutation.mutate({ taskId })}
+                          disabled={generateBlueprintMutation.isPending}
+                        >
+                          {generateBlueprintMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          Liberar missão para execução
+                        </Button>
+                      )}
+                    </div>
                   )}
                 </div>
               )}
