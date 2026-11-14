@@ -80,11 +80,11 @@ export default function TaskDetail() {
   const [trCorrection, setTrCorrection] = useState("");
   const documents = documentsQuery.data ?? [];
   const selectedDocument = documents.find((document) => document.id === selectedDocumentId)
-    ?? documents.find((document) => document.typeKey === "TR")
+    ?? documents.find((document) => document.typeKey === "TR" && document.documentKey === "TR")
     ?? null;
   const selectedVersion = selectedVersionNumber ?? selectedDocument?.latestVersion?.version ?? 0;
   const trDocument = documents.find((document) => document.typeKey === "TR");
-  const blueprintDocument = documents.find((document) => document.typeKey === "BLUEPRINT");
+  const blueprintDocument = documents.find((document) => document.typeKey === "BLUEPRINT" && document.documentKey === "BLUEPRINT");
   const blueprintReady = Boolean(
     trDocument?.latestVersion
     && blueprintDocument?.latestVersion
