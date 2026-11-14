@@ -822,11 +822,106 @@ export const appRouter = router({
             toolChoice: "auto",
           });
           const assistantTurn = response.choices?.[0]?.message;
+          const inspectCall = assistantTurn?.tool_calls?.find(
+            (call) => call.function.name === "inspect_current_mission"
+          );
           const forwardCall = assistantTurn?.tool_calls?.find(
             (call) => call.function.name === "forward_operator_instruction_to_assigned_agent"
           );
 
-          if (forwardCall) {
+          if (inspectCall && forwardCall) {
+            throw new Error("A Sofia solicitou duas operações incompatíveis na mesma resposta.");
+          }
+
+          if (inspectCall) {
+            const missionRootId = await db.getMissionRootTaskId(input.taskId);
+            const missionRoot = missionRootId ? await db.getTaskById(missionRootId) : null;
+            if (!missionRoot || (missionRoot.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
+              throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada ou sem permissão de acesso." });
+            }
+
+            const childTasks = await db.getTasksByParentId(missionRoot.id);
+            const relatedTasks = [
+              missionRoot,
+              ...childTasks.filter((child) => child.createdBy === missionRoot.createdBy),
+            ];
+            const [taskSnapshots, availableAgentRecords, executionReady] = await Promise.all([
+              Promise.all(relatedTasks.map(async (relatedTask) => ({
+                missionId: missionRoot.id,
+                taskId: relatedTask.id,
+                title: relatedTask.title,
+                parentTaskId: relatedTask.parentTaskId,
+                status: await db.getTaskStatusNameById(relatedTask.statusId),
+                agentId: relatedTask.agentId,
+                agentPinned: relatedTask.agentPinned,
+                agentTaskId: relatedTask.manusTaskId,
+                agentTaskStatus: relatedTask.manusStatus,
+                creditsUsed: relatedTask.creditsUsed,
+                completedAt: relatedTask.completedAt?.toISOString?.() ?? null,
+              }))),
+              db.getAgentsByOwnerId(missionRoot.createdBy, ctx.user.role === "admin"),
+              db.hasExecutionReadyMissionDocuments(missionRoot.id),
+            ]);
+
+            const assignedAgentIds = new Set(taskSnapshots.map((item) => item.agentId).filter((id): id is number => typeof id === "number"));
+            const observedAt = new Date();
+            const assignedAgents = availableAgentRecords
+              .filter((agent) => agent.ownerId === missionRoot.createdBy && assignedAgentIds.has(agent.id))
+              .map((agent) => {
+                const creditsUpdatedAt = agent.creditsUpdatedAt instanceof Date
+                  ? agent.creditsUpdatedAt
+                  : agent.creditsUpdatedAt ? new Date(agent.creditsUpdatedAt) : null;
+                const creditAgeMs = creditsUpdatedAt ? observedAt.getTime() - creditsUpdatedAt.getTime() : null;
+                return {
+                  agentId: agent.id,
+                  name: agent.name,
+                  status: agent.status,
+                  connectionStatus: agent.connectionStatus,
+                  version: agent.version,
+                  lastHeartbeat: agent.lastHeartbeat instanceof Date ? agent.lastHeartbeat.toISOString() : agent.lastHeartbeat ?? null,
+                  creditsRemaining: agent.creditsRemaining,
+                  creditsUpdatedAt: creditsUpdatedAt?.toISOString() ?? null,
+                  creditSnapshotFresh: creditAgeMs !== null && creditAgeMs >= 0 && creditAgeMs <= 60_000,
+                };
+              });
+
+            const missionSnapshot = {
+              source: "database_read_only_snapshot",
+              observedAt: observedAt.toISOString(),
+              mission: {
+                missionId: missionRoot.id,
+                title: missionRoot.title,
+                description: missionRoot.description,
+                status: await db.getTaskStatusNameById(missionRoot.statusId),
+                createdAt: missionRoot.createdAt?.toISOString?.() ?? null,
+                updatedAt: missionRoot.updatedAt?.toISOString?.() ?? null,
+                executionDocumentsReady: executionReady,
+              },
+              tasks: taskSnapshots,
+              assignedAgents,
+              interpretationLimits: [
+                "Créditos são o último snapshot persistido, não uma consulta em tempo real à Manus.",
+                "Status online/conectado não significa elegibilidade para nova atribuição.",
+                "Esta consulta não altera missão, agente, prioridade, execução ou créditos.",
+                "Somente a missão aberta, sua raiz e suas tarefas-filhas diretas foram consultadas.",
+              ],
+            };
+
+            const followUp = await invokeLLM({
+              messages: [
+                ...buildSofiaConversation(task, previousMessages),
+                {
+                  role: "user",
+                  content: "Resultado da ferramenta somente leitura inspect_current_mission. Use estes dados como fonte factual; não infira elegibilidade ou ações não executadas:\\n" + JSON.stringify(missionSnapshot),
+                },
+              ],
+              toolChoice: "none",
+              maxTokens: 2500,
+            });
+            assistantContent = extractTextContent(followUp.choices?.[0]?.message?.content)
+              || "Consultei os dados da missão, mas não consegui produzir uma síntese textual.";
+            if (assistantContent.startsWith("Consultei os dados")) responseStatus = "failed";
+          } else if (forwardCall) {
             let toolArgs: { message?: string };
             try {
               toolArgs = JSON.parse(forwardCall.function.arguments) as { message?: string };
