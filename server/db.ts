@@ -1,7 +1,7 @@
 import { eq, and, asc, desc, isNull, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { InsertUser, InsertAgent, users, agents, tasks, messages, activityLogs, contextReports, taskStatuses, taskPriorities, messageTypes, activityEventTypes, arcPolicies, arcAssessments, arcEvidence, arcAccessEvents, arcDeviceProfiles, arcConfidenceSnapshots } from "../drizzle/schema";
+import { InsertUser, InsertAgent, users, agents, tasks, messages, activityLogs, contextReports, taskStatuses, taskPriorities, messageTypes, activityEventTypes, arcPolicies, arcAssessments, arcEvidence, arcAccessEvents, arcDeviceProfiles, arcConfidenceSnapshots, missionDocumentTypes, missionDocuments, missionDocumentVersions } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { decryptCredential, encryptCredential } from './credentials';
 import { evaluateArcShadow } from './arcEvaluator';
@@ -1120,4 +1120,312 @@ export async function updateScheduledTaskNextRun(id: number, nextRun: Date) {
   // Esta é uma função placeholder para evitar erros de compilação
   console.log("[DB] updateScheduledTaskNextRun called but table not implemented:", { id, nextRun });
   return { success: false };
+}
+
+
+// ============================================
+// VERSIONED MISSION DOCUMENTS
+// ============================================
+
+type MissionDocumentAuthorType = "HUMAN" | "SOFIA" | "AGENT";
+
+type MissionDocumentVersionInput = {
+  content: string;
+  state?: string;
+  authorType: MissionDocumentAuthorType;
+  authorUserId?: number | null;
+  authorAgentId?: number | null;
+  sourceDocumentVersionId?: number | null;
+  provenance?: Record<string, unknown>;
+  changeSummary?: string | null;
+  contentHash?: string | null;
+  publishedAt?: Date | null;
+};
+
+async function assertMissionDocumentAccess(
+  database: Awaited<ReturnType<typeof getDb>>,
+  taskId: number,
+  ownerId: number,
+  canViewAll: boolean,
+) {
+  if (!database) throw new Error("Database not available");
+  const [task] = await database
+    .select({ id: tasks.id, createdBy: tasks.createdBy })
+    .from(tasks)
+    .where(canViewAll
+      ? eq(tasks.id, taskId)
+      : and(eq(tasks.id, taskId), eq(tasks.createdBy, ownerId)))
+    .limit(1);
+  if (!task) throw new Error("Mission not found or access denied");
+  return task;
+}
+
+async function validateMissionDocumentAuthor(
+  transaction: any,
+  taskOwnerId: number,
+  author: Pick<MissionDocumentVersionInput, "authorType" | "authorUserId" | "authorAgentId">,
+) {
+  if (author.authorType === "HUMAN" && !author.authorUserId) {
+    throw new Error("HUMAN document versions require authorUserId");
+  }
+  if (author.authorType === "AGENT" && !author.authorAgentId) {
+    throw new Error("AGENT document versions require authorAgentId");
+  }
+  if (author.authorAgentId) {
+    const [agent] = await transaction
+      .select({ id: agents.id })
+      .from(agents)
+      .where(and(eq(agents.id, author.authorAgentId), eq(agents.ownerId, taskOwnerId)))
+      .limit(1);
+    if (!agent) throw new Error("Document author agent does not belong to the mission owner");
+  }
+}
+
+async function validateMissionDocumentSource(
+  transaction: any,
+  taskId: number,
+  typeKey: string,
+  sourceDocumentVersionId?: number | null,
+) {
+  if (!sourceDocumentVersionId) {
+    if (typeKey === "BLUEPRINT") {
+      throw new Error("Blueprint versions must reference the exact source TR version");
+    }
+    return;
+  }
+
+  const [source] = await transaction
+    .select({
+      taskId: missionDocuments.taskId,
+      typeKey: missionDocumentTypes.typeKey,
+    })
+    .from(missionDocumentVersions)
+    .innerJoin(missionDocuments, eq(missionDocumentVersions.documentId, missionDocuments.id))
+    .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
+    .where(eq(missionDocumentVersions.id, sourceDocumentVersionId))
+    .limit(1);
+
+  if (!source || source.taskId !== taskId) {
+    throw new Error("Source document version does not belong to this mission");
+  }
+  if (typeKey === "BLUEPRINT" && source.typeKey !== "TR") {
+    throw new Error("Blueprint source must be a TR version");
+  }
+}
+
+export async function getMissionDocumentTypes() {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+  return database
+    .select()
+    .from(missionDocumentTypes)
+    .where(eq(missionDocumentTypes.isActive, true))
+    .orderBy(asc(missionDocumentTypes.sortOrder), asc(missionDocumentTypes.label));
+}
+
+export async function getMissionDocumentsForTask(
+  taskId: number,
+  ownerId: number,
+  canViewAll = false,
+) {
+  const database = await getDb();
+  await assertMissionDocumentAccess(database, taskId, ownerId, canViewAll);
+
+  const documents = await database!
+    .select({
+      id: missionDocuments.id,
+      taskId: missionDocuments.taskId,
+      documentKey: missionDocuments.documentKey,
+      title: missionDocuments.title,
+      createdAt: missionDocuments.createdAt,
+      updatedAt: missionDocuments.updatedAt,
+      typeKey: missionDocumentTypes.typeKey,
+      typeLabel: missionDocumentTypes.label,
+      category: missionDocumentTypes.category,
+      audience: missionDocumentTypes.audience,
+      renderer: missionDocumentTypes.renderer,
+      sortOrder: missionDocumentTypes.sortOrder,
+    })
+    .from(missionDocuments)
+    .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
+    .where(and(eq(missionDocuments.taskId, taskId), eq(missionDocumentTypes.isActive, true)))
+    .orderBy(asc(missionDocumentTypes.sortOrder), asc(missionDocuments.createdAt));
+
+  return Promise.all(documents.map(async (document) => {
+    const [latestVersion] = await database!
+      .select({
+        id: missionDocumentVersions.id,
+        version: missionDocumentVersions.version,
+        state: missionDocumentVersions.state,
+        authorType: missionDocumentVersions.authorType,
+        createdAt: missionDocumentVersions.createdAt,
+        publishedAt: missionDocumentVersions.publishedAt,
+        changeSummary: missionDocumentVersions.changeSummary,
+      })
+      .from(missionDocumentVersions)
+      .where(eq(missionDocumentVersions.documentId, document.id))
+      .orderBy(desc(missionDocumentVersions.version))
+      .limit(1);
+    return { ...document, latestVersion: latestVersion ?? null };
+  }));
+}
+
+export async function getMissionDocumentVersionForTask(
+  taskId: number,
+  documentId: number,
+  version: number,
+  ownerId: number,
+  canViewAll = false,
+) {
+  const database = await getDb();
+  await assertMissionDocumentAccess(database, taskId, ownerId, canViewAll);
+  const [result] = await database!
+    .select({
+      document: missionDocuments,
+      type: missionDocumentTypes,
+      version: missionDocumentVersions,
+    })
+    .from(missionDocumentVersions)
+    .innerJoin(missionDocuments, eq(missionDocumentVersions.documentId, missionDocuments.id))
+    .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
+    .where(and(
+      eq(missionDocuments.taskId, taskId),
+      eq(missionDocuments.id, documentId),
+      eq(missionDocumentVersions.version, version),
+    ))
+    .limit(1);
+  return result ?? null;
+}
+
+export async function createMissionDocumentWithVersion(input: {
+  taskId: number;
+  ownerId: number;
+  canViewAll?: boolean;
+  typeKey: string;
+  documentKey: string;
+  title: string;
+  version: MissionDocumentVersionInput;
+}) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+
+  return database.transaction(async (transaction) => {
+    const [task] = await transaction
+      .select({ id: tasks.id, createdBy: tasks.createdBy })
+      .from(tasks)
+      .where(input.canViewAll
+        ? eq(tasks.id, input.taskId)
+        : and(eq(tasks.id, input.taskId), eq(tasks.createdBy, input.ownerId)))
+      .limit(1);
+    if (!task) throw new Error("Mission not found or access denied");
+
+    const [documentType] = await transaction
+      .select()
+      .from(missionDocumentTypes)
+      .where(and(eq(missionDocumentTypes.typeKey, input.typeKey), eq(missionDocumentTypes.isActive, true)))
+      .limit(1);
+    if (!documentType) throw new Error("Mission document type is not active or does not exist");
+
+    await validateMissionDocumentAuthor(transaction, task.createdBy, input.version);
+    await validateMissionDocumentSource(transaction, task.id, documentType.typeKey, input.version.sourceDocumentVersionId);
+
+    const [document] = await transaction
+      .insert(missionDocuments)
+      .values({
+        taskId: task.id,
+        documentTypeId: documentType.id,
+        documentKey: input.documentKey,
+        title: input.title,
+      })
+      .returning();
+
+    const [version] = await transaction
+      .insert(missionDocumentVersions)
+      .values({
+        documentId: document.id,
+        version: 1,
+        state: input.version.state ?? "DRAFT",
+        content: input.version.content,
+        authorType: input.version.authorType,
+        authorUserId: input.version.authorUserId ?? null,
+        authorAgentId: input.version.authorAgentId ?? null,
+        sourceDocumentVersionId: input.version.sourceDocumentVersionId ?? null,
+        provenance: input.version.provenance ?? {},
+        changeSummary: input.version.changeSummary ?? "Initial version",
+        contentHash: input.version.contentHash ?? null,
+        publishedAt: input.version.publishedAt ?? null,
+      })
+      .returning();
+
+    return { document, version };
+  });
+}
+
+export async function createMissionDocumentRevision(input: {
+  taskId: number;
+  documentId: number;
+  ownerId: number;
+  canViewAll?: boolean;
+  version: MissionDocumentVersionInput;
+}) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+
+  return database.transaction(async (transaction) => {
+    const [document] = await transaction
+      .select({
+        id: missionDocuments.id,
+        taskId: missionDocuments.taskId,
+        typeKey: missionDocumentTypes.typeKey,
+        taskOwnerId: tasks.createdBy,
+      })
+      .from(missionDocuments)
+      .innerJoin(tasks, eq(missionDocuments.taskId, tasks.id))
+      .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
+      .where(input.canViewAll
+        ? and(eq(missionDocuments.id, input.documentId), eq(missionDocuments.taskId, input.taskId))
+        : and(
+          eq(missionDocuments.id, input.documentId),
+          eq(missionDocuments.taskId, input.taskId),
+          eq(tasks.createdBy, input.ownerId),
+        ))
+      .limit(1)
+      .for("update");
+    if (!document) throw new Error("Mission document not found or access denied");
+
+    await validateMissionDocumentAuthor(transaction, document.taskOwnerId, input.version);
+    await validateMissionDocumentSource(transaction, document.taskId, document.typeKey, input.version.sourceDocumentVersionId);
+
+    const [latest] = await transaction
+      .select({ version: missionDocumentVersions.version })
+      .from(missionDocumentVersions)
+      .where(eq(missionDocumentVersions.documentId, document.id))
+      .orderBy(desc(missionDocumentVersions.version))
+      .limit(1);
+
+    const [createdVersion] = await transaction
+      .insert(missionDocumentVersions)
+      .values({
+        documentId: document.id,
+        version: (latest?.version ?? 0) + 1,
+        state: input.version.state ?? "DRAFT",
+        content: input.version.content,
+        authorType: input.version.authorType,
+        authorUserId: input.version.authorUserId ?? null,
+        authorAgentId: input.version.authorAgentId ?? null,
+        sourceDocumentVersionId: input.version.sourceDocumentVersionId ?? null,
+        provenance: input.version.provenance ?? {},
+        changeSummary: input.version.changeSummary ?? null,
+        contentHash: input.version.contentHash ?? null,
+        publishedAt: input.version.publishedAt ?? null,
+      })
+      .returning();
+
+    await transaction
+      .update(missionDocuments)
+      .set({ updatedAt: new Date() })
+      .where(eq(missionDocuments.id, document.id));
+
+    return createdVersion;
+  });
 }
