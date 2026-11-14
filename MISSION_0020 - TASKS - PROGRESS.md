@@ -71,3 +71,12 @@
 - Distância atual entre live e main: 167 commits (146 no checkpoint anterior), número móvel que inclui documentação; comparar arquivos de aplicação separadamente.
 - Estado: alvo do rollback conhecido; motivação operacional desconhecida. Não implantar main até revisar deltas de código e critérios de release.
 - Nenhuma ação mutável ou chamada externa foi executada.
+
+
+### Checkpoint 20.4 — revisão de código da resposta Messenger
+- `messages.create` em main tem validações e rota de resposta; usa tarefa Manus vinculada ao agente quando `agentId` e `manusTaskId` existem, caso contrário usa LLM interno.
+- Polling Manus: snapshot anterior, envio, até 8 leituras em intervalos de 1,5s; sem resposta observada, persiste estado/placeholder pending.
+- Teste de rota cobre LLM interno, não o ramo Manus; ciclo completo de envio/polling não tem teste integrado. Identidade destino é a conta/token Manus configurada no agente da missão, não sessão pessoal arbitrária.
+- A UI melhorou o feedback, mas Link Ativo e Sincronizado ainda não provam conectividade.
+- Main não corrige retomada PROGRESS com manusTaskId, pausa operacional ou transferência manual; o código de lifecycle consultado permanece essencialmente igual ao live.
+- ensure-database mantém lock_timeout 15s; main não está liberada como release completa por esta auditoria.
