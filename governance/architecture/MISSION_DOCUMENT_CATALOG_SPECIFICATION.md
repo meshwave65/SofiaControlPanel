@@ -103,3 +103,37 @@ O visualizador consulta esses artefatos; não é mecanismo de geração, valida�
 ## 8. Limite
 
 Este contrato define a experiência e o modelo lógico. Não declara que catálogo, tabelas, APIs, RLS, persistência versionada ou visualizador estejam implementados. O desenho físico deve ser reconciliado com schema, ownership e estratégia de RLS reais antes de migrations ou alterações de runtime.
+
+
+## 9. Mapeamento físico inicial — Incremento A
+
+O primeiro mapeamento Drizzle/PostgreSQL usa três tabelas no schema privado `sofia`:
+
+| Tabela | Responsabilidade |
+|---|---|
+| `sofia.missionDocumentTypes` | Catálogo estável dos tipos documentais e metadados de apresentação. |
+| `sofia.missionDocuments` | Instância lógica do documento vinculada à missão (`tasks.id`), com `documentKey` estável dentro da missão. |
+| `sofia.missionDocumentVersions` | Conteúdo e proveniência de cada versão, com autoria, estado, timestamps e vínculo opcional à versão-fonte. |
+
+A versão vigente é derivada da maior versão registrada para a instância; não há ponteiro mutável que possa divergir do histórico. A combinação `documentId + version` é única. A combinação `taskId + documentKey` identifica uma instância lógica sem impedir múltiplas instâncias do mesmo tipo (por exemplo, vários ORs).
+
+O vínculo `sourceDocumentVersionId` permite que um Blueprint aponte para a versão exata do TR que o originou. A validação semântica de que a versão-fonte pertence à mesma missão e é do tipo TR será responsabilidade da camada de serviço antes de aceitar uma nova versão.
+
+### Catálogo inicial
+
+A migration cadastra `ORIGINAL_REQUEST`, `TR`, `BLUEPRINT`, `OR` e `FOR`. `ORIGINAL_REQUEST` representa a fonte histórica, não é substituto do TR. TR é o único tipo marcado como padrão.
+
+### Segurança e imutabilidade
+
+As três tabelas recebem RLS habilitado, políticas server-only com negação para os papéis de acesso direto e revogação de privilégios de `PUBLIC`, `anon` e `authenticated`. O SCP utiliza autenticação própria e conexão PostgreSQL server-side; portanto, as políticas não usam `auth.uid()`. A autorização de ownership deve ser verificada na API usando o proprietário da missão (`tasks.createdBy`) antes de listar ou ler documentos. A conexão server-side deve permanecer restrita ao backend.
+
+As linhas de `missionDocumentVersions` são append-only: trigger bloqueia UPDATE e DELETE; qualquer correção cria nova versão. Instâncias documentais e missões usam exclusão restrita para evitar apagar acidentalmente histórico.
+
+### Artefatos de implementação
+
+- Schema Drizzle: `drizzle/schema.ts`.
+- Migration: `drizzle/0010_mission_document_catalog.sql`.
+
+A migration 0010 **não foi adicionada ao `scripts/ensure-database.mjs`** e não foi aplicada a banco algum. A rotina de inicialização atual executa verificações e instala explicitamente somente migrations já selecionadas; ligar 0010 ao startup poderia alterar banco automaticamente durante deploy. A aplicação fica reservada a uma etapa de migração controlada, após validação do SQL, backup/rollback e autorização específica.
+
+A migration é compatível com o padrão server-only observado em `drizzle/0004_arc_server_only_rls.sql` e `drizzle/0007_arc_telemetry_confidence.sql`, mas a presença do arquivo no repositório não comprova execução no banco.
