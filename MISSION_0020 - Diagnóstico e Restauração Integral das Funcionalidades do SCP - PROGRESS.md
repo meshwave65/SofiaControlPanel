@@ -53,3 +53,14 @@ Identificar, com evidências reproduzíveis, por que o SofiaControlPanel não ex
 - `pnpm check`, `pnpm test` e `pnpm build` passam após as correções; testes adicionais da missão passam e são repetíveis.
 - Nenhuma chamada real de custo, escrita em produção ou ação externa ocorre sem o gate/autorização correspondente; documentação e handoff refletem precisamente o que foi validado.
 - Operational Reports, índice, commits e estado final da missão/quadro concordam; itens bloqueados permanecem abertos.
+
+
+## Checkpoint 2026-11-14 — tarefa 20.4 assumida
+
+- **Instância:** ChatGPT/GPT-6.
+- **Status:** PROGRESS.
+- **Escopo:** auditoria funcional dos fluxos de gestão de missões e Messenger, separando lacunas de produto, falhas de integração/configuração e falhas do runtime publicado.
+- **Ownership:** tarefa 20.3 permanece atribuída a Agente Mateus; tarefa 20.4 foi assumida sem sobreposição no commit `d95e6e7becec1ad207ac2a13190e5868eedcb123`.
+- **Achados iniciais:** ausência de pausa/transferência manual na UI/API; condição de habilitação do botão iniciar impede retomada quando `manusTaskId` já existe e não cobre PAUSED; Messenger apresenta `Link Ativo` sem health-check e encaminha para LLM interno ou execução Manus conforme a missão, sem integração direta com conta externa do operador comprovada.
+- **Limite da evidência:** inspeção estática apenas. Commit efetivamente publicado, logs/health do Render, estado real do banco/agentes e conta externa pretendida ainda não foram verificados. Nenhuma chamada Manus/LLM, consumo de crédito, escrita de produção ou deploy.
+- **Operational Report:** `OR-20261114-0017.md` (SUBMITTED; Oracle PENDING).
