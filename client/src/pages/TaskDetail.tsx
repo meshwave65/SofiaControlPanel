@@ -123,7 +123,7 @@ export default function TaskDetail() {
       toast.success("TR validado, Blueprint gerado e missão liberada para STAGED.");
     },
     onError: async (error) => {
-      await documentsQuery.refetch();
+      await Promise.all([documentsQuery.refetch(), taskQuery.refetch()]);
       toast.error(error.message);
     },
   });
@@ -132,7 +132,10 @@ export default function TaskDetail() {
       await Promise.all([documentsQuery.refetch(), taskQuery.refetch()]);
       toast.success("Blueprint READY, vinculado à versão vigente do TR. Missão liberada.");
     },
-    onError: (error) => toast.error(error.message),
+    onError: async (error) => {
+      await Promise.all([documentsQuery.refetch(), taskQuery.refetch()]);
+      toast.error(error.message);
+    },
   });
 
   const task = taskQuery.data;
