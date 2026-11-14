@@ -149,7 +149,7 @@ BEGIN
     JOIN sofia."missionDocumentVersions" version_row ON version_row."documentId" = document_row.id
    WHERE document_row."taskId" = mission_id AND type_row."typeKey" = 'TR'
    ORDER BY version_row.version DESC LIMIT 1;
-  IF latest_tr_state NOT IN ('VALIDATED', 'ACTIVE', 'REORIENTED') THEN
+  IF latest_tr_state IS NULL OR latest_tr_state NOT IN ('VALIDATED', 'ACTIVE', 'REORIENTED') THEN
     RAISE EXCEPTION 'Execution blocked: mission % has no validated current TR', mission_id;
   END IF;
   RETURN NEW;
@@ -157,5 +157,5 @@ END;
 $function$;
 REVOKE ALL ON FUNCTION sofia.enforce_validated_tr_before_staged() FROM PUBLIC, anon, authenticated;
 DROP TRIGGER IF EXISTS tasks_require_validated_tr ON sofia.tasks;
-CREATE TRIGGER tasks_require_validated_tr BEFORE INSERT OR UPDATE OF "statusId" ON sofia.tasks
+CREATE TRIGGER tasks_require_validated_tr BEFORE INSERT OR UPDATE OF "statusId", "agentId" ON sofia.tasks
   FOR EACH ROW EXECUTE FUNCTION sofia.enforce_validated_tr_before_staged();
