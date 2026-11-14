@@ -181,6 +181,9 @@ export class SofiaOrchestrator {
     if (task.statusId !== stagedStatusId) {
       return { task, started: false, factorized: false, subtaskIds: [] };
     }
+    if (!(await db.hasValidatedMissionTR(taskId))) {
+      throw new Error("Execução bloqueada: a missão ainda não possui um TR validado e publicado.");
+    }
 
     const existingSubtasks = await db.getTasksByParentId(taskId);
     let subtaskIds: number[] = [];
@@ -207,6 +210,10 @@ export class SofiaOrchestrator {
   static async startTask(taskId: number): Promise<any> {
     const task = await db.getTaskById(taskId);
     if (!task) return null;
+
+    if (!(await db.hasValidatedMissionTR(taskId))) {
+      throw new Error("Execução bloqueada: a missão não possui TR validado. Subtarefas herdam a validação da missão principal.");
+    }
 
     const stagedStatusId = await db.getTaskStatusIdByName(STATUS_STAGED);
     const alreadyClaimedWithoutExecution = task.statusId !== stagedStatusId && Boolean(task.agentId) && !task.manusTaskId;
