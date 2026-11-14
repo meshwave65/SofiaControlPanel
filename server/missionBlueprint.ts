@@ -68,7 +68,7 @@ export function validateMissionBlueprintContent(content: string): string {
     line.length > 0
     && line.toLocaleUpperCase() !== NO_SCOPE_BLOCKERS_DECLARATION
     && normalizeHeading(line) !== "bloqueios e gates pendentes"
-    && /(BLOQUEIO|PENDÊNCIA|PENDENTE|NÃO RESOLVIDO)/i.test(line)
+    && /(^|[^A-ZÀ-ÖØ-Þ])(?:BLOQUEIOS?|PENDÊNCIAS?|PENDENTES?|NÃO RESOLVIDOS?)(?=$|[^A-ZÀ-ÖØ-Þ])/i.test(line)
   );
   if (!declaresNoScopeBlockers || contradictoryBlockerLines.length > 0) {
     throw new Error("Blueprint contém bloqueios não resolvidos ou não declarou explicitamente a ausência deles em linha própria; execução permanece bloqueada.");
