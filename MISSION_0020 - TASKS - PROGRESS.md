@@ -265,3 +265,12 @@
 - A tela mostra Blueprint pendente, permite retry e oferece liberação quando documento e vínculo estão prontos. Filhas visualizam documentos da missão raiz e não podem alterá-los.
 - READY é prontidão documental/estrutural, não substitui o motor completo de política de risco, orçamento e permissões, que permanece pendente.
 - OR-20261114-0030 atualizado. Sem check/test/build/parser SQL/integration; migration 0010 não aplicada; sem produção/deploy/dispatch/LLM real/Manus/créditos. Task 20.3/Mateus intocada.
+
+ 
+### Revisão técnica B.2 — caminhos alternativos de execução (2026-11-14)
+
+- `startTask` inicia somente missões `STAGED`; removeu-se o fallback que interpretava qualquer tarefa com agente atribuído e sem Manus Task ID como claim válido. Isso bloqueia início indevido em `PAUSED` e evita duplicação em `PROGRESS`.
+- Se o claim atômico retorna vazio, o orquestrador relê o estado. Se outro dispatcher já moveu a missão, não altera `manusStatus`; só registra espera quando continua `STAGED`.
+- Fatoração só ocorre com missão raiz `STAGED` ou `PROGRESS`; UI e trigger SQL impedem gerar/dispatchar filhas a partir de missão `PAUSED`.
+- Visualizador avalia o TR canônico. Validador de Blueprint exige seções próprias, ordenadas, preenchidas e declaração não contraditória de ausência de bloqueios.
+- Testes adicionados/atualizados para os gates acima; **não executados**. Check/build/parser SQL/integration continuam pendentes. Migration 0010 não aplicada; sem produção/deploy/dispatch/LLM real/Manus/créditos. Task 20.3 intocada. OR-20261114-0030.
