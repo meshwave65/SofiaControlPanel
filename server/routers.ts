@@ -538,6 +538,27 @@ export const appRouter = router({
         if (input.parentTaskId !== undefined) {
           throw new TRPCError({ code: "BAD_REQUEST", message: "Tarefas-filhas são criadas pelo orquestrador a partir da missão principal, não pelo formulário de nova missão." });
         }
+        // Verify the document catalog before creating the task row. Without migration
+        // 0010, creating the mission first would leave an orphan task with no ORIGINAL_REQUEST/TR.
+        let activeDocumentTypes: Awaited<ReturnType<typeof db.getMissionDocumentTypes>>;
+        try {
+          activeDocumentTypes = await db.getMissionDocumentTypes();
+        } catch (error) {
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message: "O catálogo documental da missão não está disponível. A migration 0010 precisa ser aplicada antes de criar missões.",
+            cause: error,
+          });
+        }
+        const activeTypeKeys = new Set(activeDocumentTypes.map((documentType) => documentType.typeKey));
+        const missingRequiredTypes = ["ORIGINAL_REQUEST", "TR", "BLUEPRINT"].filter((typeKey) => !activeTypeKeys.has(typeKey));
+        if (missingRequiredTypes.length > 0) {
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message: "Tipos documentais obrigatórios inativos ou ausentes: " + missingRequiredTypes.join(", "),
+          });
+        }
+
         // Human-origin missions stay PAUSED until the initial TR is validated.
         const pausedStatusId = await db.getTaskStatusIdByName("PAUSED");
         if (!pausedStatusId) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O status PAUSED não está configurado; criação segura bloqueada." });
