@@ -155,3 +155,15 @@ Registrar cada nova entrada com data, OR/FOR, missão/etapa, orientação anteri
 - **Classificação:** decisão arquitetural explícita do responsável; contrato aprovado, implementação pendente.
 - **Documento normativo:** governance/architecture/MISSION_TR_SPECIFICATION.md. Referência sistêmica: governance/architecture/SOFIA_COGNITIVE_ORCHESTRATION_ARCHITECTURE.md.
 - **Limites:** nenhum schema, runtime, UI, DB, produção, dispatch, chamada externa, crédito ou deploy alterado nesta etapa. Task 20.3/Mateus permanece intocada.
+
+### AC-015 — 2026-11-14 — Blueprint como plano de trabalho derivado do TR
+
+- **Decisão explicitada pelo responsável:** Blueprint é o plano de trabalho operacional da missão, direcionado aos agentes/executores; TR é a compreensão narrativa da missão, prioritariamente direcionada ao operador humano.
+- **Derivação:** o Blueprint deve derivar de uma versão específica do TR consolidado. Em missão humana, a validação explícita do TR inicial antecede a liberação da execução. Em missão autônoma da SOFIA, o TR inicial continua obrigatório, mas não exige aprovação humana preliminar; a SOFIA pode produzir o Blueprint e executar dentro das políticas e limites de autonomia.
+- **Escopo:** o Blueprint traduz o escopo validado em etapas, tarefas, dependências, recursos, restrições, critérios de aceite e evidências. Não pode ampliar silenciosamente o escopo aprovado. Mudanças materiais exigem análise de impacto e nova versão antes de executar o trabalho afetado.
+- **Hierarquia:** a missão-pai mantém TR e Blueprint mestre; tarefas-filhas são unidades auxiliares e referenciam a versão do plano e a unidade executada. Não são missões independentes por padrão.
+- **Agentes:** executores temporários, não proprietários da missão. Cada executor recebe apenas o pacote de trabalho e contexto necessários/autorizados. Troca de agente não altera identidade da missão nem rompe proveniência.
+- **Artefatos complementares:** Blueprint prescreve o trabalho; OR registra execução e evidências; TR consolida evolução narrativa; FOR consolida aprendizado operacional final.
+- **Classificação:** decisão arquitetural explícita; especificação documental aprovada para orientar a implementação.
+- **Documento normativo:** `governance/architecture/MISSION_BLUEPRINT_SPECIFICATION.md`; relação TR/Blueprint também registrada em `MISSION_TR_SPECIFICATION.md` e na arquitetura de orquestração.
+- **Limites:** definição documental apenas. Nenhum schema, runtime, UI, banco, produção, dispatch, chamada externa, crédito, deploy ou restart alterado. Task 20.3/Mateus permanece intocada.
