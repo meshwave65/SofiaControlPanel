@@ -130,6 +130,7 @@ AS $function$
 DECLARE
   staged_status_id integer;
   progress_status_id integer;
+  paused_status_id integer;
   mission_id integer;
   mission_status_id integer;
   latest_tr_id integer;
@@ -139,7 +140,20 @@ DECLARE
 BEGIN
   SELECT id INTO staged_status_id FROM sofia."taskStatuses" WHERE name = 'STAGED' LIMIT 1;
   SELECT id INTO progress_status_id FROM sofia."taskStatuses" WHERE name = 'PROGRESS' LIMIT 1;
-  IF staged_status_id IS NULL OR NEW."statusId" IS DISTINCT FROM staged_status_id THEN RETURN NEW; END IF;
+  SELECT id INTO paused_status_id FROM sofia."taskStatuses" WHERE name = 'PAUSED' LIMIT 1;
+
+  IF progress_status_id IS NOT NULL AND NEW."statusId" = progress_status_id THEN
+    IF TG_OP = 'INSERT' THEN
+      RAISE EXCEPTION 'Execution blocked: tasks cannot be inserted directly in PROGRESS';
+    END IF;
+    IF OLD."statusId" IS DISTINCT FROM progress_status_id
+       AND OLD."statusId" IS DISTINCT FROM staged_status_id
+       AND NOT (OLD."statusId" IS NOT DISTINCT FROM paused_status_id AND NEW."manusTaskId" IS NOT NULL) THEN
+      RAISE EXCEPTION 'Execution blocked: PROGRESS requires a STAGED claim or an existing external execution resumed from PAUSED';
+    END IF;
+  ELSIF staged_status_id IS NULL OR NEW."statusId" IS DISTINCT FROM staged_status_id THEN
+    RETURN NEW;
+  END IF;
   IF NEW."parentTaskId" IS NULL THEN
     mission_id := NEW.id;
   ELSE
