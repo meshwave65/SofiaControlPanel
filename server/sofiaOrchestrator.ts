@@ -236,6 +236,7 @@ export class SofiaOrchestrator {
     if (!(await db.hasExecutionReadyMissionDocuments(taskId))) {
       throw new Error("Execução bloqueada: a missão exige TR validado e Blueprint READY. Subtarefas herdam os documentos da missão principal.");
     }
+    const progressStatusId = await db.getTaskStatusIdByName(STATUS_PROGRESS);
 
     // Refresh the selected account, or all online configured accounts for automatic assignment.
     // Cached balances older than one minute are not used to allocate a new mission.
