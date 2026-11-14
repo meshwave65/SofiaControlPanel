@@ -126,3 +126,11 @@
 - Agentes atribuídos às filhas também são temporários; a atribuição do pai não reserva nem bloqueia agentes necessários às filhas.
 - Síntese: missão e papel consolidador persistem; identidade do executor não. A continuidade é responsabilidade do SCP.
 - Referência: OR-20261114-0018, aditivo de 2026-11-14.
+
+
+### Requisito em avaliação — Agent Task ID e conversa direta do agente (2026-11-14)
+- Mostrar o Manus Task ID da execução externa na missão, separado do ID local da missão e do Agent ID, com opção de copiar e estado claro quando ainda não existir execução.
+- Permitir conversa direta com a conta original do agente mesmo sem atribuição atual à missão; canal e histórico independentes do ciclo da missão.
+- Contexto de missão fornecido explicitamente/selecionado pelo operador; não injetar automaticamente todo o histórico ou dados privados. Mensagens/respostas diretas não mudam o estado da missão.
+- Validar a API Manus: o código atual envia por /task.sendMessage com task_id; uma conversa persistente dedicada criada sob a credencial do agente é hipótese técnica, não endpoint confirmado.
+- Classificação: requisito proposto, desenho técnico pendente. Referência: OR-20261114-0018 / AC-011. Sem código, DB ou chamadas externas alterados.
