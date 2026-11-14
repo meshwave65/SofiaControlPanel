@@ -163,6 +163,7 @@ MISSION_0023 permanece PROGRESS e mantém seu próprio escopo de integridade ope
 - Acesso administrativo: `/mwn/operacao` (ou `/mwn/dashboard`) → aba **Créditos FIAT**.
 - Preview READY: `dpl_5VuHGzV9WcGuosPn6Ev1iUKSwB9b`; Preview protegido por Vercel SSO. QA visual autenticado permanece pendente.
 - Build Vite: 210 módulos transformados, 3,60 s; warning não bloqueante de bundle principal acima de 500 kB.
+- O registro de Genesis não possui linha correspondente em `public.profiles`; a fila administrativa mostra o UUID da conta como identificador, sem nome/e-mail de perfil. UUID: `5b57788b-1abf-4bfe-b810-c48783a68ce0`.
 - Caso Genesis confirmado por consulta read-only: aquisição `5620db80-922d-4b43-830c-b18df8d8c5f2`, código `MWEX-FIAT-442CB186DDFB`, BRL 100,00 via PIX, status `pending_validation`. Referência e comprovante ausentes; saldo PENDING 100, AVAILABLE 0, RESERVED 0. Ledger e audit log contêm somente a solicitação pendente; nenhum evento de pagamento ou confirmação.
 - Nenhuma confirmação/rejeição executada, nenhuma escrita financeira, migration, alteração de banco/RLS/grants/RPC.
 - OR: [OR-20261114-0011](../../operational_reports/OR-20261114-0011.md).
