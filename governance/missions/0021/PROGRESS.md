@@ -115,10 +115,10 @@ MISSION_0023 permanece PROGRESS e mantém seu próprio escopo de integridade ope
 
 ## Reavaliação read-only no banco de produção — 2026-11-14
 
-- OR-0008 corrigida após recuperação do documento de 2026-11-04 e reconciliação da OR-20261113-0015.
-- O alerta de 30 tabelas públicas sem RLS corresponde a **29 tabelas legadas de outros projetos**, deliberadamente fora do escopo MW-Ex/MWN, mais **`public.mwex_business_configs`**, criada posteriormente e a ser avaliada individualmente.
-- As 29 tabelas legadas não são pendência desta missão; não executar limpeza, migração, ativação de RLS ou revogação de grants nelas.
-- Os estados técnicos observados de `profiles` e `clients` permanecem registrados, mas sua classificação de escopo exige cruzamento nominal com o inventário e confirmação de consumidores. Não presumir pertencimento à MW-Ex.
-- A contagem agregada do Advisor não deve voltar a ser apresentada como 30 problemas novos da MW-Ex.
+- OR-0008 corrigida após recuperação do documento de 2026-11-04 e reconciliação nominal do catálogo registrada na OR-20261113-0015.
+- As 30 tabelas públicas sem RLS são 29 legadas, deliberadamente fora do escopo de remediação MW-Ex/MWN, mais `public.mwex_business_configs`, criada posteriormente e a ser avaliada individualmente.
+- A consulta nominal confirmou que `profiles` está entre as 29 tabelas legadas. A contagem read-only retornou 37 linhas; nenhum conteúdo de linha foi consultado. Não inferir sensibilidade nem afirmar que está vazia; reconciliar a contagem com a descrição documental de placeholders.
+- `clients` tem RLS habilitado e não integra o conjunto das 30 tabelas sem RLS. A contagem read-only retornou 15 linhas; policies permissivas foram observadas, mas o escopo funcional/consumidores ainda não foi atribuído.
+- Não executar limpeza, migração, ativação de RLS ou revogação de grants nas 29 tabelas legadas por conta deste alerta agregado.
 - Nenhuma alteração DDL, grant, policy, dado ou fluxo financeiro foi realizada. PR #30 e PR #31 permanecem abertas; migrations não aplicadas; sem merge/deploy.
-- Próxima etapa: reconciliar nominalmente `profiles` e `clients` e avaliar somente as estruturas efetivamente pertencentes ao escopo da MW-Ex/MWN.
+- Próxima etapa: reconciliar a caracterização das 37 linhas de `profiles`, mapear consumidores de `clients` e avaliar somente `mwex_business_configs` no escopo MW-Ex.
