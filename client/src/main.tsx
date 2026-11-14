@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import { createRoot } from "react-dom/client";
 import superjson from "superjson";
-import { supabase } from "./lib/supabase";
+import { getSupabaseAccessToken } from "./lib/supabase";
 import App from "./App";
 import "./index.css";
 
@@ -28,14 +28,15 @@ const trpcClient = trpc.createClient({
     httpBatchLink({
       url: "/api/trpc",
       transformer: superjson,
-      async fetch(input, init) {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
+      fetch(input, init) {
         const headers = new Headers(init?.headers);
-        if (session?.access_token) {
-          headers.set("Authorization", `Bearer ${session.access_token}`);
+        headers.delete("Authorization");
+
+        const accessToken = getSupabaseAccessToken();
+        if (accessToken) {
+          headers.set("Authorization", `Bearer ${accessToken}`);
         }
+
         return globalThis.fetch(input, {
           ...(init ?? {}),
           headers,
