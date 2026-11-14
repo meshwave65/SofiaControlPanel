@@ -50,3 +50,8 @@
 - **Runtime:** processo, heartbeat e DB iniciaram/verificaram em 14/11; exits com código 1 em 12/11 seguem sem causa isolada.
 - **Próxima etapa:** reconciliar intenção do rollback, revisar deltas de release e logs de erro; não fazer deploy/restart, dispatch de missão, envio de mensagem ou chamada Manus/LLM sem gate específico.
 - **OR:** OR-20261114-0017 atualizado com evidências de Render e causa do Messenger live.
+### Checkpoint 20.4 — incidente de lock no prestart (2026-11-14)
+- Render registrou sete falhas do ensure-database entre 20:25:30 e 20:37:00 UTC em 12/11; todas falharam em Verify tasks.agentPinned com PostgreSQL lock timeout.
+- Script prestart define lock_timeout=15s e executa ALTER TABLE ... ADD COLUMN IF NOT EXISTS para tasks.agentPinned; o comportamento persiste no código atual. O lock holder não foi identificado.
+- Classificação: timeout DDL no startup = causa imediata confirmada; sessão bloqueadora = desconhecida; startup em 14/11 passou posteriormente.
+- Nenhuma consulta ao banco, escrita, DDL, restart ou deploy foi executado.
