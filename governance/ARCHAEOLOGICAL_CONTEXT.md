@@ -112,3 +112,18 @@ Registrar cada nova entrada com data, OR/FOR, missão/etapa, orientação anteri
 - **Autoridade:** proposta do responsável; contrato técnico pendente de validação.
 - **Documentos:** OR-20261114-0018 (aditivo); MISSION_0020 PROGRESS; MISSION_0020 TASKS PROGRESS.
 - **Validação:** requisito registrado. Nenhuma alteração de código, banco, credencial, chamada Manus/LLM, envio de mensagem, deploy ou restart.
+
+
+### AC-012 — 2026-11-14 — SOFIA como plano cognitivo e operacional central do SCP
+- **Missão/etapa:** MISSION_0020 / tarefa 20.4 — evolução do Messenger e governança cognitiva.
+- **Decisão explícita do responsável:** implementar a SOFIA como interlocutora do operador e camada cognitiva central do SCP, responsável por compreender intenções, consultar contexto, propor/encaminhar ações e coordenar inteligências/agentes federados. O operador conversa prioritariamente com o SCP, não com a conta externa do agente.
+- **Princípio:** missões, contexto operacional, governança e continuidade pertencem ao SCP. Agentes externos são executores federados e substituíveis, salvo pinagem humana explícita.
+- **Arquitetura aprovada:** (1) camada cognitiva LLM/Sofia; (2) camada determinística de política, autorização, estado e execução no SCP; (3) adaptadores de agentes externos. O LLM interpreta e planeja, mas não acessa diretamente banco, credenciais ou APIs administrativas. Todas as ferramentas são tipadas, validadas no servidor e auditáveis.
+- **Modelo existente identificado:** `server/_core/llm.ts` usa `gemini-2.5-flash` via endpoint compatível com Chat Completions do gateway Manus Forge. Isso confirma uma capacidade LLM integrada, não um modelo proprietário da SOFIA.
+- **Primeiro incremento aprovado:** toda mensagem do operador passa pela Sofia; encaminhamento ao agente atual somente mediante decisão/tool call coerente com pedido explícito do operador, Agent ID e Agent Task ID existentes. Perguntas/análises ficam com Sofia. Ausência de resposta externa não é confirmação de entrega/leitura.
+- **Ações de controle:** transferência, pausa/retomada, prioridade e criação/cancelamento de execução exigem ferramentas governadas, validação de estado/política e confirmação conforme impacto. O modelo não é autoridade de execução.
+- **Memória:** contexto de missão e contexto operacional delimitados por ownership/finalidade; não carregar indiscriminadamente histórico de outras missões, dados privados ou credenciais.
+- **Classificação:** decisão arquitetural explícita do responsável; implementação incremental aprovada.
+- **Autoridade:** responsável pelo produto.
+- **Documentos:** `governance/architecture/SOFIA_COGNITIVE_CONTROL_PLANE.md`; OR-20261114-0022; MISSION_0020 PROGRESS; TASKS PROGRESS.
+- **Limite da primeira entrega:** não inclui transferência, pausa/retomada, persistência de planos, memória global, canal direto independente de missão ou mudanças de schema. Sem deploy, DB/produção, chamadas externas reais ou consumo de créditos.
