@@ -194,3 +194,17 @@ Esta matriz é preliminar: ações marcadas BLOCKED exigem reprodução autentic
 - Manter histórico próprio para a conversa direta e permitir anexar/fornecer contexto de missão de forma explícita e controlada. A conversa não deve alterar automaticamente estado, atribuição, Draft ou conclusão de missão.
 - A API conhecida exige task_id em /task.sendMessage; validar se existe endpoint de inbox ou se será necessária uma execução Manus dedicada e persistente para a conversa direta. Não presumir recebimento em inbox genérica.
 - Classificação: proposta de produto do responsável; desenho técnico pendente. Referência: OR-20261114-0018, aditivo e AC-011. Sem implementação ou chamadas externas nesta etapa.
+
+
+### Checkpoint 20.4 — incidente de autenticação do SCP (2026-11-14)
+- **Sintoma:** o responsável não consegue entrar no SCP; a UI informa que a inicialização da autenticação excedeu 15 segundos. Avisos de Self-XSS, WebGPU e extensões do YouTube não explicam a falha.
+- **Runtime:** Render `SofiaControlPanel-web` está ativo, com deploy live no commit `255a01601ae3f95f40de2071d53508cf6a41faf5`, branch configurada `main`, auto-deploy desligado. Logs anteriores registraram `Invalid Supabase access token` e timeout de consulta a `sofia.agents`; o timeout de consulta não foi correlacionado ao login.
+- **Supabase Auth:** logs do projeto associado ao SCP registram trocas PKCE bem-sucedidas para a origem do painel. Isso afasta indisponibilidade total do provedor, mas não prova que o backend valida o mesmo token/projeto.
+- **Código live:** `client/src/main.tsx` aguardava `supabase.auth.getSession()` antes de enviar qualquer requisição tRPC; `useAuth` também chamava `getSession()` durante a inscrição em `onAuthStateChange`. A concorrência é uma causa plausível do bloqueio de bootstrap, ainda não comprovada por reprodução de runtime.
+- **Correção preparada:** PR #16 remove a recuperação concorrente, mantém token e snapshot de sessão em memória por eventos Supabase e valida explicitamente o código PKCE no callback. PR: https://github.com/meshwave65/SofiaControlPanel/pull/16.
+- **Validação da PR/main:** `pnpm check`, `pnpm test` e `pnpm build` passaram em GitHub Actions run #43653652236.
+- **Compatibilidade com a base live:** branch isolada `hotfix/auth-restore-live`, derivada de `255a016`; `pnpm build` passou. `pnpm check` expôs três erros preexistentes fora dos arquivos alterados (`TaskDetail.tsx`, `server/_core/env.ts`, `server/sofiaOrchestrator.ts`). `pnpm test`: 20/21 passaram; a falha restante é teste de profundidade de fatorização em `server/sofiaOrchestrator.test.ts`, sem relação com autenticação.
+- **Gate de release:** `main` está 204 commits à frente de live e a comparação contém 72 arquivos alterados, incluindo API/serviços e migration SQL. O deploy Render disponível usa a branch configurada e não permite selecionar o commit isolado; publicar `main` incluiria mudanças fora do hotfix. Nenhum merge, deploy, mudança de configuração ou alteração de DB foi feito.
+- **Próximo passo:** obter caminho de deploy isolado do commit hotfix no serviço Render existente; depois validar login autenticado e observar `auth.me` no backend. Até lá, correção permanece preparada, não publicada.
+- **Guardrails:** tarefa 20.3/Mateus não foi tocada; nenhuma chamada Manus/LLM ou crédito consumido.
+- **OR:** OR-20261114-0022.
