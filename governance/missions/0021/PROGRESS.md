@@ -133,3 +133,17 @@ MISSION_0023 permanece PROGRESS e mantém seu próprio escopo de integridade ope
 - Build Vite concluído; QA visual autenticado permanece pendente.
 - Escopo limitado a JSX/CSS; nenhuma migration, alteração de banco ou operação financeira.
 - OR: [OR-20261114-0009](../../operational_reports/OR-20261114-0009.md).
+
+## Card Patrimônio — FIAT e criptoativos efetivamente em carteira — 2026-11-14
+
+- PR #33: https://github.com/meshwave65/newsite/pull/33 — aberta, não integrada.
+- Branch: `feat/mwex-wallet-patrimony`; head `ba22ae15d7f9dfda955382bbebdee6aefdcf9531`.
+- Preview Vercel: READY — deployment `dpl_HJrbyuU9hv4Va1DaHAUTwmNgoXE2`, URL https://newsite-b3fafsnuw-meshwaves-projects.vercel.app.
+- Card substitui o resumo de MWN isolado por **Patrimônio**: FIAT no topo, por moeda, e criptoativos abaixo somente com saldo positivo.
+- FIAT usa `mwex_fiat_accounts` filtrada pelo `wallet_id` da carteira autenticada; valores pendentes/reservados aparecem separados do disponível.
+- Tabela cripto: código, nome, quantidade, preço unitário atualizado e valor referencial FIAT. Valor referencial = quantidade × cotação; não representa saldo realizado nem garantia de liquidação.
+- Evidência read-only: `mwex_fiat_accounts` sem linhas no snapshot; `mwex_ledger_entries.asset` aceita somente MWN; BTC/ETH estão cadastrados como referências, não como saldos de carteira.
+- Nenhuma migration, alteração de banco/RLS/grants/RPC, ordem, transferência ou movimento financeiro.
+- Build Vercel READY. QA visual autenticado desktop/mobile e teste com FIAT efetivamente creditado permanecem pendentes.
+- Análise de Mercado continua como aba futura independente; ativos de referência não são inseridos no patrimônio.
+- OR: [OR-20261114-0010](../../operational_reports/OR-20261114-0010.md).
