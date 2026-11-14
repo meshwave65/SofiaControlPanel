@@ -102,3 +102,20 @@ Identificar, com evidências reproduzíveis, por que o SofiaControlPanel não ex
 - Fatoração é idempotente e cria subtarefas faltantes; a UI refaz consultas, mas não mostra toast de sucesso. Consolidação captura erro apenas no console, sem feedback visual explícito.
 - startTask não retoma execução Manus já existente por ação manual; TaskDetail bloqueia o botão quando manusTaskId existe e também não habilita PAUSED.
 - Testes atuais usam DB/Manus/LLM mocks. messages.test.ts cobre o ramo LLM interno, não o ramo Manus; manusExecutionService.test.ts não exercita sendManusMessageAndWait completo. Não comprovam integração em produção.
+## Matriz operacional preliminar — tarefa 20.4
+
+| Capacidade | Estado da evidência |
+|---|---|
+| Listar/criar missão | UI/API presentes; runtime autenticado não testado — BLOCKED |
+| Iniciar STAGED | UI/API/orchestrator presentes; execução ponta a ponta não testada — BLOCKED |
+| Retomar PROGRESS com manusTaskId | botão desabilitado e startTask não retoma execução existente — FAIL |
+| Pausar | sem ação dedicada; updateStatus genérico não pausa execução externa — FAIL |
+| Transferir manualmente | ausente; só existe reassignment automático por condição específica de créditos — FAIL |
+| Fatorizar | implementação idempotente presente; runtime não testado e sem toast de sucesso — BLOCKED |
+| Consolidar | implementação presente; runtime não testado e falha sem feedback visual — BLOCKED |
+| Messenger em produção | grava mensagem, não envia a Manus/LLM nem gera resposta — FAIL |
+| Messenger em main | rota Manus/LLM e resposta persistida existem, mas código não publicado — BLOCKED |
+| Identidade externa do Messenger | não há sessão arbitrária de conta pessoal; usa agente/tarefa Manus ou LLM interno — BLOCKED |
+| Indicador de conexão | Link Ativo hardcoded / Sincronizado sem handshake — FAIL |
+
+Esta matriz é preliminar: ações marcadas BLOCKED exigem reprodução autenticada controlada; não declarar sucesso a partir de testes mockados.
