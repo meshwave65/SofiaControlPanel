@@ -173,3 +173,15 @@ O modelo deve admitir múltiplas instâncias do mesmo tipo por missão, em espec
 A tela Gerenciar Missão terá um visualizador único, com dropdown dinâmico baseado no catálogo e nas instâncias. TR é o documento padrão; Blueprint, OR, FOR e tipos futuros aparecem quando existirem e forem autorizados. A descrição original permanece fonte histórica separada. A troca de documento é somente leitura e não altera execução.
 
 O desenho físico precisa ser reconciliado com schema, ownership, estratégia de RLS e convenções existentes antes de migrations. A UI do visualizador fica no incremento posterior, após APIs de listagem e conteúdo. Especificação: governance/architecture/MISSION_DOCUMENT_CATALOG_SPECIFICATION.md.
+
+
+## Incremento A — estado implementado no repositório (OR-20261114-0029)
+
+A fundação física inicial foi adicionada à branch:
+- Drizzle: missionDocumentTypes, missionDocuments e missionDocumentVersions em drizzle/schema.ts.
+- SQL 0010: catálogo inicial ORIGINAL_REQUEST/TR/BLUEPRINT/OR/FOR, vínculos, índices, RLS server-only, privilégios diretos revogados e versões append-only.
+- Ownership das instâncias deriva de tasks.createdBy; não duplicar owner nas tabelas documentais.
+- Versão vigente é calculada pelo histórico, sem ponteiro mutável.
+- Blueprint poderá referenciar a versão exata do TR via sourceDocumentVersionId; serviço deve validar missão e tipo de origem.
+
+A migration 0010 não está conectada ao startup/ensure-database e não foi aplicada a banco. Não executar até haver validação SQL, backup/rollback e gate específico. Ainda faltam camada de serviço, APIs, geração/versionamento em runtime, criação de snapshots ORIGINAL_REQUEST, UI e testes executáveis. OR-20261114-0029 registra limites e verificação.
