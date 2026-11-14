@@ -314,3 +314,9 @@ Foi criado workflow dedicado para executar `pnpm check`, `pnpm test`, `pnpm buil
 - O visualizador agora reinicia a seleção de versão ao mudar de documento.
 - CI no head `42f059e805427ea2426bb458385849714771d9f1`: runs `43650002480` e `43650006606` SUCCESS; `pnpm check`, 41/41 testes, `pnpm build` e migration 0010 em PostgreSQL 16 descartável aprovados.
 - Integração runtime com banco persistente e tool calling Gemini/Manus ainda não testada. Migration 0010 não aplicada a banco persistente/produção. Sem deploy, restart, dispatch real ou consumo de créditos. PR #15 sem merge. Task 20.3/Mateus intocada. OR-20261114-0032.
+
+### Checkpoint 20.4 — OR-20261114-0033
+- Atribuição inicial de agente é temporária; `agentPinned` agora assume false por padrão nas criações comuns.
+- Reorientação do TR permitida em PAUSED/STAGED antes da primeira execução externa, com lock transacional da missão para competir com segurança contra o dispatcher.
+- CI run 43650701916 SUCCESS: check, testes, build e migration 0010 em PostgreSQL 16 descartável.
+- Sem migration persistente, merge, deploy, restart, dispatch real, LLM/Manus ou créditos. Task 20.3/Mateus intocada. OR-20261114-0033.
