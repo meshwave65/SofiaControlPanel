@@ -86,6 +86,9 @@ export class SofiaOrchestrator {
    * retomar uma fatoração interrompida sem duplicar subtarefas já persistidas.
    */
   static async factorizeTask(task: any): Promise<number[]> {
+    if (!(await db.hasValidatedMissionTR(task.id))) {
+      throw new Error("Fatoração bloqueada: a missão principal ainda não possui TR validado.");
+    }
     if (task.parentTaskId != null) {
       throw new Error("Esta tarefa já é uma subtarefa. A fatoração deve ser feita na missão principal.");
     }
