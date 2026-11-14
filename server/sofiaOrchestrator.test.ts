@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const dbMock = vi.hoisted(() => ({
   getTaskById: vi.fn(),
   getTaskStatusIdByName: vi.fn(),
+  getTaskStatusNameById: vi.fn(),
   hasExecutionReadyMissionDocuments: vi.fn(),
   getTasksByParentId: vi.fn(),
   updateTaskStatus: vi.fn(),
@@ -30,6 +31,7 @@ describe("SofiaOrchestrator.processTask", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     dbMock.hasExecutionReadyMissionDocuments.mockResolvedValue(true);
+    dbMock.getTaskStatusNameById.mockImplementation(async (id: number) => id === 1 ? "STAGED" : id === 2 ? "PROGRESS" : "PAUSED");
     dbMock.getTaskStatusIdByName.mockImplementation(async (name: string) => {
       if (name === "STAGED") return 1;
       if (name === "PROGRESS") return 2;
@@ -110,6 +112,7 @@ describe("SofiaOrchestrator.startTask", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     dbMock.hasExecutionReadyMissionDocuments.mockResolvedValue(true);
+    dbMock.getTaskStatusNameById.mockImplementation(async (id: number) => id === 1 ? "STAGED" : id === 2 ? "PROGRESS" : "PAUSED");
     dbMock.getTaskStatusIdByName.mockImplementation(async (name: string) => {
       if (name === "STAGED") return 1;
       if (name === "PROGRESS") return 2;
@@ -225,10 +228,29 @@ describe("SofiaOrchestrator.factorizeTask", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     dbMock.hasExecutionReadyMissionDocuments.mockResolvedValue(true);
+    dbMock.getTaskStatusNameById.mockImplementation(async (id: number) => id === 1 ? "STAGED" : id === 2 ? "PROGRESS" : "PAUSED");
     dbMock.getTasksByParentId.mockResolvedValue([]);
     dbMock.getTaskStatusIdByName.mockResolvedValue(1);
     dbMock.getOrCreateActivityEventType.mockResolvedValue({ id: 5 });
     dbMock.createActivityLog.mockResolvedValue(undefined);
+  });
+
+  it("does not factorize or dispatch child tasks while the parent mission is PAUSED", async () => {
+    dbMock.getTaskStatusNameById.mockResolvedValueOnce("PAUSED");
+
+    await expect(SofiaOrchestrator.factorizeTask({
+      id: 7,
+      statusId: 3,
+      title: "Missão pausada",
+      description: "Análise detalhada em múltiplas etapas.",
+      createdBy: 152,
+      agentId: null,
+      agentPinned: false,
+      priorityId: 1,
+      parentTaskId: null,
+    })).rejects.toThrow("PAUSED não libera unidades de execução");
+
+    expect(dbMock.createTask).not.toHaveBeenCalled();
   });
 
   it("factorizes an unassigned task and records activity with a null agent", async () => {
@@ -239,6 +261,7 @@ describe("SofiaOrchestrator.factorizeTask", () => {
 
     const ids = await SofiaOrchestrator.factorizeTask({
       id: 7,
+      statusId: 1,
       title: "PoUW-01",
       description: "Análise detalhada em múltiplas etapas.",
       createdBy: 152,
@@ -284,6 +307,7 @@ describe("SofiaOrchestrator factorization depth", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     dbMock.hasExecutionReadyMissionDocuments.mockResolvedValue(true);
+    dbMock.getTaskStatusNameById.mockImplementation(async (id: number) => id === 1 ? "STAGED" : id === 2 ? "PROGRESS" : "PAUSED");
   });
 
   it("does not recursively factorize a task that already has a parent", async () => {
