@@ -100,3 +100,15 @@ Registrar cada nova entrada com data, OR/FOR, missão/etapa, orientação anteri
 - **Autoridade:** responsável pelo produto.
 - **Documentos:** OR-20261114-0018 (aditivo); MISSION_0020 PROGRESS; MISSION_0020 TASKS PROGRESS.
 - **Validação:** atualização documental versionada e relida no GitHub; nenhuma implementação de produto/DB/produção ou execução externa.
+
+
+### AC-011 — 2026-11-14 — Identificação de execução externa e comunicação direta com agente
+- **Missão/etapa:** MISSION_0020 / tarefa 20.4 — Messenger e rastreabilidade das missões.
+- **Orientação anterior:** o Messenger está vinculado à execução Manus associada à missão; agentId identifica o agente e manusTaskId identifica a execução externa. A integração conhecida envia mensagens a uma execução específica.
+- **Proposta apresentada pelo responsável:** tornar o Agent Task ID (Manus Task ID) claramente identificável na missão e permitir conversa direta com a conta original do agente, mesmo quando ele não estiver mais atribuído à missão.
+- **Requisitos derivados:** (a) exibir separadamente Mission ID, Agent ID e Agent Task ID; (b) permitir canal de conversa independente da atribuição atual da missão, usando a credencial da conta do agente; (c) manter histórico próprio e contexto de missão explicitamente selecionado; (d) não alterar estado/resultado da missão por efeito colateral da conversa.
+- **Hipótese técnica, não fato confirmado:** a API atualmente usada requer task_id em /task.sendMessage; o código também dispõe de /task.create. Se não existir endpoint de inbox genérico, avaliar uma execução Manus dedicada e persistente por conversa/agente. Validar o contrato oficial da API antes de afirmar entrega à conta ou implementar.
+- **Classificação:** proposta de produto/requisito em avaliação, não decisão técnica final.
+- **Autoridade:** proposta do responsável; contrato técnico pendente de validação.
+- **Documentos:** OR-20261114-0018 (aditivo); MISSION_0020 PROGRESS; MISSION_0020 TASKS PROGRESS.
+- **Validação:** requisito registrado. Nenhuma alteração de código, banco, credencial, chamada Manus/LLM, envio de mensagem, deploy ou restart.
