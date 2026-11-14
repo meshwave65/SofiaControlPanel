@@ -76,18 +76,24 @@ export default function TaskDetail() {
     { enabled: canLoadTask && Boolean(taskQuery.data), retry: false },
   );
   const [selectedDocumentId, setSelectedDocumentId] = useState<number | null>(null);
+  const [selectedVersionNumber, setSelectedVersionNumber] = useState<number | null>(null);
   const [trCorrection, setTrCorrection] = useState("");
   const documents = documentsQuery.data ?? [];
   const selectedDocument = documents.find((document) => document.id === selectedDocumentId)
     ?? documents.find((document) => document.typeKey === "TR")
     ?? documents[0];
+  const selectedVersion = selectedVersionNumber ?? selectedDocument?.latestVersion?.version ?? 0;
+  const documentHistoryQuery = trpc.tasks.documents.history.useQuery(
+    { taskId, documentId: selectedDocument?.id ?? 0 },
+    { enabled: canLoadTask && Boolean(selectedDocument?.id), retry: false },
+  );
   const selectedDocumentVersionQuery = trpc.tasks.documents.getVersion.useQuery(
     {
       taskId,
       documentId: selectedDocument?.id ?? 0,
-      version: selectedDocument?.latestVersion?.version ?? 0,
+      version: selectedVersion,
     },
-    { enabled: canLoadTask && Boolean(selectedDocument?.latestVersion), retry: false },
+    { enabled: canLoadTask && Boolean(selectedDocument?.latestVersion) && selectedVersion > 0, retry: false },
   );
   const reviseInitialTRMutation = trpc.tasks.documents.reviseInitialTR.useMutation({
     onSuccess: async () => {
@@ -113,6 +119,10 @@ export default function TaskDetail() {
 
   const task = taskQuery.data;
   const messages = messagesQuery.data || [];
+
+  useEffect(() => {
+    setSelectedVersionNumber(null);
+  }, [selectedDocument?.id]);
 
   useEffect(() => {
     const content = selectedDocumentVersionQuery.data?.version.content;
@@ -374,9 +384,23 @@ export default function TaskDetail() {
                     <Badge variant="outline">{selectedDocument.typeKey}</Badge>
                     {selectedDocument.latestVersion ? (
                       <>
-                        <Badge variant="secondary">v{selectedDocument.latestVersion.version}</Badge>
-                        <Badge variant="outline">{selectedDocument.latestVersion.state}</Badge>
-                        <span>Atualizado em {new Date(selectedDocument.latestVersion.createdAt).toLocaleString()}</span>
+                        <Badge variant="secondary">v{selectedVersion}</Badge>
+                        <Badge variant="outline">{selectedDocumentVersionQuery.data?.version.state ?? selectedDocument.latestVersion.state}</Badge>
+                        <span>Atualizado em {new Date(selectedDocumentVersionQuery.data?.version.createdAt ?? selectedDocument.latestVersion.createdAt).toLocaleString()}</span>
+                        {documentHistoryQuery.data && documentHistoryQuery.data.length > 1 && (
+                          <label className="ml-auto flex items-center gap-2">
+                            <span>Histórico</span>
+                            <select
+                              className="rounded-md border bg-background px-2 py-1 text-xs"
+                              value={selectedVersion}
+                              onChange={(event) => setSelectedVersionNumber(Number(event.target.value))}
+                            >
+                              {documentHistoryQuery.data.map((version) => (
+                                <option key={version.id} value={version.version}>v{version.version} — {version.state}</option>
+                              ))}
+                            </select>
+                          </label>
+                        )}
                       </>
                     ) : <Badge variant="outline">Sem versão publicada</Badge>}
                   </div>
@@ -402,7 +426,7 @@ export default function TaskDetail() {
                       </Button>
                     </div>
                   )}
-                  {selectedDocument.typeKey === "TR" && ["DRAFT", "AWAITING_HUMAN_VALIDATION"].includes(selectedDocument.latestVersion?.state ?? "") && (
+                  {selectedDocument.typeKey === "TR" && selectedVersion === selectedDocument.latestVersion?.version && ["DRAFT", "AWAITING_HUMAN_VALIDATION"].includes(selectedDocument.latestVersion?.state ?? "") && (
                     <div className="space-y-3 rounded-md border p-4">
                       <div>
                         <p className="text-sm font-semibold">Revisão do operador</p>
