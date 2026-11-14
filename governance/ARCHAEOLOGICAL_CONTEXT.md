@@ -178,3 +178,17 @@ Registrar cada nova entrada com data, OR/FOR, missão/etapa, orientação anteri
 - **Estado:** decisão de UX especificada; UI/runtime ainda não alterados. Implementação visual depende das APIs e persistência versionada TR/Blueprint e está alocada ao Incremento D.
 - **Evidência:** OR-20261114-0027; inspeção de `Tasks.tsx` e `TaskDetail.tsx`.
 - **Limites:** sem schema, runtime, banco, produção, dispatch, LLM/Manus, créditos, deploy ou restart. Task 20.3/Mateus intocada.
+
+
+### AC-017 — 2026-11-14 — visualizador dinâmico de documentos da missão
+
+- **Decisão explícita do responsável:** em Gerenciar Missão, apresentar TR, Blueprint e demais documentos em um único espaço de leitura, alternando o conteúdo por seleção dinâmica. Não limitar a interface a duas abas fixas.
+- **Modelo:** separar catálogo de tipos documentais (metadados, finalidade, ordenação, renderização e visibilidade) das instâncias efetivamente produzidas para cada missão (versão, estado, conteúdo/referência, autoria, datas e proveniência).
+- **Padrão:** TR é selecionado por padrão quando disponível. Blueprint, ORs, FOR e tipos futuros aparecem conforme existam e sejam acessíveis. Várias instâncias do mesmo tipo são permitidas quando aplicável.
+- **Proveniência:** descrição original permanece preservada como fonte da solicitação, sem ser apresentada como TR ou Blueprint.
+- **Segurança:** listagem e conteúdo são protegidos por backend/RLS; ocultar opção no frontend não é autorização. Seleção é somente leitura e não altera estado ou execução.
+- **UX:** um único visualizador, com estados distintos de ausência, elaboração, carregamento, erro e acesso negado. Novos tipos não exigem novas abas/páginas.
+- **Classificação:** decisão de UX e contrato funcional; implementação pendente.
+- **Documento normativo:** governance/architecture/MISSION_DOCUMENT_CATALOG_SPECIFICATION.md; integração também registrada nos contratos TR/Blueprint e arquitetura SOFIA.
+- **Evidência:** OR-20261114-0028.
+- **Limites:** documentação apenas; sem código funcional, schema/migration, banco, RLS de produção, dispatch, LLM/Manus, créditos, deploy ou restart. Task 20.3/Mateus intocada.
