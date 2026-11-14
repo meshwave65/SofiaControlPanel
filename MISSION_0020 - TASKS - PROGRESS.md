@@ -240,3 +240,5 @@
 - Toda leitura/escrita de documento verifica acesso à missão por tasks.createdBy; administrador usa a permissão global já existente. Autoria AGENT exige agente pertencente ao proprietário da missão. Blueprint exige versão-fonte TR da mesma missão.
 - Funções ainda não estão expostas em tRPC e não foram exercitadas contra banco; testes/check/build permanecem pendentes.
 - OR-20261114-0029 complementado com o estado da camada de repositório.
+
+- Teste estrutural em server/db.test.ts atualizado para verificar as seis funções documentais; escrito, mas não executado. Sem TypeScript/build/integration validation.
