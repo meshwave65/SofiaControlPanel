@@ -61,7 +61,7 @@ Nenhum arquivo de produto foi alterado; nenhuma escrita em Supabase, operação 
 - Arquivo visual consolidado: `src/pages/MwExBanking.css`
 - Imports antigos de `MwEx.css`, `MwExAssetStatus.css` e `MwExPortfolio.css` removidos dos componentes MW-Ex para evitar cascata concorrente. Os arquivos antigos permanecem no repositório, mas não são carregados por estes componentes.
 - Alteração em JSX limitada a imports de CSS; nenhum hook, handler, chamada, regra ou conteúdo funcional alterado.
-- Diff do PR: dois arquivos finais alterados (um JSX com imports e um CSS novo); nenhuma alteração em banco, API, RPC, auth ou deploy de produção.
+- Diff do PR: três arquivos finais alterados (dois JSX com ajustes de imports CSS e um CSS novo); nenhuma alteração em banco, API, RPC, auth ou deploy de produção.
 - Build Vite executado no Preview: 208 módulos transformados; deployment READY.
 - Inspeção de navegador confirmou que o Preview ultrapassa a proteção Vercel por link temporário, mas a rota `/mw-ex` exige autenticação MeshWave e redireciona a `/login`. Sem sessão MeshWalker, QA visual autenticada não foi possível.
 - Link temporário de acesso Vercel expira em 2026-11-15; o link com token não é armazenado nos artefatos públicos de governança.
