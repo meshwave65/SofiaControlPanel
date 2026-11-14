@@ -326,6 +326,7 @@ export default function TaskDetail() {
   const operationalReports = messages.filter(m => m.typeId === 2); // OperationalReport type
   const currentStatusName = statuses.find((status) => status.id === task.statusId)?.name.toUpperCase();
   const canStartExecution = (currentStatusName === "STAGED" || currentStatusName === "PROGRESS") && !task.manusTaskId;
+  const canReorientTR = currentStatusName === "PAUSED" && !task.manusTaskId && task.parentTaskId == null;
   const canFactorize = task.parentTaskId == null;
 
   return (
@@ -445,11 +446,14 @@ export default function TaskDetail() {
                       </Button>
                     </div>
                   )}
-                  {selectedDocument.typeKey === "TR" && selectedVersion === selectedDocument.latestVersion?.version && ["DRAFT", "AWAITING_HUMAN_VALIDATION"].includes(selectedDocument.latestVersion?.state ?? "") && (
+                  {selectedDocument.typeKey === "TR" && selectedVersion === selectedDocument.latestVersion?.version && (
+                    ["DRAFT", "AWAITING_HUMAN_VALIDATION"].includes(selectedDocument.latestVersion?.state ?? "")
+                    || (selectedDocument.latestVersion?.state === "VALIDATED" && canReorientTR)
+                  ) && (
                     <div className="space-y-3 rounded-md border p-4">
                       <div>
                         <p className="text-sm font-semibold">Revisão do operador</p>
-                        <p className="mt-1 text-xs text-muted-foreground">Edite o entendimento da SOFIA. Salvar cria uma nova versão e mantém a anterior no histórico.</p>
+                        <p className="mt-1 text-xs text-muted-foreground">Edite o entendimento da SOFIA. Salvar cria uma nova versão e mantém a anterior no histórico. Se o TR já foi validado, a reorientação invalida o Blueprint anterior e exige nova validação antes da execução.</p>
                       </div>
                       <Textarea
                         value={trCorrection}
@@ -462,10 +466,10 @@ export default function TaskDetail() {
                         <Button
                           variant="outline"
                           onClick={() => reviseInitialTRMutation.mutate({ taskId, content: trCorrection })}
-                          disabled={selectedDocument.latestVersion?.state !== "AWAITING_HUMAN_VALIDATION" || reviseInitialTRMutation.isPending || !trCorrection.trim()}
+                          disabled={!["AWAITING_HUMAN_VALIDATION", "VALIDATED"].includes(selectedDocument.latestVersion?.state ?? "") || (selectedDocument.latestVersion?.state === "VALIDATED" && !canReorientTR) || reviseInitialTRMutation.isPending || !trCorrection.trim()}
                         >
                           {reviseInitialTRMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                          Salvar correção
+                          {selectedDocument.latestVersion?.state === "VALIDATED" ? "Reorientar TR" : "Salvar correção"}
                         </Button>
                         <Button
                           onClick={() => validateTRMutation.mutate({ taskId })}
