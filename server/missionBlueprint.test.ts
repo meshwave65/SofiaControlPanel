@@ -35,6 +35,11 @@ describe("validateMissionBlueprintContent", () => {
     expect(validateMissionBlueprintContent(validBlueprint)).toBe(validBlueprint);
   });
 
+  it("accepts bold Markdown section titles with trailing colons", () => {
+    const boldHeadings = validBlueprint.replace(/^## (.+)$/gm, "**$1**:");
+    expect(validateMissionBlueprintContent(boldHeadings)).toBe(boldHeadings);
+  });
+
   it("rejects section names mentioned only in prose, not as headings", () => {
     const proseOnly = validBlueprint.replace("## Objetivo operacional", "Objetivo operacional: resultado esperado.");
     expect(() => validateMissionBlueprintContent(proseOnly)).toThrow("faltam títulos de seção próprios");
