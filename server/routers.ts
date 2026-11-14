@@ -417,8 +417,8 @@ export const appRouter = router({
           if (!task || task.createdBy !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND", message: "Somente o operador que criou a missão pode corrigir ou validar seu TR." });
           if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR pertence à missão principal; tarefas-filhas não podem alterá-lo." });
           const pausedStatusId = await db.getTaskStatusIdByName("PAUSED");
-          if (task.statusId !== pausedStatusId || task.manusTaskId) {
-            throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A revisão do TR só é permitida antes da execução, enquanto a missão estiver PAUSED e sem execução externa." });
+          if (task.statusId !== pausedStatusId || task.manusTaskId || task.manusStatus !== "awaiting_tr_validation") {
+            throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A revisão do TR só é permitida antes da primeira execução, enquanto a missão estiver no gate inicial de validação." });
           }
           const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, false);
           const tr = docs.find((document) => document.typeKey === "TR" && document.documentKey === "TR");
@@ -442,8 +442,8 @@ export const appRouter = router({
         const task = await db.getTaskById(input.taskId);
         if (!task || task.createdBy !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND", message: "Somente o operador que criou a missão pode corrigir ou validar seu TR." });
         const pausedStatusId = await db.getTaskStatusIdByName("PAUSED");
-        if (task.statusId !== pausedStatusId || task.manusTaskId) {
-          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A regeneração do TR só pode ocorrer enquanto a missão estiver PAUSED e sem execução externa." });
+        if (task.statusId !== pausedStatusId || task.manusTaskId || task.manusStatus !== "awaiting_tr_validation") {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A regeneração do TR só pode ocorrer enquanto a missão estiver no gate inicial de validação." });
         }
         if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR pertence à missão principal; tarefas-filhas não podem alterá-lo." });
         const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, false);
@@ -466,8 +466,8 @@ export const appRouter = router({
         const task = await db.getTaskById(input.taskId);
         if (!task || task.createdBy !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND", message: "Somente o operador que criou a missão pode corrigir ou validar seu TR." });
         const pausedStatusId = await db.getTaskStatusIdByName("PAUSED");
-        if (task.statusId !== pausedStatusId || task.manusTaskId) {
-          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A validação inicial do TR só pode liberar uma missão ainda PAUSED e sem execução externa." });
+        if (task.statusId !== pausedStatusId || task.manusTaskId || task.manusStatus !== "awaiting_tr_validation") {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A validação inicial do TR só pode liberar uma missão ainda no gate inicial de validação." });
         }
         if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR pertence à missão principal; tarefas-filhas não podem alterá-lo." });
         const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, false);
@@ -508,8 +508,8 @@ export const appRouter = router({
         const task = await db.getTaskById(input.taskId);
         if (!task || task.createdBy !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND", message: "Somente o operador que criou a missão pode liberar seu plano de trabalho." });
         const pausedStatusId = await db.getTaskStatusIdByName("PAUSED");
-        if (task.statusId !== pausedStatusId || task.manusTaskId) {
-          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A geração/retenção do Blueprint só pode liberar uma missão ainda PAUSED e sem execução externa." });
+        if (task.statusId !== pausedStatusId || task.manusTaskId || task.manusStatus !== "awaiting_tr_validation") {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A geração/retenção do Blueprint só pode liberar uma missão ainda no gate inicial de validação." });
         }
         if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O Blueprint pertence à missão principal." });
         const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, false);
