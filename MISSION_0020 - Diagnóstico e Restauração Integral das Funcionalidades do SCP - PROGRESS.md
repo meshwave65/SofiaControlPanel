@@ -284,3 +284,5 @@ A revisão encontrou e corrigiu duas brechas de fluxo: o início de tarefa `PAUS
 A procedure genérica de status foi endurecida: a promoção para `PROGRESS` é reservada ao claim atômico do orquestrador ou à retomada de execução externa já existente. A migration 0010 reforça a mesma regra no banco, exige TR/Blueprint vigente também em transições para `PROGRESS` e impede criar/dispatchar subtarefas quando a missão raiz está `PAUSED`. OR-20261114-0030.
 
 - Criação de missão agora faz preflight do catálogo e exige `ORIGINAL_REQUEST`, `TR` e `BLUEPRINT` ativos antes de inserir a linha em `tasks`; migration 0010 ausente/incompleta não deixa missão órfã. OR-20261114-0030.
+
+- Limite de validação registrado: a ausência de bloqueios é verificada no conteúdo integral do Blueprint; a UI só sinaliza prontidão quando o TR vigente está validado. Testes/check/build continuam pendentes porque esta sessão não dispõe de checkout/dependências locais. OR-20261114-0030.
