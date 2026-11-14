@@ -280,3 +280,11 @@
 - Criação de missão agora faz preflight do catálogo e exige `ORIGINAL_REQUEST`, `TR` e `BLUEPRINT` ativos antes de inserir a linha em `tasks`; migration 0010 ausente/incompleta não deixa missão órfã. OR-20261114-0030.
 
 - Limite de validação registrado: a ausência de bloqueios é verificada no conteúdo integral do Blueprint; a UI só sinaliza prontidão quando o TR vigente está validado. Testes/check/build continuam pendentes porque esta sessão não dispõe de checkout/dependências locais. OR-20261114-0030.
+
+
+### Incremento C — validação automatizada (2026-11-14)
+
+- Adicionado workflow GitHub Actions para instalação congelada, TypeScript check, suíte Vitest e build de produção.
+- Adicionado job isolado PostgreSQL 16 para executar a migration 0010 sobre fixture mínimo de pré-requisitos, sem conexão com Supabase/produção.
+- O workflow está configurado para push na branch, PR para main e acionamento manual. Resultado ainda precisa ser confirmado; não considerar testes ou migration aprovados antes da leitura dos jobs.
+- Migration 0010 não aplicada a banco persistente. Sem deploy, restart, dispatch, chamadas LLM/Manus ou consumo de créditos. Task 20.3/Mateus intocada. OR-20261114-0030.
