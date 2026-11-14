@@ -288,3 +288,6 @@
 - Adicionado job isolado PostgreSQL 16 para executar a migration 0010 sobre fixture mínimo de pré-requisitos, sem conexão com Supabase/produção.
 - O workflow está configurado para push na branch, PR para main e acionamento manual. Resultado ainda precisa ser confirmado; não considerar testes ou migration aprovados antes da leitura dos jobs.
 - Migration 0010 não aplicada a banco persistente. Sem deploy, restart, dispatch, chamadas LLM/Manus ou consumo de créditos. Task 20.3/Mateus intocada. OR-20261114-0030.
+
+
+- Primeiro ciclo CI: migration 0010 executou com sucesso em PostgreSQL 16 descartável. Job da aplicação parou antes da instalação por declaração duplicada da versão pnpm; configuração corrigida para usar o pin do package.json. TypeScript/testes/build aguardam nova execução. O teste descartável não autoriza migração de produção. OR-20261114-0030.
