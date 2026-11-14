@@ -194,3 +194,14 @@ Esta matriz é preliminar: ações marcadas BLOCKED exigem reprodução autentic
 - Manter histórico próprio para a conversa direta e permitir anexar/fornecer contexto de missão de forma explícita e controlada. A conversa não deve alterar automaticamente estado, atribuição, Draft ou conclusão de missão.
 - A API conhecida exige task_id em /task.sendMessage; validar se existe endpoint de inbox ou se será necessária uma execução Manus dedicada e persistente para a conversa direta. Não presumir recebimento em inbox genérica.
 - Classificação: proposta de produto do responsável; desenho técnico pendente. Referência: OR-20261114-0018, aditivo e AC-011. Sem implementação ou chamadas externas nesta etapa.
+
+
+## Checkpoint 2026-11-14 — SOFIA como plano cognitivo central (AC-012)
+- O responsável aprovou a evolução da SOFIA como interlocutora do operador e camada cognitiva central do SCP, separada da camada determinística de política/execução e dos agentes federados.
+- Modelo atualmente configurado identificado em `server/_core/llm.ts`: `gemini-2.5-flash` via gateway Manus Forge.
+- Criada branch `feat/sofia-cognitive-control-plane`; primeira entrega faz o Messenger passar pela Sofia antes de qualquer encaminhamento Manus e adiciona ferramenta tipada para encaminhamento explícito ao agente/execução atualmente atribuídos.
+- Requisitos e limites documentados em AC-012 e `governance/architecture/SOFIA_COGNITIVE_CONTROL_PLANE.md`.
+- Testes escritos, ainda não executados; check/test/build pendentes. Implementação ainda não integrada nem implantada.
+- Próximas fases: ferramentas read-only para estado/elegibilidade, planos estruturados com confirmação persistente, transferência/pausa/retomada governadas, memória operacional e UI de telemetria real.
+- Nenhuma chamada externa real, dispatch, consumo de crédito, alteração DB/produção, deploy ou restart. Task 20.3 permanece sob Mateus.
+- OR-20261114-0022 SUBMITTED; Oracle PENDING.
