@@ -83,6 +83,14 @@ export default function TaskDetail() {
     ?? documents.find((document) => document.typeKey === "TR")
     ?? null;
   const selectedVersion = selectedVersionNumber ?? selectedDocument?.latestVersion?.version ?? 0;
+  const trDocument = documents.find((document) => document.typeKey === "TR");
+  const blueprintDocument = documents.find((document) => document.typeKey === "BLUEPRINT");
+  const blueprintReady = Boolean(
+    trDocument?.latestVersion
+    && blueprintDocument?.latestVersion
+    && ["READY", "ACTIVE"].includes(blueprintDocument.latestVersion.state)
+    && blueprintDocument.latestVersion.sourceDocumentVersionId === trDocument.latestVersion.id
+  );
   const documentHistoryQuery = trpc.tasks.documents.history.useQuery(
     { taskId, documentId: selectedDocument?.id ?? 0 },
     { enabled: canLoadTask && Boolean(selectedDocument?.id), retry: false },
@@ -112,7 +120,17 @@ export default function TaskDetail() {
   const validateTRMutation = trpc.tasks.documents.validateTR.useMutation({
     onSuccess: async () => {
       await Promise.all([documentsQuery.refetch(), taskQuery.refetch()]);
-      toast.success("TR validado. A missão foi liberada para STAGED.");
+      toast.success("TR validado, Blueprint gerado e missão liberada para STAGED.");
+    },
+    onError: async (error) => {
+      await documentsQuery.refetch();
+      toast.error(error.message);
+    },
+  });
+  const generateBlueprintMutation = trpc.tasks.documents.generateBlueprint.useMutation({
+    onSuccess: async () => {
+      await Promise.all([documentsQuery.refetch(), taskQuery.refetch()]);
+      toast.success("Blueprint READY, vinculado à versão vigente do TR. Missão liberada.");
     },
     onError: (error) => toast.error(error.message),
   });
@@ -454,14 +472,27 @@ export default function TaskDetail() {
                           disabled={selectedDocument.latestVersion?.state !== "AWAITING_HUMAN_VALIDATION" || validateTRMutation.isPending}
                         >
                           {validateTRMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                          Validar TR e liberar missão
+                          Validar TR e gerar Blueprint
                         </Button>
                       </div>
                     </div>
                   )}
-                  {selectedDocument.typeKey === "TR" && ["VALIDATED", "ACTIVE", "REORIENTED"].includes(selectedDocument.latestVersion?.state ?? "") && (
+                  {selectedDocument.typeKey === "TR" && selectedVersion === selectedDocument.latestVersion?.version && selectedDocument.latestVersion?.state === "VALIDATED" && !blueprintReady && (
+                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-amber-500/30 bg-amber-500/5 p-3">
+                      <p className="text-sm text-amber-600">TR validado. A missão continua PAUSED até a SOFIA gerar um Blueprint READY vinculado a esta versão exata do TR.</p>
+                      <Button
+                        variant="outline"
+                        onClick={() => generateBlueprintMutation.mutate({ taskId })}
+                        disabled={generateBlueprintMutation.isPending}
+                      >
+                        {generateBlueprintMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Gerar Blueprint e liberar
+                      </Button>
+                    </div>
+                  )}
+                  {selectedDocument.typeKey === "TR" && ["VALIDATED", "ACTIVE", "REORIENTED"].includes(selectedDocument.latestVersion?.state ?? "") && blueprintReady && (
                     <p className="rounded-md border border-green-500/30 p-3 text-sm text-green-600">
-                      O TR vigente foi validado. A execução está autorizada dentro do escopo registrado.
+                      TR validado e Blueprint READY vinculado à versão vigente. A missão foi liberada para execução dentro dos gates aplicáveis.
                     </p>
                   )}
                 </div>
