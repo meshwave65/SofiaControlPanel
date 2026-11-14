@@ -384,6 +384,9 @@ export const appRouter = router({
         dueDate: z.date().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
+        if (input.parentTaskId !== undefined) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Tarefas-filhas são criadas pelo orquestrador a partir da missão principal, não pelo formulário de nova missão." });
+        }
         // Human-origin missions stay PAUSED until the initial TR is validated.
         const pausedStatusId = await db.getTaskStatusIdByName("PAUSED");
         if (!pausedStatusId) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O status PAUSED não está configurado; criação segura bloqueada." });
