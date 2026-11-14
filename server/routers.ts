@@ -460,7 +460,7 @@ export const appRouter = router({
         const stagedStatusId = await db.getTaskStatusIdByName("STAGED");
         await db.updateTaskStatus(input.taskId, stagedStatusId);
         return { validatedVersion: validated.version, statusId: stagedStatusId };
-      })
+      }),
       generateBlueprint: protectedProcedure.input(z.object({ taskId: z.number().int().positive() })).mutation(async ({ input, ctx }) => {
         const task = await db.getTaskById(input.taskId);
         if (!task || task.createdBy !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND", message: "Somente o operador que criou a missão pode liberar seu plano de trabalho." });
