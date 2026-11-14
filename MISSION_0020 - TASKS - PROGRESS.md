@@ -278,3 +278,5 @@
 - Revisão adicional do estado: `tasks.updateStatus` não pode promover diretamente para `PROGRESS`; migration 0010 permite claim `STAGED→PROGRESS` e retomada `PAUSED→PROGRESS` somente com `manusTaskId` existente, verificando novamente os documentos. Fatoração de filhas depende da raiz `STAGED/PROGRESS`. OR-20261114-0030.
 
 - Criação de missão agora faz preflight do catálogo e exige `ORIGINAL_REQUEST`, `TR` e `BLUEPRINT` ativos antes de inserir a linha em `tasks`; migration 0010 ausente/incompleta não deixa missão órfã. OR-20261114-0030.
+
+- Limite de validação registrado: a ausência de bloqueios é verificada no conteúdo integral do Blueprint; a UI só sinaliza prontidão quando o TR vigente está validado. Testes/check/build continuam pendentes porque esta sessão não dispõe de checkout/dependências locais. OR-20261114-0030.
