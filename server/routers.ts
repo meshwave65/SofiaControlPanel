@@ -412,8 +412,12 @@ export const appRouter = router({
         .mutation(async ({ input, ctx }) => {
           const task = await db.getTaskById(input.taskId);
           if (!task || task.createdBy !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND", message: "Somente o operador que criou a missão pode corrigir ou validar seu TR." });
-        if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR pertence à missão principal; tarefas-filhas não podem alterá-lo." });
-          const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, ctx.user.role === "admin");
+          if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR pertence à missão principal; tarefas-filhas não podem alterá-lo." });
+          const pausedStatusId = await db.getTaskStatusIdByName("PAUSED");
+          if (task.statusId !== pausedStatusId || task.manusTaskId) {
+            throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A revisão do TR só é permitida antes da execução, enquanto a missão estiver PAUSED e sem execução externa." });
+          }
+          const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, false);
           const tr = docs.find((document) => document.typeKey === "TR");
           const canReorientBeforeExecution = tr?.latestVersion?.state === "VALIDATED"
             && (await db.getTaskStatusNameById(task.statusId))?.toUpperCase() === "PAUSED"
@@ -438,14 +442,15 @@ export const appRouter = router({
         if (task.statusId !== pausedStatusId || task.manusTaskId) {
           throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A regeneração do TR só pode ocorrer enquanto a missão estiver PAUSED e sem execução externa." });
         }
-        const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, ctx.user.role === "admin");
+        if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR pertence à missão principal; tarefas-filhas não podem alterá-lo." });
+        const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, false);
         const tr = docs.find((document) => document.typeKey === "TR");
         if (!tr?.latestVersion || tr.latestVersion.state !== "DRAFT") {
           throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A regeneração só é permitida enquanto o TR inicial estiver em DRAFT." });
         }
         const content = await generateInitialMissionTR(task.title, task.description);
         return db.createMissionDocumentRevision({
-          taskId: input.taskId, documentId: tr.id, ownerId: ctx.user.id, canViewAll: ctx.user.role === "admin",
+          taskId: input.taskId, documentId: tr.id, ownerId: ctx.user.id, canViewAll: false,
           version: {
             content, state: "AWAITING_HUMAN_VALIDATION", authorType: "SOFIA",
             provenance: { origin: "HUMAN", source: "operator_requested_regeneration", supersedesVersion: tr.latestVersion.version },
