@@ -163,23 +163,6 @@ describe("messages.create — persistência e resposta Sofia", () => {
           role: "assistant",
           content: null,
           tool_calls: [{
-            id: "call-forward-no-agent",
-            type: "function",
-            function: {
-              name: "forward_operator_instruction_to_assigned_agent",
-              arguments: JSON.stringify({ message: "Continue." }),
-            },
-          }],
-        },
-      }],
-    });
-    /* ORIGINAL_TOOL_CALL_FIX_BOUNDARY */
-    invokeLLMMock.mockResolvedValue({
-      choices: [{
-        message: {
-          role: "assistant",
-          content: null,
-          tool_calls: [{
             id: "call-forward-2",
             type: "function",
             function: {
