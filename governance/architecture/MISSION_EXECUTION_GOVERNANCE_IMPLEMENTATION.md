@@ -190,3 +190,14 @@ A migration 0010 não está conectada ao startup/ensure-database e não foi apli
 ### Camada de repositório server-side (Incremento A)
 
 server/db.ts agora expõe operações de catálogo, listagem de instâncias, consulta de versão, listagem do histórico, criação transacional da instância + versão inicial e criação serializada de revisões append-only. As funções verificam acesso à missão via tasks.createdBy; autoria AGENT valida vínculo do agente ao proprietário; Blueprint exige referência a uma versão TR da mesma missão. Ainda não há procedures tRPC nem integração com UI. Ver OR-20261114-0029.
+
+
+## 11. Incremento B — estado implementado no repositório (2026-11-14)
+
+A branch agora implementa o fluxo inicial humano descrito na seção 4: `tasks.create` força PAUSED, registra ORIGINAL_REQUEST e solicita à SOFIA o primeiro TR. A versão gerada fica AWAITING_HUMAN_VALIDATION; falha cognitiva produz DRAFT e mantém a missão bloqueada. A API de validação cria versão VALIDATED append-only e promove para STAGED somente após persistência.
+
+O gate foi implementado em `tasks.updateStatus`, no orquestrador (`startTask`, `processTask`, `factorizeTask`), em helper server-side que resolve a missão raiz e na migration 0010 por trigger BEFORE INSERT/UPDATE de status/agente. Filhas herdam a autorização documental da raiz, sem herdar a lease/pinagem do agente consolidador.
+
+As procedures documentais e o visualizador dinâmico foram conectados em TaskDetail, com TR padrão, conteúdo por versão, histórico, correção, regeneração de DRAFT e validação explícita. O estado inicial PAUSED também foi refletido nos formulários de criação.
+
+**Limites:** Blueprint ainda não é gerado automaticamente; missão SOFIA-originada, TR vivo/event-driven, backfill de missões antigas e revalidação de alterações materiais não foram implementados. Migration 0010 continua fora do startup e não aplicada. Check/test/build/parser SQL/integration permanecem pendentes. Não publicar o código antes de aplicar a migration em gate separado. OR-20261114-0030.
