@@ -95,3 +95,10 @@ Identificar, com evidências reproduzíveis, por que o SofiaControlPanel não ex
 - Em 14/11 a inicialização posterior passou pelas verificações de schema e conexão; o incidente não estava bloqueando continuamente o startup naquele momento.
 - Não foi executada consulta ao Supabase, DDL, restart ou reprodução. Próxima etapa DB exige sessão read-only autorizada e captura do lock holder; sem isso, manter a causa subjacente como desconhecida.
 - **Precisão sobre pausa:** existe tasks.updateStatus genérico em live e main (id + statusId), mas não uma operação dedicada de pause/resume nem lógica de transição/coordenação de execução externa; a UI TaskDetail não oferece botão de pausa. Alterar status para PAUSED por setter genérico não comprova pausa operacional segura.
+## Checkpoint 2026-11-14 — ações de missão e cobertura de testes
+
+- Live e main têm os mesmos procedures principais no trecho auditado: updateStatus, factorize, start e consolidate; não há pause/resume ou transfer manual dedicado.
+- updateStatus é setter genérico de statusId, sem matriz de transição nem coordenação da execução Manus; não equivale a pausa operacional.
+- Fatoração é idempotente e cria subtarefas faltantes; a UI refaz consultas, mas não mostra toast de sucesso. Consolidação captura erro apenas no console, sem feedback visual explícito.
+- startTask não retoma execução Manus já existente por ação manual; TaskDetail bloqueia o botão quando manusTaskId existe e também não habilita PAUSED.
+- Testes atuais usam DB/Manus/LLM mocks. messages.test.ts cobre o ramo LLM interno, não o ramo Manus; manusExecutionService.test.ts não exercita sendManusMessageAndWait completo. Não comprovam integração em produção.
