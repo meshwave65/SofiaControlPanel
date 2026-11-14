@@ -22,6 +22,7 @@ CREATE TABLE sofia."agents" (
 CREATE TABLE sofia.tasks (
   id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   "statusId" integer REFERENCES sofia."taskStatuses"(id),
+  "agentId" integer REFERENCES sofia."agents"(id),
   "parentTaskId" integer REFERENCES sofia.tasks(id),
   "manusTaskId" varchar(128)
 );
