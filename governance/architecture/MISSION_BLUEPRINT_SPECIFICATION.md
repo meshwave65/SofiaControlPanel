@@ -111,3 +111,12 @@ Esses são estados documentais, não status de tarefa, missão ou agente. A libe
 - OR registra execução; TR consolida a narrativa; FOR captura aprendizado final.
 - Nenhum estado documental substitui gates de autorização, risco, orçamento ou segurança.
 - Esta especificação não afirma que schema, UI, versionamento ou runtime já implementem esses contratos.
+
+
+## 9. Apresentação no visualizador de documentos (AC-017)
+
+O Blueprint é apresentado no mesmo espaço de leitura do TR, selecionável por um dropdown dinâmico alimentado pelos documentos existentes e acessíveis da missão. Não exige aba ou página dedicada. A interface deve identificar versão e versão exata do TR de origem, além do estado e da data de atualização.
+
+O Blueprint só aparece como documento disponível quando houver uma instância persistida e acessível. Sua seleção não libera execução nem altera o estado da missão. O visualizador genérico também comporta ORs, FOR e tipos futuros, conforme o catálogo de documentos.
+
+Contrato completo: governance/architecture/MISSION_DOCUMENT_CATALOG_SPECIFICATION.md.
