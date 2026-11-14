@@ -127,3 +127,15 @@ Registrar cada nova entrada com data, OR/FOR, missão/etapa, orientação anteri
 - **Autoridade:** responsável pelo produto.
 - **Documentos:** `governance/architecture/SOFIA_COGNITIVE_CONTROL_PLANE.md`; OR-20261114-0022; MISSION_0020 PROGRESS; TASKS PROGRESS.
 - **Limite da primeira entrega:** não inclui transferência, pausa/retomada, persistência de planos, memória global, canal direto independente de missão ou mudanças de schema. Sem deploy, DB/produção, chamadas externas reais ou consumo de créditos.
+
+
+### AC-013 — 2026-11-14 — Identidade sistêmica do SOFIA, SCP frontend e arquitetura BBC/BCE
+- **Declaração e decisão explícita do responsável:** SOFIA é o sistema integrado completo, composto por módulos especializados e capacidades transversais. SCP (SOFIA Control Panel) é exclusivamente o painel central de comando/frontend do SOFIA; não é um módulo funcional independente nem o nome de uma camada *control plane*.
+- **Módulos de conhecimento:** SWE (SOFIA Web Extractor) extrai conhecimento das fontes do usuário e alimenta a BBC; SCur (SOFIA Curator) trabalha sobre a BBC, realiza curadoria e mantém a BCE e seus documentos vivos; SVec (SOFIA Vectorizer) vetoriza a BCE curada, não a BBC como fonte primária.
+- **Terminologia oficial:** BBC = Base Bruta de Conhecimento; BCE = Base de Conhecimento Evolutivo. BBC preserva fontes, históricos, arquivos e evidências de origem. BCE representa o conhecimento curado, organizado e evolutivo, com documentos vivos que expressam o estado da arte dos temas/domínios.
+- **Fluxo conceitual:** SWE → BBC → SCur → BCE → SVec. Módulos arqueológicos, de otimização e segurança, entre outros, são componentes/capacidades do sistema integrado, não subprodutos do SCP.
+- **Capacidades transversais:** cognição, governança, segurança e orquestração pertencem ao SOFIA como sistema. O SCP oferece a interface de interação e controle do operador; módulos especializados mantêm suas responsabilidades próprias e contratos explícitos.
+- **Relação com Foundation_MeshWave:** a estrutura documental consultada registra BCE curada separada das fontes brutas em KNOWLEDGE/. A nomenclatura sistêmica BBC formaliza a camada bruta; esta decisão não renomeia diretórios do Foundation nem altera aquele repositório.
+- **Classificação:** decisão arquitetural explícita do responsável; nomenclatura e responsabilidades conceituais adotadas. Não implica implementação dos módulos ou do pipeline completo.
+- **Documentos afetados:** substituído `governance/architecture/SOFIA_COGNITIVE_CONTROL_PLANE.md` por `governance/architecture/SOFIA_COGNITIVE_ORCHESTRATION_ARCHITECTURE.md`; OR-20261114-0022; PR #15.
+- **Autoridade:** responsável pelo produto.
