@@ -455,9 +455,9 @@ export default function TaskDetail() {
                       </Button>
                     </div>
                   )}
-                  {selectedDocument.typeKey === "TR" && selectedVersion === selectedDocument.latestVersion?.version && (
+                  {selectedDocument.typeKey === "TR" && selectedVersion === selectedDocument.latestVersion?.version && canReorientTR && (
                     ["DRAFT", "AWAITING_HUMAN_VALIDATION"].includes(selectedDocument.latestVersion?.state ?? "")
-                    || (selectedDocument.latestVersion?.state === "VALIDATED" && canReorientTR)
+                    || selectedDocument.latestVersion?.state === "VALIDATED"
                   ) && (
                     <div className="space-y-3 rounded-md border p-4">
                       <div>
