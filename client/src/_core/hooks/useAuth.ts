@@ -1,5 +1,8 @@
 import { trpc } from "@/lib/trpc";
-import { supabase } from "@/lib/supabase";
+import {
+  getSupabaseAuthSnapshot,
+  supabase,
+} from "@/lib/supabase";
 import { useCallback, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -10,7 +13,6 @@ export function useAuth() {
   const queryClient = useQueryClient();
   const [sessionReady, setSessionReady] = useState(false);
   const [hasSession, setHasSession] = useState(false);
-  const [bootstrapError, setBootstrapError] = useState<Error | null>(null);
   const [loadingTimedOut, setLoadingTimedOut] = useState(false);
 
   // Only the backend-resolved internal user can authorize panel access.
@@ -23,15 +25,12 @@ export function useAuth() {
 
   useEffect(() => {
     let mounted = true;
-    let authEventReceived = false;
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (!mounted) return;
 
-      authEventReceived = true;
-      setBootstrapError(null);
       setHasSession(Boolean(session?.access_token));
       setSessionReady(true);
 
@@ -48,27 +47,13 @@ export function useAuth() {
       });
     });
 
-    // Explicitly resolve the persisted session as a fallback to INITIAL_SESSION.
-    // This prevents the dashboard from remaining on its skeleton if the auth
-    // event is delayed or missed during browser startup.
-    void supabase.auth.getSession().then(({ data, error }) => {
-      if (!mounted || authEventReceived) return;
-
-      if (error) {
-        setBootstrapError(error);
-      } else {
-        setHasSession(Boolean(data.session?.access_token));
-      }
+    // The module-level listener is registered immediately after createClient.
+    // Read its snapshot in case INITIAL_SESSION arrived before this effect ran.
+    const initialSnapshot = getSupabaseAuthSnapshot();
+    if (initialSnapshot.ready) {
+      setHasSession(initialSnapshot.hasSession);
       setSessionReady(true);
-    }).catch((error: unknown) => {
-      if (!mounted || authEventReceived) return;
-      setBootstrapError(
-        error instanceof Error
-          ? error
-          : new Error("Não foi possível inicializar a sessão de autenticação.")
-      );
-      setSessionReady(true);
-    });
+    }
 
     return () => {
       mounted = false;
@@ -109,7 +94,6 @@ export function useAuth() {
   const loading = authLoading && !loadingTimedOut;
   const error =
     backendAuth.error ??
-    bootstrapError ??
     (loadingTimedOut
       ? new Error(
           "A inicialização da autenticação excedeu 15 segundos. Recarregue a página; se persistir, verifique a conexão com o serviço de autenticação."

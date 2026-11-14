@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { startGoogleLogin } from "@/lib/auth";
 
@@ -35,36 +34,27 @@ export default function AuthCallback() {
         return;
       }
 
-      let session: Session | null = null;
-
-      if (code) {
-        const { data, error: exchangeError } =
-          await supabase.auth.exchangeCodeForSession(code);
-        if (exchangeError) {
-          if (active) {
-            setHasError(true);
-            setMessage(
-              `Não foi possível concluir o login: ${exchangeError.message}`
-            );
-          }
-          return;
+      if (!code) {
+        if (active) {
+          setHasError(true);
+          setMessage("A resposta do provedor não trouxe o código de autenticação. Inicie o login novamente.");
         }
-        session = data.session;
-      } else {
-        const { data, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError) {
-          if (active) {
-            setHasError(true);
-            setMessage(
-              `Não foi possível concluir o login: ${sessionError.message}`
-            );
-          }
-          return;
-        }
-        session = data.session;
+        return;
       }
 
-      if (!session) {
+      const { data, error: exchangeError } =
+        await supabase.auth.exchangeCodeForSession(code);
+      if (exchangeError) {
+        if (active) {
+          setHasError(true);
+          setMessage(
+            `Não foi possível concluir o login: ${exchangeError.message}`
+          );
+        }
+        return;
+      }
+
+      if (!data.session) {
         if (active) {
           setHasError(true);
           setMessage(
