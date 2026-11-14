@@ -255,3 +255,12 @@ A migration não foi conectada ao ensure-database/startup e não foi aplicada a 
 A camada server-side de persistência também foi adicionada em server/db.ts: catálogo, listagem, consulta de versões, histórico, criação transacional de documento + versão inicial e criação serializada de revisões. Ownership é validado pelo registro da missão; Blueprint só aceita versão TR da mesma missão. Ainda sem procedures tRPC, UI ou testes executáveis. OR-20261114-0029 atualizado.
 
 - server/db.test.ts recebeu assertions de exportação para as seis funções de persistência; teste escrito, ainda não executado. OR-20261114-0029 registra limites.
+
+
+### Incremento B — APIs documentais, TR inicial e bloqueio pré-execução (2026-11-14)
+
+Implementado na branch isolada: criação humana em PAUSED; snapshot ORIGINAL_REQUEST; primeira versão do TR pela SOFIA em AWAITING_HUMAN_VALIDATION (ou DRAFT quando a geração falha); procedures para listar documentos, consultar versões/histórico, corrigir, regenerar e validar o TR; validação cria versão append-only VALIDATED e libera STAGED. O gate também existe no updateStatus, no orquestrador (start/process/factorize) e como trigger BEFORE na migration 0010, cobrindo mudanças de agente em tarefas já STAGED e herança de autorização pelas filhas. Fatorização não copia a lease/pinagem do pai.
+
+TaskDetail agora usa visualizador documental único com TR padrão, seleção dinâmica por instâncias, histórico e controles de correção/regeneração/validação. Os formulários exibem PAUSED como estado inicial e levam o operador ao TR.
+
+**Não validado:** pnpm check/test/build, parser SQL e integração. Migration 0010 não aplicada e deve ser aplicada em gate separado antes de deploy deste código. Sem alterações de banco/produção, deploy, restart, dispatch, chamada LLM/Manus real ou consumo de créditos. OR-20261114-0030. Task 20.3/Mateus intocada.
