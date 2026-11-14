@@ -1486,22 +1486,37 @@ export async function listMissionDocumentVersionsForTask(
 }
 
 
+/** Resolve a task to its top-level mission, rejecting broken or cyclic parent chains. */
+async function resolveMissionRootTaskId(database: NonNullable<Awaited<ReturnType<typeof getDb>>>, taskId: number): Promise<number | null> {
+  let currentId = taskId;
+  const visited = new Set<number>();
+  while (true) {
+    if (visited.has(currentId)) return null;
+    visited.add(currentId);
+    const [current] = await database
+      .select({ id: tasks.id, parentTaskId: tasks.parentTaskId })
+      .from(tasks)
+      .where(eq(tasks.id, currentId))
+      .limit(1);
+    if (!current) return null;
+    if (current.parentTaskId == null) return current.id;
+    currentId = current.parentTaskId;
+  }
+}
+
+export async function getMissionRootTaskId(taskId: number): Promise<number | null> {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+  return resolveMissionRootTaskId(database, taskId);
+}
+
 /** Execution authorization is inherited by child tasks from the top-level mission. */
 export async function hasValidatedMissionTR(taskId: number): Promise<boolean> {
   const database = await getDb();
   if (!database) throw new Error("Database not available");
-  const [task] = await database.select({ id: tasks.id, parentTaskId: tasks.parentTaskId })
-    .from(tasks).where(eq(tasks.id, taskId)).limit(1);
-  if (!task) return false;
-  let missionId = task.id;
-  let parentId = task.parentTaskId;
-  while (parentId != null) {
-    const [parent] = await database.select({ id: tasks.id, parentTaskId: tasks.parentTaskId })
-      .from(tasks).where(eq(tasks.id, parentId)).limit(1);
-    if (!parent) return false;
-    missionId = parent.id;
-    parentId = parent.parentTaskId;
-  }
+  const missionId = await resolveMissionRootTaskId(database, taskId);
+  if (missionId == null) return false;
+
   const [validated] = await database.select({ id: missionDocumentVersions.id })
     .from(missionDocumentVersions)
     .innerJoin(missionDocuments, eq(missionDocumentVersions.documentId, missionDocuments.id))
