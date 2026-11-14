@@ -318,3 +318,13 @@
 - Reorientação do TR permitida em PAUSED/STAGED antes da primeira execução externa, com lock transacional da missão para competir com segurança contra o dispatcher.
 - CI run 43650701916 SUCCESS: check, testes, build e migration 0010 em PostgreSQL 16 descartável.
 - Sem migration persistente, merge, deploy, restart, dispatch real, LLM/Manus ou créditos. Task 20.3/Mateus intocada. OR-20261114-0033.
+
+### Checkpoint 20.4 — OR-20261114-0034: consulta cognitiva somente leitura (2026-11-14)
+
+- SOFIA recebeu a ferramenta tipada `inspect_current_mission`, sem argumentos controlados pelo LLM; o escopo é derivado da missão autorizada aberta no Messenger.
+- Consulta missão raiz, filhas diretas, estados, atribuições, Agent IDs, Agent Task IDs, estado externo, créditos em snapshot e prontidão documental TR/Blueprint.
+- Ownership é validado; filhas de outro proprietário são excluídas; somente agentes efetivamente atribuídos à árvore são projetados e credenciais não são expostas.
+- A consulta não modifica estado nem declara elegibilidade de agente. Créditos são snapshot persistido; status online não prova disponibilidade.
+- CI run 43655671495 SUCCESS: `pnpm check`, 41/41 testes, `pnpm build` e migration 0010 em PostgreSQL 16 descartável.
+- Próxima etapa: consulta de elegibilidade reproduzindo exatamente o predicado do claim, ainda sem reservar ou modificar agentes; depois planos estruturados e confirmação persistente.
+- Sem DB persistente, migration aplicada, deploy, restart, dispatch, LLM/Manus real ou consumo de créditos. PR #15 sem merge. Task 20.3/Mateus intocada. OR-20261114-0034.
