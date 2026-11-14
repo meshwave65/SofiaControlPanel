@@ -134,3 +134,13 @@
 - Contexto de missão fornecido explicitamente/selecionado pelo operador; não injetar automaticamente todo o histórico ou dados privados. Mensagens/respostas diretas não mudam o estado da missão.
 - Validar a API Manus: o código atual envia por /task.sendMessage com task_id; uma conversa persistente dedicada criada sob a credencial do agente é hipótese técnica, não endpoint confirmado.
 - Classificação: requisito proposto, desenho técnico pendente. Referência: OR-20261114-0018 / AC-011. Sem código, DB ou chamadas externas alterados.
+
+
+### Checkpoint 20.4 — decisão e primeiro incremento cognitivo SOFIA (2026-11-14)
+- O responsável aprovou a SOFIA como camada cognitiva e interlocutora central do SCP; arquitetura registrada em `governance/architecture/SOFIA_COGNITIVE_CONTROL_PLANE.md` e AC-012.
+- Branch isolada: `feat/sofia-cognitive-control-plane`, baseada no main em `5e77db55c2b397d92cabb7a40237125802a2bb71`.
+- Implementação inicial: mensagens passam primeiro pela Sofia; ferramenta tipada permite encaminhar instrução somente mediante tool call e pedido explícito, exigindo agente e execução externa identificados. Perguntas/análises são respondidas pela Sofia.
+- Testes adicionados para mediação, não encaminhamento automático e bloqueio sem execução externa; ainda não executados. Check/test/build pendentes.
+- Não implementados ainda: ferramentas read-only de estado/elegibilidade, transferência, pausa/retomada, plano persistente/confirmável, memória operacional persistente e UI de telemetria.
+- Sem deploy, restart, alteração de DB/produção, chamada LLM/Manus real, mensagem externa, dispatch ou consumo de créditos. Task 20.3/Mateus intocada.
+- OR: `OR-20261114-0022.md` (SUBMITTED; Oracle PENDING).
