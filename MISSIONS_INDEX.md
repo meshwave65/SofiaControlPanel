@@ -52,7 +52,7 @@ A numeração `MISSION_0001`–`MISSION_0024` é uma série documental distinta 
 | 0021 | PROGRESS | `governance/missions/0021/BLUEPRINT.md` + artefatos |
 | 0022 | STAGED | `governance/missions/0022/README.md`, `BLUEPRINT.md`, `TASKS.md` |
 | 0023 | PROGRESS | `governance/missions/0023/README.md`, `BLUEPRINT.md`, `TASKS.md` |
-| 0024 | PROGRESS | `governance/missions/0024/README.md`, `BLUEPRINT.md`, `TASKS.md` |
+| 0024 | DONE — publicada em produção | `governance/missions/0024/README.md`, `BLUEPRINT.md`, `TASKS.md`, `PROGRESS.md` |
 
 Os arquivos da raiz continuam versionados por compatibilidade histórica. Eles não devem ser apagados nem tratados como novos registros. Quando houver `governance/missions/<ID>/README.md` ou `BLUEPRINT.md`, esses documentos governam a continuidade da missão; os arquivos da raiz são snapshots/legado de execução anterior.
 
