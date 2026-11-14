@@ -149,3 +149,20 @@ Podem compartilhar fontes, mas não finalidade. O TR não substitui o FOR, e o F
 - Abrir missão no SCP apresenta TR como visão principal.
 - TR e FOR permanecem artefatos distintos.
 - Implementação técnica não presume schema, UI ou eventos existentes: esses elementos devem ser inspecionados antes de projetar alterações.
+
+## 12. Relação normativa entre TR e Blueprint
+
+O TR e o Blueprint são artefatos distintos e complementares.
+
+- **TR:** documento narrativo vivo, destinado prioritariamente ao operador, que registra compreensão, origem, motivação, objetivo, escopo, evolução, decisões, resultados comprovados e situação da missão.
+- **Blueprint:** plano de trabalho operacional, destinado aos executores, que traduz uma versão específica do TR em etapas, tarefas, dependências, recursos, restrições, critérios de aceite e evidências exigidas.
+
+O Blueprint deriva do TR consolidado. Em missão humana, a validação explícita do TR inicial precede a liberação da execução. Em missão autônoma, a SOFIA pode produzir TR e Blueprint e prosseguir dentro das políticas e limites de autonomia.
+
+O Blueprint deve referenciar a versão exata do TR que o fundamenta e não pode ampliar silenciosamente o escopo validado. Mudanças materiais no TR exigem análise de impacto e atualização/versionamento do Blueprint afetado antes de executar o trabalho correspondente.
+
+A missão-pai mantém o TR e o Blueprint mestre. Tarefas-filhas são unidades auxiliares de execução e referenciam a versão do Blueprint e a unidade que executam; não são missões independentes por padrão. Agentes são executores temporários, não proprietários da missão, e recebem somente o pacote de trabalho/contexto autorizado necessário.
+
+OR registra execução, tentativas, ocorrências e evidências; o TR consolida a evolução narrativa; FOR consolida o aprendizado operacional final. O OR pode motivar revisão do plano, mas não altera o Blueprint automaticamente.
+
+O contrato completo do plano de trabalho está em `governance/architecture/MISSION_BLUEPRINT_SPECIFICATION.md`. A definição é normativa para a arquitetura, mas não afirma que geração, persistência, versionamento, UI ou gates de runtime estejam implementados.
