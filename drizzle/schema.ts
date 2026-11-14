@@ -679,7 +679,7 @@ export const missionDocumentVersions = sofia.table("missionDocumentVersions", {
   documentIdFk: foreignKey({ columns: [table.documentId], foreignColumns: [missionDocuments.id] }).onDelete("restrict"),
   authorUserIdFk: foreignKey({ columns: [table.authorUserId], foreignColumns: [users.id] }).onDelete("restrict"),
   authorAgentIdFk: foreignKey({ columns: [table.authorAgentId], foreignColumns: [agents.id] }).onDelete("restrict"),
-  sourceDocumentVersionIdFk: foreignKey({ columns: [table.sourceDocumentVersionId], foreignColumns: [missionDocumentVersions.id] }).onDelete("restrict"),
+  sourceDocumentVersionIdFk: foreignKey({ columns: [table.sourceDocumentVersionId], foreignColumns: [table.id] }).onDelete("restrict"),
 }));
 
 export type MissionDocumentVersion = typeof missionDocumentVersions.$inferSelect;
