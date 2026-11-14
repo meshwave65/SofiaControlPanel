@@ -135,7 +135,7 @@ O contexto deve ser minimizado, rastreável e delimitado por ownership. Não car
 
 ## 10. Próximas entregas
 
-1. Ferramentas somente de leitura para consultar missões, módulos, agentes elegíveis, créditos e dependências, sempre filtradas por ownership.
+1. Ferramentas somente de leitura para consultar missões, módulos, agentes elegíveis, créditos e dependências, sempre filtradas por ownership. Incremento inicial implementado: `inspect_current_mission` consulta a missão aberta, raiz, filhas diretas, agentes atribuídos e snapshots de créditos; consulta de candidatos elegíveis, módulos e outras missões permanece pendente.
 2. Planos de ação estruturados com intenção, alvo, pré-condições, impacto, confirmação necessária e resultado esperado.
 3. Registro persistente de propostas/decisões e confirmação humana vinculada à proposta.
 4. Serviços governados para pause/resume, reassignment, retry e prioridade, respeitando pinagem, leases, idempotência e concorrência.
@@ -146,9 +146,9 @@ O contexto deve ser minimizado, rastreável e delimitado por ownership. Não car
 
 ## 11. Limites e estado de implementação
 
-Esta definição arquitetural não declara todos os módulos implementados. O primeiro incremento desta branch limita-se à mediação cognitiva do Messenger e ao encaminhamento explícito para a execução atualmente atribuída.
+Esta definição arquitetural não declara todos os módulos implementados. Os incrementos iniciais desta branch incluem mediação cognitiva do Messenger, encaminhamento explícito para a execução atualmente atribuída e consulta somente leitura do contexto operacional da missão aberta.
 
-Não estão implementados por esta entrega: pipeline completo SWE/BBC/SCur/BCE/SVec, ferramentas read-only ampliadas, transferência, pausa/retomada, planos persistentes, memória operacional persistente, telemetria completa do SCP ou canal independente de missão.
+Não estão implementados por esta entrega: pipeline completo SWE/BBC/SCur/BCE/SVec, consulta de candidatos elegíveis e módulos, planos persistentes, confirmação humana vinculada a propostas, transferência, pausa/retomada, memória operacional persistente, telemetria completa do SCP ou canal independente de missão.
 
 A chamada LLM e a chamada Manus existentes só são invocadas pelo fluxo de runtime quando uma mensagem for enviada. Nenhum teste ou execução externa real foi disparado nesta implementação. Testes automatizados devem mockar ambos os adaptadores.
 
@@ -224,3 +224,19 @@ A tela Gerenciar Missão utiliza um único espaço de leitura, controlado por se
 - Backend/RLS são responsáveis por ownership e acesso; a UI lista apenas documentos existentes e acessíveis e distingue ausência, elaboração, carregamento, erro e acesso negado.
 
 Contrato normativo: governance/architecture/MISSION_DOCUMENT_CATALOG_SPECIFICATION.md. A decisão define UX e modelo lógico; persistência, APIs, RLS e UI ainda dependem de implementação.
+
+## 17. Ferramenta cognitiva de inspeção da missão (OR-20261114-0034)
+
+A ferramenta `inspect_current_mission` permite que a SOFIA consulte dados operacionais estruturados da missão atualmente aberta no Messenger. O LLM não escolhe Mission ID nem fornece identificadores de registros: o servidor deriva o escopo da missão já autorizada no contexto da requisição.
+
+O snapshot contém a missão raiz, suas tarefas-filhas diretas, estados locais, Agent IDs, pinagem, Agent Task IDs/Manus Task IDs, estado externo, créditos utilizados, agentes efetivamente atribuídos e o gate documental TR/Blueprint.
+
+Controles:
+- Ownership da missão é validado antes da consulta; tarefas-filhas de outro proprietário são excluídas.
+- Apenas dados públicos mínimos dos agentes atribuídos são projetados; tokens, senhas e credenciais nunca entram no contexto do LLM.
+- Créditos são identificados como último snapshot persistido, com data e indicação de atualidade; não são consultados em tempo real.
+- Status online/conectado não é interpretado como elegibilidade para nova atribuição.
+- A ferramenta não altera missão, estado, atribuição, prioridade, execução ou créditos.
+- O resultado é sintetizado pela SOFIA em uma segunda chamada cognitiva; testes automatizados mockam o provedor.
+
+Esta primeira ferramenta cobre somente a missão aberta, sua raiz e filhas diretas. A consulta de candidatos elegíveis deve reproduzir o predicado transacional do claim sem adquirir locks nem reservar agentes. Consultas de módulos e planos estruturados permanecem fases posteriores.
