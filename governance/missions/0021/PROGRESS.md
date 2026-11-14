@@ -47,6 +47,7 @@ Inspeção read-only anterior identificou `public.profiles` com RLS desabilitado
 - Nenhuma correção de RLS foi aplicada.
 - Nenhuma migration de RLS foi autorizada nesta continuidade.
 - O RPC novo da busca não concede acesso direto às tabelas de perfil: a superfície pública é SECURITY INVOKER e delega à implementação no schema não exposto `private`.
+- A função legada `public.mwex_search_meshwalkers(text, integer)` permanece SECURITY DEFINER com EXECUTE concedido a `anon` e `authenticated`; ela chama `mwex_assert_eligible()` internamente, mas não é utilizada pela nova UI. Revisar/restringir grants como tarefa de hardening separada, sem alterar consumidores externos por inferência.
 - A exposição direta preexistente de `public.profiles` permanece como risco independente; não foi corrigida pela busca de destinatários.
 - PR #31 continua draft, sem migration aplicada. A correção global de RLS e a auditoria de `public.clients` permanecem fora do escopo deste ajuste.
 - Não desligar grants nem aplicar policies por inferência; primeiro auditar dependências e testar.
