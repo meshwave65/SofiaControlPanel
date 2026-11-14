@@ -47,9 +47,9 @@ describe("validateMissionBlueprintContent", () => {
 
   it("rejects required sections in a different order", () => {
     const reordered = validBlueprint.replace(
-      "## Objetivo operacional\\nResultado esperado: concluir o objetivo declarado.",
-      "## Escopo executável\\nSomente as atividades descritas no TR.\\n## Objetivo operacional\\nResultado esperado: concluir o objetivo declarado.",
-    ).replace("\\n## Escopo executável\\nSomente as atividades descritas no TR.", "");
+      "## Objetivo operacional\nResultado esperado: concluir o objetivo declarado.",
+      "## Escopo executável\nSomente as atividades descritas no TR.\n## Objetivo operacional\nResultado esperado: concluir o objetivo declarado.",
+    ).replace("\n## Escopo executável\nSomente as atividades descritas no TR.", "");
     expect(() => validateMissionBlueprintContent(reordered)).toThrow("ordem operacional definida");
   });
 
