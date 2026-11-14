@@ -223,3 +223,8 @@ A autorização documental não substitui a máquina de estados. `startTask` só
 A fatoração requer missão raiz `STAGED` ou `PROGRESS`. A migration 0010 verifica o status da missão raiz antes de permitir subtarefa `STAGED`, além do gate TR+Blueprint. A UI aplica as mesmas condições. O visualizador avalia somente o TR canônico.
 
 A validação estrutural do Blueprint foi isolada em `server/missionBlueprint.ts` e agora exige títulos próprios em ordem, conteúdo por seção e declaração explícita e não contraditória de ausência de bloqueios. Testes unitários e de orquestração foram adicionados; ainda não executados. OR-20261114-0030.
+
+ 
+### Complemento — máquina de estados na fronteira de execução
+
+A procedure genérica de status não promove tarefas diretamente para `PROGRESS`. Essa transição pertence ao claim atômico do orquestrador ou à retomada de execução externa já existente. A migration 0010 repete a regra: rejeita INSERT direto em `PROGRESS`, permite `STAGED→PROGRESS` e permite `PAUSED→PROGRESS` somente quando já existe `manusTaskId`; em ambos os casos verifica novamente TR/Blueprint. A criação/atualização de filhas em `STAGED` exige missão raiz `STAGED/PROGRESS`. OR-20261114-0030.
