@@ -145,3 +145,13 @@ Esta matriz é preliminar: ações marcadas BLOCKED exigem reprodução autentic
 - Handler de consolidação ainda registra erro somente em console, sem toast visível; também não mostra confirmação explícita de sucesso.
 - Próximo passo: localizar/inspecionar trigger real e criar testes determinísticos para 1 agente, múltiplas subtarefas, múltiplos agentes e retry parcial. Não alterar reserva sem definir semântica do status do pai.
 - Nenhuma alteração de código, dado de produção, dispatch, chamada externa, deploy ou restart.
+
+
+### Checkpoint 20.4 — confirmação da reserva de agente na fatorização (2026-11-14)
+- Localizada a migration-fonte `drizzle/0003_automatic_task_dispatch.sql`: trigger AFTER INSERT/UPDATE para tarefa STAGED usa `net.http_post` para despachar cada filha assincronamente. `scripts/ensure-database.mjs` instala a migration; não foi consultado o catálogo do DB de produção para verificar instalação ativa.
+- Claim SQL exclui agentes atribuídos a outra tarefa PROGRESS. Como `startTask` coloca o pai em PROGRESS antes da fatorização e as filhas herdam agente/pin, pai com agente fixado cria bloqueio persistente: filhas exigem agente reservado pelo pai e heartbeat apenas repete a tentativa a cada 30s. Pai automático com um único agente também retém o único agente; com vários agentes, filhas podem usar agentes livres.
+- Qualificação: não é correto afirmar que o primeiro filho sempre bloqueia todos os outros. A claim automática usa FOR UPDATE OF agent SKIP LOCKED e pode distribuir filhos entre agentes distintos; a falha depende da capacidade elegível e da reserva do pai.
+- O retorno `executionStarted` do ramo de fatorização é baseado em `subtaskIds.length > 0`, não em confirmação de execução real das filhas; indicador pode ser falso positivo operacional.
+- Heartbeat reprocessa a cada 30s apenas tarefas STAGED marcadas waiting_for_available_agent/waiting_for_pinned_agent. Não libera a reserva do pai nem resolve o caso pinned.
+- Testes atuais não exercitam trigger/SQL real nem o modelo de ocupação. Próximo passo: testes para pinned/automatico com 1 agente, vários agentes/filhas concorrentes, retry após liberação válida e retorno executionStarted. Definir semântica de status/reserva do pai antes de alterar implementação.
+- Sem alterações de produto/DB, chamadas externas, dispatch, créditos, deploy ou restart.
