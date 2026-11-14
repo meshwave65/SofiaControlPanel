@@ -243,3 +243,10 @@ Esta matriz é preliminar: ações marcadas BLOCKED exigem reprodução autentic
 - Descrição original é preservada como fonte da solicitação e não substitui TR/Blueprint. Seleção é somente leitura; backend/RLS garantem acesso.
 - Especificação: governance/architecture/MISSION_DOCUMENT_CATALOG_SPECIFICATION.md; OR-20261114-0028 indexado. Contratos TR, Blueprint e arquitetura geral atualizados.
 - Implementação permanece pendente; sem runtime/schema/banco/produção/dispatch/LLM/Manus/créditos/deploy/restart. Task 20.3/Mateus intocada.
+
+
+### Incremento A — persistência documental (2026-11-14)
+
+O modelo físico inicial do catálogo e versionamento foi adicionado à branch (schema Drizzle + migration SQL 0010). Tabelas: missionDocumentTypes, missionDocuments e missionDocumentVersions. Ownership deriva de tasks.createdBy; versões são append-only; Blueprint pode apontar para versão exata do TR; catálogo inicial inclui ORIGINAL_REQUEST, TR, BLUEPRINT, OR e FOR.
+
+A migration não foi conectada ao ensure-database/startup e não foi aplicada a banco. APIs, serviços, geração, backfill e UI permanecem pendentes. Não houve testes executáveis, deploy, restart ou chamadas externas. OR-20261114-0029.
