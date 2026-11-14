@@ -112,3 +112,6 @@ MISSION_0023 permanece PROGRESS e mantém seu próprio escopo de integridade ope
 - Necessário obter autorização para consultar o custo e criar branch de QA na organização `remwpkmiaavakbgcftob`.
 - Testes RLS anon/owner/admin, signup com e sem confirmação de e-mail, indicação, migration isolada e QA visual autenticado permanecem pendentes.
 - PR #30 e PR #31 não devem ser integradas/publicadas antes desses gates. Migration em produção, merge e deploy continuam ações separadas.
+
+- Preview Vercel final do head PR #31 `c9f0c3c7c6e46ed0b225c4ff71a6b59720323649`: READY — deployment `dpl_Des6nhYyc63afWjyeYyCdUG9iFmr`, URL https://newsite-p66iyfrsb-meshwaves-projects.vercel.app; build Vite 4,06 s.
+- Tentativa read-only de QA visual em `/mw-ex` redirecionou para Vercel Login/SSO. Nenhuma autenticação ou alteração de proteção foi tentada; QA visual permanece pendente.
