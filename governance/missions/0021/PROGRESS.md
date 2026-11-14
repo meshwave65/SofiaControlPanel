@@ -13,42 +13,32 @@ Concluir uma MW-Ex proprietária, privada e funcional, com segregação contábi
 
 ### Produção
 
-- A PR #29 foi integrada; a produção está no commit `58eae07f128f4d84ca4929adfcdb314ce0a45aa6`.
+- A PR #29 foi integrada. O estado atual de produção está no commit `1acc0b7df9db5cfe25de854bd299fc1e1fd41a11`, com PRs #36 e #37 integradas e migration de destinatários sincronizada.
 - O ticket de compra/venda permanece disponível.
 - O seletor de ativo-alvo lê a elegibilidade em `mwex_assets`; somente MWN está habilitada para compra/venda neste momento. BTC e ETH permanecem como referências, não ativos negociáveis.
 - OR: [OR-20261114-0003](../../operational_reports/OR-20261114-0003.md).
 - Nenhuma movimentação financeira foi realizada na fase de restauração do seletor.
 
-### PR #30 — busca de destinatário e largura do histórico
+### Busca de destinatários para transferência MWN — concluída
 
-- PR: https://github.com/meshwave65/newsite/pull/30
-- Branch: `feat/mwex-recipient-lookup-activity-layout`
-- Base: `main` em `58eae07f128f4d84ca4929adfcdb314ce0a45aa6`
-- Head atual: `354b12c0d488ac4fd1be7a5e3585bf702a6c638a`
-- Estado: OPEN, mergeable; não integrada.
-- Preview Vercel: READY — deployment `dpl_2qWNmSKFn99UUY3QBRSWzSZTonAg`, URL https://newsite-jn001fb8a-meshwaves-projects.vercel.app
-- Build: Vite concluído em 3,58 s. Warning não bloqueante de bundle JS principal de 737,02 kB.
-- Arquivos: `src/pages/MwEx.jsx`, `src/pages/MwEx.css`, `supabase/migrations/20261114130000_mwex_search_transfer_recipients.sql`.
-
-#### Regras de destinatário persistidas
-
-1. Busca por nome/username pode apresentar sugestões com nome e username.
-2. Busca por CPF/NIF só consulta documento completo: CPF com 11 dígitos ou NIF com 9 dígitos. Entrada numérica parcial não dispara pesquisa nem sugestões.
-3. A consulta fiscal exata retorna somente status genérico FOUND, NOT_FOUND ou AMBIGUOUS. Em match único, o identificador é mantido internamente para a RPC; a interface não mostra nome, username ou fragmentos do documento.
-4. Correspondência fiscal ambígua não escolhe destinatário arbitrariamente.
-5. UUID integral permanece apenas no estado interno usado pela RPC `mwex_transfer_mwn`; interface mostra UUID mascarada.
-6. Usuário que já conhece a UUID pode colá-la diretamente; após a colagem, a UI também exibe somente a versão mascarada.
-7. UUIDs em registros/atividade também são mascaradas.
-8. O card “Atividade da conta” ocupa toda a largura disponível em desktop.
-
-#### Gates ainda abertos
-
-- Migration da busca não aplicada ao Supabase.
-- Teste autenticado da RPC e teste de ponta a ponta com contas de teste pendentes.
-- Teste da migration em banco isolado pendente.
-- Validação visual autenticada desktop/mobile pendente; o build READY não constitui QA visual.
-- Lint e testes automatizados não foram confirmados nesta fase.
-- Nenhum merge ou deploy de produção autorizado/executado para PR #30.
+- PR #36: https://github.com/meshwave65/newsite/pull/36 — MERGED.
+- Commit de integração: `e124e479688f4415becde4a4c5034cadae2af286`.
+- A PR #30 foi encerrada como rascunho superado; não foi integrada.
+- Migration aplicada ao Supabase canônico: `20261114143556_mwex_transfer_recipient_lookup`.
+- Arquivo sincronizado com a versão registrada no banco pela PR #38: `supabase/migrations/20261114143556_mwex_transfer_recipient_lookup.sql`.
+- PR #38: https://github.com/meshwave65/newsite/pull/38 — MERGED; commit `1acc0b7df9db5cfe25de854bd299fc1e1fd41a11`.
+- A busca parte de `mwc_meshwalker_profiles`, inclui fontes mínimas de nome em `profiles`, `clients` e metadados Auth e considera carteiras existentes não ativas.
+- Busca por nome/username usa prefixo, mínimo de 3 caracteres e até 8 sugestões.
+- Busca fiscal exige CPF completo (11 dígitos) ou NIF completo (9 dígitos), com correspondência exata. Consulta parcial retorna zero linhas.
+- A busca fiscal não devolve documento, fragmentos, nome ou username; retorna estado genérico e somente o user_id interno quando existe correspondência única.
+- A busca exclui o próprio usuário e contas Auth removidas. Resultados ambíguos não selecionam destinatário.
+- O RPC exposto é SECURITY INVOKER; a leitura privilegiada fica em função SECURITY DEFINER no schema não exposto `private`. EXECUTE público/anon foi revogado; authenticated foi autorizado.
+- A UI mascara a UUID selecionada e preserva a alternativa de UUID manual.
+- A transferência continua usando exclusivamente `mwex_transfer_mwn`, que valida novamente elegibilidade e estado das carteiras. Nenhuma regra de saldo, ledger ou transferência foi modificada.
+- Teste controlado com contexto authenticated no banco canônico: CPF/NIF exato retornou FOUND e o user_id esperado; busca por prefixo encontrou o destinatário esperado; consulta fiscal parcial retornou zero linhas; anon não possui EXECUTE.
+- Produção: deployment final `dpl_CydYBqVoGy6x1xDY2g9oAg4dRbSP` — READY; URL https://www.meshwave.com.br/mw-ex.
+- Nenhuma transferência real foi executada e nenhum saldo/ledger foi movimentado.
+- OR: [OR-20261114-0014](../../operational_reports/OR-20261114-0014.md).
 
 ### Gate crítico de dados pessoais — Supabase canônico
 
@@ -56,7 +46,9 @@ Inspeção read-only anterior identificou `public.profiles` com RLS desabilitado
 
 - Nenhuma correção de RLS foi aplicada.
 - Nenhuma migration de RLS foi autorizada nesta continuidade.
-- PR #30 não deve ser integrada/publicada antes de tratar esse gate com desenho mínimo de policies, preservando os fluxos legítimos de cadastro e leitura.
+- O RPC novo da busca não concede acesso direto às tabelas de perfil: a superfície pública é SECURITY INVOKER e delega à implementação no schema não exposto `private`.
+- A exposição direta preexistente de `public.profiles` permanece como risco independente; não foi corrigida pela busca de destinatários.
+- PR #31 continua draft, sem migration aplicada. A correção global de RLS e a auditoria de `public.clients` permanecem fora do escopo deste ajuste.
 - Não desligar grants nem aplicar policies por inferência; primeiro auditar dependências e testar.
 
 ## Missão complementar MISSION_0023
@@ -65,11 +57,10 @@ MISSION_0023 permanece PROGRESS e mantém seu próprio escopo de integridade ope
 
 ## Próxima sequência de trabalho
 
-1. Concluir revisão técnica da PR #30 e checks do Preview.
-2. Preparar e executar testes isolados/autenticados sem transações financeiras reais.
-3. Resolver o gate de exposição de `profiles` por uma fase específica, após autorização explícita para alterações de banco.
-4. Reavaliar integração da PR #30 somente depois dos gates de segurança e testes.
-5. Manter merge, migration em produção e deploy de produção como ações separadas e dependentes de autorização explícita.
+1. A busca de destinatários por nome e CPF/NIF está entregue e publicada; a validação funcional autenticada pelo responsável em produção permanece como smoke test operacional, sem necessidade de transação real.
+2. Manter a revisão global de RLS em `profiles` e a auditoria de `clients` como trabalho de segurança separado; PR #31 permanece draft e não foi aplicada.
+3. Continuar as demais frentes da MISSION_0021 conforme prioridade do responsável, sem reabrir o escopo já concluído de destinatário.
+4. Não executar transferências reais em testes automatizados; usar contas de teste e confirmação explícita para qualquer operação financeira real.
 
 ## Referências
 
@@ -97,8 +88,7 @@ MISSION_0023 permanece PROGRESS e mantém seu próprio escopo de integridade ope
 ### Dados existentes e dependências
 - `auth.users` contém 77 contas; 40 não possuem linha correspondente em `public.profiles`.
 - Entre as 40, 4 são MeshWalkers elegíveis e 3 têm aquisições. A migration não faz backfill dessas contas.
-- PR #30 foi corrigida para pesquisar a partir de `mwc_meshwalker_profiles` e usar LEFT JOIN de `profiles`, preservando a busca desses elegíveis sem linha de perfil.
-- PR #30: https://github.com/meshwave65/newsite/pull/30 — head `483bafc8038ba1304eabcb17b7e3152c3504cb39`; Preview READY em https://newsite-hoy4u3lz8-meshwaves-projects.vercel.app. Nenhuma migration aplicada.
+- PR #36 substituiu a implementação preliminar da PR #30 e foi integrada. A função pesquisa a partir de `mwc_meshwalker_profiles` e não depende da existência de linha em `profiles` para identificar elegibilidade ou bloquear carteiras inativas.
 
 ### Gate adicional — `public.clients`
 - RLS habilitado, mas políticas permitem SELECT aberto para `anon` e `authenticated`, INSERT aberto para ambos e UPDATE aberto para `authenticated`.
