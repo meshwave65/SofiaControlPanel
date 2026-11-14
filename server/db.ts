@@ -1176,6 +1176,9 @@ async function validateMissionDocumentAuthor(
   if (author.authorType === "HUMAN" && !author.authorUserId) {
     throw new Error("HUMAN document versions require authorUserId");
   }
+  if (author.authorType === "HUMAN" && author.authorUserId !== taskOwnerId) {
+    throw new Error("Human document authorship must match the mission owner");
+  }
   if (author.authorType === "AGENT" && !author.authorAgentId) {
     throw new Error("AGENT document versions require authorAgentId");
   }
