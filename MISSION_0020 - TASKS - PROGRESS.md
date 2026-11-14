@@ -232,3 +232,11 @@
 - Migration 0010 NÃO foi conectada ao ensure-database.mjs e NÃO foi aplicada a banco. Essa separação evita DDL automático em deploy/startup.
 - Sem camada de serviço, APIs, geração de documentos, backfill de solicitações originais, UI ou testes executáveis nesta etapa.
 - OR-20261114-0029 criado. Task 20.3/Mateus intocada. Sem deploy, restart, dispatch, LLM/Manus ou consumo de créditos.
+
+
+### Incremento A — camada de persistência server-side (2026-11-14)
+
+- server/db.ts recebeu operações para consultar catálogo, listar documentos da missão com versão vigente, recuperar versão específica, listar histórico, criar instância + primeira versão transacionalmente e criar revisões serializadas.
+- Toda leitura/escrita de documento verifica acesso à missão por tasks.createdBy; administrador usa a permissão global já existente. Autoria AGENT exige agente pertencente ao proprietário da missão. Blueprint exige versão-fonte TR da mesma missão.
+- Funções ainda não estão expostas em tRPC e não foram exercitadas contra banco; testes/check/build permanecem pendentes.
+- OR-20261114-0029 complementado com o estado da camada de repositório.
