@@ -220,3 +220,15 @@
 - Especificação: governance/architecture/MISSION_DOCUMENT_CATALOG_SPECIFICATION.md; integração registrada nos contratos TR/Blueprint e arquitetura geral. OR-20261114-0028 criado.
 - Estado: contrato de UX/modelo lógico documentado; catálogo, persistência, APIs, RLS e UI ainda não implementados. Próximo passo é incorporar catálogo/instâncias ao desenho físico do Incremento A após verificar schema e ownership reais; UI vem após APIs de leitura.
 - Apenas documentação. Sem código funcional, schema/migration, banco, produção, dispatch, LLM/Manus, créditos, deploy ou restart. Task 20.3/Mateus intocada.
+
+
+### Checkpoint 20.4 — Incremento A: persistência documental (2026-11-14)
+
+- Inspecionado schema Drizzle, migrations SQL, RLS server-only, ensure-database.mjs, ownership e tela TaskDetail.
+- Adicionado modelo físico Drizzle: missionDocumentTypes (catálogo), missionDocuments (instâncias por missão) e missionDocumentVersions (histórico append-only).
+- Adicionada migration 0010 com catálogo ORIGINAL_REQUEST/TR/BLUEPRINT/OR/FOR, índices, FKs, RLS/policies server-only, revogação de privilégios diretos e trigger de imutabilidade das versões.
+- Ownership documental herda tasks.createdBy; não foi duplicado. Blueprint poderá referenciar a versão exata do TR.
+- A versão corrente é derivada do maior número de versão, sem ponteiro mutável.
+- Migration 0010 NÃO foi conectada ao ensure-database.mjs e NÃO foi aplicada a banco. Essa separação evita DDL automático em deploy/startup.
+- Sem camada de serviço, APIs, geração de documentos, backfill de solicitações originais, UI ou testes executáveis nesta etapa.
+- OR-20261114-0029 criado. Task 20.3/Mateus intocada. Sem deploy, restart, dispatch, LLM/Manus ou consumo de créditos.
