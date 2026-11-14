@@ -24,10 +24,10 @@ Concluir uma MW-Ex proprietária, privada e funcional, com segregação contábi
 - PR: https://github.com/meshwave65/newsite/pull/30
 - Branch: `feat/mwex-recipient-lookup-activity-layout`
 - Base: `main` em `58eae07f128f4d84ca4929adfcdb314ce0a45aa6`
-- Head atual: `29ef67f2cadca4d9e3a9543cbc99860bb04c6054`
+- Head atual: `354b12c0d488ac4fd1be7a5e3585bf702a6c638a`
 - Estado: OPEN, mergeable; não integrada.
-- Preview Vercel: READY — deployment `dpl_GRt2reNc4q5BPDMNXjumm7dzNXNM`, URL https://newsite-j37a00anz-meshwaves-projects.vercel.app
-- Build: Vite concluído em 3,31 s. Warning não bloqueante de bundle JS principal de 736,78 kB.
+- Preview Vercel: READY — deployment `dpl_2qWNmSKFn99UUY3QBRSWzSZTonAg`, URL https://newsite-jn001fb8a-meshwaves-projects.vercel.app
+- Build: Vite concluído em 3,58 s. Warning não bloqueante de bundle JS principal de 737,02 kB.
 - Arquivos: `src/pages/MwEx.jsx`, `src/pages/MwEx.css`, `supabase/migrations/20261114130000_mwex_search_transfer_recipients.sql`.
 
 #### Regras de destinatário persistidas
@@ -37,7 +37,7 @@ Concluir uma MW-Ex proprietária, privada e funcional, com segregação contábi
 3. A consulta fiscal exata retorna somente status genérico FOUND, NOT_FOUND ou AMBIGUOUS. Em match único, o identificador é mantido internamente para a RPC; a interface não mostra nome, username ou fragmentos do documento.
 4. Correspondência fiscal ambígua não escolhe destinatário arbitrariamente.
 5. UUID integral permanece apenas no estado interno usado pela RPC `mwex_transfer_mwn`; interface mostra UUID mascarada.
-6. Usuário que já conhece a UUID pode colá-la diretamente.
+6. Usuário que já conhece a UUID pode colá-la diretamente; após a colagem, a UI também exibe somente a versão mascarada.
 7. UUIDs em registros/atividade também são mascaradas.
 8. O card “Atividade da conta” ocupa toda a largura disponível em desktop.
 
