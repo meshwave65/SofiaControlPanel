@@ -122,3 +122,14 @@ MISSION_0023 permanece PROGRESS e mantém seu próprio escopo de integridade ope
 - Não executar limpeza, migração, ativação de RLS ou revogação de grants nas 29 tabelas legadas por conta deste alerta agregado.
 - Nenhuma alteração DDL, grant, policy, dado ou fluxo financeiro foi realizada. PR #30 e PR #31 permanecem abertas; migrations não aplicadas; sem merge/deploy.
 - Próxima etapa: reconciliar a caracterização das 37 linhas de `profiles`, mapear consumidores de `clients` e avaliar somente `mwex_business_configs` no escopo MW-Ex.
+
+## Correção de largura da Atividade da conta — 2026-11-14
+
+- Causa: as regras históricas de grade por `:nth-of-type()` tinham maior especificidade que a regra de largura total; a seção de produção também não possuía classe dedicada.
+- PR #32: https://github.com/meshwave65/newsite/pull/32 — merged.
+- Commit: `82deb2713270ce022e970a980dbfa62e7e48515e`.
+- Correção: classe `mwex-account-activity` + seletor desktop de maior especificidade com `grid-column: 1 / -1`, `width: 100%` e `min-width: 0`.
+- Produção: deployment `dpl_DLvhFANzX4HBQQ9d8ZfDSzR933EW` READY; domínio `www.meshwave.com.br`.
+- Build Vite concluído; QA visual autenticado permanece pendente.
+- Escopo limitado a JSX/CSS; nenhuma migration, alteração de banco ou operação financeira.
+- OR: [OR-20261114-0009](../../operational_reports/OR-20261114-0009.md).
