@@ -426,13 +426,14 @@ export const appRouter = router({
       validateTR: protectedProcedure.input(z.object({ taskId: z.number().int().positive() })).mutation(async ({ input, ctx }) => {
         const task = await db.getTaskById(input.taskId);
         if (!task || task.createdBy !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND", message: "Somente o operador que criou a missão pode corrigir ou validar seu TR." });
-        const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, ctx.user.role === "admin");
+        if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR pertence à missão principal; tarefas-filhas não podem alterá-lo." });
+        const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, false);
         const tr = docs.find((document) => document.typeKey === "TR");
         if (!tr?.latestVersion || tr.latestVersion.state !== "AWAITING_HUMAN_VALIDATION") throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Não existe uma versão do TR aguardando validação." });
-        const current = await db.getMissionDocumentVersionForTask(input.taskId, tr.id, tr.latestVersion.version, ctx.user.id, ctx.user.role === "admin");
+        const current = await db.getMissionDocumentVersionForTask(input.taskId, tr.id, tr.latestVersion.version, ctx.user.id, false);
         if (!current) throw new TRPCError({ code: "NOT_FOUND", message: "Conteúdo do TR não encontrado." });
         const validated = await db.createMissionDocumentRevision({
-          taskId: input.taskId, documentId: tr.id, ownerId: ctx.user.id, canViewAll: ctx.user.role === "admin",
+          taskId: input.taskId, documentId: tr.id, ownerId: ctx.user.id, canViewAll: false,
           version: {
             content: current.version.content, state: "VALIDATED", authorType: "HUMAN", authorUserId: ctx.user.id,
             provenance: { origin: "HUMAN", action: "explicit_tr_validation", validatedVersion: tr.latestVersion.version },
@@ -440,10 +441,49 @@ export const appRouter = router({
             publishedAt: new Date(),
           },
         });
+        try {
+          await persistMissionBlueprint({
+            taskId: input.taskId, ownerId: ctx.user.id, canViewAll: false,
+            title: task.title, trVersionId: validated.id, trVersionNumber: validated.version,
+            trContent: current.version.content,
+          });
+        } catch (error) {
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message: "TR validado, mas o Blueprint não foi gerado. A missão permanece PAUSED; tente gerar o Blueprint novamente. " + (error instanceof Error ? error.message : ""),
+            cause: error,
+          });
+        }
+        if (!(await db.hasExecutionReadyMissionDocuments(input.taskId))) {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O Blueprint não passou pela verificação de vínculo com a versão vigente do TR." });
+        }
         const stagedStatusId = await db.getTaskStatusIdByName("STAGED");
         await db.updateTaskStatus(input.taskId, stagedStatusId);
         return { validatedVersion: validated.version, statusId: stagedStatusId };
-      }),
+      })
+      generateBlueprint: protectedProcedure.input(z.object({ taskId: z.number().int().positive() })).mutation(async ({ input, ctx }) => {
+        const task = await db.getTaskById(input.taskId);
+        if (!task || task.createdBy !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND", message: "Somente o operador que criou a missão pode liberar seu plano de trabalho." });
+        if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O Blueprint pertence à missão principal." });
+        const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, false);
+        const tr = docs.find((document) => document.typeKey === "TR");
+        if (!tr?.latestVersion || !["VALIDATED", "ACTIVE", "REORIENTED"].includes(tr.latestVersion.state)) {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR precisa estar validado antes da geração do Blueprint." });
+        }
+        const current = await db.getMissionDocumentVersionForTask(input.taskId, tr.id, tr.latestVersion.version, ctx.user.id, false);
+        if (!current) throw new TRPCError({ code: "NOT_FOUND", message: "Conteúdo do TR validado não encontrado." });
+        const blueprint = await persistMissionBlueprint({
+          taskId: input.taskId, ownerId: ctx.user.id, canViewAll: false,
+          title: task.title, trVersionId: current.version.id, trVersionNumber: current.version.version,
+          trContent: current.version.content,
+        });
+        if (!(await db.hasExecutionReadyMissionDocuments(input.taskId))) {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Blueprint não está READY ou não referencia a versão vigente do TR." });
+        }
+        const stagedStatusId = await db.getTaskStatusIdByName("STAGED");
+        await db.updateTaskStatus(input.taskId, stagedStatusId);
+        return { blueprintVersion: blueprint.version, statusId: stagedStatusId };
+      }),,
     }),
 
     list: protectedProcedure.query(async ({ ctx }) => {
