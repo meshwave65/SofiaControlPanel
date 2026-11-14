@@ -198,3 +198,13 @@
 - OR-20261114-0026 criado e indexado.
 - **Estado:** planejamento técnico; Incremento A (persistência/versionamento + RLS + testes) ainda não implementado. Sem schema/migration/runtime/UI/DB/produção/dispatch/LLM/Manus/créditos/deploy/restart. Task 20.3/Mateus intocada.
 - Próximo passo: implementar Incremento A após conferir o modelo real de autenticação/ownership e a estratégia de RLS do banco; não presumir que uma policy baseada em auth.uid() corresponda ao identificador inteiro de users.id.
+
+### Checkpoint 20.4 — AC-016: TR como visão principal em Gerenciar Missão (2026-11-14)
+
+- Inspecionada a UI atual: `Tasks.tsx` possui botão Gerenciar que abre `/tasks/:id`; `TaskDetail.tsx` apresenta a descrição da missão e abas Subtarefas, Relatórios e Consolidado, sem TR/Blueprint.
+- Decisão: Gerenciar abre a missão diretamente na visão TR, como conteúdo principal/padrão para o operador. Blueprint terá área/aba própria, como plano operacional para executores.
+- A descrição original permanece fonte/proveniência do pedido, não TR consolidado nem Blueprint.
+- Hierarquia da tela: TR → Blueprint → Execução (subtarefas/ORs/checkpoints/evidências) → Consolidação (entregável/FOR).
+- Missão humana aguardando validação terá correção/validação no próprio TR e indicação inequívoca de execução bloqueada. Missão SOFIA-originada mostrará origem e permitirá inspeção/intervenção sem aprovação humana preliminar.
+- AC-016 registrado na arquitetura/contexto; OR-20261114-0027 criado e indexado.
+- Estado: decisão de UX persistida; UI ainda não implementada. Implementação fica no Incremento D, após APIs e persistência A–C. Sem alterações funcionais/DB/produção/dispatch/LLM/Manus/créditos/deploy/restart. Task 20.3/Mateus intocada.
