@@ -29,6 +29,7 @@ A decisão metodológica mais recente estabelece visão global e planejamento in
 
 - Messenger central: UI implementada e CI aprovado; ligação de código para retorno do executor à conversa central rastreada. Ver OR-0045 e OR-0046.
 - Painel Execução e executor: UI implementada e CI aprovado; estado local e estado externo apresentados separadamente, com consulta do perfil público do agente sem credenciais. Ver OR-0047.
+- Pausa e retomada Manus: mutations protegidas, confirmação por task.detail, reconciliação de estados pendentes e controles explícitos na UI. CI aprovado: 10 arquivos/77 testes, TypeScript, build e validação PostgreSQL/dispatch. Ver OR-0048.
 
 ## Próxima ação
 
