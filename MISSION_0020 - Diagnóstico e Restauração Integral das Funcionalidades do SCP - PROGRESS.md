@@ -348,3 +348,11 @@ Foi criado workflow dedicado para executar `pnpm check`, `pnpm test`, `pnpm buil
 - A aprovação do proprietário é persistida como nova versão imutável APPROVED, vinculada ao hash da proposta exibida; a transação rejeita alterações concorrentes e fontes obsoletas.
 - Aprovação não despacha nem executa tarefas, não reserva agentes e não autoriza créditos. Execução por unidade e gates de risco/orçamento/permissão permanecem fases posteriores.
 - CI run [43668453513](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43668453513) SUCCESS: check, 48/48 testes, build e migrations 0010+0011 em PostgreSQL 16 descartável. Nenhuma migration persistente, merge, deploy ou execução externa. Task 20.3/Mateus intocada.
+
+### Checkpoint 20.4 — pré-avaliação determinística por unidade (OR-20261114-0037)
+
+- O motor de governança avalia evidências verificáveis e bloqueia qualquer lacuna; a API e a UI exibem a decisão por unidade do ACTION_PLAN aprovado.
+- A consulta revalida ownership e a cadeia Blueprint→TR. Não trata o agente da missão-pai como executor elegível da tarefa-filha.
+- Auditoria encontrou trigger automático de dispatch ao inserir/alterar tarefa para STAGED (migration 0003, instalada por ensure-database). A próxima etapa deverá proteger o trigger e todo o caminho de dispatch antes de materializar unidades.
+- CI [43669315311](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43669315311) SUCCESS: check, 53/53 testes, build e migrations 0010+0011 em PostgreSQL descartável.
+- Sem criação de subtarefas, alteração de status/trigger, dispatch, DB persistente, merge, deploy ou consumo de créditos.
