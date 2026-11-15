@@ -140,6 +140,50 @@ export async function sendManusMessage(task: NonNullable<LocalTask>, text: strin
   });
 }
 
+/**
+ * Retoma uma execução previamente interrompida pelo operador.
+ * Só envia task.sendMessage se task.detail confirmar stopped sem jobs em background.
+ */
+export async function resumeManusTask(task: NonNullable<LocalTask>) {
+  if (!task.agentId || !task.manusTaskId) throw new Error("A tarefa não possui executor e execução Manus atribuídos.");
+  const credentials = await db.getManusCredentialsForAgent(task.agentId);
+  if (!credentials?.manusToken) throw new Error("O agente não possui uma API key Manus configurada.");
+
+  const before = await getManusTaskDetail(task, credentials.manusToken);
+  if (before.status === "running") {
+    return { resumed: true, status: "running" as const };
+  }
+  if (before.status !== "stopped") {
+    throw new Error(`A execução Manus não está stopped (estado atual: ${before.status}). Atualize a missão antes de tentar retomar.`);
+  }
+  if (before.has_running_background_jobs !== false) {
+    throw new Error("A Manus não confirmou que os processos em segundo plano terminaram. A retomada foi bloqueada.");
+  }
+
+  await manusRequest<ManusTaskResponse>(credentials.manusToken, "/task.sendMessage", {
+    method: "POST",
+    body: JSON.stringify({
+      task_id: task.manusTaskId,
+      message: {
+        content: [{
+          type: "text",
+          text: "Retome a execução desta tarefa a partir do último ponto concluído. Preserve o trabalho já realizado, não o repita e continue seguindo o escopo e as instruções originais.",
+          visibility: "visible",
+        }],
+      },
+    }),
+  });
+
+  const after = await getManusTaskDetail(task, credentials.manusToken);
+  if (after.status === "error") {
+    throw new Error("A Manus retornou erro ao retomar a execução.");
+  }
+  return {
+    resumed: after.status === "running",
+    status: after.status,
+  };
+}
+
 async function listManusMessages(task: NonNullable<LocalTask>) {
   if (!task.agentId || !task.manusTaskId) return [];
   const credentials = await db.getManusCredentialsForAgent(task.agentId);
@@ -284,6 +328,33 @@ async function syncRunningTask(task: NonNullable<LocalTask>) {
   if (!externalTask?.status) return null;
 
   const normalizedStatus = externalTask.status.toLowerCase();
+
+  if (task.manusStatus === "manual_resume_pending") {
+    if (normalizedStatus === "running") {
+      const progressStatusId = await db.getTaskStatusIdByName("PROGRESS");
+      await db.updateTaskExecution(task.id, {
+        manusStatus: "running",
+        completedAt: null,
+      });
+      await db.updateTaskStatus(task.id, progressStatusId);
+      return { taskId: task.id, manusStatus: "running", creditsUsed: externalTask.credit_usage ?? null };
+    }
+    if (normalizedStatus === "error") {
+      const failStatusId = await db.getTaskStatusIdByName("FAIL");
+      await db.updateTaskExecution(task.id, {
+        manusStatus: "error",
+        completedAt: new Date(),
+      });
+      await db.updateTaskStatus(task.id, failStatusId);
+      return { taskId: task.id, manusStatus: "error", creditsUsed: externalTask.credit_usage ?? null };
+    }
+    await db.updateTaskExecution(task.id, {
+      manusStatus: "manual_resume_pending",
+      creditsUsed: typeof externalTask.credit_usage === "number" ? externalTask.credit_usage : undefined,
+      completedAt: null,
+    });
+    return { taskId: task.id, manusStatus: "manual_resume_pending", creditsUsed: externalTask.credit_usage ?? null };
+  }
 
   // Uma pausa solicitada pelo operador não pode ser confundida com conclusão.
   // Só finaliza em PAUSED quando a Manus confirma stopped e nenhum job em background.
