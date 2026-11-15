@@ -610,7 +610,7 @@ export default function TaskDetail() {
                           >
                             {unit.id}
                             {actionPlanUnitRecordsQuery.data?.find((record: any) => record.unitId === unit.id)?.state
-                              ? " · " + actionPlanUnitRecordsQuery.data.find((record: any) => record.unitId === unit.id).state
+                              ? " · " + actionPlanUnitRecordsQuery.data.find((record: any) => record.unitId === unit.id)?.state
                               : ""}
                           </Button>
                         ))}
