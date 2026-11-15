@@ -43,3 +43,14 @@ Prosseguir a auditoria do ciclo de vida da missão com inspeção dos contratos 
 - Não tocar em 20.3/Mateus.
 - Não expandir AC-023 nem ARC/PGC como gates/fontes de execução.
 - Testes unitários com mocks não comprovam entrega real a Manus/agente.
+
+
+## Diretriz operacional vigente — OR-20261115-0050
+
+O operador determinou implementação pela PR destinada a `main`, publicação incremental no Render Free já existente e correção baseada no comportamento real. Não exigir Browser Use, preview pago ou QA visual como pré-condição. PR #15 é a PR existente; não abrir outra. Auto-deploy permanece desligado, com publicação manual após merge.
+
+O head `214c4d8` inclui proteção para que um eventual PR Preview não execute bootstrap/DDL no banco compartilhado. O CI do head ainda estava em execução no momento do OR; o head anterior havia passado CI. Nenhuma alteração de Render ou publicação foi feita até o registro inicial.
+
+Atenção operacional: as migrations 0010–0013 passaram em PostgreSQL descartável, mas não há comprovação de aplicação ao banco persistente. `scripts/ensure-database.mjs` não executa essas migrations. Identificar o projeto Supabase associado ao Render antes de aplicar DDL; não escolher por inferência.
+
+A cada etapa, persistir OR/PROGRESS/TASKS, distinguir CI de schema persistente/deploy/funcionalidade observada, não criar serviço pago, não contratar Browser Use, não tocar 20.3/Mateus e não executar chamadas externas/consumir créditos sem autorização própria.
