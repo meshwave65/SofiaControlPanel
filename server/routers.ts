@@ -13,7 +13,8 @@ import { mirrorTaskToGitHub } from "./githubMissionMirror";
 import { invokeLLM } from "./_core/llm";
 import { buildSofiaConversation, extractTextContent, normalizeOperatorMessage, OPERATOR_MESSAGE_MAX_LENGTH, SOFIA_MESSAGE_TOOLS } from "./messageService";
 import { validateMissionBlueprintContent } from "./missionBlueprint";
-import { validateActionPlan } from "./actionPlan";
+import { validateActionPlan, ActionPlanSchema } from "./actionPlan";
+import { evaluateExecutionGate } from "./executionGovernance";
 
 async function generateInitialMissionTR(title: string, description?: string | null): Promise<string> {
   const response = await invokeLLM({
@@ -395,6 +396,111 @@ export const appRouter = router({
           const missionRootId = await db.getMissionRootTaskId(input.taskId);
           if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
           return db.listMissionDocumentVersionsForTask(missionRootId, input.documentId, ctx.user.id, ctx.user.role === "admin");
+        }),
+      evaluateActionPlanUnit: protectedProcedure
+        .input(z.object({
+          taskId: z.number().int().positive(),
+          unitId: z.string().regex(/^T[0-9]{2}$/),
+        }))
+        .query(async ({ input, ctx }) => {
+          const requestedTask = await db.getTaskById(input.taskId);
+          if (!requestedTask || requestedTask.createdBy !== ctx.user.id) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+          }
+          const missionRootId = await db.getMissionRootTaskId(input.taskId);
+          if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
+          const mission = await db.getTaskById(missionRootId);
+          if (!mission || mission.createdBy !== ctx.user.id) {
+            throw new TRPCError({ code: "FORBIDDEN", message: "Somente o proprietário da missão pode avaliar a governança do plano." });
+          }
+
+          const documents = await db.getMissionDocumentsForTask(missionRootId, ctx.user.id, false);
+          const actionPlanDocument = documents.find((document) =>
+            document.typeKey === "ACTION_PLAN" && document.documentKey === "ACTION_PLAN"
+          );
+          if (!actionPlanDocument?.latestVersion) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "A missão ainda não possui plano de ação." });
+          }
+
+          const planVersionResult = await db.getMissionDocumentVersionForTask(
+            missionRootId,
+            actionPlanDocument.id,
+            actionPlanDocument.latestVersion.version,
+            ctx.user.id,
+            false,
+          );
+          if (!planVersionResult) throw new TRPCError({ code: "NOT_FOUND", message: "Versão atual do plano não encontrada." });
+
+          let plan;
+          try {
+            plan = ActionPlanSchema.parse(JSON.parse(planVersionResult.version.content));
+          } catch {
+            throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O conteúdo da versão atual do plano não corresponde ao contrato estruturado." });
+          }
+          const unit = plan.tasks.find((item) => item.id === input.unitId);
+          if (!unit) throw new TRPCError({ code: "NOT_FOUND", message: "Unidade não encontrada na versão atual do plano." });
+
+          const blueprintDocument = documents.find((document) =>
+            document.typeKey === "BLUEPRINT" && document.documentKey === "BLUEPRINT"
+          );
+          let sourceVersionsCurrent = false;
+          if (blueprintDocument?.latestVersion
+            && blueprintDocument.latestVersion.id === planVersionResult.version.sourceDocumentVersionId
+            && ["READY", "ACTIVE"].includes(blueprintDocument.latestVersion.state)) {
+            const blueprintResult = await db.getMissionDocumentVersionForTask(
+              missionRootId,
+              blueprintDocument.id,
+              blueprintDocument.latestVersion.version,
+              ctx.user.id,
+              false,
+            );
+            const trDocument = documents.find((document) =>
+              document.typeKey === "TR" && document.documentKey === "TR"
+            );
+            if (blueprintResult && trDocument?.latestVersion
+              && ["VALIDATED", "ACTIVE", "REORIENTED"].includes(trDocument.latestVersion.state)
+              && blueprintResult.version.sourceDocumentVersionId === trDocument.latestVersion.id) {
+              sourceVersionsCurrent = true;
+            }
+          }
+
+          const gate = evaluateExecutionGate({
+            planApproved: actionPlanDocument.latestVersion.state === "APPROVED",
+            sourceVersionsCurrent,
+            dependenciesCompleted: unit.dependsOn.length === 0 ? true : null,
+            riskClass: null,
+            maximumAllowedRisk: null,
+            estimatedCredits: unit.estimatedCredits,
+            availableBudgetCredits: null,
+            budgetEstimateVerified: false,
+            permissionGranted: false,
+            agentEligible: false,
+            idempotencyKey: null,
+            executionAdapterAvailable: false,
+            explicitUnitApproval: false,
+          });
+
+          return {
+            missionId: missionRootId,
+            actionPlanDocumentId: actionPlanDocument.id,
+            actionPlanVersion: planVersionResult.version.version,
+            actionPlanContentHash: planVersionResult.version.contentHash,
+            unit: {
+              id: unit.id,
+              title: unit.title,
+              proposedAgentId: unit.proposedAgentId,
+              dependsOn: unit.dependsOn,
+              estimatedCredits: unit.estimatedCredits,
+            },
+            gate,
+            limitations: [
+              "A avaliação é somente leitura e não cria autorização nem execução.",
+              "Dependências do plano ainda não possuem vínculo persistido com tarefas operacionais; dependências não vazias permanecem bloqueadas.",
+              "Classificação/limite de risco, orçamento autorizado, permissão por unidade, elegibilidade do executor-filho, idempotência persistida e adaptador de execução por unidade ainda não estão implementados.",
+              "O snapshot de elegibilidade da missão-pai não é reutilizado como prova de elegibilidade de uma futura tarefa-filha.",
+              "A aprovação do plano inteiro não equivale à aprovação individual desta unidade.",
+            ],
+          };
         }),
       generateActionPlan: protectedProcedure
         .input(z.object({ taskId: z.number().int().positive() }))
