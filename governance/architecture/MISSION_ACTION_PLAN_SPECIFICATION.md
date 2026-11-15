@@ -98,7 +98,7 @@ O plano é exibido no visualizador documental dinâmico existente. A UI oferece:
 - [x] Aprovação rejeita versão obsoleta ou fonte TR/Blueprint desatualizada.
 - [x] UI integrada ao visualizador existente.
 - [x] Nenhum dispatch ou execução é iniciado pela aprovação.
-- [ ] CI final e validação de migration 0011 em PostgreSQL descartável.
+- [x] CI final e validação de migration 0011 em PostgreSQL 16 descartável (run 43668299189).
 - [ ] Runtime LLM integrado e banco persistente permanecem sem validação.
 
 ## 9. Próxima fronteira
