@@ -1357,9 +1357,9 @@ export const appRouter = router({
               || "Consultei os critérios de elegibilidade, mas não consegui produzir uma síntese textual.";
             if (assistantContent.startsWith("Consultei os critérios")) responseStatus = "failed";
           } else if (forwardCall) {
-            let toolArgs: { message?: string };
+            let toolArgs: { message?: string; taskId?: number };
             try {
-              toolArgs = JSON.parse(forwardCall.function.arguments) as { message?: string };
+              toolArgs = JSON.parse(forwardCall.function.arguments) as { message?: string; taskId?: number };
             } catch {
               throw new Error("A Sofia retornou argumentos inválidos para o encaminhamento.");
             }
@@ -1368,17 +1368,52 @@ export const appRouter = router({
             if (!forwardedMessage || forwardedMessage.length > OPERATOR_MESSAGE_MAX_LENGTH) {
               throw new Error("A Sofia produziu uma instrução vazia ou acima do limite permitido.");
             }
-            if (!task.agentId || !task.manusTaskId) {
-              assistantContent = "Entendi que você deseja encaminhar uma instrução, mas esta missão não possui agente atribuído e execução externa identificada. Não enviei a mensagem.";
+
+            // A missão pode estar sendo executada por uma tarefa-filha. O SCP
+            // continua dono da missão e resolve o executor temporário ativo.
+            const missionRootId = await db.getMissionRootTaskId(input.taskId);
+            const missionRoot = missionRootId ? await db.getTaskById(missionRootId) : null;
+            if (!missionRoot || (missionRoot.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
+              throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada ou sem permissão de acesso." });
+            }
+
+            const childTasks = await db.getTasksByParentId(missionRoot.id);
+            const relatedTasks = [
+              missionRoot,
+              ...childTasks.filter((child) => child.createdBy === missionRoot.createdBy),
+            ];
+            const executionCandidates = (await Promise.all(relatedTasks.map(async (candidate) => ({
+              task: candidate,
+              status: (await db.getTaskStatusNameById(candidate.statusId))?.toUpperCase() ?? null,
+            })))).filter(({ task: candidate, status }) =>
+              status === "PROGRESS"
+              && candidate.agentId != null
+              && Boolean(candidate.manusTaskId)
+              && !["stopped", "error", "completed"].includes((candidate.manusStatus ?? "").toLowerCase())
+            );
+
+            const executionTask = toolArgs.taskId
+              ? executionCandidates.find(({ task: candidate }) => candidate.id === toolArgs.taskId)?.task
+              : executionCandidates.length === 1
+                ? executionCandidates[0].task
+                : null;
+
+            if (!executionTask) {
+              if (executionCandidates.length > 1) {
+                assistantContent = "Há mais de uma execução ativa nesta missão. Para evitar encaminhar a instrução ao executor errado, indique a etapa/tarefa de destino. Execuções ativas: "
+                  + executionCandidates.map(({ task: candidate }) => `#${candidate.id} — ${candidate.title}`).join("; ") + ".";
+              } else {
+                assistantContent = "Não localizei uma execução externa ativa e atribuída nesta missão. A mensagem não foi encaminhada.";
+              }
               responseStatus = "failed";
-            } else if (!(await db.hasExecutionReadyMissionDocuments(input.taskId))) {
+            } else if (!(await db.hasExecutionReadyMissionDocuments(missionRoot.id))) {
               assistantContent = "A instrução não foi enviada: a missão ainda não possui TR validado e Blueprint READY vinculado à versão vigente.";
               responseStatus = "failed";
             } else {
-              const externalReply = await sendManusMessageAndWait(task, forwardedMessage);
+              const externalReply = await sendManusMessageAndWait(executionTask, forwardedMessage);
               assistantContent = externalReply
-                ? `A instrução foi encaminhada à execução externa associada a esta missão. Resposta recebida:\n\n${externalReply}`
-                : "A solicitação de envio foi encaminhada à integração Manus, mas não foi possível confirmar uma resposta da execução dentro da janela de consulta. Isso não comprova leitura ou processamento.";
+                ? `Instrução encaminhada à tarefa #${executionTask.id} — ${executionTask.title}. Resposta recebida:\n\n${externalReply}`
+                : `A instrução foi enviada à execução #${executionTask.id}, mas não foi possível confirmar uma resposta dentro da janela de consulta. Isso não comprova leitura ou processamento.`;
               if (!externalReply) responseStatus = "pending";
             }
           } else {
