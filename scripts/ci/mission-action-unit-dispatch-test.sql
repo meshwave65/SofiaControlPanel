@@ -1,5 +1,5 @@
 -- Exercises the ACTION_PLAN dispatch boundary on disposable PostgreSQL only.
--- Requires migrations 0010, 0011, 0012 and the 0003 dispatch trigger.
+-- Requires migrations 0010–0013 and the 0003 dispatch trigger.
 
 CREATE OR REPLACE FUNCTION net.http_post(
   url text,
@@ -114,6 +114,43 @@ BEGIN
        <> (SELECT id FROM sofia."taskStatuses" WHERE name = 'PAUSED') THEN
     RAISE EXCEPTION 'TEST FAILURE: PAUSED materialization changed the approval or task state';
   END IF;
+
+  -- Gate evidence is bound to the exact persisted Txx identity and is append-only.
+  INSERT INTO sofia."missionActionUnitGateEvidence" (
+    "actionUnitId", "missionTaskId", "actionPlanDocumentId", "actionPlanVersionId",
+    "actionPlanVersionNumber", "actionPlanContentHash", "unitId", "gateKey",
+    decision, "actorType", source, evidence
+  )
+  SELECT id, "missionTaskId", "actionPlanDocumentId", "actionPlanVersionId",
+         "actionPlanVersionNumber", "actionPlanContentHash", "unitId", 'DEPENDENCY',
+         'VERIFIED', 'SYSTEM', 'ci_fixture', '{"allDependenciesCompleted":true}'::jsonb
+    FROM sofia."missionActionUnits"
+   WHERE "missionTaskId" = root_id AND "unitId" = 'T01';
+
+  BEGIN
+    UPDATE sofia."missionActionUnitGateEvidence"
+       SET decision = 'BLOCKED'
+     WHERE "actionUnitId" = (SELECT id FROM sofia."missionActionUnits" WHERE "missionTaskId" = root_id AND "unitId" = 'T01');
+    RAISE EXCEPTION 'TEST FAILURE: gate evidence was mutable';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'TEST FAILURE:%' THEN RAISE; END IF;
+  END;
+
+  BEGIN
+    INSERT INTO sofia."missionActionUnitGateEvidence" (
+      "actionUnitId", "missionTaskId", "actionPlanDocumentId", "actionPlanVersionId",
+      "actionPlanVersionNumber", "actionPlanContentHash", "unitId", "gateKey",
+      decision, "actorType", "actorUserId", source, evidence
+    )
+    SELECT id, "missionTaskId" + 1, "actionPlanDocumentId", "actionPlanVersionId",
+           "actionPlanVersionNumber", "actionPlanContentHash", "unitId", 'BUDGET_AUTHORIZATION',
+           'VERIFIED', 'OWNER', owner_id, 'ci_fixture', '{"budgetCap":10}'::jsonb
+      FROM sofia."missionActionUnits"
+     WHERE "missionTaskId" = root_id AND "unitId" = 'T01';
+    RAISE EXCEPTION 'TEST FAILURE: evidence with mismatched mission identity was accepted';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'TEST FAILURE:%' THEN RAISE; END IF;
+  END;
 
   -- A linked PAUSED child is still blocked from STAGED until all gates separately
   -- advance the unit to READY_FOR_DISPATCH.
