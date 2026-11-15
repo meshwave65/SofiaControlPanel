@@ -433,3 +433,10 @@ O ARC/PGC atual é somente um protótipo conceitual rudimentar, sem enforcement 
 - Browser Use e serviços pagos estão fora do processo. CI é evidência auxiliar, não gate artificial para interromper a implementação.
 - Registrar cada commit/alteração/resultado em OR, PROGRESS e TASKS. Separar CI, migration persistente, deploy e teste funcional real.
 - Verificar projeto Supabase efetivamente conectado antes de aplicar migrations 0010–0013; não inferir projeto pelo nome. Task 20.3/Mateus permanece intocada.
+
+
+### PR #15 integrada e deploy iniciado — OR-20261115-0050
+- PR #15 foi integrada em `main` por squash merge; commit `9e3f9bd3f7c09a7d2212bd7c1e30796cd020b78f`.
+- Deploy manual no Render Free: `dep-dbsvo1rbc2fs73cn5v1g`; estado inicial `build_in_progress`.
+- Auto-deploy continua desligado. Aguardar resultado real do deploy e registrar falhas/correções sem reverter automaticamente a missão.
+- Banco Supabase efetivo e migrations 0010–0013 persistentes ainda não confirmados. Ver OR-20261115-0050.
