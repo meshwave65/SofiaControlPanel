@@ -395,3 +395,6 @@ Foi criado workflow dedicado para executar `pnpm check`, `pnpm test`, `pnpm buil
 - Dependências serão comprovadas por Txx→operationalTaskId e status DONE; elegibilidade e adaptador serão snapshots específicos do executor/tarefa e revalidados no runtime.
 - Contrato AC-023 definido: ledger append-only de evidências tipadas e vinculado à versão/hash/unidade; ausência ou obsolescência mantém BLOCKED. Sem READY_FOR_DISPATCH nesta etapa.
 - Relatório: governance/operational_reports/OR-20261115-0041.md. Nenhuma migration persistente, execução, dispatch, consumo de créditos, merge ou deploy. Task 20.3/Mateus intocada.
+
+### Diretriz de segurança contínua — ARC/PGC
+O ARC/PGC atual é somente um protótipo conceitual rudimentar, sem enforcement prático. A direção futura é um módulo de segurança contínua e contextual: autenticação estabelece identidade inicial, enquanto comportamento, contexto, integridade, escopo e condições do executor são reavaliados durante a operação. Sinais contínuos podem restringir, suspender ou provocar revalidação; nunca concedem permissões implicitamente nem substituem grants explícitos. Ver atualização em ACTION_UNIT_EXECUTION_GOVERNANCE.md e OR-20261115-0041.
