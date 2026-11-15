@@ -338,3 +338,15 @@
 - CI run 43656100735 SUCCESS: `pnpm check`, 43/43 testes, `pnpm build` e migration 0010 em PostgreSQL 16 descartável.
 - Próxima etapa: planos de ação persistíveis, versionados e vinculados ao TR/Blueprint, com efeitos/custos/riscos/dependências e confirmação humana explícita antes de ferramenta mutável.
 - Sem DB persistente, migration aplicada, merge, deploy, restart, dispatch, LLM/Manus real ou créditos. PR #15 sem merge. Task 20.3/Mateus intocada. OR-20261114-0035.
+
+### Checkpoint 20.4 — OR-20261114-0036: plano de ação estruturado
+
+- Implementado contrato JSON validado em `server/actionPlan.ts`: objetivo, resultado, tarefas, dependências, critérios de aceite, propostas de agentes, créditos, riscos, reversibilidade e aprovação obrigatória.
+- Geração exige TR vigente validado e Blueprint READY/ACTIVE derivado da versão exata do TR.
+- Agentes sugeridos ficam limitados ao snapshot read-only de elegibilidade. Nenhuma reserva ou atribuição ocorre.
+- Sem modelo verificável de custo por tarefa, créditos estimados são null; saldo do agente não é usado como custo.
+- ACTION_PLAN usa o catálogo/versionamento documental existente. Migration 0011 registra apenas o novo tipo, sem tabela nova e sem execução automática no startup.
+- Aprovação cria versão imutável APPROVED, assinada pelo proprietário e vinculada a versão/hash exatos da proposta; servidor revalida integridade e atualidade do TR/Blueprint. Aprovação não inicia execução nem libera créditos.
+- UI integrada ao visualizador documental existente.
+- CI run do incremento em andamento; migration 0011 ainda será validada em PostgreSQL 16 descartável.
+- Sem aplicação de migration persistente, merge, deploy, restart, dispatch, LLM/Manus real ou consumo de créditos. Task 20.3/Mateus intocada.
