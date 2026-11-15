@@ -49,6 +49,17 @@ export default function TaskDetail() {
   );
   const [messageContent, setMessageContent] = useState("");
   const createMissionMessageMutation = trpc.messages.create.useMutation();
+  const pauseExecutionMutation = trpc.tasks.pauseExecution.useMutation({
+    onSuccess: async (result) => {
+      await taskQuery.refetch();
+      if (result.paused) {
+        toast.success("Execução externa pausada e confirmada pela Manus.");
+      } else {
+        toast.warning("Pausa solicitada, mas ainda há processos em segundo plano ativos ou sem confirmação. A missão permanece em PROGRESS.");
+      }
+    },
+    onError: (error) => toast.error(error.message || "Não foi possível pausar a execução."),
+  });
   const lookupsQuery = trpc.lookups.listAll.useQuery(
     undefined,
     { enabled: canLoadTask && Boolean(taskQuery.data), retry: false },
@@ -464,6 +475,7 @@ export default function TaskDetail() {
     awaiting_tr_validation: "Aguardando validação do TR",
     waiting_for_available_agent: "Aguardando agente elegível",
     waiting_for_pinned_agent: "Aguardando agente fixado",
+    manual_pause_pending: "Pausa solicitada — aguardando processos em segundo plano",
   };
   const externalStatusLabel = task.manusStatus
     ? externalStatusLabels[task.manusStatus.toLowerCase()] ?? task.manusStatus.replace(/_/g, " ")
@@ -893,6 +905,11 @@ export default function TaskDetail() {
                   <div className="space-y-1">
                     <p className="text-xs text-muted-foreground">Execução externa (Manus)</p>
                     <Badge variant="outline">{externalStatusLabel}</Badge>
+                    {task.manusStatus === "manual_pause_pending" && (
+                      <p className="text-xs text-amber-600">
+                        O estado local só mudará para PAUSED quando a Manus confirmar que não há jobs em segundo plano.
+                      </p>
+                    )}
                     {task.manusTaskId && (
                       <p className="break-all text-xs text-muted-foreground">ID: {task.manusTaskId}</p>
                     )}
@@ -905,6 +922,30 @@ export default function TaskDetail() {
                     <p className="text-xs text-amber-600 sm:col-span-2 lg:col-span-3">
                       Não foi possível carregar os dados públicos do executor. Os dados da missão continuam disponíveis.
                     </p>
+                  )}
+                  {task.manusTaskId && currentStatusName === "PROGRESS" && ["running", "manual_pause_pending"].includes((task.manusStatus ?? "").toLowerCase()) && (
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-4 sm:col-span-2 lg:col-span-3">
+                      <p className="text-xs text-muted-foreground">
+                        A pausa interrompe a execução externa. Se houver processos em segundo plano, a missão permanecerá em PROGRESS até a confirmação.
+                      </p>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="destructive"
+                        disabled={pauseExecutionMutation.isPending}
+                        onClick={() => {
+                          const message = task.manusStatus === "manual_pause_pending"
+                            ? "Verificar novamente e, se a execução tiver retomado, solicitar sua interrupção?"
+                            : "Interromper a execução externa desta tarefa na Manus?";
+                          if (window.confirm(message)) {
+                            pauseExecutionMutation.mutate({ taskId });
+                          }
+                        }}
+                      >
+                        {pauseExecutionMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {task.manusStatus === "manual_pause_pending" ? "Verificar pausa" : "Pausar execução"}
+                      </Button>
+                    </div>
                   )}
                 </CardContent>
               </Card>
