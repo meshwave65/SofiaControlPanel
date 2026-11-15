@@ -25,3 +25,8 @@ Manter visão global do produto e planejar a sequência de forma coerente; imple
 - Branch atual de implementação: `feat/sofia-cognitive-control-plane`
 - PR atual: https://github.com/meshwave65/SofiaControlPanel/pull/15
 - A branch/PR não equivale à produção. Conferir sempre o estado real antes de retomar.
+
+
+## Continuidade após OR-20261115-0050
+
+6. [OR-20261115-0050](../../operational_reports/OR-20261115-0050.md) — decisão do operador para integração direta via PR #15 em `main`, publicação incremental no Render Free e documentação operacional persistente.

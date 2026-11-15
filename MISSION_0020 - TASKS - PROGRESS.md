@@ -134,3 +134,302 @@
 - Contexto de missão fornecido explicitamente/selecionado pelo operador; não injetar automaticamente todo o histórico ou dados privados. Mensagens/respostas diretas não mudam o estado da missão.
 - Validar a API Manus: o código atual envia por /task.sendMessage com task_id; uma conversa persistente dedicada criada sob a credencial do agente é hipótese técnica, não endpoint confirmado.
 - Classificação: requisito proposto, desenho técnico pendente. Referência: OR-20261114-0018 / AC-011. Sem código, DB ou chamadas externas alterados.
+
+
+### Checkpoint 20.4 — decisão e primeiro incremento cognitivo SOFIA (2026-11-14)
+- O responsável aprovou a SOFIA como camada cognitiva e interlocutora central do SCP; arquitetura registrada em `governance/architecture/SOFIA_COGNITIVE_CONTROL_PLANE.md` e AC-012.
+- Branch isolada: `feat/sofia-cognitive-control-plane`, baseada no main em `5e77db55c2b397d92cabb7a40237125802a2bb71`.
+- Implementação inicial: mensagens passam primeiro pela Sofia; ferramenta tipada permite encaminhar instrução somente mediante tool call e pedido explícito, exigindo agente e execução externa identificados. Perguntas/análises são respondidas pela Sofia.
+- Testes adicionados para mediação, não encaminhamento automático e bloqueio sem execução externa; ainda não executados. Check/test/build pendentes.
+- Não implementados ainda: ferramentas read-only de estado/elegibilidade, transferência, pausa/retomada, plano persistente/confirmável, memória operacional persistente e UI de telemetria.
+- Sem deploy, restart, alteração de DB/produção, chamada LLM/Manus real, mensagem externa, dispatch ou consumo de créditos. Task 20.3/Mateus intocada.
+- OR: `OR-20261114-0022.md` (SUBMITTED; Oracle PENDING).
+
+
+### Checkpoint 20.4 — correção da identidade arquitetural SOFIA (2026-11-14)
+- Decisão AC-013: SOFIA é o sistema integrado e modular; SCP é somente seu painel central de comando/frontend, não um módulo independente nem sinônimo de *control plane*.
+- Terminologia oficial de conhecimento: BBC = Base Bruta de Conhecimento; BCE = Base de Conhecimento Evolutivo curada.
+- Fluxo conceitual: SWE → BBC → SCur → BCE → SVec. SVec consome a BCE curada; não usa a BBC como fonte primária de vetorização.
+- Cognição, governança, segurança e orquestração são capacidades transversais do SOFIA. Módulos especializados mantêm contratos e responsabilidades próprios.
+- Documento atualizado: `governance/architecture/SOFIA_COGNITIVE_ORCHESTRATION_ARCHITECTURE.md`; nome ambíguo `SOFIA_COGNITIVE_CONTROL_PLANE.md` removido.
+- Foundation_MeshWave consultado: `KNOWLEDGE/` preserva fontes brutas e `BCE/` contém documentos curados. A decisão BBC não altera diretórios nem arquivos do Foundation.
+- Esta alteração é documental/arquitetural; pipeline SWE/BBC/SCur/BCE/SVec não está declarado implementado. PR #15 permanece isolada; testes/check/build pendentes; sem merge, deploy, DB ou produção. Task 20.3/Mateus intocada.
+
+
+### Checkpoint 20.4 — AC-014: TR como contrato do ciclo de vida da missão (2026-11-14)
+- Decisão do responsável registrada: toda missão deve receber primeiro TR antes da execução.
+- Missão humana: primeiro TR apresenta a compreensão da SOFIA e aguarda validação explícita do operador solicitante; correções/redirecionamentos criam novas versões preservando histórico.
+- Missão originada pela SOFIA: primeiro TR obrigatório, sem validação humana preliminar; autonomia permanece subordinada a permissões, políticas e limites vigentes. Operador pode intervir e reorientar a qualquer momento.
+- TR não inventa motivação, decisão ou resultado. Fatos, declarações, interpretações, hipóteses, reconstruções e dados não localizados devem ser distinguidos. Missões antigas sem justificativa declaram que a motivação original não foi localizada.
+- TR vivo, versionado e sustentado por eventos/fontes; abertura da missão no SCP deve mostrar TR primeiro. Correlações exigem evidência. TR e FOR permanecem distintos.
+- Especificação: governance/architecture/MISSION_TR_SPECIFICATION.md; arquitetura: governance/architecture/SOFIA_COGNITIVE_ORCHESTRATION_ARCHITECTURE.md.
+- **Estado:** requisito e documentação registrados; geração/versionamento/UI não implementados nem presumidos. Inspeção de schema, eventos, APIs e UI será necessária antes da implementação.
+- Nenhuma alteração de runtime, DB, produção, dispatch, chamada externa, crédito, deploy ou restart. Task 20.3/Mateus intocada.
+
+
+### Checkpoint 20.4 — Auditoria do fluxo de criação/execução para o TR (OR-20261114-0024)
+- Inspecionados na branch `feat/sofia-cognitive-control-plane`: `drizzle/schema.ts`, migrations `0000`, `0003`, `0006`, `0009`; `server/routers.ts`, `server/db.ts`, `server/sofiaOrchestrator.ts`, `server/dispatchEndpoint.ts`, `server/storage.ts`, `server/githubMissionMirror.ts`; telas `TaskCreate.tsx`, `Tasks.tsx`, `TaskDetail.tsx`.
+- O registro de missão hoje é `sofia.tasks`; não foi encontrada entidade `missions` separada no schema inspecionado. Campos de intenção limitam-se essencialmente a `title` e `description`; não há campos próprios para motivação, objetivo/escopo validados ou resultados esperados.
+- Ponto crítico: formulários usam STAGED como status inicial padrão; `tasks.create` aceita status inicial e grava diretamente; migration `0003_automatic_task_dispatch.sql` define trigger AFTER INSERT OR UPDATE de status/agente que chama dispatch quando a linha fica STAGED. A migration comprova a definição no repositório, não a instalação/ativação no banco de produção.
+- Logo, primeiro TR precisa integrar o caminho crítico de criação/liberação. Não é seguro apenas acrescentar TR depois do INSERT STAGED. É necessário introduzir estado pré-execução/gate ou mecanismo equivalente, bloquear dispatch até a condição documental apropriada e impedir bypass via seleção arbitrária de status/rotas internas.
+- Fluxo de execução adicional: `tasks.start` chama `SofiaOrchestrator.startTask`; o endpoint interno de dispatch também chama o mesmo método. A fatoração cria subtarefas em STAGED, que também podem disparar o trigger; subtarefas são criadas pelo orquestrador e não passam por validação humana preliminar individual. O contrato do TR deve definir se subtarefas herdam o TR/plano validado da missão-pai ou precisam de artefato derivado antes do dispatch; recomendação técnica a validar: herdar escopo aprovado e registrar proveniência/decomposição, sem pedir validação humana repetitiva.
+- Persistência existente: `messages` guarda conversas e ORs por taskId; `activityLogs` guarda eventos pontuais; `contextReports` é tabela de relatórios gerais, não relacionada diretamente a missão; relatório consolidado é armazenado por mecanismo de Storage. Nenhuma dessas estruturas, isoladamente, implementa TR versionado com proveniência.
+- GitHub mirror (`missions/{missionKey}.md`) atualmente espelha título, descrição e metadados operacionais; não armazena TR. A rotina de espelhamento é regenerativa e não deve ser reaproveitada como histórico de TR sem alterar o contrato para preservar versões e evitar sobrescrita.
+- UI: criação em `TaskCreate.tsx` e modal em `Tasks.tsx`; detalhe em `TaskDetail.tsx` apresenta descrição/ações e tabs Subtarefas/Relatórios/Consolidado, sem TR. Tab padrão atual é Subtarefas.
+- **Não verificado:** estado real das migrations/triggers no banco; dados de produção; execução real do dispatch; instalação de triggers; conteúdo e volume dos registros atuais. A auditoria foi somente leitura do código/migrations da branch.
+- **Sem alterações funcionais:** nenhum schema/migration, runtime, UI, DB, produção, dispatch, chamada Manus/LLM, consumo de crédito, deploy ou restart foi realizado. Task 20.3/Mateus intocada.
+- Próxima etapa: desenhar e validar arquitetura mínima de gate pré-dispatch, primeiro TR persistente/versionado e integração do TR inicial com os fluxos humano, SOFIA autônoma e subtarefas; depois implementar em PR com testes que provem que nenhuma rota/trigger inicia missão humana antes da validação.
+
+### Checkpoint 20.4 — AC-015: distinção TR / Blueprint (2026-11-14)
+
+- Decisão registrada: TR é a compreensão narrativa e viva da missão, voltada prioritariamente ao operador humano; Blueprint é o plano de trabalho operacional derivado de uma versão específica do TR, direcionado aos executores.
+- Em missão humana, validação explícita do TR inicial precede a liberação do Blueprint para execução. Em missão autônoma da SOFIA, TR inicial também é obrigatório, mas não há aprovação humana preliminar; a execução permanece dentro dos limites de autonomia e governança.
+- Blueprint decompõe o escopo validado em etapas, tarefas, dependências, recursos, restrições, critérios de aceite e evidências. Não pode ampliar silenciosamente o escopo.
+- Missão-pai mantém TR e Blueprint mestre; filhas referenciam a versão e unidade do plano. Agentes são executores temporários e recebem contexto mínimo autorizado.
+- OR registra execução/evidências; TR consolida a narrativa; FOR consolida aprendizado operacional.
+- Especificação: `governance/architecture/MISSION_BLUEPRINT_SPECIFICATION.md`; relação adicionada a `MISSION_TR_SPECIFICATION.md` e à arquitetura SOFIA.
+- OR-20261114-0025 criado e indexado. Apenas documentação; sem schema/runtime/UI/DB/produção/dispatch/LLM/Manus/créditos/deploy/restart. Task 20.3/Mateus intocada.
+- Próxima etapa: projeto técnico do gate pré-dispatch e persistência/versionamento de TR e Blueprint, com testes para criação humana/autônoma, início direto, trigger interno e tarefas-filhas.
+### Checkpoint 20.4 — Plano técnico de persistência e gate TR/Blueprint (2026-11-14)
+
+- Inspeção complementar confirmou: `taskStatuses` é lookup; criação aceita status arbitrário; `updateStatus` permite promover qualquer tarefa; `startTask` possui caminho `alreadyClaimedWithoutExecution` fora de STAGED; `ensure-database.mjs` executa a migration do trigger durante inicialização.
+- Também foi confirmado que `factorizeTask` copia atualmente agente/pinagem do pai às filhas, divergindo da decisão de pai consolidador e filhas executadas por agentes elegíveis.
+- Criado `governance/architecture/MISSION_EXECUTION_GOVERNANCE_IMPLEMENTATION.md` com modelo append-only para versões de TR/Blueprint, vínculo exato Blueprint→TR, RLS/ownership, fluxo humano/autônomo, herança de escopo nas filhas e defesa em profundidade.
+- OR-20261114-0026 criado e indexado.
+- **Estado:** planejamento técnico; Incremento A (persistência/versionamento + RLS + testes) ainda não implementado. Sem schema/migration/runtime/UI/DB/produção/dispatch/LLM/Manus/créditos/deploy/restart. Task 20.3/Mateus intocada.
+- Próximo passo: implementar Incremento A após conferir o modelo real de autenticação/ownership e a estratégia de RLS do banco; não presumir que uma policy baseada em auth.uid() corresponda ao identificador inteiro de users.id.
+
+### Checkpoint 20.4 — AC-016: TR como visão principal em Gerenciar Missão (2026-11-14)
+
+- Inspecionada a UI atual: `Tasks.tsx` possui botão Gerenciar que abre `/tasks/:id`; `TaskDetail.tsx` apresenta a descrição da missão e abas Subtarefas, Relatórios e Consolidado, sem TR/Blueprint.
+- Decisão: Gerenciar abre a missão diretamente na visão TR, como conteúdo principal/padrão para o operador. Blueprint terá área/aba própria, como plano operacional para executores.
+- A descrição original permanece fonte/proveniência do pedido, não TR consolidado nem Blueprint.
+- Hierarquia da tela: TR → Blueprint → Execução (subtarefas/ORs/checkpoints/evidências) → Consolidação (entregável/FOR).
+- Missão humana aguardando validação terá correção/validação no próprio TR e indicação inequívoca de execução bloqueada. Missão SOFIA-originada mostrará origem e permitirá inspeção/intervenção sem aprovação humana preliminar.
+- AC-016 registrado na arquitetura/contexto; OR-20261114-0027 criado e indexado.
+- Estado: decisão de UX persistida; UI ainda não implementada. Implementação fica no Incremento D, após APIs e persistência A–C. Sem alterações funcionais/DB/produção/dispatch/LLM/Manus/créditos/deploy/restart. Task 20.3/Mateus intocada.
+
+
+### Checkpoint 20.4 — AC-017: visualizador dinâmico de documentos (2026-11-14)
+
+- Decisão: Gerenciar Missão terá um único visualizador de documentos, com dropdown dinâmico alimentado pelo catálogo e pelas instâncias documentais da missão; não serão criadas abas fixas TR/Blueprint nem uma tela por tipo.
+- TR é selecionado por padrão; Blueprint, ORs, FOR e documentos futuros aparecem somente quando houver instância existente e acessível. A seleção apenas altera o documento exibido.
+- Modelo separa catálogo de tipos (metadados e regras de apresentação) de instâncias documentais (missão, tipo, versão, estado, conteúdo/referência segura, autoria, datas e proveniência). Permite múltiplos ORs ou outras instâncias do mesmo tipo.
+- Descrição original permanece fonte histórica separada; não pode ser tratada como TR nem Blueprint.
+- Segurança de listagem/conteúdo é server-side/RLS; estados de ausência, elaboração, carregamento, erro e acesso negado são distintos.
+- Especificação: governance/architecture/MISSION_DOCUMENT_CATALOG_SPECIFICATION.md; integração registrada nos contratos TR/Blueprint e arquitetura geral. OR-20261114-0028 criado.
+- Estado: contrato de UX/modelo lógico documentado; catálogo, persistência, APIs, RLS e UI ainda não implementados. Próximo passo é incorporar catálogo/instâncias ao desenho físico do Incremento A após verificar schema e ownership reais; UI vem após APIs de leitura.
+- Apenas documentação. Sem código funcional, schema/migration, banco, produção, dispatch, LLM/Manus, créditos, deploy ou restart. Task 20.3/Mateus intocada.
+
+
+### Checkpoint 20.4 — Incremento A: persistência documental (2026-11-14)
+
+- Inspecionado schema Drizzle, migrations SQL, RLS server-only, ensure-database.mjs, ownership e tela TaskDetail.
+- Adicionado modelo físico Drizzle: missionDocumentTypes (catálogo), missionDocuments (instâncias por missão) e missionDocumentVersions (histórico append-only).
+- Adicionada migration 0010 com catálogo ORIGINAL_REQUEST/TR/BLUEPRINT/OR/FOR, índices, FKs, RLS/policies server-only, revogação de privilégios diretos e trigger de imutabilidade das versões.
+- Ownership documental herda tasks.createdBy; não foi duplicado. Blueprint poderá referenciar a versão exata do TR.
+- A versão corrente é derivada do maior número de versão, sem ponteiro mutável.
+- Migration 0010 NÃO foi conectada ao ensure-database.mjs e NÃO foi aplicada a banco. Essa separação evita DDL automático em deploy/startup.
+- Sem camada de serviço, APIs, geração de documentos, backfill de solicitações originais, UI ou testes executáveis nesta etapa.
+- OR-20261114-0029 criado. Task 20.3/Mateus intocada. Sem deploy, restart, dispatch, LLM/Manus ou consumo de créditos.
+
+
+### Incremento A — camada de persistência server-side (2026-11-14)
+
+- server/db.ts recebeu operações para consultar catálogo, listar documentos da missão com versão vigente, recuperar versão específica, listar histórico, criar instância + primeira versão transacionalmente e criar revisões serializadas.
+- Toda leitura/escrita de documento verifica acesso à missão por tasks.createdBy; administrador usa a permissão global já existente. Autoria AGENT exige agente pertencente ao proprietário da missão. Blueprint exige versão-fonte TR da mesma missão.
+- Funções ainda não estão expostas em tRPC e não foram exercitadas contra banco; testes/check/build permanecem pendentes.
+- OR-20261114-0029 complementado com o estado da camada de repositório.
+
+- Teste estrutural em server/db.test.ts atualizado para verificar as seis funções documentais; escrito, mas não executado. Sem TypeScript/build/integration validation.
+
+
+### Incremento B — ciclo inicial do TR e gate de execução (2026-11-14)
+
+- `tasks.create` agora cria missões humanas em PAUSED, preserva ORIGINAL_REQUEST como snapshot e gera TR inicial pela SOFIA. Falha de geração produz TR DRAFT com fatos declarados e mantém a missão bloqueada.
+- APIs `tasks.documents`: listagem, conteúdo por versão, histórico, correção do TR inicial, regeneração após falha e validação explícita.
+- Validar TR cria nova versão VALIDATED e só depois promove a missão para STAGED.
+- Gate em `tasks.updateStatus`, `SofiaOrchestrator.startTask/processTask/factorizeTask`, helper de repositório e trigger BEFORE da migration 0010. Filhas herdam autorização do TR raiz.
+- Fatorização não copia mais agentId/agentPinned do pai às filhas; leases de execução são independentes.
+- TaskDetail ganhou visualizador dinâmico, TR padrão, histórico de versões e ações de correção/regeneração/validação. Formulários iniciam em PAUSED e encaminham ao detalhe para revisão.
+- OR-20261114-0030 registra arquivos, limites e sequência segura de validação.
+- Não executados check/test/build/parser SQL/integration tests. Migration 0010 não aplicada; sem banco, deploy, restart, dispatch, chamada LLM/Manus ou créditos. Task 20.3/Mateus intocada.
+
+
+### Incremento B.1 — Blueprint obrigatório antes da liberação (2026-11-14)
+
+- O fluxo foi endurecido para cumprir AC-015: validar TR não libera execução sozinho. A SOFIA gera Blueprint a partir da versão exata do TR validado; o documento registra número e ID da versão-fonte.
+- O Blueprint só recebe estado READY se contiver as seções estruturais obrigatórias e declarar explicitamente ausência de bloqueios de escopo não resolvidos. Se houver bloqueio ou falha de geração, a missão permanece PAUSED.
+- `hasExecutionReadyMissionDocuments`, API, orquestrador e trigger SQL exigem TR vigente validado + Blueprint vigente READY/ACTIVE com `sourceDocumentVersionId` igual ao ID da versão atual do TR.
+- A API permite retry do Blueprint e liberação posterior enquanto a missão permanecer PAUSED e sem execução externa. Reorientação pré-execução do TR cria nova versão, invalida a referência do Blueprint anterior e exige nova validação/geração.
+- A tela mostra Blueprint pendente, permite retry e oferece liberação quando documento e vínculo estão prontos. Filhas visualizam documentos da missão raiz e não podem alterá-los.
+- READY é prontidão documental/estrutural, não substitui o motor completo de política de risco, orçamento e permissões, que permanece pendente.
+- OR-20261114-0030 atualizado. Sem check/test/build/parser SQL/integration; migration 0010 não aplicada; sem produção/deploy/dispatch/LLM real/Manus/créditos. Task 20.3/Mateus intocada.
+
+ 
+### Revisão técnica B.2 — caminhos alternativos de execução (2026-11-14)
+
+- `startTask` inicia somente missões `STAGED`; removeu-se o fallback que interpretava qualquer tarefa com agente atribuído e sem Manus Task ID como claim válido. Isso bloqueia início indevido em `PAUSED` e evita duplicação em `PROGRESS`.
+- Se o claim atômico retorna vazio, o orquestrador relê o estado. Se outro dispatcher já moveu a missão, não altera `manusStatus`; só registra espera quando continua `STAGED`.
+- Fatoração só ocorre com missão raiz `STAGED` ou `PROGRESS`; UI e trigger SQL impedem gerar/dispatchar filhas a partir de missão `PAUSED`.
+- Visualizador avalia o TR canônico. Validador de Blueprint exige seções próprias, ordenadas, preenchidas e declaração não contraditória de ausência de bloqueios.
+- Testes adicionados/atualizados para os gates acima; **não executados**. Check/build/parser SQL/integration continuam pendentes. Migration 0010 não aplicada; sem produção/deploy/dispatch/LLM real/Manus/créditos. Task 20.3 intocada. OR-20261114-0030.
+
+- Revisão adicional do estado: `tasks.updateStatus` não pode promover diretamente para `PROGRESS`; migration 0010 permite claim `STAGED→PROGRESS` e retomada `PAUSED→PROGRESS` somente com `manusTaskId` existente, verificando novamente os documentos. Fatoração de filhas depende da raiz `STAGED/PROGRESS`. OR-20261114-0030.
+
+- Criação de missão agora faz preflight do catálogo e exige `ORIGINAL_REQUEST`, `TR` e `BLUEPRINT` ativos antes de inserir a linha em `tasks`; migration 0010 ausente/incompleta não deixa missão órfã. OR-20261114-0030.
+
+- Limite de validação registrado: a ausência de bloqueios é verificada no conteúdo integral do Blueprint; a UI só sinaliza prontidão quando o TR vigente está validado. Testes/check/build continuam pendentes porque esta sessão não dispõe de checkout/dependências locais. OR-20261114-0030.
+
+
+### Incremento C — validação automatizada (2026-11-14)
+
+- Adicionado workflow GitHub Actions para instalação congelada, TypeScript check, suíte Vitest e build de produção.
+- Adicionado job isolado PostgreSQL 16 para executar a migration 0010 sobre fixture mínimo de pré-requisitos, sem conexão com Supabase/produção.
+- O workflow está configurado para push na branch, PR para main e acionamento manual. Resultado ainda precisa ser confirmado; não considerar testes ou migration aprovados antes da leitura dos jobs.
+- Migration 0010 não aplicada a banco persistente. Sem deploy, restart, dispatch, chamadas LLM/Manus ou consumo de créditos. Task 20.3/Mateus intocada. OR-20261114-0030.
+
+
+- Primeiro ciclo CI: migration 0010 executou com sucesso em PostgreSQL 16 descartável. Job da aplicação parou antes da instalação por declaração duplicada da versão pnpm; configuração corrigida para usar o pin do package.json. TypeScript/testes/build aguardam nova execução. O teste descartável não autoriza migração de produção. OR-20261114-0030.
+
+### Checkpoint 20.4 — OR-20261114-0031: diagnóstico e correção das falhas de CI (2026-11-14)
+
+- Analisado o job `132612505589` do run `43647344694`: instalação concluída e `pnpm check` passou; Vitest executou 41 testes, com 36 aprovados e 5 falhas; build não foi executado devido ao fail-fast após falha nos testes.
+- Causa 1 (implementação): validador de Blueprint confundia `Dependências` com `PENDÊNCIA` por busca de substring. Corrigida detecção para respeitar fronteiras de palavra.
+- Causa 2 (implementação): no caminho sem agente elegível, `startTask` fazia uma releitura redundante após persistir `manusStatus`, retornando `undefined` no fixture sem terceira resposta. Agora retorna o registro relido, acrescido do estado persistido.
+- Causa 3 (testes): `messages.test.ts` não mockava `hasExecutionReadyMissionDocuments` e o cenário sem agente não configurava tool call; os fixtures foram corrigidos sem relaxar os gates de segurança.
+- Correções em `server/missionBlueprint.ts`, `server/sofiaOrchestrator.ts` e `server/messages.test.ts`, persistidas na branch da PR #15. OR-20261114-0031.
+- Novas execuções automáticas iniciadas no novo head; resultados ainda pendentes. Não declarar CI aprovado até consultar os jobs completos.
+- Sem alteração de banco persistente, Supabase, produção, deploy, restart, dispatch, chamadas reais LLM/Manus ou créditos. PR #15 permanece Draft. Task 20.3/Mateus intocada.
+
+
+- **Resultado final do CI:** run `43649190436` no commit `ecc45754464511e2d15e567910a97707b46ed7c5` concluiu SUCCESS. `pnpm check` passou; `pnpm test` passou com 41/41 testes; `pnpm build` passou; migration 0010 executou com sucesso em PostgreSQL 16 descartável. OR-20261114-0031 atualizado.
+- A aprovação refere-se ao código e ao fixture descartável. Migration 0010 não foi aplicada a banco persistente/produção. Sem deploy, restart, dispatch, chamadas reais LLM/Manus ou consumo de créditos. PR #15 permanece Draft; Task 20.3/Mateus intocada.
+
+### Checkpoint 20.4 — OR-20261114-0032: revisão final do PR #15 (2026-11-14)
+
+- Revisão final identificou persistência não atômica da missão e dos documentos iniciais; corrigida com `createMissionWithInitialDocuments`, que grava tarefa, ORIGINAL_REQUEST e TR na mesma transação. Espelhamento GitHub passou a ocorrer somente após o commit documental.
+- Corrigido o visualizador: ao trocar o documento, a UI limpa a versão histórica selecionada e retorna à versão vigente do documento escolhido.
+- CI no head `42f059e805427ea2426bb458385849714771d9f1`: runs `43650002480` (push) e `43650006606` (PR) SUCCESS; check, 41/41 testes, build e migration 0010 em PostgreSQL 16 descartável aprovados.
+- PR #15 continua sem merge; pronto para revisão humana. Migration não aplicada a banco persistente; sem deploy/restart/dispatch/LLM/Manus real/créditos. Task 20.3/Mateus intocada. OR-20261114-0032.
+
+### Checkpoint 20.4 — OR-20261114-0033
+- Atribuição inicial de agente é temporária; `agentPinned` agora assume false por padrão nas criações comuns.
+- Reorientação do TR permitida em PAUSED/STAGED antes da primeira execução externa, com lock transacional da missão para competir com segurança contra o dispatcher.
+- CI run 43650701916 SUCCESS: check, testes, build e migration 0010 em PostgreSQL 16 descartável.
+- Sem migration persistente, merge, deploy, restart, dispatch real, LLM/Manus ou créditos. Task 20.3/Mateus intocada. OR-20261114-0033.
+
+### Checkpoint 20.4 — OR-20261114-0034: consulta cognitiva somente leitura (2026-11-14)
+
+- SOFIA recebeu a ferramenta tipada `inspect_current_mission`, sem argumentos controlados pelo LLM; o escopo é derivado da missão autorizada aberta no Messenger.
+- Consulta missão raiz, filhas diretas, estados, atribuições, Agent IDs, Agent Task IDs, estado externo, créditos em snapshot e prontidão documental TR/Blueprint.
+- Ownership é validado; filhas de outro proprietário são excluídas; somente agentes efetivamente atribuídos à árvore são projetados e credenciais não são expostas.
+- A consulta não modifica estado nem declara elegibilidade de agente. Créditos são snapshot persistido; status online não prova disponibilidade.
+- CI run 43655671495 SUCCESS: `pnpm check`, 41/41 testes, `pnpm build` e migration 0010 em PostgreSQL 16 descartável.
+- Próxima etapa: consulta de elegibilidade reproduzindo exatamente o predicado do claim, ainda sem reservar ou modificar agentes; depois planos estruturados e confirmação persistente.
+- Sem DB persistente, migration aplicada, deploy, restart, dispatch, LLM/Manus real ou consumo de créditos. PR #15 sem merge. Task 20.3/Mateus intocada. OR-20261114-0034.
+
+### Checkpoint 20.4 — OR-20261114-0035: elegibilidade de agentes (2026-11-14)
+
+- Implementada `inspectTaskAgentEligibility(taskId, ownerId)` em `server/db.ts` e ferramenta cognitiva `inspect_agent_eligibility` no Messenger.
+- Reproduz o predicado de `claimStagedTaskWithAvailableAgent`: tarefa STAGED; pinagem humana; agente online; conexão configured/connected; credencial presente (booleano, sem segredo); créditos positivos; snapshot de até 60 segundos; ausência de outra tarefa PROGRESS.
+- Lista motivos de inelegibilidade e ordena candidatos elegíveis como o claim atual: créditos decrescentes, snapshot mais antigo, Agent ID.
+- Consulta sem lock, FOR UPDATE, SKIP LOCKED, reserva ou escrita. É snapshot, não garante elegibilidade futura nem valida credencial/ saldo em tempo real na Manus.
+- CI run 43656100735 SUCCESS: `pnpm check`, 43/43 testes, `pnpm build` e migration 0010 em PostgreSQL 16 descartável.
+- Próxima etapa: planos de ação persistíveis, versionados e vinculados ao TR/Blueprint, com efeitos/custos/riscos/dependências e confirmação humana explícita antes de ferramenta mutável.
+- Sem DB persistente, migration aplicada, merge, deploy, restart, dispatch, LLM/Manus real ou créditos. PR #15 sem merge. Task 20.3/Mateus intocada. OR-20261114-0035.
+
+### Checkpoint 20.4 — OR-20261114-0036: plano de ação estruturado
+
+- Implementado contrato JSON validado em `server/actionPlan.ts`: objetivo, resultado, tarefas, dependências, critérios de aceite, propostas de agentes, créditos, riscos, reversibilidade e aprovação obrigatória.
+- Geração exige TR vigente validado e Blueprint READY/ACTIVE derivado da versão exata do TR.
+- Agentes sugeridos ficam limitados ao snapshot read-only de elegibilidade. Nenhuma reserva ou atribuição ocorre.
+- Sem modelo verificável de custo por tarefa, créditos estimados são null; saldo do agente não é usado como custo.
+- ACTION_PLAN usa o catálogo/versionamento documental existente. Migration 0011 registra apenas o novo tipo, sem tabela nova e sem execução automática no startup.
+- Aprovação cria versão imutável APPROVED, assinada pelo proprietário e vinculada a versão/hash exatos da proposta; servidor revalida integridade e atualidade do TR/Blueprint. Aprovação não inicia execução nem libera créditos.
+- UI integrada ao visualizador documental existente.
+- CI run [43668453513](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43668453513) SUCCESS: `pnpm check`, 48/48 testes (8 arquivos), `pnpm build` e migrations 0010+0011 em PostgreSQL 16 descartável.
+- Sem aplicação de migration persistente, merge, deploy, restart, dispatch, LLM/Manus real ou consumo de créditos. Task 20.3/Mateus intocada.
+
+### Checkpoint 20.4 — OR-20261114-0037: pré-avaliação de governança por unidade
+
+- Criado motor determinístico fail-closed para verificar plano aprovado, fontes atuais, dependências, risco/política, orçamento, permissões, elegibilidade específica, idempotência e adaptador.
+- Nova query read-only `evaluateActionPlanUnit` verifica ownership, unidade e cadeia de versões TR/Blueprint; UI permite selecionar unidade e ver bloqueios.
+- Identificado risco arquitetural crítico: trigger `tasks_dispatch_staged` da migration 0003 faz HTTP dispatch quando tarefa é inserida/alterada para STAGED; `ensure-database.mjs` instala o trigger no startup. Portanto, criar filha STAGED já pode disparar execução. Materialização de unidades fica bloqueada até a defesa transacional/SQL completa.
+- CI run [43669500711](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43669500711): SUCCESS no código final com integridade SHA-256 — TypeScript, 53/53 testes (9 arquivos), build e migrations 0010+0011 em PostgreSQL 16 descartável.
+- Nenhuma subtarefa criada, status alterado, trigger/migration modificada, dispatch, execução, DB persistente, merge ou deploy. Task 20.3/Mateus intocada.
+
+
+### Checkpoint 20.4 — AC-020 / OR-20261115-0038: identidade e autorização de unidades ACTION_PLAN
+
+- Migration 0012 adiciona `missionActionUnits`: missão raiz, ACTION_PLAN/versão/hash exatos, unidade Txx/título, chave de idempotência única, tarefa operacional opcional, estado e aprovação individual. Constraints e trigger validam imutabilidade, atualidade, correspondência do JSON e ownership.
+- A migration 0003 foi endurecida: se existe ACTION_PLAN, a missão raiz e qualquer tarefa sem registro de unidade aprovado, READY_FOR_DISPATCH e vinculado à tarefa são bloqueados antes do HTTP callback. A definição reinstalada no startup também foi atualizada.
+- `inspectTaskDispatchAuthorization` e `SofiaOrchestrator.startTask` repetem a validação server-side; endpoint interno transmite a chave persistida. UI/tRPC sem chave não pode iniciar unidade ACTION_PLAN. Missões sem ACTION_PLAN mantêm fluxo legado.
+- CI run [43699256796](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43699256796): migration PostgreSQL 16 descartável 0010+0011+0012, instalação do trigger e teste da barreira SQL passaram; `pnpm check`, `pnpm test` e `pnpm build` passaram.
+- Não há API/UI para registrar/aprovar unidade nem criação transacional da tarefa operacional nesta etapa. Nenhum registro READY_FOR_DISPATCH, subtarefa, status operacional ou dispatch foi criado.
+- Sem migration persistente, alteração Supabase/produção, execução LLM/Manus, reserva/créditos, merge/deploy/restart. Task 20.3/Mateus intocada. Próxima etapa: persistir e validar evidências de risco, orçamento, permissões, dependências e elegibilidade; então aprovação individual e materialização atômica PAUSED → vínculo → STAGED.
+
+- Defesa complementar AC-020: recuperação de tarefas em `waiting_credit` agora revalida autorização persistida da unidade antes de retomar mensagem ou criar execução após reatribuição; teste específico adicionado. CI final [43699884914](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43699884914) SUCCESS: migrations 0010–0012, trigger e teste PostgreSQL, TypeScript, testes e build.
+
+
+### Checkpoint 20.4 — registro e aprovação individual ACTION_PLAN (AC-021 / OR-20261115-0039)
+- Implementados na branch #15 os serviços transacionais de registro idempotente e aprovação individual das unidades Txx, com conferência de ownership, versão APPROVED vigente e hash SHA-256.
+- API tRPC para consultar, registrar e aprovar unidades; UI TaskDetail mostra estado e permite aprovação por unidade. A aprovação não autoriza execução.
+- CI #283 inicial falhou em TypeScript; correção aplicada. Workflow final [#317](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43707809264) aprovou TypeScript, 56/56 testes, build e PostgreSQL 16 descartável. Ver OR-20261115-0039.
+- Nenhuma migration persistente, tarefa operacional, dispatch, reserva/crédito, merge ou deploy. Task 20.3/Mateus intocada.
+
+### Checkpoint 20.4 — materialização de unidades aprovadas em PAUSED (AC-022 / OR-20261115-0040)
+- Implementado helper transacional `materializeApprovedMissionActionPlanUnits`: revalida missão raiz/owner, documento ACTION_PLAN e versão APPROVED vigente, SHA-256, schema JSON e correspondência completa de todas as unidades persistidas.
+- Materializa apenas unidades individualmente aprovadas, criando filhas PAUSED, sem agente, sem pinagem e sem execução externa; grava `operationalTaskId` e evidência na mesma transação. Repetição reutiliza vínculo existente.
+- Lock da missão e do documento serializa concorrência com materializações e revisões do ACTION_PLAN. A migration 0012 agora valida ownership e parent direto imediatamente ao estabelecer qualquer vínculo operacional, ainda que a unidade permaneça APPROVED.
+- Nova mutation tRPC e ação na TaskDetail exibem a materialização e o ID da tarefa-filha. Estado da unidade permanece APPROVED e a tarefa permanece PAUSED; nenhum caminho para STAGED/dispatch foi implementado.
+- Fixture SQL ampliada: vínculo PAUSED não concede READY_FOR_DISPATCH; tentativa de promover para STAGED antes da autorização é rejeitada.
+- Evidência em OR-20261115-0040 e contrato em `governance/architecture/ACTION_UNIT_EXECUTION_GOVERNANCE.md`.
+- CI [#317](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43707809264) SUCCESS: TypeScript, 56/56 testes, build e migrations 0010–0012 + trigger/barreira PostgreSQL 16 descartável. Nenhuma migration persistente, tarefa real, dispatch, LLM/Manus, crédito, merge ou deploy. Task 20.3/Mateus intocada.
+
+### Checkpoint 20.4 — AC-023: auditoria das fontes de evidência (OR-20261115-0041)
+- Auditoria do schema confirmou 21 tabelas. Não existem fontes dedicadas para risco operacional, orçamento de missão/unidade, permissões granulares, catálogo de capacidades de executor ou adaptadores.
+- ARC/PGC permanece telemetria/confiança; saldo de agente permanece snapshot financeiro do executor, não orçamento de missão. Nenhum dos dois libera execução.
+- Dependências serão comprovadas por Txx→operationalTaskId e status DONE; elegibilidade e adaptador serão snapshots específicos do executor/tarefa e revalidados no runtime.
+- Contrato AC-023 definido: ledger append-only de evidências tipadas e vinculado à versão/hash/unidade; ausência ou obsolescência mantém BLOCKED. Sem READY_FOR_DISPATCH nesta etapa.
+- Relatório: governance/operational_reports/OR-20261115-0041.md. Nenhuma migration persistente, execução, dispatch, consumo de créditos, merge ou deploy. Task 20.3/Mateus intocada.
+
+### Diretriz de segurança contínua — ARC/PGC
+O ARC/PGC atual é somente um protótipo conceitual rudimentar, sem enforcement prático. A direção futura é um módulo de segurança contínua e contextual: autenticação estabelece identidade inicial, enquanto comportamento, contexto, integridade, escopo e condições do executor são reavaliados durante a operação. ARC/PGC fornecem somente avaliações e evidências consultivas; não bloqueiam conexões nem alteram interações autonomamente. O SOFIA aplica suas políticas e decide qualquer revalidação, restrição, suspensão ou bloqueio. PGC é acionado somente por critérios definidos pelo sistema; nenhum módulo concede permissões implicitamente. Ver atualização em ACTION_UNIT_EXECUTION_GOVERNANCE.md e OR-20261115-0041.
+
+### AC-023a — ledger persistente de evidências implementado (OR-20261115-0042)
+- Nova tabela `missionActionUnitGateEvidence`, append-only, server-only e vinculada à identidade imutável da unidade Txx e ao hash/versão exatos do ACTION_PLAN.
+- Seis categorias fechadas de gate; decisões VERIFIED/BLOCKED/UNKNOWN; autoria SYSTEM/OWNER com validação do proprietário; trigger rejeita UPDATE/DELETE; RLS e FKs restritivas.
+- Migration 0013 e teste SQL adicionados; schema Drizzle reconstruído a partir de baseline limpo.
+- CI run 43708974232 SUCCESS: TypeScript, 56 testes, build e PostgreSQL descartável migrations 0010–0013 + dispatch boundary.
+- Não grava grants reais, não libera gates por si só, não promove tarefa, não reserva agente nem despacha. Sem migration persistente, merge ou deploy. Task 20.3/Mateus intocada.
+
+
+### AC-023b — evidência de dependências (implementação em branch)
+- Novo módulo `server/actionUnitGateEvidence.ts` revalida a versão APPROVED mais recente do ACTION_PLAN, o hash SHA-256 e a identidade Txx antes de derivar dependências.
+- Dependência só é VERIFIED com registro da mesma versão/hash, vínculo operacional, tarefa filha direta, mesmo proprietário e status DONE; ausência ou divergência gera BLOCKED com motivo.
+- A evidência é append-only, atribuída a SYSTEM e persistida no ledger 0013. A avaliação de unidade passa a consumir esse resultado e os dados de aprovação/idempotência já persistidos.
+- Testes unitários adicionados para dependências concluídas, ausentes, não materializadas, não DONE, fora do escopo e lista vazia. CI [run 43719391912](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43719391912) SUCCESS: TypeScript, testes, build, migrations 0010–0013 e dispatch boundary em PostgreSQL 16 descartável.
+- Nenhum gate de risco, orçamento, permissão, executor ou adaptador foi liberado; nenhuma tarefa foi promovida, despachada ou executada. Sem DB persistente, merge/deploy, créditos ou chamada externa. Task 20.3/Mateus intocada.
+
+
+### Checkpoint 20.4 — OR-20261115-0043: reorientação do SCP e roteamento do Messenger
+
+- Correção de escopo: prioridade volta ao ciclo de vida da missão, orquestração soberana pelo SCP/SOFIA e interlocução do operador pelo Messenger. Agentes são executores temporários, nunca proprietários das missões.
+- AC-023 e expansão de ARC/PGC como fontes/gates ficam estacionados; não serão ampliados nesta etapa. Código já existente permanece para revisão de escopo, sem reversão destrutiva automática. ARC/PGC são consultivos; o SOFIA decide e aplica políticas.
+- TR padronizado como **Transactional Report**. Especificação atualizada para refletir implementação parcial já existente na PR #15 e lacunas de atualização contínua/origem autônoma.
+- Auditoria confirmou criação humana com ORIGINAL_REQUEST/TR transacional, correção/validação/versionamento, Blueprint vinculado à versão exata e visualizador documental no TaskDetail. Ainda faltam missão originada autonomamente pela SOFIA e atualização event-driven do TR.
+- Messenger corrigido na branch: resolve missão-raiz e filhas diretas do mesmo proprietário; encontra execuções PROGRESS com Agent ID + Manus Task ID; encaminha automaticamente se houver um executor; se houver vários, não escolhe arbitrariamente e pede desambiguação; aceita taskId explícito somente após validação server-side de pertencimento e execução ativa.
+- Testes cobrem executor em filha, múltiplos executores ambíguos e seleção explícita. Workflow [43720232937](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43720232937) SUCCESS: TypeScript, testes, build, migrations 0010–0013 e dispatch boundary em PostgreSQL 16 descartável.
+- Lacunas prioritárias: pause/resume/transferência operacional dedicada; semântica de pai coordenador/consolidador e leases de filhas; missão autônoma da SOFIA; atualização contínua do TR.
+- Nenhuma chamada real Manus/LLM, mensagem externa, dispatch, consumo de créditos, migration persistente, merge, deploy ou restart. Task 20.3/Mateus intocada.
+- Próxima etapa: implementar controles de ciclo de vida no SCP, preservando identidade/contexto da missão e permitindo substituição do executor sem perda de continuidade.
+
+
+
+### Diretriz de execução atualizada — OR-20261115-0050
+- Método anterior de aguardar preview/QA visual antes de merge foi substituído por decisão explícita do operador: integrar pela PR existente para `main`, publicar no Render Free e corrigir com base no comportamento real.
+- PR #15 já aponta para `main`; não criar PR redundante. Auto-deploy permanece OFF; deploy manual após merge.
+- Browser Use e serviços pagos estão fora do processo. CI é evidência auxiliar, não gate artificial para interromper a implementação.
+- Registrar cada commit/alteração/resultado em OR, PROGRESS e TASKS. Separar CI, migration persistente, deploy e teste funcional real.
+- Verificar projeto Supabase efetivamente conectado antes de aplicar migrations 0010–0013; não inferir projeto pelo nome. Task 20.3/Mateus permanece intocada.

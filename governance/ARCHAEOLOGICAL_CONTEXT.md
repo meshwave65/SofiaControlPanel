@@ -112,3 +112,83 @@ Registrar cada nova entrada com data, OR/FOR, missão/etapa, orientação anteri
 - **Autoridade:** proposta do responsável; contrato técnico pendente de validação.
 - **Documentos:** OR-20261114-0018 (aditivo); MISSION_0020 PROGRESS; MISSION_0020 TASKS PROGRESS.
 - **Validação:** requisito registrado. Nenhuma alteração de código, banco, credencial, chamada Manus/LLM, envio de mensagem, deploy ou restart.
+
+
+### AC-012 — 2026-11-14 — SOFIA como plano cognitivo e operacional central do SCP
+- **Missão/etapa:** MISSION_0020 / tarefa 20.4 — evolução do Messenger e governança cognitiva.
+- **Decisão explícita do responsável:** implementar a SOFIA como interlocutora do operador e camada cognitiva central do SCP, responsável por compreender intenções, consultar contexto, propor/encaminhar ações e coordenar inteligências/agentes federados. O operador conversa prioritariamente com o SCP, não com a conta externa do agente.
+- **Princípio:** missões, contexto operacional, governança e continuidade pertencem ao SCP. Agentes externos são executores federados e substituíveis, salvo pinagem humana explícita.
+- **Arquitetura aprovada:** (1) camada cognitiva LLM/Sofia; (2) camada determinística de política, autorização, estado e execução no SCP; (3) adaptadores de agentes externos. O LLM interpreta e planeja, mas não acessa diretamente banco, credenciais ou APIs administrativas. Todas as ferramentas são tipadas, validadas no servidor e auditáveis.
+- **Modelo existente identificado:** `server/_core/llm.ts` usa `gemini-2.5-flash` via endpoint compatível com Chat Completions do gateway Manus Forge. Isso confirma uma capacidade LLM integrada, não um modelo proprietário da SOFIA.
+- **Primeiro incremento aprovado:** toda mensagem do operador passa pela Sofia; encaminhamento ao agente atual somente mediante decisão/tool call coerente com pedido explícito do operador, Agent ID e Agent Task ID existentes. Perguntas/análises ficam com Sofia. Ausência de resposta externa não é confirmação de entrega/leitura.
+- **Ações de controle:** transferência, pausa/retomada, prioridade e criação/cancelamento de execução exigem ferramentas governadas, validação de estado/política e confirmação conforme impacto. O modelo não é autoridade de execução.
+- **Memória:** contexto de missão e contexto operacional delimitados por ownership/finalidade; não carregar indiscriminadamente histórico de outras missões, dados privados ou credenciais.
+- **Classificação:** decisão arquitetural explícita do responsável; implementação incremental aprovada.
+- **Autoridade:** responsável pelo produto.
+- **Documentos:** `governance/architecture/SOFIA_COGNITIVE_CONTROL_PLANE.md`; OR-20261114-0022; MISSION_0020 PROGRESS; TASKS PROGRESS.
+- **Limite da primeira entrega:** não inclui transferência, pausa/retomada, persistência de planos, memória global, canal direto independente de missão ou mudanças de schema. Sem deploy, DB/produção, chamadas externas reais ou consumo de créditos.
+
+
+### AC-013 — 2026-11-14 — Identidade sistêmica do SOFIA, SCP frontend e arquitetura BBC/BCE
+- **Declaração e decisão explícita do responsável:** SOFIA é o sistema integrado completo, composto por módulos especializados e capacidades transversais. SCP (SOFIA Control Panel) é exclusivamente o painel central de comando/frontend do SOFIA; não é um módulo funcional independente nem o nome de uma camada *control plane*.
+- **Módulos de conhecimento:** SWE (SOFIA Web Extractor) extrai conhecimento das fontes do usuário e alimenta a BBC; SCur (SOFIA Curator) trabalha sobre a BBC, realiza curadoria e mantém a BCE e seus documentos vivos; SVec (SOFIA Vectorizer) vetoriza a BCE curada, não a BBC como fonte primária.
+- **Terminologia oficial:** BBC = Base Bruta de Conhecimento; BCE = Base de Conhecimento Evolutivo. BBC preserva fontes, históricos, arquivos e evidências de origem. BCE representa o conhecimento curado, organizado e evolutivo, com documentos vivos que expressam o estado da arte dos temas/domínios.
+- **Fluxo conceitual:** SWE → BBC → SCur → BCE → SVec. Módulos arqueológicos, de otimização e segurança, entre outros, são componentes/capacidades do sistema integrado, não subprodutos do SCP.
+- **Capacidades transversais:** cognição, governança, segurança e orquestração pertencem ao SOFIA como sistema. O SCP oferece a interface de interação e controle do operador; módulos especializados mantêm suas responsabilidades próprias e contratos explícitos.
+- **Relação com Foundation_MeshWave:** a estrutura documental consultada registra BCE curada separada das fontes brutas em KNOWLEDGE/. A nomenclatura sistêmica BBC formaliza a camada bruta; esta decisão não renomeia diretórios do Foundation nem altera aquele repositório.
+- **Classificação:** decisão arquitetural explícita do responsável; nomenclatura e responsabilidades conceituais adotadas. Não implica implementação dos módulos ou do pipeline completo.
+- **Documentos afetados:** substituído `governance/architecture/SOFIA_COGNITIVE_CONTROL_PLANE.md` por `governance/architecture/SOFIA_COGNITIVE_ORCHESTRATION_ARCHITECTURE.md`; OR-20261114-0022; PR #15.
+- **Autoridade:** responsável pelo produto.
+
+
+### AC-014 — 2026-11-14 — TR como compreensão, validação e memória evolutiva das missões
+
+- **Decisão explícita do responsável:** toda missão deve receber um primeiro TR após sua criação e antes de qualquer execução. O TR inicial documenta a compreensão da SOFIA sobre origem, motivação, objetivo, escopo, resultados esperados, estratégia, premissas, dúvidas e critérios de conclusão.
+- **Missão originada por humano:** o primeiro TR deve ser apresentado ao operador solicitante para validar se a SOFIA compreendeu a intenção. O operador pode corrigir, complementar ou redirecionar; a execução só começa após validação explícita. Versões anteriores devem ser preservadas.
+- **Missão originada pela SOFIA:** também exige primeiro TR, mas não exige avaliação/aprovação humana preliminar. A SOFIA pode executar autonomamente dentro das permissões, políticas e limites de autonomia; deve registrar a origem, motivação operacional e evidências que sustentam a iniciativa.
+- **Intervenção contínua:** um operador pode consultar, questionar e reorientar qualquer missão durante seu ciclo de vida, respeitando gates de governança e impacto.
+- **Integridade documental:** TR não inventa motivação, decisões, progresso ou resultados. Deve distinguir declaração do operador, fato documentado, decisão, interpretação da SOFIA, hipótese/inferência, reconstrução e informação não localizada. Missão antiga sem justificativa deve declarar que a motivação original não foi localizada; eventual reconstrução deve ser rotulada e fundamentada. Resultados realizados exigem evidência.
+- **Documento vivo:** atualizar e versionar após eventos materiais, preservando histórico, autoria/origem, fontes e alterações. Captura de eventos, consolidação narrativa e publicação da versão são responsabilidades separadas.
+- **Experiência SCP:** ao abrir missão, TR é a visão principal; tarefas, ORs, checkpoints, decisões, evidências e FOR ficam acessíveis como detalhamento secundário. Estados documentais não se confundem com estados técnicos de missão/tarefa.
+- **Correlação:** relações entre missões (origem comum, dependência, continuidade, complementaridade, conflito/sobreposição) exigem evidência e justificativa; similaridade temática não basta.
+- **Distinção TR/FOR:** TR é narrativa viva de compreensão humana da missão; FOR é aprendizado operacional final para evolução dos procedimentos e eficiência da SOFIA. Não são intercambiáveis.
+- **Classificação:** decisão arquitetural explícita do responsável; contrato aprovado, implementação pendente.
+- **Documento normativo:** governance/architecture/MISSION_TR_SPECIFICATION.md. Referência sistêmica: governance/architecture/SOFIA_COGNITIVE_ORCHESTRATION_ARCHITECTURE.md.
+- **Limites:** nenhum schema, runtime, UI, DB, produção, dispatch, chamada externa, crédito ou deploy alterado nesta etapa. Task 20.3/Mateus permanece intocada.
+
+### AC-015 — 2026-11-14 — Blueprint como plano de trabalho derivado do TR
+
+- **Decisão explicitada pelo responsável:** Blueprint é o plano de trabalho operacional da missão, direcionado aos agentes/executores; TR é a compreensão narrativa da missão, prioritariamente direcionada ao operador humano.
+- **Derivação:** o Blueprint deve derivar de uma versão específica do TR consolidado. Em missão humana, a validação explícita do TR inicial antecede a liberação da execução. Em missão autônoma da SOFIA, o TR inicial continua obrigatório, mas não exige aprovação humana preliminar; a SOFIA pode produzir o Blueprint e executar dentro das políticas e limites de autonomia.
+- **Escopo:** o Blueprint traduz o escopo validado em etapas, tarefas, dependências, recursos, restrições, critérios de aceite e evidências. Não pode ampliar silenciosamente o escopo aprovado. Mudanças materiais exigem análise de impacto e nova versão antes de executar o trabalho afetado.
+- **Hierarquia:** a missão-pai mantém TR e Blueprint mestre; tarefas-filhas são unidades auxiliares e referenciam a versão do plano e a unidade executada. Não são missões independentes por padrão.
+- **Agentes:** executores temporários, não proprietários da missão. Cada executor recebe apenas o pacote de trabalho e contexto necessários/autorizados. Troca de agente não altera identidade da missão nem rompe proveniência.
+- **Artefatos complementares:** Blueprint prescreve o trabalho; OR registra execução e evidências; TR consolida evolução narrativa; FOR consolida aprendizado operacional final.
+- **Classificação:** decisão arquitetural explícita; especificação documental aprovada para orientar a implementação.
+- **Documento normativo:** `governance/architecture/MISSION_BLUEPRINT_SPECIFICATION.md`; relação TR/Blueprint também registrada em `MISSION_TR_SPECIFICATION.md` e na arquitetura de orquestração.
+- **Limites:** definição documental apenas. Nenhum schema, runtime, UI, banco, produção, dispatch, chamada externa, crédito, deploy ou restart alterado. Task 20.3/Mateus permanece intocada.
+
+### AC-016 — 2026-11-14 — TR como visão principal em Gerenciar Missão
+
+- **Proposta do responsável:** a ação atual **Gerenciar**, na listagem de Missões, deve abrir a missão apresentando o TR, pois a descrição hoje exibida se aproxima de um plano operacional e mistura funções.
+- **Decisão:** a tela `/tasks/:id` passa a ter o TR como visão principal e padrão para o operador. O Blueprint fica em área/aba própria, como plano de trabalho direcionado aos executores.
+- **Proveniência:** a descrição original submetida na criação permanece preservada como fonte do pedido; não é o TR consolidado nem o Blueprint.
+- **Hierarquia da tela:** TR; Blueprint; Execução (subtarefas, ORs, checkpoints/evidências); Consolidação (entregável e FOR).
+- **Gate visual:** missão humana aguardando validação deve permitir corrigir/validar o TR e exibir bloqueio de execução até validação explícita. Missão SOFIA-originada mostra origem autônoma e permite inspeção/intervenção, sem exigir aprovação humana preliminar.
+- **Estado:** decisão de UX especificada; UI/runtime ainda não alterados. Implementação visual depende das APIs e persistência versionada TR/Blueprint e está alocada ao Incremento D.
+- **Evidência:** OR-20261114-0027; inspeção de `Tasks.tsx` e `TaskDetail.tsx`.
+- **Limites:** sem schema, runtime, banco, produção, dispatch, LLM/Manus, créditos, deploy ou restart. Task 20.3/Mateus intocada.
+
+
+### AC-017 — 2026-11-14 — visualizador dinâmico de documentos da missão
+
+- **Decisão explícita do responsável:** em Gerenciar Missão, apresentar TR, Blueprint e demais documentos em um único espaço de leitura, alternando o conteúdo por seleção dinâmica. Não limitar a interface a duas abas fixas.
+- **Modelo:** separar catálogo de tipos documentais (metadados, finalidade, ordenação, renderização e visibilidade) das instâncias efetivamente produzidas para cada missão (versão, estado, conteúdo/referência, autoria, datas e proveniência).
+- **Padrão:** TR é selecionado por padrão quando disponível. Blueprint, ORs, FOR e tipos futuros aparecem conforme existam e sejam acessíveis. Várias instâncias do mesmo tipo são permitidas quando aplicável.
+- **Proveniência:** descrição original permanece preservada como fonte da solicitação, sem ser apresentada como TR ou Blueprint.
+- **Segurança:** listagem e conteúdo são protegidos por backend/RLS; ocultar opção no frontend não é autorização. Seleção é somente leitura e não altera estado ou execução.
+- **UX:** um único visualizador, com estados distintos de ausência, elaboração, carregamento, erro e acesso negado. Novos tipos não exigem novas abas/páginas.
+- **Classificação:** decisão de UX e contrato funcional; implementação pendente.
+- **Documento normativo:** governance/architecture/MISSION_DOCUMENT_CATALOG_SPECIFICATION.md; integração também registrada nos contratos TR/Blueprint e arquitetura SOFIA.
+- **Evidência:** OR-20261114-0028.
+- **Limites:** documentação apenas; sem código funcional, schema/migration, banco, RLS de produção, dispatch, LLM/Manus, créditos, deploy ou restart. Task 20.3/Mateus intocada.

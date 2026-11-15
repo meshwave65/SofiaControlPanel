@@ -54,11 +54,12 @@ export default function Tasks() {
 
   const utils = trpc.useUtils();
   const createTaskMutation = trpc.tasks.create.useMutation({
-    onSuccess: async () => {
+    onSuccess: async (createdTask) => {
       await utils.tasks.list.invalidate();
-      toast.success("Tarefa criada com sucesso");
+      toast.success("Missão criada em PAUSED. Revise o TR inicial para liberar a execução.");
       setIsOpen(false);
       form.reset();
+      navigate(`/tasks/${createdTask.id}`);
     },
     onError: (error) => toast.error(`Erro ao criar tarefa: ${error.message}`),
   });
@@ -74,7 +75,7 @@ export default function Tasks() {
   });
   const statuses = lookupsQuery.data?.statuses ?? [];
   const priorities = lookupsQuery.data?.priorities ?? [];
-  const stagedStatusId = statuses.find((status) => status.name.toUpperCase() === "STAGED")?.id;
+  const pausedStatusId = statuses.find((status) => status.name.toUpperCase() === "PAUSED")?.id;
   const defaultPriority = priorities.find((priority) => priority.name.toLowerCase() === "baixa")
     ?? [...priorities].sort((a, b) => a.level - b.level)[0];
 
@@ -103,13 +104,13 @@ export default function Tasks() {
 
   useEffect(() => {
     if (!isOpen) return;
-    if (stagedStatusId !== undefined && !form.getValues("statusId")) {
-      form.setValue("statusId", String(stagedStatusId));
+    if (pausedStatusId !== undefined && !form.getValues("statusId")) {
+      form.setValue("statusId", String(pausedStatusId));
     }
     if (defaultPriority && !form.getValues("priorityId")) {
       form.setValue("priorityId", String(defaultPriority.id));
     }
-  }, [isOpen, stagedStatusId, defaultPriority?.id, form]);
+  }, [isOpen, pausedStatusId, defaultPriority?.id, form]);
 
   const onSubmit = (data: CreateTaskInput) => {
     const statusId = Number(data.statusId);
@@ -242,14 +243,14 @@ export default function Tasks() {
                       name="statusId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-[10px] font-black uppercase tracking-widest">Status inicial</FormLabel>
+                          <FormLabel className="text-[10px] font-black uppercase tracking-widest">Estado inicial — controlado pelo TR</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger className="cad-box"><SelectValue placeholder="Selecione o status" /></SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {statuses.map((status) => (
-                                <SelectItem key={status.id} value={String(status.id)}>{status.name}</SelectItem>
+                              {statuses.filter((status) => status.name.toUpperCase() === "PAUSED").map((status) => (
+                                <SelectItem key={status.id} value={String(status.id)}>PAUSED — aguardando validação do TR</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>

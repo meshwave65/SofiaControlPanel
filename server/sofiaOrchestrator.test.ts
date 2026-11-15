@@ -2,7 +2,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const dbMock = vi.hoisted(() => ({
   getTaskById: vi.fn(),
+  getAllTasksGlobal: vi.fn(),
+  getAllAgentsGlobal: vi.fn(),
   getTaskStatusIdByName: vi.fn(),
+  getTaskStatusNameById: vi.fn(),
+  hasExecutionReadyMissionDocuments: vi.fn(),
+  inspectTaskDispatchAuthorization: vi.fn(),
   getTasksByParentId: vi.fn(),
   updateTaskStatus: vi.fn(),
   claimStagedTask: vi.fn(),
@@ -17,6 +22,7 @@ const dbMock = vi.hoisted(() => ({
 
 const manusMock = vi.hoisted(() => ({
   createManusTask: vi.fn(),
+  sendManusMessage: vi.fn(),
   syncAgentCredits: vi.fn(),
 }));
 
@@ -25,9 +31,38 @@ vi.mock("./manusExecutionService", () => manusMock);
 
 import { SofiaOrchestrator } from "./sofiaOrchestrator";
 
+describe("SofiaOrchestrator.resumeCreditBlockedTasks", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    dbMock.getAllTasksGlobal.mockResolvedValue([
+      { id: 42, manusStatus: "waiting_credit", agentId: 7, createdBy: 5 },
+    ]);
+    dbMock.getTaskStatusIdByName.mockResolvedValue(2);
+  });
+
+  it("does not resume a credit-blocked ACTION_PLAN unit without current persisted authorization", async () => {
+    dbMock.inspectTaskDispatchAuthorization.mockResolvedValueOnce({
+      authorized: false,
+      requiresActionPlanUnit: true,
+      idempotencyKey: null,
+      reason: "plano foi substituído",
+    });
+
+    const result = await SofiaOrchestrator.resumeCreditBlockedTasks();
+
+    expect(result).toEqual([]);
+    expect(dbMock.getAllAgentsGlobal).not.toHaveBeenCalled();
+    expect(manusMock.sendManusMessage).not.toHaveBeenCalled();
+    expect(manusMock.createManusTask).not.toHaveBeenCalled();
+  });
+});
+
 describe("SofiaOrchestrator.processTask", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    dbMock.hasExecutionReadyMissionDocuments.mockResolvedValue(true);
+    dbMock.inspectTaskDispatchAuthorization.mockResolvedValue({ authorized: true, requiresActionPlanUnit: false, idempotencyKey: null, reason: null });
+    dbMock.getTaskStatusNameById.mockImplementation(async (id: number) => id === 1 ? "STAGED" : id === 2 ? "PROGRESS" : "PAUSED");
     dbMock.getTaskStatusIdByName.mockImplementation(async (name: string) => {
       if (name === "STAGED") return 1;
       if (name === "PROGRESS") return 2;
@@ -107,6 +142,9 @@ describe("SofiaOrchestrator.startTask", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    dbMock.hasExecutionReadyMissionDocuments.mockResolvedValue(true);
+    dbMock.inspectTaskDispatchAuthorization.mockResolvedValue({ authorized: true, requiresActionPlanUnit: false, idempotencyKey: null, reason: null });
+    dbMock.getTaskStatusNameById.mockImplementation(async (id: number) => id === 1 ? "STAGED" : id === 2 ? "PROGRESS" : "PAUSED");
     dbMock.getTaskStatusIdByName.mockImplementation(async (name: string) => {
       if (name === "STAGED") return 1;
       if (name === "PROGRESS") return 2;
@@ -120,6 +158,65 @@ describe("SofiaOrchestrator.startTask", () => {
     dbMock.updateTaskStatus.mockResolvedValue(undefined);
     dbMock.getAgentsByOwnerId.mockResolvedValue([{ id: 6, hasCredential: true, status: "online", creditsUpdatedAt: new Date() }]);
     manusMock.syncAgentCredits.mockResolvedValue(100);
+  });
+
+  it("blocks an approved ACTION_PLAN task when no persisted unit authorization exists", async () => {
+    dbMock.getTaskById.mockResolvedValueOnce(stagedTask);
+    dbMock.inspectTaskDispatchAuthorization.mockResolvedValueOnce({
+      authorized: false,
+      requiresActionPlanUnit: true,
+      idempotencyKey: null,
+      reason: "unidade sem vínculo aprovado",
+    });
+
+    await expect(SofiaOrchestrator.startTask(30)).rejects.toThrow("unidade sem vínculo aprovado");
+
+    expect(dbMock.claimStagedTaskWithAvailableAgent).not.toHaveBeenCalled();
+    expect(dbMock.getAgentsByOwnerId).not.toHaveBeenCalled();
+    expect(manusMock.createManusTask).not.toHaveBeenCalled();
+  });
+
+  it("requires the persisted idempotency key for ACTION_PLAN unit dispatch", async () => {
+    dbMock.getTaskById.mockResolvedValueOnce(stagedTask);
+    dbMock.inspectTaskDispatchAuthorization.mockResolvedValueOnce({
+      authorized: true,
+      requiresActionPlanUnit: true,
+      idempotencyKey: "unit-idempotency-key-0001",
+      reason: null,
+    });
+
+    await expect(SofiaOrchestrator.startTask(30)).rejects.toThrow("chave de idempotência persistida");
+
+    expect(dbMock.claimStagedTaskWithAvailableAgent).not.toHaveBeenCalled();
+    expect(manusMock.createManusTask).not.toHaveBeenCalled();
+  });
+
+  it("does not treat a PAUSED mission with an assigned agent as an in-flight claim", async () => {
+    dbMock.getTaskById.mockResolvedValueOnce({ ...stagedTask, statusId: 3 });
+
+    const result = await SofiaOrchestrator.startTask(30);
+
+    expect(result).toMatchObject({
+      started: false,
+      executionStarted: false,
+      externalTaskIds: [],
+    });
+    expect(dbMock.claimStagedTaskWithAvailableAgent).not.toHaveBeenCalled();
+    expect(dbMock.getAgentsByOwnerId).not.toHaveBeenCalled();
+    expect(manusMock.createManusTask).not.toHaveBeenCalled();
+    expect(manusMock.syncAgentCredits).not.toHaveBeenCalled();
+  });
+
+  it("does not start a PROGRESS task again when its external task ID is still absent", async () => {
+    const claimedButNotDispatched = { ...stagedTask, statusId: 2, manusTaskId: null };
+    dbMock.getTaskById.mockResolvedValueOnce(claimedButNotDispatched);
+
+    const result = await SofiaOrchestrator.startTask(30);
+
+    expect(result).toMatchObject({ started: false, executionStarted: false });
+    expect(dbMock.hasExecutionReadyMissionDocuments).not.toHaveBeenCalled();
+    expect(dbMock.claimStagedTaskWithAvailableAgent).not.toHaveBeenCalled();
+    expect(manusMock.createManusTask).not.toHaveBeenCalled();
   });
 
   it("atomically claims a staged task and creates one Manus execution", async () => {
@@ -147,6 +244,7 @@ describe("SofiaOrchestrator.startTask", () => {
     const result = await SofiaOrchestrator.startTask(30);
 
     expect(result).toMatchObject({ started: false, executionStarted: false });
+    expect(dbMock.updateTaskExecution).not.toHaveBeenCalled();
     expect(manusMock.createManusTask).not.toHaveBeenCalled();
   });
 
@@ -192,10 +290,31 @@ describe("SofiaOrchestrator.startTask", () => {
 describe("SofiaOrchestrator.factorizeTask", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    dbMock.hasExecutionReadyMissionDocuments.mockResolvedValue(true);
+    dbMock.inspectTaskDispatchAuthorization.mockResolvedValue({ authorized: true, requiresActionPlanUnit: false, idempotencyKey: null, reason: null });
+    dbMock.getTaskStatusNameById.mockImplementation(async (id: number) => id === 1 ? "STAGED" : id === 2 ? "PROGRESS" : "PAUSED");
     dbMock.getTasksByParentId.mockResolvedValue([]);
     dbMock.getTaskStatusIdByName.mockResolvedValue(1);
     dbMock.getOrCreateActivityEventType.mockResolvedValue({ id: 5 });
     dbMock.createActivityLog.mockResolvedValue(undefined);
+  });
+
+  it("does not factorize or dispatch child tasks while the parent mission is PAUSED", async () => {
+    dbMock.getTaskStatusNameById.mockResolvedValueOnce("PAUSED");
+
+    await expect(SofiaOrchestrator.factorizeTask({
+      id: 7,
+      statusId: 3,
+      title: "Missão pausada",
+      description: "Análise detalhada em múltiplas etapas.",
+      createdBy: 152,
+      agentId: null,
+      agentPinned: false,
+      priorityId: 1,
+      parentTaskId: null,
+    })).rejects.toThrow("PAUSED não libera unidades de execução");
+
+    expect(dbMock.createTask).not.toHaveBeenCalled();
   });
 
   it("factorizes an unassigned task and records activity with a null agent", async () => {
@@ -206,6 +325,7 @@ describe("SofiaOrchestrator.factorizeTask", () => {
 
     const ids = await SofiaOrchestrator.factorizeTask({
       id: 7,
+      statusId: 1,
       title: "PoUW-01",
       description: "Análise detalhada em múltiplas etapas.",
       createdBy: 152,
@@ -232,6 +352,7 @@ describe("SofiaOrchestrator.factorizeTask", () => {
 
     const ids = await SofiaOrchestrator.factorizeTask({
       id: 7,
+      statusId: 1,
       title: "PoUW-01",
       description: "Análise detalhada em múltiplas etapas.",
       createdBy: 152,
@@ -250,6 +371,9 @@ describe("SofiaOrchestrator.factorizeTask", () => {
 describe("SofiaOrchestrator factorization depth", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    dbMock.hasExecutionReadyMissionDocuments.mockResolvedValue(true);
+    dbMock.inspectTaskDispatchAuthorization.mockResolvedValue({ authorized: true, requiresActionPlanUnit: false, idempotencyKey: null, reason: null });
+    dbMock.getTaskStatusNameById.mockImplementation(async (id: number) => id === 1 ? "STAGED" : id === 2 ? "PROGRESS" : "PAUSED");
   });
 
   it("does not recursively factorize a task that already has a parent", async () => {

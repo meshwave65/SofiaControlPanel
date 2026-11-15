@@ -18,6 +18,15 @@ export class SofiaOrchestrator {
     const progressStatusId = await db.getTaskStatusIdByName(STATUS_PROGRESS);
     const results: Array<{ taskId: number; action: string; agentId: number }> = [];
     for (const task of waiting) {
+      const dispatchAuthorization = await db.inspectTaskDispatchAuthorization(task.id);
+      if (!dispatchAuthorization.authorized) {
+        console.warn(`[Orchestrator] Retomada bloqueada para tarefa ${task.id}: ${dispatchAuthorization.reason ?? "unidade ACTION_PLAN sem autorização vigente"}.`);
+        continue;
+      }
+      if (!(await db.hasExecutionReadyMissionDocuments(task.id))) {
+        console.warn(`[Orchestrator] Retomada bloqueada para missão ${task.id}: TR/Blueprint não estão elegíveis.`);
+        continue;
+      }
       const agents = await db.getAllAgentsGlobal();
       const current = agents.find((agent) => agent.id === task.agentId);
       if (!current) continue;
@@ -86,8 +95,15 @@ export class SofiaOrchestrator {
    * retomar uma fatoração interrompida sem duplicar subtarefas já persistidas.
    */
   static async factorizeTask(task: any): Promise<number[]> {
+    if (!(await db.hasExecutionReadyMissionDocuments(task.id))) {
+      throw new Error("Fatoração bloqueada: a missão principal exige TR validado e Blueprint READY vinculado à versão vigente.");
+    }
     if (task.parentTaskId != null) {
       throw new Error("Esta tarefa já é uma subtarefa. A fatoração deve ser feita na missão principal.");
+    }
+    const currentStatusName = (await db.getTaskStatusNameById(task.statusId))?.toUpperCase();
+    if (currentStatusName !== STATUS_STAGED && currentStatusName !== STATUS_PROGRESS) {
+      throw new Error("Fatoração bloqueada: a missão principal precisa estar STAGED ou PROGRESS; PAUSED não libera unidades de execução.");
     }
     console.log(`[Orchestrator] Fatorando tarefa ${task.id}: ${task.title}`);
 
@@ -110,8 +126,8 @@ export class SofiaOrchestrator {
       const result = await db.createTask({
         createdBy: task.createdBy,
         creatorType: task.creatorType === "system" ? "system" : "user",
-        agentId: task.agentId ?? undefined,
-        agentPinned: task.agentPinned,
+        // Child execution units inherit the validated mission scope, not the
+        // parent's temporary executor lease or an explicit pin on that executor.
         title: subtaskTitle,
         description: `${dim.suffix} ${task.description}`,
         statusId: await db.getTaskStatusIdByName(STATUS_STAGED),
@@ -181,6 +197,9 @@ export class SofiaOrchestrator {
     if (task.statusId !== stagedStatusId) {
       return { task, started: false, factorized: false, subtaskIds: [] };
     }
+    if (!(await db.hasExecutionReadyMissionDocuments(taskId))) {
+      throw new Error("Execução bloqueada: a missão exige TR validado e Blueprint READY vinculado à versão vigente.");
+    }
 
     const existingSubtasks = await db.getTasksByParentId(taskId);
     let subtaskIds: number[] = [];
@@ -204,13 +223,12 @@ export class SofiaOrchestrator {
   /**
    * Inicia a missão local e cria a execução correspondente na API Manus.
    */
-  static async startTask(taskId: number): Promise<any> {
+  static async startTask(taskId: number, dispatchKey?: string): Promise<any> {
     const task = await db.getTaskById(taskId);
     if (!task) return null;
 
     const stagedStatusId = await db.getTaskStatusIdByName(STATUS_STAGED);
-    const alreadyClaimedWithoutExecution = task.statusId !== stagedStatusId && Boolean(task.agentId) && !task.manusTaskId;
-    if (task.statusId !== stagedStatusId && !alreadyClaimedWithoutExecution) {
+    if (task.statusId !== stagedStatusId) {
       return {
         task,
         started: false,
@@ -220,6 +238,18 @@ export class SofiaOrchestrator {
         externalTaskIds: task.manusTaskId ? [task.manusTaskId] : [],
       };
     }
+    const dispatchAuthorization = await db.inspectTaskDispatchAuthorization(taskId);
+    if (!dispatchAuthorization.authorized) {
+      throw new Error("Dispatch bloqueado pela governança da unidade: " + (dispatchAuthorization.reason ?? "autorização não comprovada."));
+    }
+    if (dispatchAuthorization.requiresActionPlanUnit
+      && (!dispatchKey || dispatchKey !== dispatchAuthorization.idempotencyKey)) {
+      throw new Error("Dispatch bloqueado: tarefas vinculadas a ACTION_PLAN só podem ser iniciadas pelo callback interno com a chave de idempotência persistida da unidade aprovada.");
+    }
+    if (!(await db.hasExecutionReadyMissionDocuments(taskId))) {
+      throw new Error("Execução bloqueada: a missão exige TR validado e Blueprint READY. Subtarefas herdam os documentos da missão principal.");
+    }
+    const progressStatusId = await db.getTaskStatusIdByName(STATUS_PROGRESS);
 
     // Refresh the selected account, or all online configured accounts for automatic assignment.
     // Cached balances older than one minute are not used to allocate a new mission.
@@ -244,18 +274,30 @@ export class SofiaOrchestrator {
       }
     }));
 
-    const progressStatusId = await db.getTaskStatusIdByName(STATUS_PROGRESS);
-    const claimedTask = alreadyClaimedWithoutExecution
-      ? task
-      : await db.claimStagedTaskWithAvailableAgent(taskId, stagedStatusId, progressStatusId);
+    const claimedTask = await db.claimStagedTaskWithAvailableAgent(taskId, stagedStatusId, progressStatusId);
 
-    // No eligible agent: keep the mission STAGED. Heartbeat retries when credits/status change.
     if (!claimedTask) {
-      await db.updateTaskExecution(taskId, {
-        manusStatus: task.agentPinned ? "waiting_for_pinned_agent" : "waiting_for_available_agent",
-      });
+      // The atomic claim returns null both when no agent is eligible and when
+      // another dispatcher has already moved the task out of STAGED. Re-read
+      // before writing a wait state so we never overwrite another dispatcher's claim.
+      const latestTask = await db.getTaskById(taskId);
+      if (!latestTask) return null;
+      if (latestTask.statusId !== stagedStatusId) {
+        return {
+          task: latestTask,
+          started: false,
+          factorized: false,
+          subtaskIds: [],
+          executionStarted: Boolean(latestTask.manusTaskId),
+          externalTaskIds: latestTask.manusTaskId ? [latestTask.manusTaskId] : [],
+        };
+      }
+
+      // No eligible agent: keep the mission STAGED. Heartbeat retries when credits/status change.
+      const waitingStatus = latestTask.agentPinned ? "waiting_for_pinned_agent" : "waiting_for_available_agent";
+      await db.updateTaskExecution(taskId, { manusStatus: waitingStatus });
       return {
-        task: await db.getTaskById(taskId),
+        task: { ...latestTask, manusStatus: waitingStatus },
         started: false,
         factorized: false,
         subtaskIds: [],

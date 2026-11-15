@@ -6,14 +6,30 @@ const dbMock = vi.hoisted(() => ({
   getMessageByIdForTask: vi.fn(),
   createMessage: vi.fn(),
   getMessagesByTaskId: vi.fn(),
+  hasExecutionReadyMissionDocuments: vi.fn(),
+  getMissionRootTaskId: vi.fn(),
+  getTasksByParentId: vi.fn(),
+  getTaskStatusNameById: vi.fn(),
+  getAgentsByOwnerId: vi.fn(),
+  inspectTaskAgentEligibility: vi.fn(),
+  getTaskStatusIdByName: vi.fn(),
+  updateTaskExecution: vi.fn(),
+  updateTaskStatus: vi.fn(),
+  getOrCreateActivityEventType: vi.fn(),
+  createActivityLog: vi.fn(),
+  updateTaskGitHubSync: vi.fn(),
 }));
 const invokeLLMMock = vi.hoisted(() => vi.fn());
 const sendManusMessageAndWaitMock = vi.hoisted(() => vi.fn());
+const stopManusTaskMock = vi.hoisted(() => vi.fn());
+const resumeManusTaskMock = vi.hoisted(() => vi.fn());
 
 vi.mock("./db", () => dbMock);
 vi.mock("./_core/llm", () => ({ invokeLLM: invokeLLMMock }));
 vi.mock("./manusExecutionService", () => ({
   sendManusMessageAndWait: sendManusMessageAndWaitMock,
+  stopManusTask: stopManusTaskMock,
+  resumeManusTask: resumeManusTaskMock,
   syncAgentCredits: vi.fn(),
 }));
 
@@ -28,6 +44,20 @@ const context = {
 describe("messages.create — persistência e resposta Sofia", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    dbMock.hasExecutionReadyMissionDocuments.mockResolvedValue(true);
+    dbMock.getMissionRootTaskId.mockResolvedValue(19);
+    dbMock.getTasksByParentId.mockResolvedValue([]);
+    dbMock.getTaskStatusNameById.mockResolvedValue("PROGRESS");
+    dbMock.getAgentsByOwnerId.mockResolvedValue([]);
+    dbMock.inspectTaskAgentEligibility.mockResolvedValue({
+      observedAt: "2026-11-14T12:00:00.000Z",
+      task: { taskId: 19, ownerId: 152, status: "STAGED", assignedAgentId: null, agentPinned: false, assignmentMode: "AUTOMATIC" },
+      candidates: [],
+      interpretationLimits: ["Somente leitura."],
+    });
+    dbMock.getTaskStatusNameById.mockResolvedValue("PROGRESS");
+    dbMock.getTaskStatusIdByName.mockResolvedValue(4);
+    dbMock.getOrCreateActivityEventType.mockResolvedValue({ id: 9, name: "task_execution_paused" });
     dbMock.getTaskById.mockResolvedValue({
       id: 19,
       createdBy: 152,
@@ -47,6 +77,126 @@ describe("messages.create — persistência e resposta Sofia", () => {
     invokeLLMMock.mockResolvedValue({
       choices: [{ message: { role: "assistant", content: "Canal confirmado." } }],
     });
+  });
+
+  it("pausa a tarefa local somente após confirmação externa sem jobs em background", async () => {
+    dbMock.getTaskById.mockResolvedValue({
+      id: 91,
+      createdBy: 152,
+      statusId: 2,
+      agentId: 7,
+      manusTaskId: "manus-pause-91",
+      manusStatus: "running",
+      missionKey: null,
+    });
+    stopManusTaskMock.mockResolvedValue({
+      status: "stopped",
+      hasRunningBackgroundJobs: false,
+    });
+
+    const result = await appRouter.createCaller(context).tasks.pauseExecution({ taskId: 91 });
+
+    expect(result).toEqual({
+      paused: true,
+      pending: false,
+      externalStatus: "stopped",
+      hasRunningBackgroundJobs: false,
+    });
+    expect(stopManusTaskMock).toHaveBeenCalledWith(expect.objectContaining({ id: 91 }), false);
+    expect(dbMock.updateTaskExecution).toHaveBeenCalledWith(91, { manusStatus: "stopped", completedAt: null });
+    expect(dbMock.updateTaskStatus).toHaveBeenCalledWith(91, 4);
+    expect(dbMock.createActivityLog).toHaveBeenCalled();
+  });
+
+  it("mantém PROGRESS quando a Manus ainda reporta processos em segundo plano", async () => {
+    dbMock.getTaskById.mockResolvedValue({
+      id: 92,
+      createdBy: 152,
+      statusId: 2,
+      agentId: 7,
+      manusTaskId: "manus-pause-92",
+      manusStatus: "running",
+      missionKey: null,
+    });
+    stopManusTaskMock.mockResolvedValue({
+      status: "stopped",
+      hasRunningBackgroundJobs: true,
+    });
+
+    const result = await appRouter.createCaller(context).tasks.pauseExecution({ taskId: 92 });
+
+    expect(result).toEqual({
+      paused: false,
+      pending: true,
+      externalStatus: "stopped",
+      hasRunningBackgroundJobs: true,
+    });
+    expect(dbMock.updateTaskExecution).toHaveBeenCalledWith(92, {
+      manusStatus: "manual_pause_pending",
+      completedAt: null,
+    });
+    expect(dbMock.updateTaskStatus).not.toHaveBeenCalled();
+  });
+
+  it("retoma tarefa PAUSED somente após confirmação running na Manus", async () => {
+    dbMock.getTaskById.mockResolvedValue({
+      id: 94,
+      createdBy: 152,
+      statusId: 4,
+      agentId: 7,
+      manusTaskId: "manus-resume-94",
+      manusStatus: "stopped",
+      missionKey: null,
+    });
+    dbMock.getTaskStatusNameById.mockResolvedValue("PAUSED");
+    dbMock.getTaskStatusIdByName.mockResolvedValue(2);
+    resumeManusTaskMock.mockResolvedValue({ resumed: true, status: "running" });
+
+    const result = await appRouter.createCaller(context).tasks.resumeExecution({ taskId: 94 });
+
+    expect(result).toEqual({ resumed: true, pending: false, externalStatus: "running" });
+    expect(resumeManusTaskMock).toHaveBeenCalledWith(expect.objectContaining({ id: 94 }));
+    expect(dbMock.updateTaskExecution).toHaveBeenCalledWith(94, { manusStatus: "running", completedAt: null });
+    expect(dbMock.updateTaskStatus).toHaveBeenCalledWith(94, 2);
+    expect(dbMock.createActivityLog).toHaveBeenCalled();
+  });
+
+  it("mantém PAUSED enquanto a retomada externa ainda não foi confirmada", async () => {
+    dbMock.getTaskById.mockResolvedValue({
+      id: 95,
+      createdBy: 152,
+      statusId: 4,
+      agentId: 7,
+      manusTaskId: "manus-resume-95",
+      manusStatus: "stopped",
+      missionKey: null,
+    });
+    dbMock.getTaskStatusNameById.mockResolvedValue("PAUSED");
+    resumeManusTaskMock.mockResolvedValue({ resumed: false, status: "stopped" });
+
+    const result = await appRouter.createCaller(context).tasks.resumeExecution({ taskId: 95 });
+
+    expect(result).toEqual({ resumed: false, pending: true, externalStatus: "stopped" });
+    expect(dbMock.updateTaskExecution).toHaveBeenCalledWith(95, {
+      manusStatus: "manual_resume_pending",
+      completedAt: null,
+    });
+    expect(dbMock.updateTaskStatus).not.toHaveBeenCalled();
+  });
+
+  it("não permite pausar tarefa de outro proprietário", async () => {
+    dbMock.getTaskById.mockResolvedValue({
+      id: 93,
+      createdBy: 999,
+      statusId: 2,
+      agentId: 7,
+      manusTaskId: "manus-pause-93",
+      manusStatus: "running",
+    });
+
+    await expect(appRouter.createCaller(context).tasks.pauseExecution({ taskId: 93 }))
+      .rejects.toMatchObject({ code: "NOT_FOUND" });
+    expect(stopManusTaskMock).not.toHaveBeenCalled();
   });
 
   it("persiste o operador, envia o histórico à IA e persiste a resposta como filha", async () => {
@@ -74,6 +224,451 @@ describe("messages.create — persistência e resposta Sofia", () => {
     }));
     expect(result.responseStatus).toBe("replied");
     expect(result.reply).toMatchObject({ id: 101, isAssistant: true });
+  });
+
+  it("mantém a Sofia como mediadora antes de encaminhar uma instrução explícita ao agente", async () => {
+    dbMock.getTaskById.mockResolvedValue({
+      id: 19,
+      createdBy: 152,
+      title: "Missão fixture",
+      description: "Validar comunicação",
+      agentId: 7,
+      manusTaskId: "manus-task-19",
+      agentPinned: false,
+      manusStatus: "running",
+    });
+    invokeLLMMock.mockResolvedValue({
+      choices: [{
+        message: {
+          role: "assistant",
+          content: null,
+          tool_calls: [{
+            id: "call-forward-1",
+            type: "function",
+            function: {
+              name: "forward_operator_instruction_to_assigned_agent",
+              arguments: JSON.stringify({ message: "Continue a análise a partir do checkpoint." }),
+            },
+          }],
+        },
+      }],
+    });
+    sendManusMessageAndWaitMock.mockResolvedValue("Checkpoint retomado.");
+
+    const result = await appRouter.createCaller(context).messages.create({
+      taskId: 19,
+      typeId: 1,
+      content: "Envie ao agente: continue a análise a partir do checkpoint.",
+    });
+
+    expect(invokeLLMMock).toHaveBeenCalledWith(expect.objectContaining({
+      tools: expect.arrayContaining([
+        expect.objectContaining({
+          function: expect.objectContaining({ name: "forward_operator_instruction_to_assigned_agent" }),
+        }),
+      ]),
+      toolChoice: "auto",
+    }));
+    expect(sendManusMessageAndWaitMock).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 19, agentId: 7, manusTaskId: "manus-task-19" }),
+      "Continue a análise a partir do checkpoint."
+    );
+    expect(result.responseStatus).toBe("replied");
+    expect(dbMock.createMessage).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      content: expect.stringContaining("Checkpoint retomado."),
+      isAssistant: true,
+    }));
+  });
+
+  it("encaminha pela missão raiz para a única tarefa-filha em execução", async () => {
+    const root = {
+      id: 19, createdBy: 152, title: "Missão coordenadora",
+      description: "Executar etapas", agentId: null, manusTaskId: null,
+    };
+    const child = {
+      id: 20, createdBy: 152, parentTaskId: 19, title: "Etapa em execução",
+      description: "Executar etapa", agentId: 8, manusTaskId: "manus-child-20",
+      agentPinned: false, manusStatus: "running", statusId: 3,
+    };
+    dbMock.getMissionRootTaskId.mockResolvedValue(19);
+    dbMock.getTaskById.mockImplementation(async (id: number) => id === 20 ? child : root);
+    dbMock.getTasksByParentId.mockResolvedValue([child]);
+    dbMock.getTaskStatusNameById.mockResolvedValue("PROGRESS");
+    invokeLLMMock.mockResolvedValue({
+      choices: [{
+        message: {
+          role: "assistant",
+          content: null,
+          tool_calls: [{
+            id: "call-forward-child",
+            type: "function",
+            function: {
+              name: "forward_operator_instruction_to_assigned_agent",
+              arguments: JSON.stringify({ message: "Continue a etapa." }),
+            },
+          }],
+        },
+      }],
+    });
+    sendManusMessageAndWaitMock.mockResolvedValue("Etapa concluída.");
+
+    const result = await appRouter.createCaller(context).messages.create({
+      taskId: 19, typeId: 1, content: "Envie ao executor atual: continue a etapa.",
+    });
+
+    expect(sendManusMessageAndWaitMock).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 20, agentId: 8, manusTaskId: "manus-child-20" }),
+      "Continue a etapa.",
+    );
+    expect(result.responseStatus).toBe("replied");
+    expect(dbMock.createMessage).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      content: expect.stringContaining("tarefa #20"),
+      isAssistant: true,
+    }));
+  });
+
+  it("permite selecionar a tarefa executora após a ambiguidade ter sido esclarecida", async () => {
+    const root = {
+      id: 19, createdBy: 152, title: "Missão coordenadora",
+      agentId: null, manusTaskId: null,
+    };
+    const children = [20, 21].map((id) => ({
+      id, createdBy: 152, parentTaskId: 19, title: `Etapa ${id}`,
+      agentId: id, manusTaskId: `manus-${id}`, manusStatus: "running", statusId: 3,
+    }));
+    dbMock.getTaskById.mockResolvedValue(root);
+    dbMock.getTasksByParentId.mockResolvedValue(children);
+    dbMock.getTaskStatusNameById.mockResolvedValue("PROGRESS");
+    invokeLLMMock.mockResolvedValue({
+      choices: [{
+        message: {
+          role: "assistant",
+          content: null,
+          tool_calls: [{
+            id: "call-forward-selected",
+            type: "function",
+            function: {
+              name: "forward_operator_instruction_to_assigned_agent",
+              arguments: JSON.stringify({ message: "Atualize a etapa 21.", taskId: 21 }),
+            },
+          }],
+        },
+      }],
+    });
+    sendManusMessageAndWaitMock.mockResolvedValue("Etapa 21 atualizada.");
+
+    const result = await appRouter.createCaller(context).messages.create({
+      taskId: 19, typeId: 1, content: "Encaminhe para a etapa #21: atualize.",
+    });
+
+    expect(sendManusMessageAndWaitMock).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 21, agentId: 21, manusTaskId: "manus-21" }),
+      "Atualize a etapa 21.",
+    );
+    expect(result.responseStatus).toBe("replied");
+  });
+
+  it("não escolhe arbitrariamente quando há várias execuções ativas", async () => {
+    const root = {
+      id: 19, createdBy: 152, title: "Missão coordenadora",
+      agentId: null, manusTaskId: null,
+    };
+    const children = [20, 21].map((id) => ({
+      id, createdBy: 152, parentTaskId: 19, title: `Etapa ${id}`,
+      agentId: id, manusTaskId: `manus-${id}`, manusStatus: "running", statusId: 3,
+    }));
+    dbMock.getTaskById.mockResolvedValue(root);
+    dbMock.getTasksByParentId.mockResolvedValue(children);
+    dbMock.getTaskStatusNameById.mockResolvedValue("PROGRESS");
+    invokeLLMMock.mockResolvedValue({
+      choices: [{
+        message: {
+          role: "assistant",
+          content: null,
+          tool_calls: [{
+            id: "call-forward-ambiguous",
+            type: "function",
+            function: {
+              name: "forward_operator_instruction_to_assigned_agent",
+              arguments: JSON.stringify({ message: "Reoriente a execução." }),
+            },
+          }],
+        },
+      }],
+    });
+
+    const result = await appRouter.createCaller(context).messages.create({
+      taskId: 19, typeId: 1, content: "Envie ao executor: reoriente a execução.",
+    });
+
+    expect(sendManusMessageAndWaitMock).not.toHaveBeenCalled();
+    expect(result.responseStatus).toBe("failed");
+    expect(dbMock.createMessage).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      content: expect.stringContaining("#20"),
+      isAssistant: true,
+    }));
+    expect(dbMock.createMessage).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      content: expect.stringContaining("#21"),
+      isAssistant: true,
+    }));
+  });
+
+  it("responde perguntas pela Sofia sem encaminhá-las automaticamente ao agente", async () => {
+    dbMock.getTaskById.mockResolvedValue({
+      id: 19,
+      createdBy: 152,
+      title: "Missão fixture",
+      description: "Validar comunicação",
+      agentId: 7,
+      manusTaskId: "manus-task-19",
+      agentPinned: false,
+      manusStatus: "running",
+    });
+    invokeLLMMock.mockResolvedValue({
+      choices: [{ message: { role: "assistant", content: "A missão está em execução." } }],
+    });
+
+    await appRouter.createCaller(context).messages.create({
+      taskId: 19,
+      typeId: 1,
+      content: "Qual é a situação da missão?",
+    });
+
+    expect(sendManusMessageAndWaitMock).not.toHaveBeenCalled();
+  });
+
+  it("consulta estado, tarefas-filhas e agentes atribuídos sem executar ações ou expor credenciais", async () => {
+    dbMock.getTaskById.mockResolvedValue({
+      id: 19,
+      createdBy: 152,
+      title: "Missão fixture",
+      description: "Validar comunicação",
+      statusId: 2,
+      agentId: 7,
+      manusTaskId: "manus-task-19",
+      agentPinned: false,
+      manusStatus: "running",
+      createdAt: new Date("2026-11-14T10:00:00.000Z"),
+      updatedAt: new Date("2026-11-14T11:00:00.000Z"),
+    });
+    dbMock.getTasksByParentId.mockResolvedValue([
+      {
+        id: 20,
+        createdBy: 152,
+        title: "Filha válida",
+        parentTaskId: 19,
+        statusId: 3,
+        agentId: 8,
+        agentPinned: false,
+        manusTaskId: "manus-child-20",
+        manusStatus: "completed",
+        creditsUsed: 12,
+        completedAt: new Date("2026-11-14T12:00:00.000Z"),
+      },
+      {
+        id: 21,
+        createdBy: 999,
+        title: "Registro de outro proprietário",
+        parentTaskId: 19,
+        statusId: 3,
+        agentId: 99,
+      },
+    ]);
+    dbMock.getTaskStatusNameById
+      .mockResolvedValueOnce("PROGRESS")
+      .mockResolvedValueOnce("DONE");
+    dbMock.getAgentsByOwnerId.mockResolvedValue([
+      {
+        id: 7,
+        ownerId: 152,
+        name: "Agente principal",
+        status: "online",
+        connectionStatus: "connected",
+        version: "1.0",
+        lastHeartbeat: new Date("2026-11-14T12:00:00.000Z"),
+        creditsRemaining: "80.00",
+        creditsUpdatedAt: new Date(),
+        manusToken: "MUST_NOT_LEAK",
+      },
+      {
+        id: 8,
+        ownerId: 152,
+        name: "Agente filho",
+        status: "offline",
+        connectionStatus: "configured",
+        creditsRemaining: "20.00",
+        creditsUpdatedAt: null,
+      },
+      {
+        id: 99,
+        ownerId: 999,
+        name: "Agente de outro proprietário",
+        status: "online",
+        manusToken: "FOREIGN_SECRET",
+      },
+    ]);
+    invokeLLMMock
+      .mockResolvedValueOnce({
+        choices: [{
+          message: {
+            role: "assistant",
+            content: null,
+            tool_calls: [{
+              id: "call-inspect-1",
+              type: "function",
+              function: { name: "inspect_current_mission", arguments: "{}" },
+            }],
+          },
+        }],
+      })
+      .mockResolvedValueOnce({
+        choices: [{ message: { role: "assistant", content: "A missão está em PROGRESS e possui uma filha concluída." } }],
+      });
+
+    const result = await appRouter.createCaller(context).messages.create({
+      taskId: 19,
+      typeId: 1,
+      content: "Qual é o estado da missão e das subtarefas?",
+    });
+
+    expect(dbMock.getMissionRootTaskId).toHaveBeenCalledWith(19);
+    expect(dbMock.getAgentsByOwnerId).toHaveBeenCalledWith(152, false);
+    expect(invokeLLMMock).toHaveBeenCalledTimes(2);
+    const followUpMessages = invokeLLMMock.mock.calls[1][0].messages;
+    const toolContext = followUpMessages[followUpMessages.length - 1].content;
+    expect(toolContext).toContain('"missionId":19');
+    expect(toolContext).toContain('"taskId":20');
+    expect(toolContext).not.toContain("Registro de outro proprietário");
+    expect(toolContext).not.toContain("MUST_NOT_LEAK");
+    expect(toolContext).not.toContain("FOREIGN_SECRET");
+    expect(sendManusMessageAndWaitMock).not.toHaveBeenCalled();
+    expect(result.responseStatus).toBe("replied");
+    expect(dbMock.createMessage).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      content: "A missão está em PROGRESS e possui uma filha concluída.",
+      isAssistant: true,
+    }));
+    expect(result.reply).toMatchObject({ id: 101, isAssistant: true });
+  });
+
+  it("consulta elegibilidade com os critérios do claim sem reservar agentes nem expor credenciais", async () => {
+    dbMock.getTaskById.mockResolvedValue({
+      id: 19,
+      createdBy: 152,
+      title: "Missão fixture",
+      description: "Validar elegibilidade",
+      statusId: 1,
+      agentId: null,
+      agentPinned: false,
+    });
+    dbMock.inspectTaskAgentEligibility.mockResolvedValue({
+      observedAt: "2026-11-14T12:00:00.000Z",
+      task: {
+        taskId: 19,
+        ownerId: 152,
+        status: "STAGED",
+        assignedAgentId: null,
+        agentPinned: false,
+        assignmentMode: "AUTOMATIC",
+      },
+      candidates: [
+        {
+          agentId: 7,
+          name: "Agente elegível",
+          status: "online",
+          connectionStatus: "connected",
+          hasCredential: true,
+          hasPositiveCredits: true,
+          creditSnapshotFresh: true,
+          hasNoProgressTask: true,
+          eligible: true,
+          reasons: [],
+        },
+        {
+          agentId: 8,
+          name: "Agente ocupado",
+          status: "online",
+          connectionStatus: "connected",
+          hasCredential: true,
+          hasPositiveCredits: true,
+          creditSnapshotFresh: true,
+          hasNoProgressTask: false,
+          eligible: false,
+          reasons: ["agent_has_progress_task"],
+        },
+      ],
+      interpretationLimits: ["O snapshot não reserva agentes."],
+    });
+    invokeLLMMock
+      .mockResolvedValueOnce({
+        choices: [{
+          message: {
+            role: "assistant",
+            content: null,
+            tool_calls: [{
+              id: "call-eligibility-1",
+              type: "function",
+              function: { name: "inspect_agent_eligibility", arguments: "{}" },
+            }],
+          },
+        }],
+      })
+      .mockResolvedValueOnce({
+        choices: [{ message: { role: "assistant", content: "O agente 7 atende aos critérios; o agente 8 está ocupado." } }],
+      });
+
+    const result = await appRouter.createCaller(context).messages.create({
+      taskId: 19,
+      typeId: 1,
+      content: "Quais agentes estão elegíveis para esta tarefa?",
+    });
+
+    expect(dbMock.inspectTaskAgentEligibility).toHaveBeenCalledWith(19, 152);
+    expect(invokeLLMMock).toHaveBeenCalledTimes(2);
+    const followUpMessages = invokeLLMMock.mock.calls[1][0].messages;
+    const toolContext = followUpMessages[followUpMessages.length - 1].content;
+    expect(toolContext).toContain('"eligibleAgentIdsInClaimOrder":[7]');
+    expect(toolContext).toContain("agent_has_progress_task");
+    expect(toolContext).not.toContain("manusToken");
+    expect(toolContext).not.toContain("MUST_NOT_LEAK");
+    expect(sendManusMessageAndWaitMock).not.toHaveBeenCalled();
+    expect(result.responseStatus).toBe("replied");
+    expect(dbMock.createMessage).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      content: "O agente 7 atende aos critérios; o agente 8 está ocupado.",
+      isAssistant: true,
+    }));
+    expect(result.reply).toMatchObject({ id: 101, isAssistant: true });
+  });
+
+  it("bloqueia encaminhamento quando a missão não tem execução externa identificada", async () => {
+    invokeLLMMock.mockResolvedValue({
+      choices: [{
+        message: {
+          role: "assistant",
+          content: null,
+          tool_calls: [{
+            id: "call-forward-2",
+            type: "function",
+            function: {
+              name: "forward_operator_instruction_to_assigned_agent",
+              arguments: JSON.stringify({ message: "Continue." }),
+            },
+          }],
+        },
+      }],
+    });
+
+    const result = await appRouter.createCaller(context).messages.create({
+      taskId: 19,
+      typeId: 1,
+      content: "Encaminhe ao agente: continue.",
+    });
+
+    expect(sendManusMessageAndWaitMock).not.toHaveBeenCalled();
+    expect(result.responseStatus).toBe("failed");
+    expect(dbMock.createMessage).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      content: expect.stringContaining("Não localizei uma execução externa ativa"),
+      isAssistant: true,
+    }));
   });
 
   it("recusa mensagem pai de outra missão antes de persistir ou chamar a IA", async () => {

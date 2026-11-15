@@ -25,10 +25,52 @@ export default function TaskDetail() {
     { id: taskId },
     { enabled: canLoadTask, retry: false, refetchOnWindowFocus: false },
   );
+  const assignedAgentId = taskQuery.data?.agentId ?? null;
+  const assignedAgentQuery = trpc.agents.getById.useQuery(
+    { id: assignedAgentId ?? 0 },
+    {
+      enabled: canLoadTask && assignedAgentId !== null,
+      retry: false,
+    },
+  );
   const messagesQuery = trpc.messages.getByTask.useQuery(
     { taskId },
     { enabled: canLoadTask && Boolean(taskQuery.data), retry: false },
   );
+  // A conversa pertence à missão-raiz, mesmo quando o operador abre uma tarefa-filha.
+  const missionRootTaskId = taskQuery.data?.parentTaskId ?? taskId;
+  const missionMessagesQuery = trpc.messages.getByTask.useQuery(
+    { taskId: missionRootTaskId },
+    {
+      enabled: canLoadTask && Boolean(taskQuery.data),
+      retry: false,
+      refetchInterval: 5000,
+    },
+  );
+  const [messageContent, setMessageContent] = useState("");
+  const createMissionMessageMutation = trpc.messages.create.useMutation();
+  const pauseExecutionMutation = trpc.tasks.pauseExecution.useMutation({
+    onSuccess: async (result) => {
+      await taskQuery.refetch();
+      if (result.paused) {
+        toast.success("Execução externa pausada e confirmada pela Manus.");
+      } else {
+        toast.warning("Pausa solicitada, mas ainda há processos em segundo plano ativos ou sem confirmação. A missão permanece em PROGRESS.");
+      }
+    },
+    onError: (error) => toast.error(error.message || "Não foi possível pausar a execução."),
+  });
+  const resumeExecutionMutation = trpc.tasks.resumeExecution.useMutation({
+    onSuccess: async (result) => {
+      await taskQuery.refetch();
+      if (result.resumed) {
+        toast.success("Retomada confirmada pela Manus.");
+      } else {
+        toast.warning("A instrução de retomada foi enviada, mas a Manus ainda não confirmou running. A tarefa permanece PAUSED.");
+      }
+    },
+    onError: (error) => toast.error(error.message || "Não foi possível retomar a execução."),
+  });
   const lookupsQuery = trpc.lookups.listAll.useQuery(
     undefined,
     { enabled: canLoadTask && Boolean(taskQuery.data), retry: false },
@@ -71,9 +113,181 @@ export default function TaskDetail() {
     { taskId },
     { enabled: canLoadTask && Boolean(taskQuery.data), retry: false },
   );
+  const documentsQuery = trpc.tasks.documents.list.useQuery(
+    { taskId },
+    { enabled: canLoadTask && Boolean(taskQuery.data), retry: false },
+  );
+  const [selectedDocumentId, setSelectedDocumentId] = useState<number | null>(null);
+  const [selectedVersionNumber, setSelectedVersionNumber] = useState<number | null>(null);
+  const [selectedActionUnitId, setSelectedActionUnitId] = useState<string | null>(null);
+  const [trCorrection, setTrCorrection] = useState("");
+  const documents = documentsQuery.data ?? [];
+  const selectedDocument = documents.find((document) => document.id === selectedDocumentId)
+    ?? documents.find((document) => document.typeKey === "TR" && document.documentKey === "TR")
+    ?? null;
+  const selectedVersion = selectedVersionNumber ?? selectedDocument?.latestVersion?.version ?? 0;
+  const trDocument = documents.find((document) => document.typeKey === "TR" && document.documentKey === "TR");
+  const blueprintDocument = documents.find((document) => document.typeKey === "BLUEPRINT" && document.documentKey === "BLUEPRINT");
+  const blueprintReady = Boolean(
+    trDocument?.latestVersion
+    && ["VALIDATED", "ACTIVE", "REORIENTED"].includes(trDocument.latestVersion.state)
+    && blueprintDocument?.latestVersion
+    && ["READY", "ACTIVE"].includes(blueprintDocument.latestVersion.state)
+    && blueprintDocument.latestVersion.sourceDocumentVersionId === trDocument.latestVersion.id
+  );
+  const documentHistoryQuery = trpc.tasks.documents.history.useQuery(
+    { taskId, documentId: selectedDocument?.id ?? 0 },
+    { enabled: canLoadTask && Boolean(selectedDocument?.id), retry: false },
+  );
+  const selectedDocumentVersionQuery = trpc.tasks.documents.getVersion.useQuery(
+    {
+      taskId,
+      documentId: selectedDocument?.id ?? 0,
+      version: selectedVersion,
+    },
+    { enabled: canLoadTask && Boolean(selectedDocument?.latestVersion) && selectedVersion > 0, retry: false },
+  );
+  const actionPlanUnits = (() => {
+    if (selectedDocument?.typeKey !== "ACTION_PLAN") return [];
+    try {
+      const parsed = JSON.parse(selectedDocumentVersionQuery.data?.version.content ?? "{}");
+      return Array.isArray(parsed.tasks) ? parsed.tasks : [];
+    } catch {
+      return [];
+    }
+  })();
+  const activeActionUnitId = selectedActionUnitId ?? actionPlanUnits[0]?.id ?? "T01";
+  const actionUnitGateMutation = trpc.tasks.documents.evaluateActionPlanUnit.useMutation();
+  const actionPlanUnitRecordsQuery = trpc.tasks.documents.listActionPlanUnits.useQuery(
+    { taskId },
+    {
+      enabled: canLoadTask
+        && selectedDocument?.typeKey === "ACTION_PLAN"
+        && selectedDocument.latestVersion?.state === "APPROVED"
+        && selectedVersion === selectedDocument.latestVersion.version,
+      retry: false,
+    },
+  );
+  const registerActionPlanUnitsMutation = trpc.tasks.documents.registerActionPlanUnits.useMutation({
+    onSuccess: async () => {
+      await actionPlanUnitRecordsQuery.refetch();
+      toast.success("Unidades registradas. Cada uma aguarda aprovação individual; nenhuma tarefa foi criada.");
+    },
+    onError: (error) => toast.error(error.message),
+  });
+  const approveActionPlanUnitMutation = trpc.tasks.documents.approveActionPlanUnit.useMutation({
+    onSuccess: async () => {
+      await actionPlanUnitRecordsQuery.refetch();
+      toast.success("Aprovação individual registrada. Isso não libera execução nem dispatch.");
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const materializeActionPlanUnitsMutation = trpc.tasks.documents.materializeApprovedActionPlanUnits.useMutation({
+    onSuccess: async (result) => {
+      await Promise.all([actionPlanUnitRecordsQuery.refetch(), subtasksQuery.refetch()]);
+      const createdCount = result.units.filter((unit) => unit.created).length;
+      toast.success(`${createdCount} tarefa(s) materializada(s) em PAUSED. Nenhum agente foi atribuído e nenhum dispatch ocorreu.`);
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const reviseInitialTRMutation = trpc.tasks.documents.reviseInitialTR.useMutation({
+    onSuccess: async () => {
+      setSelectedVersionNumber(null);
+      await documentsQuery.refetch();
+      toast.success("Correção registrada em nova versão do TR.");
+    },
+    onError: (error) => toast.error(error.message),
+  });
+  const regenerateInitialTRMutation = trpc.tasks.documents.regenerateInitialTR.useMutation({
+    onSuccess: async () => {
+      setSelectedVersionNumber(null);
+      await documentsQuery.refetch();
+      toast.success("Nova versão inicial do TR gerada pela SOFIA.");
+    },
+    onError: (error) => toast.error(error.message),
+  });
+  const validateTRMutation = trpc.tasks.documents.validateTR.useMutation({
+    onSuccess: async () => {
+      setSelectedVersionNumber(null);
+      await Promise.all([documentsQuery.refetch(), taskQuery.refetch()]);
+      toast.success("TR validado, Blueprint gerado e missão liberada para STAGED.");
+    },
+    onError: async (error) => {
+      setSelectedVersionNumber(null);
+      await Promise.all([documentsQuery.refetch(), taskQuery.refetch()]);
+      toast.error(error.message);
+    },
+  });
+  const generateBlueprintMutation = trpc.tasks.documents.generateBlueprint.useMutation({
+    onSuccess: async () => {
+      setSelectedVersionNumber(null);
+      await Promise.all([documentsQuery.refetch(), taskQuery.refetch()]);
+      toast.success("Blueprint READY, vinculado à versão vigente do TR. Missão liberada.");
+    },
+    onError: async (error) => {
+      setSelectedVersionNumber(null);
+      await Promise.all([documentsQuery.refetch(), taskQuery.refetch()]);
+      toast.error(error.message);
+    },
+  });
+
+  const generateActionPlanMutation = trpc.tasks.documents.generateActionPlan.useMutation({
+    onSuccess: async (result) => {
+      setSelectedDocumentId(result.documentId);
+      setSelectedVersionNumber(null);
+      await documentsQuery.refetch();
+      toast.success("Plano de ação estruturado proposto e versionado. Nenhuma execução foi iniciada.");
+    },
+    onError: (error) => toast.error(error.message),
+  });
+  const approveActionPlanMutation = trpc.tasks.documents.approveActionPlan.useMutation({
+    onSuccess: async () => {
+      setSelectedVersionNumber(null);
+      await documentsQuery.refetch();
+      toast.success("Aprovação humana registrada para esta versão exata. Nenhuma execução foi iniciada.");
+    },
+    onError: (error) => toast.error(error.message),
+  });
 
   const task = taskQuery.data;
   const messages = messagesQuery.data || [];
+  const missionMessages = (missionMessagesQuery.data || []).filter((message) => message.typeId === 1);
+
+  const handleSendMissionMessage = async () => {
+    const content = messageContent.trim();
+    if (!content || !missionRootTaskId || createMissionMessageMutation.isPending) return;
+
+    try {
+      const result = await createMissionMessageMutation.mutateAsync({
+        taskId: missionRootTaskId,
+        typeId: 1,
+        content,
+      });
+      setMessageContent("");
+      await missionMessagesQuery.refetch();
+      if (result.responseStatus === "replied") {
+        toast.success("SOFIA respondeu no Messenger da missão.");
+      } else if (result.responseStatus === "pending") {
+        toast.info("Mensagem registrada. A resposta externa ainda está pendente.");
+      } else {
+        toast.warning("Mensagem registrada, mas a SOFIA não conseguiu concluir a resposta.");
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível enviar a mensagem.");
+    }
+  };
+
+  useEffect(() => {
+    setSelectedVersionNumber(null);
+    setSelectedActionUnitId(null);
+  }, [selectedDocument?.id]);
+
+  useEffect(() => {
+    const content = selectedDocumentVersionQuery.data?.version.content;
+    if (typeof content === "string") setTrCorrection(content);
+  }, [selectedDocumentVersionQuery.data?.version.id]);
 
   useEffect(() => {
     const assessmentNotFound = arcAssessmentQuery.isError
@@ -253,8 +467,23 @@ export default function TaskDetail() {
 
   const operationalReports = messages.filter(m => m.typeId === 2); // OperationalReport type
   const currentStatusName = statuses.find((status) => status.id === task.statusId)?.name.toUpperCase();
-  const canStartExecution = (currentStatusName === "STAGED" || currentStatusName === "PROGRESS") && !task.manusTaskId;
-  const canFactorize = task.parentTaskId == null;
+  const externalStatusLabels: Record<string, string> = {
+    running: "Em execução",
+    completed: "Concluída",
+    stopped: "Interrompida",
+    error: "Erro",
+    awaiting_tr_validation: "Aguardando validação do TR",
+    waiting_for_available_agent: "Aguardando agente elegível",
+    waiting_for_pinned_agent: "Aguardando agente fixado",
+    manual_pause_pending: "Pausa solicitada — aguardando processos em segundo plano",
+    manual_resume_pending: "Retomada solicitada — aguardando confirmação externa",
+  };
+  const externalStatusLabel = task.manusStatus
+    ? externalStatusLabels[task.manusStatus.toLowerCase()] ?? task.manusStatus.replace(/_/g, " ")
+    : task.manusTaskId ? "Estado não informado" : "Não iniciada";
+  const canStartExecution = currentStatusName === "STAGED" && !task.manusTaskId;
+  const canReorientTR = ["PAUSED", "STAGED"].includes(currentStatusName ?? "") && !task.manusTaskId && task.manusStatus === "awaiting_tr_validation" && task.parentTaskId == null;
+  const canFactorize = task.parentTaskId == null && ["STAGED", "PROGRESS"].includes(currentStatusName ?? "") && blueprintReady;
 
   return (
     <DashboardLayout>
@@ -284,15 +513,473 @@ export default function TaskDetail() {
           </div>
 
           {/* Main Content */}
+          {/* Mission document viewer — TR is the default human-facing view. */}
+          <Card className="cad-card mb-6">
+            <CardHeader className="border-b border-foreground/10">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <CardTitle className="text-xl">
+                    {selectedDocument?.typeKey === "TR" ? "Entendimento da missão — TR" : "Documentos da missão"}
+                  </CardTitle>
+                  <CardDescription className="mt-1">
+                    {selectedDocument?.typeKey === "TR"
+                      ? "Esta é a leitura estruturada da SOFIA sobre o pedido: objetivo, motivação, escopo e resultado esperado. Não é apenas a descrição original."
+                      : "Contexto, planejamento e registros da missão em um único visualizador."}
+                    {task.parentTaskId != null && " Este documento é herdado da missão principal."}
+                  </CardDescription>
+                </div>
+                <div className="w-full sm:max-w-sm">
+                  <label htmlFor="mission-document-select" className="mb-1 block text-xs text-muted-foreground">Documento</label>
+                  <select
+                    id="mission-document-select"
+                    className="cad-box w-full rounded-md border bg-background px-3 py-2 text-sm"
+                    value={selectedDocument?.id ?? ""}
+                    onChange={(event) => {
+                      setSelectedDocumentId(event.target.value ? Number(event.target.value) : null);
+                      setSelectedVersionNumber(null);
+                    }}
+                    disabled={documentsQuery.isLoading || documents.length === 0}
+                  >
+                    {documents.length === 0 && <option value="">Nenhum documento disponível</option>}
+                    {documents.map((document) => (
+                      <option key={document.id} value={document.id}>
+                        {document.typeLabel} — {document.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-5">
+              {documentsQuery.isLoading ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />Carregando documentos...</div>
+              ) : documentsQuery.isError ? (
+                <div className="rounded-md border border-red-500/30 p-4 text-sm text-red-500">
+                  Não foi possível carregar o catálogo documental. {documentsQuery.error.message}
+                </div>
+              ) : !selectedDocument ? (
+                <div className="rounded-md border border-dashed p-5 text-sm text-muted-foreground">
+                  O TR inicial ainda não está disponível. A missão permanece bloqueada para execução até que o documento seja gerado e validado.
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                    <Badge variant="outline">{selectedDocument.typeKey}</Badge>
+                    {selectedDocument.latestVersion ? (
+                      <>
+                        <Badge variant="secondary">v{selectedVersion}</Badge>
+                        <Badge variant="outline">{selectedDocumentVersionQuery.data?.version.state ?? selectedDocument.latestVersion.state}</Badge>
+                        <span>Atualizado em {new Date(selectedDocumentVersionQuery.data?.version.createdAt ?? selectedDocument.latestVersion.createdAt).toLocaleString()}</span>
+                        {documentHistoryQuery.data && documentHistoryQuery.data.length > 1 && (
+                          <label className="ml-auto flex items-center gap-2">
+                            <span>Histórico</span>
+                            <select
+                              className="rounded-md border bg-background px-2 py-1 text-xs"
+                              value={selectedVersion}
+                              onChange={(event) => setSelectedVersionNumber(Number(event.target.value))}
+                            >
+                              {documentHistoryQuery.data.map((version) => (
+                                <option key={version.id} value={version.version}>v{version.version} — {version.state}</option>
+                              ))}
+                            </select>
+                          </label>
+                        )}
+                      </>
+                    ) : <Badge variant="outline">Sem versão publicada</Badge>}
+                  </div>
+                  {selectedDocumentVersionQuery.isLoading ? (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />Carregando versão...</div>
+                  ) : selectedDocumentVersionQuery.isError ? (
+                    <p className="text-sm text-red-500">{selectedDocumentVersionQuery.error.message}</p>
+                  ) : (
+                    <pre className="max-h-[560px] overflow-auto whitespace-pre-wrap break-words rounded-md border bg-muted/20 p-4 font-sans text-sm leading-6 text-foreground">
+                      {selectedDocumentVersionQuery.data?.version.content ?? "Conteúdo não disponível."}
+                    </pre>
+                  )}
+                  {blueprintReady && selectedDocument.typeKey !== "ACTION_PLAN" && (
+                    <div className="flex justify-end">
+                      <Button
+                        variant="outline"
+                        onClick={() => generateActionPlanMutation.mutate({ taskId })}
+                        disabled={generateActionPlanMutation.isPending}
+                      >
+                        {generateActionPlanMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Propor plano de ação estruturado
+                      </Button>
+                    </div>
+                  )}
+                  {selectedDocument.typeKey === "ACTION_PLAN"
+                    && selectedVersion === selectedDocument.latestVersion?.version
+                    && selectedDocument.latestVersion?.state === "PROPOSED" && (
+                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-amber-500/30 bg-amber-500/5 p-4">
+                      <div>
+                        <p className="text-sm font-semibold">Aprovação humana necessária</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          A aprovação ficará vinculada ao hash e à versão exibida. Ela não inicia tarefas, reserva agentes ou autoriza consumo de créditos.
+                        </p>
+                      </div>
+                      <Button
+                        onClick={() => {
+                          const version = selectedDocumentVersionQuery.data?.version;
+                          if (!version?.contentHash) {
+                            toast.error("Hash da versão indisponível. Recarregue o documento antes de aprovar.");
+                            return;
+                          }
+                          approveActionPlanMutation.mutate({
+                            taskId,
+                            documentId: selectedDocument.id,
+                            expectedVersion: version.version,
+                            expectedContentHash: version.contentHash,
+                          });
+                        }}
+                        disabled={approveActionPlanMutation.isPending || !selectedDocumentVersionQuery.data?.version.contentHash}
+                      >
+                        {approveActionPlanMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Aprovar esta versão
+                      </Button>
+                    </div>
+                  )}
+                  {selectedDocument.typeKey === "ACTION_PLAN" && selectedDocument.latestVersion?.state === "APPROVED" && (
+                    <div className="rounded-md border border-green-500/30 p-3 text-sm text-green-600">
+                      Aprovação humana registrada. O plano permanece sem execução; cada ação operacional exige seu próprio gate governado.
+                    </div>
+                  )}
+
+                  {selectedDocument.typeKey === "ACTION_PLAN"
+                    && selectedDocument.latestVersion?.state === "APPROVED"
+                    && selectedVersion === selectedDocument.latestVersion.version && actionPlanUnits.length > 0 && (
+                    <div className="space-y-3 rounded-md border p-4">
+                      <div>
+                        <p className="text-sm font-semibold">Governança individual das unidades</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Registre as unidades deste plano aprovado e aprove cada uma separadamente. A aprovação confirma o escopo; não autoriza execução, reserva de agente, crédito ou dispatch.
+                        </p>
+                      </div>
+                      {actionPlanUnitRecordsQuery.isLoading && (
+                        <p className="text-xs text-muted-foreground">Carregando registros de governança...</p>
+                      )}
+                      {actionPlanUnitRecordsQuery.isError && (
+                        <p className="text-sm text-destructive">{actionPlanUnitRecordsQuery.error.message}</p>
+                      )}
+                      {actionPlanUnitRecordsQuery.data?.length === 0 && (
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            const version = selectedDocumentVersionQuery.data?.version;
+                            if (!version?.contentHash || !selectedDocument?.id) {
+                              toast.error("Versão/hash indisponível. Recarregue o plano antes de registrar.");
+                              return;
+                            }
+                            registerActionPlanUnitsMutation.mutate({
+                              taskId,
+                              documentId: selectedDocument.id,
+                              expectedVersion: version.version,
+                              expectedContentHash: version.contentHash,
+                            });
+                          }}
+                          disabled={registerActionPlanUnitsMutation.isPending || !selectedDocumentVersionQuery.data?.version.contentHash}
+                        >
+                          {registerActionPlanUnitsMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          Registrar unidades para aprovação
+                        </Button>
+                      )}
+                      {actionPlanUnitRecordsQuery.data?.some((record: any) => record.state === "APPROVED" && !record.operationalTaskId) && (
+                        <div className="space-y-2 rounded-md border border-amber-500/30 p-3">
+                          <p className="text-xs text-muted-foreground">
+                            A materialização cria somente tarefas-filhas PAUSED, sem agente e sem autorização de execução. Os gates de dependências, risco, orçamento, permissões, executor e adaptador continuam obrigatórios.
+                          </p>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => materializeActionPlanUnitsMutation.mutate({ taskId })}
+                            disabled={materializeActionPlanUnitsMutation.isPending}
+                          >
+                            {materializeActionPlanUnitsMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Materializar unidades aprovadas em PAUSED
+                          </Button>
+                        </div>
+                      )}
+                      <div className="flex flex-wrap gap-2">
+                        {actionPlanUnits.map((unit: any) => (
+                          <Button
+                            key={unit.id}
+                            size="sm"
+                            variant={activeActionUnitId === unit.id ? "default" : "outline"}
+                            onClick={() => setSelectedActionUnitId(unit.id)}
+                          >
+                            {unit.id}
+                            {actionPlanUnitRecordsQuery.data?.find((record: any) => record.unitId === unit.id)?.state
+                              ? " · " + actionPlanUnitRecordsQuery.data.find((record: any) => record.unitId === unit.id)?.state
+                              : ""}
+                          </Button>
+                        ))}
+                      </div>
+                      {(() => {
+                        const record = actionPlanUnitRecordsQuery.data?.find((item: any) => item.unitId === activeActionUnitId);
+                        const version = selectedDocumentVersionQuery.data?.version;
+                        if (!record) return null;
+                        return (
+                          <div className="rounded-md border p-3 space-y-2">
+                            <p className="text-sm font-medium">{record.unitId} — {record.unitTitle}</p>
+                            <p className="text-xs text-muted-foreground">Estado de governança: {record.state}</p>
+                            {record.operationalTaskId && (
+                              <p className="text-xs text-muted-foreground">
+                                Tarefa operacional: #{record.operationalTaskId} — criada em PAUSED, sem executor e sem dispatch.
+                              </p>
+                            )}
+                            {record.state === "AWAITING_APPROVAL" && (
+                              <Button
+                                size="sm"
+                                onClick={() => {
+                                  if (!version?.contentHash) {
+                                    toast.error("Hash da versão indisponível. Recarregue o plano.");
+                                    return;
+                                  }
+                                  approveActionPlanUnitMutation.mutate({
+                                    taskId,
+                                    unitId: record.unitId,
+                                    expectedVersion: version.version,
+                                    expectedContentHash: version.contentHash,
+                                  });
+                                }}
+                                disabled={approveActionPlanUnitMutation.isPending || !version?.contentHash}
+                              >
+                                {approveActionPlanUnitMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Aprovar unidade {record.unitId}
+                              </Button>
+                            )}
+                            {record.state === "APPROVED" && (
+                              <p className="text-xs text-green-600">Aprovação individual registrada; os demais gates de execução continuam obrigatórios.</p>
+                            )}
+                          </div>
+                        );
+                      })()}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => actionUnitGateMutation.mutate({ taskId, unitId: activeActionUnitId })}
+                        disabled={actionUnitGateMutation.isPending}
+                      >
+                        {actionUnitGateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Avaliar pré-condições da unidade
+                      </Button>
+                      {actionUnitGateMutation.isPending && <p className="text-xs text-muted-foreground">Avaliando pré-condições...</p>}
+                      {actionUnitGateMutation.isError && (
+                        <p className="text-sm text-destructive">{actionUnitGateMutation.error.message}</p>
+                      )}
+                      {actionUnitGateMutation.data && (
+                        <div className="space-y-2">
+                          <p className="text-sm font-semibold">
+                            {actionUnitGateMutation.data.unit.id} — {actionUnitGateMutation.data.unit.title}
+                          </p>
+                          <p className="text-xs font-semibold text-destructive">
+                            Decisão: {actionUnitGateMutation.data.gate.decision}
+                          </p>
+                          <ul className="list-disc space-y-1 pl-5 text-xs text-muted-foreground">
+                            {actionUnitGateMutation.data.gate.blockers.map((blocker: any) => (
+                              <li key={blocker.code}><strong>{blocker.code}</strong>: {blocker.detail}</li>
+                            ))}
+                          </ul>
+                          <p className="text-xs text-muted-foreground">
+                            Esta avaliação não constitui autorização. A aprovação individual e o gate de dispatch permanecem etapas separadas.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {selectedDocument.typeKey === "TR" && selectedDocument.latestVersion?.state === "DRAFT" && (
+                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-amber-500/30 bg-amber-500/5 p-3">
+                      <p className="text-sm text-amber-600">A geração cognitiva do TR está pendente. A execução continua bloqueada.</p>
+                      <Button
+                        variant="outline"
+                        onClick={() => regenerateInitialTRMutation.mutate({ taskId })}
+                        disabled={regenerateInitialTRMutation.isPending}
+                      >
+                        {regenerateInitialTRMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Tentar gerar TR novamente
+                      </Button>
+                    </div>
+                  )}
+                  {selectedDocument.typeKey === "TR" && selectedVersion === selectedDocument.latestVersion?.version && canReorientTR && (
+                    ["DRAFT", "AWAITING_HUMAN_VALIDATION"].includes(selectedDocument.latestVersion?.state ?? "")
+                    || selectedDocument.latestVersion?.state === "VALIDATED"
+                  ) && (
+                    <div className="space-y-3 rounded-md border p-4">
+                      <div>
+                        <p className="text-sm font-semibold">Revisão do operador</p>
+                        <p className="mt-1 text-xs text-muted-foreground">Edite o entendimento da SOFIA. Salvar cria uma nova versão e mantém a anterior no histórico. Se o TR já foi validado, a reorientação invalida o Blueprint anterior e exige nova validação antes da execução.</p>
+                      </div>
+                      <Textarea
+                        value={trCorrection}
+                        onChange={(event) => setTrCorrection(event.target.value)}
+                        rows={10}
+                        className="font-mono text-xs leading-5"
+                        disabled={selectedDocument.latestVersion?.state === "DRAFT"}
+                      />
+                      <div className="flex flex-wrap justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => reviseInitialTRMutation.mutate({ taskId, content: trCorrection })}
+                          disabled={!["AWAITING_HUMAN_VALIDATION", "VALIDATED"].includes(selectedDocument.latestVersion?.state ?? "") || (selectedDocument.latestVersion?.state === "VALIDATED" && !canReorientTR) || reviseInitialTRMutation.isPending || !trCorrection.trim()}
+                        >
+                          {reviseInitialTRMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          {selectedDocument.latestVersion?.state === "VALIDATED" ? "Reorientar TR" : "Salvar correção"}
+                        </Button>
+                        <Button
+                          onClick={() => validateTRMutation.mutate({ taskId })}
+                          disabled={selectedDocument.latestVersion?.state !== "AWAITING_HUMAN_VALIDATION" || validateTRMutation.isPending}
+                        >
+                          {validateTRMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          Validar TR e gerar Blueprint
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                  {selectedDocument.typeKey === "TR" && selectedVersion === selectedDocument.latestVersion?.version && selectedDocument.latestVersion?.state === "VALIDATED" && !blueprintReady && (
+                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-amber-500/30 bg-amber-500/5 p-3">
+                      <p className="text-sm text-amber-600">TR validado. A missão continua PAUSED até a SOFIA gerar um Blueprint READY vinculado a esta versão exata do TR.</p>
+                      <Button
+                        variant="outline"
+                        onClick={() => generateBlueprintMutation.mutate({ taskId })}
+                        disabled={generateBlueprintMutation.isPending}
+                      >
+                        {generateBlueprintMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Gerar Blueprint e liberar
+                      </Button>
+                    </div>
+                  )}
+                  {selectedDocument.typeKey === "TR" && ["VALIDATED", "ACTIVE", "REORIENTED"].includes(selectedDocument.latestVersion?.state ?? "") && blueprintReady && (
+                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-green-500/30 p-3">
+                      <p className="text-sm text-green-600">TR validado e Blueprint READY vinculado à versão vigente.</p>
+                      {currentStatusName === "PAUSED" && !task.manusTaskId && (
+                        <Button
+                          onClick={() => generateBlueprintMutation.mutate({ taskId })}
+                          disabled={generateBlueprintMutation.isPending}
+                        >
+                          {generateBlueprintMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          Liberar missão para execução
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             {/* Descrição e Ações */}
             <div className="lg:col-span-2">
               <Card className="cad-card">
                 <CardHeader>
-                  <CardTitle className="text-lg">Descrição</CardTitle>
+                  <CardTitle className="text-lg">Solicitação original</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-foreground whitespace-pre-wrap">{task.description || "Sem descrição"}</p>
+                </CardContent>
+              </Card>
+
+              {/* Visão operacional separa estado local da missão e execução externa. */}
+              <Card className="cad-card mt-6">
+                <CardHeader>
+                  <CardTitle className="text-lg">Execução e executor</CardTitle>
+                  <CardDescription>
+                    Estado da execução externa e atribuição atual. A situação do executor não substitui o estado da missão.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Executor atribuído</p>
+                    <p className="text-sm font-medium">
+                      {assignedAgentQuery.isLoading
+                        ? "Carregando executor..."
+                        : assignedAgentQuery.data?.name ?? (task.agentId ? `Agente #${task.agentId}` : "Nenhum executor atribuído")}
+                    </p>
+                    {task.agentId != null && (
+                      <p className="text-xs text-muted-foreground">
+                        {task.agentPinned ? "Atribuição fixada manualmente" : "Atribuição não fixada"}
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Estado do executor</p>
+                    <p className="text-sm font-medium">
+                      {assignedAgentQuery.data?.status ?? (task.agentId ? "Não disponível" : "—")}
+                    </p>
+                    {assignedAgentQuery.data?.connectionStatus && (
+                      <p className="text-xs text-muted-foreground">
+                        Conexão: {assignedAgentQuery.data.connectionStatus}
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Execução externa (Manus)</p>
+                    <Badge variant="outline">{externalStatusLabel}</Badge>
+                    {task.manusStatus === "manual_pause_pending" && (
+                      <p className="text-xs text-amber-600">
+                        O estado local só mudará para PAUSED quando a Manus confirmar que não há jobs em segundo plano.
+                      </p>
+                    )}
+                    {task.manusTaskId && (
+                      <p className="break-all text-xs text-muted-foreground">ID: {task.manusTaskId}</p>
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Créditos consumidos</p>
+                    <p className="text-sm font-medium tabular-nums">{task.creditsUsed ?? 0}</p>
+                  </div>
+                  {assignedAgentQuery.isError && (
+                    <p className="text-xs text-amber-600 sm:col-span-2 lg:col-span-3">
+                      Não foi possível carregar os dados públicos do executor. Os dados da missão continuam disponíveis.
+                    </p>
+                  )}
+                  {task.manusTaskId && currentStatusName === "PROGRESS" && ["running", "manual_pause_pending"].includes((task.manusStatus ?? "").toLowerCase()) && (
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-4 sm:col-span-2 lg:col-span-3">
+                      <p className="text-xs text-muted-foreground">
+                        A pausa interrompe a execução externa. Se houver processos em segundo plano, a missão permanecerá em PROGRESS até a confirmação.
+                      </p>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="destructive"
+                        disabled={pauseExecutionMutation.isPending}
+                        onClick={() => {
+                          const message = task.manusStatus === "manual_pause_pending"
+                            ? "Verificar novamente e, se a execução tiver retomado, solicitar sua interrupção?"
+                            : "Interromper a execução externa desta tarefa na Manus?";
+                          if (window.confirm(message)) {
+                            pauseExecutionMutation.mutate({ taskId });
+                          }
+                        }}
+                      >
+                        {pauseExecutionMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {task.manusStatus === "manual_pause_pending" ? "Verificar pausa" : "Pausar execução"}
+                      </Button>
+                    </div>
+                  )}
+                  {task.manusTaskId && currentStatusName === "PAUSED" && ["stopped", "manual_resume_pending"].includes((task.manusStatus ?? "").toLowerCase()) && (
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-4 sm:col-span-2 lg:col-span-3">
+                      <p className="text-xs text-muted-foreground">
+                        A retomada envia uma instrução à execução Manus e só altera o estado local para PROGRESS após confirmação externa.
+                      </p>
+                      <Button
+                        type="button"
+                        size="sm"
+                        disabled={resumeExecutionMutation.isPending}
+                        onClick={() => {
+                          const message = task.manusStatus === "manual_resume_pending"
+                            ? "Tentar novamente a retomada desta execução na Manus?"
+                            : "Retomar esta execução na Manus a partir do último ponto concluído?";
+                          if (window.confirm(message)) {
+                            resumeExecutionMutation.mutate({ taskId });
+                          }
+                        }}
+                      >
+                        {resumeExecutionMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {task.manusStatus === "manual_resume_pending" ? "Tentar retomada" : "Retomar execução"}
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -312,7 +999,7 @@ export default function TaskDetail() {
                     ) : (
                       <Play className="w-4 h-4 mr-2" />
                     )}
-                    {isStarting ? "Iniciando..." : currentStatusName === "PROGRESS" ? "Retomar execução" : "Iniciar missão"}
+                    {isStarting ? "Iniciando..." : "Iniciar missão"}
                   </Button>
                   <Button
                     onClick={handleFactorize}
@@ -565,11 +1252,95 @@ export default function TaskDetail() {
 
           {/* Tabs para Subtarefas e Relatórios */}
           <Tabs defaultValue="subtasks" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="subtasks">Subtarefas ({subtasks.length})</TabsTrigger>
+              <TabsTrigger value="messenger">Messenger</TabsTrigger>
               <TabsTrigger value="reports">Relatórios ({messages.length})</TabsTrigger>
               <TabsTrigger value="consolidated">Consolidado</TabsTrigger>
             </TabsList>
+
+            {/* Messenger central da missão: mensagens sempre ficam vinculadas à raiz. */}
+            <TabsContent value="messenger" className="mt-6">
+              <Card className="cad-card">
+                <CardHeader className="border-b border-foreground/10">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <CardTitle>Conversa com a SOFIA</CardTitle>
+                      <CardDescription>
+                        Canal central da missão #{missionRootTaskId}. A SOFIA responde aqui e só encaminha instruções ao executor quando você solicitar explicitamente.
+                      </CardDescription>
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => void missionMessagesQuery.refetch()}
+                      disabled={missionMessagesQuery.isFetching}
+                    >
+                      {missionMessagesQuery.isFetching && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Atualizar
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4 pt-5">
+                  {missionMessagesQuery.isError ? (
+                    <div className="rounded-md border border-destructive/30 p-4 text-sm text-destructive">
+                      Não foi possível carregar a conversa. {missionMessagesQuery.error.message}
+                    </div>
+                  ) : missionMessagesQuery.isLoading ? (
+                    <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" />Carregando conversa...
+                    </div>
+                  ) : missionMessages.length === 0 ? (
+                    <div className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
+                      Ainda não há mensagens nesta missão. Envie uma pergunta ou orientação para iniciar a conversa com a SOFIA.
+                    </div>
+                  ) : (
+                    <div className="max-h-[520px] space-y-4 overflow-y-auto rounded-md border bg-muted/10 p-4">
+                      {missionMessages.map((message) => (
+                        <div key={message.id} className={`flex ${message.isAssistant ? "justify-start" : "justify-end"}`}>
+                          <div className={`max-w-[90%] rounded-lg border px-4 py-3 sm:max-w-[80%] ${
+                            message.isAssistant
+                              ? "border-foreground/10 bg-card"
+                              : "border-accent/30 bg-accent/10"
+                          }`}>
+                            <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                              <strong className="text-foreground">{message.isAssistant ? "SOFIA" : "Você"}</strong>
+                              <span>{new Date(message.createdAt).toLocaleString()}</span>
+                            </div>
+                            <p className="whitespace-pre-wrap break-words text-sm leading-6">{message.content}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="space-y-3 border-t border-foreground/10 pt-4">
+                    <Textarea
+                      value={messageContent}
+                      onChange={(event) => setMessageContent(event.target.value)}
+                      placeholder="Pergunte à SOFIA sobre a missão ou registre uma orientação..."
+                      rows={4}
+                      maxLength={12000}
+                      disabled={createMissionMessageMutation.isPending}
+                    />
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <p className="text-xs text-muted-foreground">
+                        Até 12.000 caracteres. Perguntas não são encaminhadas ao agente; o encaminhamento exige pedido explícito.
+                      </p>
+                      <Button
+                        type="button"
+                        onClick={() => void handleSendMissionMessage()}
+                        disabled={!messageContent.trim() || createMissionMessageMutation.isPending}
+                      >
+                        {createMissionMessageMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Enviar mensagem
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
             {/* Subtarefas */}
             <TabsContent value="subtasks" className="mt-6">

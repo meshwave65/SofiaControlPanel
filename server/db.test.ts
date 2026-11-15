@@ -24,6 +24,7 @@ describe("Database Helpers - Type Validation", () => {
     
     // Tasks
     expect(typeof db.createTask).toBe("function");
+    expect(typeof db.createMissionWithInitialDocuments).toBe("function");
     expect(typeof db.getTasksByStatus).toBe("function");
     expect(typeof db.getTasksByAgentId).toBe("function");
     expect(typeof db.updateTaskStatus).toBe("function");
@@ -41,6 +42,24 @@ describe("Database Helpers - Type Validation", () => {
     expect(typeof db.createContextReport).toBe("function");
     expect(typeof db.getRecentContextReports).toBe("function");
     expect(typeof db.updateContextReportGitHub).toBe("function");
+
+    // Mission documents and execution governance
+    expect(typeof db.getMissionRootTaskId).toBe("function");
+    expect(typeof db.hasValidatedMissionTR).toBe("function");
+    expect(typeof db.hasExecutionReadyMissionDocuments).toBe("function");
+    expect(typeof db.getTaskStatusNameById).toBe("function");
+    expect(typeof db.getMissionDocumentTypes).toBe("function");
+    expect(typeof db.getMissionDocumentsForTask).toBe("function");
+    expect(typeof db.getMissionDocumentVersionForTask).toBe("function");
+    expect(typeof db.listMissionDocumentVersionsForTask).toBe("function");
+    expect(typeof db.createMissionDocumentWithVersion).toBe("function");
+    expect(typeof db.createMissionDocumentRevision).toBe("function");
+    expect(typeof db.approveMissionActionPlanVersion).toBe("function");
+    expect(typeof db.inspectTaskDispatchAuthorization).toBe("function");
+    expect(typeof db.registerMissionActionPlanUnits).toBe("function");
+    expect(typeof db.approveMissionActionPlanUnit).toBe("function");
+    expect(typeof db.listMissionActionPlanUnits).toBe("function");
+    expect(typeof db.materializeApprovedMissionActionPlanUnits).toBe("function");
   });
 });
 

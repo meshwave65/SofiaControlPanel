@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
@@ -7,10 +8,126 @@ import * as db from "./db";
 import { SofiaOrchestrator } from "./sofiaOrchestrator";
 import { TRPCError } from "@trpc/server";
 import { getConsolidatedTaskReport, uploadConsolidatedTaskReport } from "./controlPanelStorage";
-import { sendManusMessageAndWait, syncAgentCredits } from "./manusExecutionService";
+import { resumeManusTask, sendManusMessageAndWait, stopManusTask, syncAgentCredits } from "./manusExecutionService";
 import { mirrorTaskToGitHub } from "./githubMissionMirror";
 import { invokeLLM } from "./_core/llm";
-import { buildSofiaConversation, extractTextContent, normalizeOperatorMessage, OPERATOR_MESSAGE_MAX_LENGTH } from "./messageService";
+import { buildSofiaConversation, extractTextContent, normalizeOperatorMessage, OPERATOR_MESSAGE_MAX_LENGTH, SOFIA_MESSAGE_TOOLS } from "./messageService";
+import { validateMissionBlueprintContent } from "./missionBlueprint";
+import { validateActionPlan, ActionPlanSchema } from "./actionPlan";
+import { evaluateExecutionGate } from "./executionGovernance";
+import { refreshActionUnitDependencyEvidence } from "./actionUnitGateEvidence";
+
+async function generateInitialMissionTR(title: string, description?: string | null): Promise<string> {
+  const response = await invokeLLM({
+    messages: [
+      { role: "system", content: [
+        "Você é SOFIA, responsável por compreender missões.",
+        "Produza a primeira versão de um TR em português, legível e conciso.",
+        "É uma interpretação inicial, não um relatório de execução: nenhum trabalho foi realizado ainda.",
+        "Não invente motivação, decisões, fatos, resultados, prazos, recursos ou critérios ausentes.",
+        "Separe declaração original, fatos documentados, interpretação da SOFIA, hipóteses e informações desconhecidas.",
+        "Quando a motivação não estiver expressa, declare que não foi informada; não a deduza como fato.",
+        "Inclua origem humana, objetivo compreendido, escopo conhecido, lacunas, critérios apenas se informados e próximos passos propostos.",
+        "A validação humana ainda não ocorreu."
+      ].join("\n") },
+      { role: "user", content: "Título da missão: " + title + "\n\nDescrição original:\n" + (description?.trim() || "Não foi fornecida descrição adicional.") }
+    ],
+    maxTokens: 5000,
+  });
+  const content = extractTextContent(response.choices?.[0]?.message?.content);
+  if (!content.trim()) throw new Error("A SOFIA não retornou conteúdo para o TR inicial.");
+  return content.trim();
+}
+
+
+async function generateInitialMissionBlueprint(title: string, trVersion: number, trContent: string): Promise<string> {
+  const response = await invokeLLM({
+    messages: [
+      { role: "system", content: [
+        "Você é SOFIA e deve transformar o TR validado em um Blueprint operacional.",
+        "O Blueprint é prescritivo e destinado aos executores; não reescreva o TR como narrativa.",
+        "Não amplie objetivo, escopo, entregáveis, permissões, orçamento, recursos ou prazos além do que está explícito no TR.",
+        "Não invente credenciais, ferramentas autorizadas, agentes, custos, limites ou dependências.",
+        "Quando faltar informação necessária, marque como BLOQUEIO/PENDÊNCIA e não presuma autorização.",
+        "Inclua exatamente estes títulos de seção: Objetivo operacional; Escopo executável; Exclusões e premissas; Etapas e unidades de trabalho; Dependências e paralelismo; Perfil/capacidade do executor; Entradas e contexto autorizado; Restrições e riscos; Critérios objetivos de aceite; Evidências exigidas; Validação e consolidação; Contingência; Bloqueios e gates pendentes.",
+        "Cada unidade de trabalho deve ter resultado esperado, pré-condições, entradas, passos, dependências, critério de aceite e evidência.",
+        "Se o TR não permite decomposição segura, explique os bloqueios e não invente tarefas.",
+        "Na seção Bloqueios e gates pendentes, escreva em uma linha isolada, sem bullet nem negrito, exatamente 'BLOQUEIOS NÃO RESOLVIDOS: NENHUM' somente se não houver bloqueio de escopo; caso contrário, enumere cada bloqueio explicitamente.",
+        "READY significa somente que a estrutura do plano foi gerada e vinculada; não dispensa verificações de risco, orçamento, credenciais ou elegibilidade do executor."
+      ].join("\n") },
+      { role: "user", content: "Missão: " + title + "\nVersão do TR de origem: " + trVersion + "\n\nTR validado:\n" + trContent }
+    ],
+    maxTokens: 7000,
+  });
+  const content = extractTextContent(response.choices?.[0]?.message?.content);
+  return validateMissionBlueprintContent(content);
+}
+
+async function persistMissionBlueprint(input: {
+  taskId: number;
+  ownerId: number;
+  canViewAll: boolean;
+  title: string;
+  trVersionId: number;
+  trVersionNumber: number;
+  trContent: string;
+}) {
+  const documents = await db.getMissionDocumentsForTask(input.taskId, input.ownerId, input.canViewAll);
+  const existing = documents.find((document) => document.typeKey === "BLUEPRINT" && document.documentKey === "BLUEPRINT");
+  if (
+    existing?.latestVersion
+    && ["READY", "ACTIVE"].includes(existing.latestVersion.state)
+    && existing.latestVersion.sourceDocumentVersionId === input.trVersionId
+  ) {
+    return existing.latestVersion;
+  }
+
+  const generatedContent = await generateInitialMissionBlueprint(input.title, input.trVersionNumber, input.trContent);
+  const content = [
+    "# Blueprint — " + input.title,
+    "",
+    "**Versão exata do TR de origem:** v" + input.trVersionNumber,
+    "**Registro da versão TR:** #" + input.trVersionId,
+    "**Estado documental:** READY — estrutura gerada e vinculada; gates adicionais permanecem aplicáveis.",
+    "",
+    generatedContent,
+  ].join("\n");
+  const version = {
+    content,
+    state: "READY",
+    authorType: "SOFIA" as const,
+    sourceDocumentVersionId: input.trVersionId,
+    provenance: {
+      origin: "HUMAN",
+      source: "validated_TR",
+      sourceTRVersionId: input.trVersionId,
+      sourceTRVersionNumber: input.trVersionNumber,
+    },
+    changeSummary: "Blueprint gerado pela SOFIA a partir do TR validado v" + input.trVersionNumber,
+    publishedAt: new Date(),
+  };
+
+  if (existing) {
+    return db.createMissionDocumentRevision({
+      taskId: input.taskId,
+      documentId: existing.id,
+      ownerId: input.ownerId,
+      canViewAll: input.canViewAll,
+      version,
+    });
+  }
+
+  const created = await db.createMissionDocumentWithVersion({
+    taskId: input.taskId,
+    ownerId: input.ownerId,
+    canViewAll: input.canViewAll,
+    typeKey: "BLUEPRINT",
+    documentKey: "BLUEPRINT",
+    title: "Blueprint — " + input.title,
+    version,
+  });
+  return created.version;
+}
 
 export const appRouter = router({
   system: systemRouter,
@@ -255,6 +372,557 @@ export const appRouter = router({
   // TASKS ROUTER
   // ============================================
   tasks: router({
+    documents: router({
+      list: protectedProcedure.input(z.object({ taskId: z.number().int().positive() })).query(async ({ input, ctx }) => {
+        const task = await db.getTaskById(input.taskId);
+        if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+        const missionRootId = await db.getMissionRootTaskId(input.taskId);
+        if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
+        return db.getMissionDocumentsForTask(missionRootId, ctx.user.id, ctx.user.role === "admin");
+      }),
+      getVersion: protectedProcedure.input(z.object({ taskId: z.number().int().positive(), documentId: z.number().int().positive(), version: z.number().int().positive() }))
+        .query(async ({ input, ctx }) => {
+          const task = await db.getTaskById(input.taskId);
+          if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+          const missionRootId = await db.getMissionRootTaskId(input.taskId);
+          if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
+          const result = await db.getMissionDocumentVersionForTask(missionRootId, input.documentId, input.version, ctx.user.id, ctx.user.role === "admin");
+          if (!result) throw new TRPCError({ code: "NOT_FOUND", message: "Versão documental não encontrada." });
+          return result;
+        }),
+      history: protectedProcedure.input(z.object({ taskId: z.number().int().positive(), documentId: z.number().int().positive() }))
+        .query(async ({ input, ctx }) => {
+          const task = await db.getTaskById(input.taskId);
+          if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+          const missionRootId = await db.getMissionRootTaskId(input.taskId);
+          if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
+          return db.listMissionDocumentVersionsForTask(missionRootId, input.documentId, ctx.user.id, ctx.user.role === "admin");
+        }),
+      listActionPlanUnits: protectedProcedure
+        .input(z.object({ taskId: z.number().int().positive() }))
+        .query(async ({ input, ctx }) => {
+          const requestedTask = await db.getTaskById(input.taskId);
+          if (!requestedTask || requestedTask.createdBy !== ctx.user.id) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+          }
+          const missionRootId = await db.getMissionRootTaskId(input.taskId);
+          if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
+          return db.listMissionActionPlanUnits(missionRootId, ctx.user.id);
+        }),
+      registerActionPlanUnits: protectedProcedure
+        .input(z.object({
+          taskId: z.number().int().positive(),
+          documentId: z.number().int().positive(),
+          expectedVersion: z.number().int().positive(),
+          expectedContentHash: z.string().regex(/^[a-f0-9]{64}$/),
+        }))
+        .mutation(async ({ input, ctx }) => {
+          const requestedTask = await db.getTaskById(input.taskId);
+          if (!requestedTask || requestedTask.createdBy !== ctx.user.id) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+          }
+          const missionRootId = await db.getMissionRootTaskId(input.taskId);
+          if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
+          try {
+            return await db.registerMissionActionPlanUnits({
+              missionTaskId: missionRootId,
+              ownerId: ctx.user.id,
+              documentId: input.documentId,
+              expectedVersion: input.expectedVersion,
+              expectedContentHash: input.expectedContentHash,
+            });
+          } catch (error) {
+            throw new TRPCError({
+              code: "PRECONDITION_FAILED",
+              message: error instanceof Error ? error.message : "Não foi possível registrar as unidades do plano.",
+              cause: error,
+            });
+          }
+        }),
+      approveActionPlanUnit: protectedProcedure
+        .input(z.object({
+          taskId: z.number().int().positive(),
+          unitId: z.string().regex(/^T[0-9]{2}$/),
+          expectedVersion: z.number().int().positive(),
+          expectedContentHash: z.string().regex(/^[a-f0-9]{64}$/),
+        }))
+        .mutation(async ({ input, ctx }) => {
+          const requestedTask = await db.getTaskById(input.taskId);
+          if (!requestedTask || requestedTask.createdBy !== ctx.user.id) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+          }
+          const missionRootId = await db.getMissionRootTaskId(input.taskId);
+          if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
+          try {
+            return await db.approveMissionActionPlanUnit({
+              missionTaskId: missionRootId,
+              ownerId: ctx.user.id,
+              unitId: input.unitId,
+              expectedVersion: input.expectedVersion,
+              expectedContentHash: input.expectedContentHash,
+            });
+          } catch (error) {
+            throw new TRPCError({
+              code: "PRECONDITION_FAILED",
+              message: error instanceof Error ? error.message : "Não foi possível aprovar esta unidade.",
+              cause: error,
+            });
+          }
+        }),
+      materializeApprovedActionPlanUnits: protectedProcedure
+        .input(z.object({ taskId: z.number().int().positive() }))
+        .mutation(async ({ input, ctx }) => {
+          const requestedTask = await db.getTaskById(input.taskId);
+          if (!requestedTask || requestedTask.createdBy !== ctx.user.id) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+          }
+          const missionRootId = await db.getMissionRootTaskId(input.taskId);
+          if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
+          try {
+            return await db.materializeApprovedMissionActionPlanUnits({
+              missionTaskId: missionRootId,
+              ownerId: ctx.user.id,
+            });
+          } catch (error) {
+            throw new TRPCError({
+              code: "PRECONDITION_FAILED",
+              message: error instanceof Error ? error.message : "Não foi possível materializar as unidades aprovadas.",
+              cause: error,
+            });
+          }
+        }),
+      evaluateActionPlanUnit: protectedProcedure
+        .input(z.object({
+          taskId: z.number().int().positive(),
+          unitId: z.string().regex(/^T[0-9]{2}$/),
+        }))
+        .mutation(async ({ input, ctx }) => {
+          const requestedTask = await db.getTaskById(input.taskId);
+          if (!requestedTask || requestedTask.createdBy !== ctx.user.id) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+          }
+          const missionRootId = await db.getMissionRootTaskId(input.taskId);
+          if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
+          const mission = await db.getTaskById(missionRootId);
+          if (!mission || mission.createdBy !== ctx.user.id) {
+            throw new TRPCError({ code: "FORBIDDEN", message: "Somente o proprietário da missão pode avaliar a governança do plano." });
+          }
+
+          const documents = await db.getMissionDocumentsForTask(missionRootId, ctx.user.id, false);
+          const actionPlanDocument = documents.find((document) =>
+            document.typeKey === "ACTION_PLAN" && document.documentKey === "ACTION_PLAN"
+          );
+          if (!actionPlanDocument?.latestVersion) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "A missão ainda não possui plano de ação." });
+          }
+
+          const planVersionResult = await db.getMissionDocumentVersionForTask(
+            missionRootId,
+            actionPlanDocument.id,
+            actionPlanDocument.latestVersion.version,
+            ctx.user.id,
+            false,
+          );
+          if (!planVersionResult) throw new TRPCError({ code: "NOT_FOUND", message: "Versão atual do plano não encontrada." });
+
+          const actualPlanHash = createHash("sha256")
+            .update(planVersionResult.version.content, "utf8")
+            .digest("hex");
+          if (!planVersionResult.version.contentHash
+            || actualPlanHash !== planVersionResult.version.contentHash) {
+            throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A integridade SHA-256 da versão aprovada não confere; pré-avaliação bloqueada." });
+          }
+
+          let plan;
+          try {
+            plan = ActionPlanSchema.parse(JSON.parse(planVersionResult.version.content));
+          } catch {
+            throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O conteúdo da versão atual do plano não corresponde ao contrato estruturado." });
+          }
+          const unit = plan.tasks.find((item) => item.id === input.unitId);
+          if (!unit) throw new TRPCError({ code: "NOT_FOUND", message: "Unidade não encontrada na versão atual do plano." });
+
+          const blueprintDocument = documents.find((document) =>
+            document.typeKey === "BLUEPRINT" && document.documentKey === "BLUEPRINT"
+          );
+          let sourceVersionsCurrent = false;
+          if (blueprintDocument?.latestVersion
+            && blueprintDocument.latestVersion.id === planVersionResult.version.sourceDocumentVersionId
+            && ["READY", "ACTIVE"].includes(blueprintDocument.latestVersion.state)) {
+            const blueprintResult = await db.getMissionDocumentVersionForTask(
+              missionRootId,
+              blueprintDocument.id,
+              blueprintDocument.latestVersion.version,
+              ctx.user.id,
+              false,
+            );
+            const trDocument = documents.find((document) =>
+              document.typeKey === "TR" && document.documentKey === "TR"
+            );
+            if (blueprintResult && trDocument?.latestVersion
+              && ["VALIDATED", "ACTIVE", "REORIENTED"].includes(trDocument.latestVersion.state)
+              && blueprintResult.version.sourceDocumentVersionId === trDocument.latestVersion.id) {
+              sourceVersionsCurrent = true;
+            }
+          }
+
+          const registeredUnits = actionPlanDocument.latestVersion.state === "APPROVED"
+            ? await db.listMissionActionPlanUnits(missionRootId, ctx.user.id)
+            : [];
+          const registeredUnit = registeredUnits.find((candidate) => candidate.unitId === unit.id);
+          const dependencyEvidence = registeredUnit
+            ? await refreshActionUnitDependencyEvidence({
+              missionTaskId: missionRootId,
+              ownerId: ctx.user.id,
+              actionPlanDocumentId: actionPlanDocument.id,
+              actionPlanVersionId: planVersionResult.version.id,
+              actionPlanVersionNumber: planVersionResult.version.version,
+              actionPlanContentHash: actualPlanHash,
+              unitId: unit.id,
+            })
+            : {
+              evidenceId: null,
+              decision: unit.dependsOn.length === 0 ? "VERIFIED" as const : "BLOCKED" as const,
+              dependencies: unit.dependsOn.map((dependencyId) => ({
+                unitId: dependencyId,
+                operationalTaskId: null,
+                taskStatus: null,
+                verified: false,
+                reason: "action_unit_not_registered",
+              })),
+              unitApproved: false,
+              idempotencyKey: null,
+            };
+
+          const gate = evaluateExecutionGate({
+            planApproved: actionPlanDocument.latestVersion.state === "APPROVED",
+            sourceVersionsCurrent,
+            dependenciesCompleted: dependencyEvidence.decision === "VERIFIED",
+            riskClass: null,
+            maximumAllowedRisk: null,
+            estimatedCredits: unit.estimatedCredits,
+            availableBudgetCredits: null,
+            budgetEstimateVerified: false,
+            permissionGranted: false,
+            agentEligible: false,
+            idempotencyKey: dependencyEvidence.idempotencyKey,
+            executionAdapterAvailable: false,
+            explicitUnitApproval: dependencyEvidence.unitApproved,
+          });
+
+          return {
+            missionId: missionRootId,
+            actionPlanDocumentId: actionPlanDocument.id,
+            actionPlanVersion: planVersionResult.version.version,
+            actionPlanContentHash: planVersionResult.version.contentHash,
+            unit: {
+              id: unit.id,
+              title: unit.title,
+              proposedAgentId: unit.proposedAgentId,
+              dependsOn: unit.dependsOn,
+              estimatedCredits: unit.estimatedCredits,
+            },
+            gate,
+            dependencyEvidence,
+            limitations: [
+              "A avaliação é somente leitura e não cria autorização nem execução.",
+              "Dependências do plano ainda não possuem vínculo persistido com tarefas operacionais; dependências não vazias permanecem bloqueadas.",
+              "Classificação/limite de risco, orçamento autorizado, permissão por unidade, elegibilidade do executor-filho, idempotência persistida e adaptador de execução por unidade ainda não estão implementados.",
+              "O snapshot de elegibilidade da missão-pai não é reutilizado como prova de elegibilidade de uma futura tarefa-filha.",
+              "A aprovação do plano inteiro não equivale à aprovação individual desta unidade.",
+            ],
+          };
+        }),
+      generateActionPlan: protectedProcedure
+        .input(z.object({ taskId: z.number().int().positive() }))
+        .mutation(async ({ input, ctx }) => {
+          const requestedTask = await db.getTaskById(input.taskId);
+          if (!requestedTask || (requestedTask.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+          }
+          const missionRootId = await db.getMissionRootTaskId(input.taskId);
+          if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
+          const mission = await db.getTaskById(missionRootId);
+          if (!mission || mission.createdBy !== ctx.user.id) {
+            throw new TRPCError({ code: "FORBIDDEN", message: "Somente o proprietário da missão pode propor seu plano de ação." });
+          }
+
+          const documents = await db.getMissionDocumentsForTask(missionRootId, ctx.user.id, false);
+          const tr = documents.find((document) => document.typeKey === "TR" && document.documentKey === "TR");
+          const blueprint = documents.find((document) => document.typeKey === "BLUEPRINT" && document.documentKey === "BLUEPRINT");
+          if (!tr?.latestVersion || !["VALIDATED", "ACTIVE", "REORIENTED"].includes(tr.latestVersion.state)
+            || !blueprint?.latestVersion || !["READY", "ACTIVE"].includes(blueprint.latestVersion.state)
+            || blueprint.latestVersion.sourceDocumentVersionId !== tr.latestVersion.id) {
+            throw new TRPCError({
+              code: "PRECONDITION_FAILED",
+              message: "O plano de ação exige TR vigente validado e Blueprint READY/ACTIVE vinculado àquela versão exata.",
+            });
+          }
+
+          const trRecord = await db.getMissionDocumentVersionForTask(
+            missionRootId, tr.id, tr.latestVersion.version, ctx.user.id, false,
+          );
+          const blueprintRecord = await db.getMissionDocumentVersionForTask(
+            missionRootId, blueprint.id, blueprint.latestVersion.version, ctx.user.id, false,
+          );
+          if (!trRecord || !blueprintRecord) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Versão-fonte do TR ou Blueprint não encontrada." });
+          }
+
+          const eligibility = await db.inspectTaskAgentEligibility(missionRootId, mission.createdBy);
+          const eligibleAgents = (eligibility?.candidates ?? [])
+            .filter((candidate: any) => candidate.eligible)
+            .map((candidate: any) => ({
+              agentId: candidate.agentId,
+              name: candidate.name,
+              creditsSnapshot: candidate.creditsRemaining,
+              creditsUpdatedAt: candidate.creditsUpdatedAt,
+            }));
+
+          const response = await invokeLLM({
+            messages: [
+              {
+                role: "system",
+                content: [
+                  "Você é SOFIA e deve propor um plano de ação estruturado, em JSON puro, sem Markdown ou cercas de código.",
+                  "O plano deve respeitar estritamente o TR validado e o Blueprint fornecidos. Não amplie escopo nem invente fatos, dependências, prazos, ferramentas, permissões ou recursos.",
+                  "Divida o trabalho em unidades pequenas, com IDs T01, T02 etc., dependências explícitas e critérios objetivos de aceite.",
+                  "Só proponha proposedAgentId dentre os agentes elegíveis fornecidos; se nenhum for adequado, use null e explique em agentRationale.",
+                  "Não existe neste sistema um modelo de preço/crédito verificado por tarefa: estimatedCredits deve ser null em todas as tarefas e creditEstimateBasis deve declarar essa limitação. Não confunda saldo disponível do agente com custo estimado.",
+                  "Registre riscos e reversibilidade por tarefa e globalmente. approvalRequired deve ser true. Não execute, reserve, despache, altere status ou atribua agentes.",
+                  "Retorne exatamente as propriedades do schema: schemaVersion, objective, expectedOutcome, tasks, globalRisks, reversibility, approvalRequired, approvalReason. Cada tarefa: id, title, description, dependsOn, proposedAgentId, agentRationale, estimatedCredits, creditEstimateBasis, acceptanceCriteria, risks, reversibility.",
+                ].join("\n"),
+              },
+              {
+                role: "user",
+                content: "Missão: " + mission.title
+                  + "\n\nTR validado (versão " + tr.latestVersion.version + "):\n" + trRecord.version.content
+                  + "\n\nBlueprint vigente (versão " + blueprint.latestVersion.version + "):\n" + blueprintRecord.version.content
+                  + "\n\nAgentes elegíveis no snapshot (não reservados):\n" + JSON.stringify(eligibleAgents),
+              },
+            ],
+            toolChoice: "none",
+            maxTokens: 6000,
+          });
+          const raw = extractTextContent(response.choices?.[0]?.message?.content);
+          let parsed: unknown;
+          try {
+            parsed = JSON.parse(raw);
+          } catch {
+            throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A SOFIA não retornou um plano JSON válido; nenhuma proposta foi persistida." });
+          }
+          let plan;
+          try {
+            plan = validateActionPlan(parsed, eligibleAgents.map((agent: any) => agent.agentId));
+          } catch (error) {
+            throw new TRPCError({
+              code: "PRECONDITION_FAILED",
+              message: error instanceof Error ? error.message : "Plano estruturado inválido.",
+              cause: error,
+            });
+          }
+
+          const content = JSON.stringify(plan, null, 2);
+          const contentHash = createHash("sha256").update(content, "utf8").digest("hex");
+          const existing = documents.find((document) => document.typeKey === "ACTION_PLAN" && document.documentKey === "ACTION_PLAN");
+          const version = {
+            content,
+            state: "PROPOSED",
+            authorType: "SOFIA" as const,
+            sourceDocumentVersionId: blueprintRecord.version.id,
+            provenance: {
+              source: "validated_TR_and_READY_BLUEPRINT",
+              sourceTRVersionId: trRecord.version.id,
+              sourceTRVersionNumber: trRecord.version.version,
+              sourceBlueprintVersionId: blueprintRecord.version.id,
+              sourceBlueprintVersionNumber: blueprintRecord.version.version,
+              eligibilityObservedAt: eligibility?.observedAt ?? null,
+              eligibleAgentIds: eligibleAgents.map((agent: any) => agent.agentId),
+            },
+            changeSummary: "Plano estruturado proposto pela SOFIA a partir do TR e Blueprint vigentes",
+            contentHash,
+            publishedAt: new Date(),
+          };
+
+          if (existing) {
+            const createdVersion = await db.createMissionDocumentRevision({
+              taskId: missionRootId,
+              documentId: existing.id,
+              ownerId: ctx.user.id,
+              canViewAll: false,
+              version,
+            });
+            return { documentId: existing.id, version: createdVersion };
+          }
+
+          const created = await db.createMissionDocumentWithVersion({
+            taskId: missionRootId,
+            ownerId: ctx.user.id,
+            canViewAll: false,
+            typeKey: "ACTION_PLAN",
+            documentKey: "ACTION_PLAN",
+            title: "Plano de ação — " + mission.title,
+            version,
+          });
+          return { documentId: created.document.id, version: created.version };
+        }),
+      approveActionPlan: protectedProcedure
+        .input(z.object({
+          taskId: z.number().int().positive(),
+          documentId: z.number().int().positive(),
+          expectedVersion: z.number().int().positive(),
+          expectedContentHash: z.string().regex(/^[a-f0-9]{64}$/),
+        }))
+        .mutation(async ({ input, ctx }) => {
+          const task = await db.getTaskById(input.taskId);
+          if (!task || task.createdBy !== ctx.user.id) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Somente o proprietário da missão pode aprovar o plano." });
+          }
+          const missionRootId = await db.getMissionRootTaskId(input.taskId);
+          if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
+          try {
+            return await db.approveMissionActionPlanVersion({
+              taskId: missionRootId,
+              documentId: input.documentId,
+              ownerId: ctx.user.id,
+              expectedVersion: input.expectedVersion,
+              expectedContentHash: input.expectedContentHash,
+            });
+          } catch (error) {
+            throw new TRPCError({
+              code: "PRECONDITION_FAILED",
+              message: error instanceof Error ? error.message : "Não foi possível aprovar a versão apresentada.",
+              cause: error,
+            });
+          }
+        }),
+      reviseInitialTR: protectedProcedure.input(z.object({ taskId: z.number().int().positive(), content: z.string().trim().min(1).max(50000) }))
+        .mutation(async ({ input, ctx }) => {
+          const task = await db.getTaskById(input.taskId);
+          if (!task || task.createdBy !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND", message: "Somente o operador que criou a missão pode corrigir ou validar seu TR." });
+          if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR pertence à missão principal; tarefas-filhas não podem alterá-lo." });
+          if (task.manusTaskId || task.manusStatus !== "awaiting_tr_validation") {
+            throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A revisão do TR só é permitida antes da primeira execução externa." });
+          }
+          const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, false);
+          const tr = docs.find((document) => document.typeKey === "TR" && document.documentKey === "TR");
+          const currentStatusName = (await db.getTaskStatusNameById(task.statusId))?.toUpperCase();
+          const canReorientBeforeExecution = tr?.latestVersion?.state === "VALIDATED"
+            && ["PAUSED", "STAGED"].includes(currentStatusName ?? "")
+            && !task.manusTaskId;
+          if (!tr?.latestVersion || (!["DRAFT", "AWAITING_HUMAN_VALIDATION"].includes(tr.latestVersion.state) && !canReorientBeforeExecution)) {
+            throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR só pode ser corrigido antes da primeira execução; após validação, a reorientação exige missão ainda PAUSED e sem execução externa." });
+          }
+          try {
+            return await db.reorientMissionTRBeforeExecution({
+              taskId: input.taskId,
+              documentId: tr.id,
+              ownerId: ctx.user.id,
+              content: input.content,
+            });
+          } catch (error) {
+            throw new TRPCError({
+              code: "PRECONDITION_FAILED",
+              message: error instanceof Error ? error.message : "Não foi possível reorientar o TR antes da execução.",
+              cause: error,
+            });
+          }
+        }),
+      regenerateInitialTR: protectedProcedure.input(z.object({ taskId: z.number().int().positive() })).mutation(async ({ input, ctx }) => {
+        const task = await db.getTaskById(input.taskId);
+        if (!task || task.createdBy !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND", message: "Somente o operador que criou a missão pode corrigir ou validar seu TR." });
+        const pausedStatusId = await db.getTaskStatusIdByName("PAUSED");
+        if (task.statusId !== pausedStatusId || task.manusTaskId || task.manusStatus !== "awaiting_tr_validation") {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A regeneração do TR só pode ocorrer enquanto a missão estiver no gate inicial de validação." });
+        }
+        if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR pertence à missão principal; tarefas-filhas não podem alterá-lo." });
+        const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, false);
+        const tr = docs.find((document) => document.typeKey === "TR" && document.documentKey === "TR");
+        if (!tr?.latestVersion || tr.latestVersion.state !== "DRAFT") {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A regeneração só é permitida enquanto o TR inicial estiver em DRAFT." });
+        }
+        const content = await generateInitialMissionTR(task.title, task.description);
+        return db.createMissionDocumentRevision({
+          taskId: input.taskId, documentId: tr.id, ownerId: ctx.user.id, canViewAll: false,
+          version: {
+            content, state: "AWAITING_HUMAN_VALIDATION", authorType: "SOFIA",
+            provenance: { origin: "HUMAN", source: "operator_requested_regeneration", supersedesVersion: tr.latestVersion.version },
+            changeSummary: "SOFIA regenerou o TR inicial após falha anterior",
+            publishedAt: new Date(),
+          },
+        });
+      }),
+      validateTR: protectedProcedure.input(z.object({ taskId: z.number().int().positive() })).mutation(async ({ input, ctx }) => {
+        const task = await db.getTaskById(input.taskId);
+        if (!task || task.createdBy !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND", message: "Somente o operador que criou a missão pode corrigir ou validar seu TR." });
+        const pausedStatusId = await db.getTaskStatusIdByName("PAUSED");
+        if (task.statusId !== pausedStatusId || task.manusTaskId || task.manusStatus !== "awaiting_tr_validation") {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A validação inicial do TR só pode liberar uma missão ainda no gate inicial de validação." });
+        }
+        if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR pertence à missão principal; tarefas-filhas não podem alterá-lo." });
+        const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, false);
+        const tr = docs.find((document) => document.typeKey === "TR" && document.documentKey === "TR");
+        if (!tr?.latestVersion || tr.latestVersion.state !== "AWAITING_HUMAN_VALIDATION") throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Não existe uma versão do TR aguardando validação." });
+        const current = await db.getMissionDocumentVersionForTask(input.taskId, tr.id, tr.latestVersion.version, ctx.user.id, false);
+        if (!current) throw new TRPCError({ code: "NOT_FOUND", message: "Conteúdo do TR não encontrado." });
+        const validated = await db.createMissionDocumentRevision({
+          taskId: input.taskId, documentId: tr.id, ownerId: ctx.user.id, canViewAll: false,
+          version: {
+            content: current.version.content, state: "VALIDATED", authorType: "HUMAN", authorUserId: ctx.user.id,
+            provenance: { origin: "HUMAN", action: "explicit_tr_validation", validatedVersion: tr.latestVersion.version },
+            changeSummary: "Validação explícita pelo operador da versão " + tr.latestVersion.version,
+            publishedAt: new Date(),
+          },
+        });
+        try {
+          await persistMissionBlueprint({
+            taskId: input.taskId, ownerId: ctx.user.id, canViewAll: false,
+            title: task.title, trVersionId: validated.id, trVersionNumber: validated.version,
+            trContent: current.version.content,
+          });
+        } catch (error) {
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message: "TR validado, mas o Blueprint não foi gerado. A missão permanece PAUSED; tente gerar o Blueprint novamente. " + (error instanceof Error ? error.message : ""),
+            cause: error,
+          });
+        }
+        if (!(await db.hasExecutionReadyMissionDocuments(input.taskId))) {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O Blueprint não passou pela verificação de vínculo com a versão vigente do TR." });
+        }
+        const stagedStatusId = await db.getTaskStatusIdByName("STAGED");
+        await db.updateTaskStatus(input.taskId, stagedStatusId);
+        return { validatedVersion: validated.version, statusId: stagedStatusId };
+      }),
+      generateBlueprint: protectedProcedure.input(z.object({ taskId: z.number().int().positive() })).mutation(async ({ input, ctx }) => {
+        const task = await db.getTaskById(input.taskId);
+        if (!task || task.createdBy !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND", message: "Somente o operador que criou a missão pode liberar seu plano de trabalho." });
+        const pausedStatusId = await db.getTaskStatusIdByName("PAUSED");
+        if (task.statusId !== pausedStatusId || task.manusTaskId || task.manusStatus !== "awaiting_tr_validation") {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A geração/retenção do Blueprint só pode liberar uma missão ainda no gate inicial de validação." });
+        }
+        if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O Blueprint pertence à missão principal." });
+        const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, false);
+        const tr = docs.find((document) => document.typeKey === "TR" && document.documentKey === "TR");
+        if (!tr?.latestVersion || !["VALIDATED", "ACTIVE", "REORIENTED"].includes(tr.latestVersion.state)) {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR precisa estar validado antes da geração do Blueprint." });
+        }
+        const current = await db.getMissionDocumentVersionForTask(input.taskId, tr.id, tr.latestVersion.version, ctx.user.id, false);
+        if (!current) throw new TRPCError({ code: "NOT_FOUND", message: "Conteúdo do TR validado não encontrado." });
+        const blueprint = await persistMissionBlueprint({
+          taskId: input.taskId, ownerId: ctx.user.id, canViewAll: false,
+          title: task.title, trVersionId: current.version.id, trVersionNumber: current.version.version,
+          trContent: current.version.content,
+        });
+        if (!(await db.hasExecutionReadyMissionDocuments(input.taskId))) {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Blueprint não está READY ou não referencia a versão vigente do TR." });
+        }
+        const stagedStatusId = await db.getTaskStatusIdByName("STAGED");
+        await db.updateTaskStatus(input.taskId, stagedStatusId);
+        return { blueprintVersion: blueprint.version, statusId: stagedStatusId };
+      }),
+    }),
+
     list: protectedProcedure.query(async ({ ctx }) => {
       return db.getAllTasks(ctx.user.id, ctx.user.role === "admin");
     }),
@@ -274,34 +942,110 @@ export const appRouter = router({
         dueDate: z.date().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
-        const created = await db.createTask({
-          agentId: input.agentId,
-          createdBy: ctx.user.id,
-          title: input.title,
-          description: input.description,
-          statusId: input.statusId,
-          priorityId: input.priorityId,
-          parentTaskId: input.parentTaskId,
-          dueDate: input.dueDate,
-        });
-        const taskId = created[0]?.id;
-        if (!taskId) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "A missão não foi persistida." });
+        if (input.parentTaskId !== undefined) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Tarefas-filhas são criadas pelo orquestrador a partir da missão principal, não pelo formulário de nova missão." });
+        }
+        // Verify the document catalog before creating the task row. Without migration
+        // 0010, creating the mission first would leave an orphan task with no ORIGINAL_REQUEST/TR.
+        let activeDocumentTypes: Awaited<ReturnType<typeof db.getMissionDocumentTypes>>;
+        try {
+          activeDocumentTypes = await db.getMissionDocumentTypes();
+        } catch (error) {
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message: "O catálogo documental da missão não está disponível. A migration 0010 precisa ser aplicada antes de criar missões.",
+            cause: error,
+          });
+        }
+        const activeTypeKeys = new Set(activeDocumentTypes.map((documentType) => documentType.typeKey));
+        const missingRequiredTypes = ["ORIGINAL_REQUEST", "TR", "BLUEPRINT"].filter((typeKey) => !activeTypeKeys.has(typeKey));
+        if (missingRequiredTypes.length > 0) {
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message: "Tipos documentais obrigatórios inativos ou ausentes: " + missingRequiredTypes.join(", "),
+          });
+        }
 
+        // Human-origin missions stay PAUSED until the initial TR is validated.
+        const pausedStatusId = await db.getTaskStatusIdByName("PAUSED");
+        if (!pausedStatusId) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O status PAUSED não está configurado; criação segura bloqueada." });
+
+        let trGenerationError: string | null = null;
+        let trContent: string;
+        let trState = "AWAITING_HUMAN_VALIDATION";
+        try {
+          trContent = await generateInitialMissionTR(input.title, input.description);
+        } catch (error) {
+          trGenerationError = error instanceof Error ? error.message : "Falha ao gerar o TR inicial.";
+          trState = "DRAFT";
+          trContent = [
+            "# TR inicial — " + input.title, "",
+            "**Estado:** DRAFT — geração cognitiva pendente; validação indisponível.",
+            "**Origem:** solicitação humana registrada no documento Solicitação original.", "",
+            "## Informações disponíveis",
+            "- Título declarado: " + input.title,
+            "- Descrição declarada: " + (input.description?.trim() || "Não informada."), "",
+            "## Limite de conhecimento",
+            "A interpretação da SOFIA não foi concluída. Nenhuma motivação, decisão, escopo adicional ou resultado foi presumido."
+          ].join("\n");
+        }
+
+        const originalContent = [
+          "# Solicitação original — " + input.title, "",
+          "**Origem:** operador humano (usuário #" + ctx.user.id + ")",
+          "**Registrada em:** " + new Date().toISOString(), "",
+          "## Descrição original", input.description?.trim() || "Nenhuma descrição adicional foi fornecida."
+        ].join("\n");
+
+        let created: Awaited<ReturnType<typeof db.createMissionWithInitialDocuments>>;
+        try {
+          created = await db.createMissionWithInitialDocuments({
+            task: {
+              agentId: input.agentId,
+              createdBy: ctx.user.id,
+              title: input.title,
+              description: input.description,
+              statusId: pausedStatusId,
+              priorityId: input.priorityId,
+              dueDate: input.dueDate,
+              manusStatus: "awaiting_tr_validation",
+            },
+            originalRequest: {
+              content: originalContent,
+              state: "PUBLISHED",
+              authorType: "HUMAN",
+              authorUserId: ctx.user.id,
+              provenance: { origin: "HUMAN", source: "tasks.create" },
+              changeSummary: "Snapshot imutável da solicitação original",
+            },
+            tr: {
+              content: trContent,
+              state: trState,
+              authorType: "SOFIA",
+              provenance: { origin: "HUMAN", source: "tasks.create", originalRequestDocumentKey: "ORIGINAL_REQUEST" },
+              changeSummary: "Primeira compreensão da missão pela SOFIA; aguardando validação humana",
+              publishedAt: trState === "AWAITING_HUMAN_VALIDATION" ? new Date() : null,
+            },
+          });
+        } catch (error) {
+          console.error("[Tasks] Atomic mission/document creation failed:", error);
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "A missão e seus documentos iniciais não puderam ser persistidos. Nenhuma missão parcial foi criada.",
+            cause: error,
+          });
+        }
+
+        // GitHub mirroring is deliberately outside the DB transaction and occurs
+        // only after the mission + mandatory source documents are safely persisted.
         const mirror = await mirrorTaskToGitHub({
-          id: taskId,
-          missionKey: `SCP-TASK-${String(taskId).padStart(6, "0")}`,
-          title: input.title,
-          description: input.description,
-          statusId: input.statusId,
-          priorityId: input.priorityId,
-          parentTaskId: input.parentTaskId,
-          dueDate: input.dueDate,
+          ...created,
           createdBy: ctx.user.id,
           creatorType: "user",
           creatorName: ctx.user.name,
           creatorEmail: ctx.user.email,
         });
-        await db.updateTaskGitHubSync(taskId, {
+        await db.updateTaskGitHubSync(created.id, {
           missionKey: mirror.missionKey,
           githubPath: mirror.path,
           githubSha: mirror.sha,
@@ -309,7 +1053,14 @@ export const appRouter = router({
           githubSyncError: mirror.error ?? null,
         });
 
-        return { ...created[0], missionKey: mirror.missionKey, githubPath: mirror.path, githubSyncStatus: mirror.status };
+        return {
+          ...created,
+          missionKey: mirror.missionKey,
+          githubPath: mirror.path,
+          githubSyncStatus: mirror.status,
+          trState,
+          trGenerationError,
+        };
       }),
 
     getById: protectedProcedure
@@ -348,6 +1099,25 @@ export const appRouter = router({
         if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
           throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
         }
+        const requestedStatus = (await db.getTaskStatusNameById(input.statusId))?.toUpperCase();
+        const currentStatus = (await db.getTaskStatusNameById(task.statusId))?.toUpperCase();
+        if (requestedStatus === "PROGRESS" && currentStatus !== "PROGRESS") {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A transição para PROGRESS é exclusiva dos fluxos internos de claim atômico e retomada; a procedure genérica não pode promovê-la." });
+        }
+        if (requestedStatus === "STAGED" && !(await db.hasExecutionReadyMissionDocuments(input.id))) {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A missão não pode entrar em STAGED sem TR validado e Blueprint READY vinculado à versão vigente." });
+        }
+        if (
+          requestedStatus === "PAUSED"
+          && currentStatus === "PROGRESS"
+          && task.manusTaskId
+          && !["stopped", "waiting_credit"].includes((task.manusStatus ?? "").toLowerCase())
+        ) {
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message: "A execução externa ainda não está pausada. Use a operação de pausa, que confirma o estado na Manus antes de alterar o estado local.",
+          });
+        }
         const result = await db.updateTaskStatus(input.id, input.statusId);
         if (task.missionKey) {
           const mirror = await mirrorTaskToGitHub({
@@ -363,6 +1133,142 @@ export const appRouter = router({
           });
         }
         return result;
+      }),
+
+    pauseExecution: protectedProcedure
+      .input(z.object({ taskId: z.number().int().positive() }))
+      .mutation(async ({ input, ctx }) => {
+        const task = await db.getTaskById(input.taskId);
+        if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+        }
+        const currentStatus = (await db.getTaskStatusNameById(task.statusId))?.toUpperCase();
+        if (currentStatus !== "PROGRESS") {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Somente uma tarefa em PROGRESS pode solicitar pausa da execução externa." });
+        }
+        if (!task.agentId || !task.manusTaskId) {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A tarefa não possui executor e execução Manus atribuídos." });
+        }
+
+        let pauseResult: Awaited<ReturnType<typeof stopManusTask>>;
+        try {
+          pauseResult = await stopManusTask(task, task.manusStatus === "manual_pause_pending");
+        } catch (error) {
+          throw new TRPCError({
+            code: "BAD_GATEWAY",
+            message: error instanceof Error ? error.message : "Não foi possível confirmar a pausa na Manus.",
+            cause: error,
+          });
+        }
+
+        const pauseConfirmed = pauseResult.hasRunningBackgroundJobs === false;
+        if (pauseConfirmed) {
+          const pausedStatusId = await db.getTaskStatusIdByName("PAUSED");
+          await db.updateTaskExecution(task.id, { manusStatus: "stopped", completedAt: null });
+          await db.updateTaskStatus(task.id, pausedStatusId);
+          if (task.missionKey) {
+            const mirror = await mirrorTaskToGitHub({ ...task, statusId: pausedStatusId });
+            await db.updateTaskGitHubSync(task.id, {
+              missionKey: mirror.missionKey,
+              githubPath: mirror.path,
+              githubSha: mirror.sha,
+              githubSyncStatus: mirror.status,
+              githubSyncError: mirror.error ?? null,
+            });
+          }
+        } else {
+          await db.updateTaskExecution(task.id, { manusStatus: "manual_pause_pending", completedAt: null });
+        }
+
+        try {
+          const eventType = await db.getOrCreateActivityEventType(
+            pauseConfirmed ? "task_execution_paused" : "task_execution_pause_pending",
+          );
+          await db.createActivityLog({
+            agentId: task.agentId,
+            taskId: task.id,
+            eventTypeId: eventType.id,
+            details: pauseConfirmed
+              ? "Execução Manus confirmada como stopped, sem processos em segundo plano ativos. Estado local alterado para PAUSED."
+              : "Solicitação de pausa enviada. A Manus informou processos em segundo plano ativos ou não confirmou esse campo; a tarefa permanece PROGRESS até confirmação segura.",
+          });
+        } catch (error) {
+          console.warn("[Tasks] Could not record execution pause activity:", error);
+        }
+
+        return {
+          paused: pauseConfirmed,
+          pending: !pauseConfirmed,
+          externalStatus: pauseResult.status,
+          hasRunningBackgroundJobs: pauseResult.hasRunningBackgroundJobs,
+        };
+      }),
+
+    resumeExecution: protectedProcedure
+      .input(z.object({ taskId: z.number().int().positive() }))
+      .mutation(async ({ input, ctx }) => {
+        const task = await db.getTaskById(input.taskId);
+        if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+        }
+        const currentStatus = (await db.getTaskStatusNameById(task.statusId))?.toUpperCase();
+        if (currentStatus !== "PAUSED") {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Somente uma tarefa em PAUSED pode solicitar retomada." });
+        }
+        if (!task.agentId || !task.manusTaskId) {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A tarefa não possui executor e execução Manus para retomar." });
+        }
+
+        let resumeResult: Awaited<ReturnType<typeof resumeManusTask>>;
+        try {
+          resumeResult = await resumeManusTask(task);
+        } catch (error) {
+          throw new TRPCError({
+            code: "BAD_GATEWAY",
+            message: error instanceof Error ? error.message : "Não foi possível confirmar a retomada na Manus.",
+            cause: error,
+          });
+        }
+
+        if (resumeResult.resumed) {
+          const progressStatusId = await db.getTaskStatusIdByName("PROGRESS");
+          await db.updateTaskExecution(task.id, { manusStatus: "running", completedAt: null });
+          await db.updateTaskStatus(task.id, progressStatusId);
+          if (task.missionKey) {
+            const mirror = await mirrorTaskToGitHub({ ...task, statusId: progressStatusId });
+            await db.updateTaskGitHubSync(task.id, {
+              missionKey: mirror.missionKey,
+              githubPath: mirror.path,
+              githubSha: mirror.sha,
+              githubSyncStatus: mirror.status,
+              githubSyncError: mirror.error ?? null,
+            });
+          }
+        } else {
+          await db.updateTaskExecution(task.id, { manusStatus: "manual_resume_pending", completedAt: null });
+        }
+
+        try {
+          const eventType = await db.getOrCreateActivityEventType(
+            resumeResult.resumed ? "task_execution_resumed" : "task_execution_resume_pending",
+          );
+          await db.createActivityLog({
+            agentId: task.agentId,
+            taskId: task.id,
+            eventTypeId: eventType.id,
+            details: resumeResult.resumed
+              ? "Retomada confirmada pela Manus; estado local alterado para PROGRESS."
+              : `Instrução de retomada aceita, mas o estado externo ainda é ${resumeResult.status}; a tarefa permanece PAUSED até confirmação.`,
+          });
+        } catch (error) {
+          console.warn("[Tasks] Could not record execution resume activity:", error);
+        }
+
+        return {
+          resumed: resumeResult.resumed,
+          pending: !resumeResult.resumed,
+          externalStatus: resumeResult.status,
+        };
       }),
 
     factorize: protectedProcedure
@@ -459,20 +1365,209 @@ export const appRouter = router({
         let assistantContent: string;
         let responseStatus: "replied" | "pending" | "failed" = "replied";
         try {
-          if (task.agentId && task.manusTaskId) {
-            const externalReply = await sendManusMessageAndWait(task, content);
-            assistantContent = externalReply
-              ? externalReply
-              : "Mensagem encaminhada para a execução Manus, mas ainda não houve resposta. Abra o canal da missão novamente em alguns segundos.";
-            if (!externalReply) responseStatus = "pending";
-          } else {
-            const response = await invokeLLM({
-              messages: buildSofiaConversation(task, previousMessages),
+          const response = await invokeLLM({
+            messages: buildSofiaConversation(task, previousMessages),
+            tools: SOFIA_MESSAGE_TOOLS,
+            toolChoice: "auto",
+          });
+          const assistantTurn = response.choices?.[0]?.message;
+          const inspectCall = assistantTurn?.tool_calls?.find(
+            (call) => call.function.name === "inspect_current_mission"
+          );
+          const eligibilityCall = assistantTurn?.tool_calls?.find(
+            (call) => call.function.name === "inspect_agent_eligibility"
+          );
+          const forwardCall = assistantTurn?.tool_calls?.find(
+            (call) => call.function.name === "forward_operator_instruction_to_assigned_agent"
+          );
+
+          const requestedOperations = [inspectCall, eligibilityCall, forwardCall].filter(Boolean);
+          if (requestedOperations.length > 1) {
+            throw new Error("A Sofia solicitou operações incompatíveis na mesma resposta.");
+          }
+
+          if (inspectCall) {
+            const missionRootId = await db.getMissionRootTaskId(input.taskId);
+            const missionRoot = missionRootId ? await db.getTaskById(missionRootId) : null;
+            if (!missionRoot || (missionRoot.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
+              throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada ou sem permissão de acesso." });
+            }
+
+            const childTasks = await db.getTasksByParentId(missionRoot.id);
+            const relatedTasks = [
+              missionRoot,
+              ...childTasks.filter((child) => child.createdBy === missionRoot.createdBy),
+            ];
+            const [taskSnapshots, availableAgentRecords, executionReady] = await Promise.all([
+              Promise.all(relatedTasks.map(async (relatedTask) => ({
+                missionId: missionRoot.id,
+                taskId: relatedTask.id,
+                title: relatedTask.title,
+                parentTaskId: relatedTask.parentTaskId,
+                status: await db.getTaskStatusNameById(relatedTask.statusId),
+                agentId: relatedTask.agentId,
+                agentPinned: relatedTask.agentPinned,
+                agentTaskId: relatedTask.manusTaskId,
+                agentTaskStatus: relatedTask.manusStatus,
+                creditsUsed: relatedTask.creditsUsed,
+                completedAt: relatedTask.completedAt?.toISOString?.() ?? null,
+              }))),
+              db.getAgentsByOwnerId(missionRoot.createdBy, ctx.user.role === "admin"),
+              db.hasExecutionReadyMissionDocuments(missionRoot.id),
+            ]);
+
+            const assignedAgentIds = new Set(taskSnapshots.map((item) => item.agentId).filter((id): id is number => typeof id === "number"));
+            const observedAt = new Date();
+            const assignedAgents = availableAgentRecords
+              .filter((agent) => agent.ownerId === missionRoot.createdBy && assignedAgentIds.has(agent.id))
+              .map((agent) => {
+                const creditsUpdatedAt = agent.creditsUpdatedAt instanceof Date
+                  ? agent.creditsUpdatedAt
+                  : agent.creditsUpdatedAt ? new Date(agent.creditsUpdatedAt) : null;
+                const creditAgeMs = creditsUpdatedAt ? observedAt.getTime() - creditsUpdatedAt.getTime() : null;
+                return {
+                  agentId: agent.id,
+                  name: agent.name,
+                  status: agent.status,
+                  connectionStatus: agent.connectionStatus,
+                  version: agent.version,
+                  lastHeartbeat: agent.lastHeartbeat instanceof Date ? agent.lastHeartbeat.toISOString() : agent.lastHeartbeat ?? null,
+                  creditsRemaining: agent.creditsRemaining,
+                  creditsUpdatedAt: creditsUpdatedAt?.toISOString() ?? null,
+                  creditSnapshotFresh: creditAgeMs !== null && creditAgeMs >= 0 && creditAgeMs <= 60_000,
+                };
+              });
+
+            const missionSnapshot = {
+              source: "database_read_only_snapshot",
+              observedAt: observedAt.toISOString(),
+              mission: {
+                missionId: missionRoot.id,
+                title: missionRoot.title,
+                description: missionRoot.description,
+                status: await db.getTaskStatusNameById(missionRoot.statusId),
+                createdAt: missionRoot.createdAt?.toISOString?.() ?? null,
+                updatedAt: missionRoot.updatedAt?.toISOString?.() ?? null,
+                executionDocumentsReady: executionReady,
+              },
+              tasks: taskSnapshots,
+              assignedAgents,
+              interpretationLimits: [
+                "Créditos são o último snapshot persistido, não uma consulta em tempo real à Manus.",
+                "Status online/conectado não significa elegibilidade para nova atribuição.",
+                "Esta consulta não altera missão, agente, prioridade, execução ou créditos.",
+                "Somente a missão aberta, sua raiz e suas tarefas-filhas diretas foram consultadas.",
+              ],
+            };
+
+            const followUp = await invokeLLM({
+              messages: [
+                ...buildSofiaConversation(task, previousMessages),
+                {
+                  role: "user",
+                  content: "Resultado da ferramenta somente leitura inspect_current_mission. Use estes dados como fonte factual; não infira elegibilidade ou ações não executadas:\\n" + JSON.stringify(missionSnapshot),
+                },
+              ],
+              toolChoice: "none",
+              maxTokens: 2500,
             });
-            const generatedContent = extractTextContent(response.choices?.[0]?.message?.content);
+            assistantContent = extractTextContent(followUp.choices?.[0]?.message?.content)
+              || "Consultei os dados da missão, mas não consegui produzir uma síntese textual.";
+            if (assistantContent.startsWith("Consultei os dados")) responseStatus = "failed";
+          } else if (eligibilityCall) {
+            const eligibilitySnapshot = await db.inspectTaskAgentEligibility(input.taskId, task.createdBy);
+            if (!eligibilitySnapshot) {
+              throw new TRPCError({ code: "NOT_FOUND", message: "Tarefa não encontrada para consulta de elegibilidade." });
+            }
+
+            const eligibleAgents = eligibilitySnapshot.candidates.filter((candidate: any) => candidate.eligible);
+            const snapshot = {
+              source: "database_read_only_agent_eligibility_snapshot",
+              ...eligibilitySnapshot,
+              eligibleAgentCount: eligibleAgents.length,
+              eligibleAgentIdsInClaimOrder: eligibleAgents.map((candidate: any) => candidate.agentId),
+              warning: "Elegibilidade é um snapshot; somente o claim transacional pode reservar o agente. Não houve reserva nesta consulta.",
+            };
+
+            const followUp = await invokeLLM({
+              messages: [
+                ...buildSofiaConversation(task, previousMessages),
+                {
+                  role: "user",
+                  content: "Resultado da ferramenta somente leitura inspect_agent_eligibility. Explique os critérios e os motivos de inelegibilidade usando exclusivamente os dados abaixo. Não afirme que um agente foi reservado ou que a elegibilidade está garantida no futuro:\\n" + JSON.stringify(snapshot),
+                },
+              ],
+              toolChoice: "none",
+              maxTokens: 2500,
+            });
+            assistantContent = extractTextContent(followUp.choices?.[0]?.message?.content)
+              || "Consultei os critérios de elegibilidade, mas não consegui produzir uma síntese textual.";
+            if (assistantContent.startsWith("Consultei os critérios")) responseStatus = "failed";
+          } else if (forwardCall) {
+            let toolArgs: { message?: string; taskId?: number };
+            try {
+              toolArgs = JSON.parse(forwardCall.function.arguments) as { message?: string; taskId?: number };
+            } catch {
+              throw new Error("A Sofia retornou argumentos inválidos para o encaminhamento.");
+            }
+
+            const forwardedMessage = toolArgs.message?.trim();
+            if (!forwardedMessage || forwardedMessage.length > OPERATOR_MESSAGE_MAX_LENGTH) {
+              throw new Error("A Sofia produziu uma instrução vazia ou acima do limite permitido.");
+            }
+
+            // A missão pode estar sendo executada por uma tarefa-filha. O SCP
+            // continua dono da missão e resolve o executor temporário ativo.
+            const missionRootId = await db.getMissionRootTaskId(input.taskId);
+            const missionRoot = missionRootId ? await db.getTaskById(missionRootId) : null;
+            if (!missionRoot || (missionRoot.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
+              throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada ou sem permissão de acesso." });
+            }
+
+            const childTasks = await db.getTasksByParentId(missionRoot.id);
+            const relatedTasks = [
+              missionRoot,
+              ...childTasks.filter((child) => child.createdBy === missionRoot.createdBy),
+            ];
+            const executionCandidates = (await Promise.all(relatedTasks.map(async (candidate) => ({
+              task: candidate,
+              status: (await db.getTaskStatusNameById(candidate.statusId))?.toUpperCase() ?? null,
+            })))).filter(({ task: candidate, status }) =>
+              status === "PROGRESS"
+              && candidate.agentId != null
+              && Boolean(candidate.manusTaskId)
+              && !["stopped", "error", "completed"].includes((candidate.manusStatus ?? "").toLowerCase())
+            );
+
+            const executionTask = toolArgs.taskId
+              ? executionCandidates.find(({ task: candidate }) => candidate.id === toolArgs.taskId)?.task
+              : executionCandidates.length === 1
+                ? executionCandidates[0].task
+                : null;
+
+            if (!executionTask) {
+              if (executionCandidates.length > 1) {
+                assistantContent = "Há mais de uma execução ativa nesta missão. Para evitar encaminhar a instrução ao executor errado, indique a etapa/tarefa de destino. Execuções ativas: "
+                  + executionCandidates.map(({ task: candidate }) => `#${candidate.id} — ${candidate.title}`).join("; ") + ".";
+              } else {
+                assistantContent = "Não localizei uma execução externa ativa e atribuída nesta missão. A mensagem não foi encaminhada.";
+              }
+              responseStatus = "failed";
+            } else if (!(await db.hasExecutionReadyMissionDocuments(missionRoot.id))) {
+              assistantContent = "A instrução não foi enviada: a missão ainda não possui TR validado e Blueprint READY vinculado à versão vigente.";
+              responseStatus = "failed";
+            } else {
+              const externalReply = await sendManusMessageAndWait(executionTask, forwardedMessage);
+              assistantContent = externalReply
+                ? `Instrução encaminhada à tarefa #${executionTask.id} — ${executionTask.title}. Resposta recebida:\n\n${externalReply}`
+                : `A instrução foi enviada à execução #${executionTask.id}, mas não foi possível confirmar uma resposta dentro da janela de consulta. Isso não comprova leitura ou processamento.`;
+              if (!externalReply) responseStatus = "pending";
+            }
+          } else {
+            const generatedContent = extractTextContent(assistantTurn?.content);
             assistantContent = generatedContent
               ? generatedContent
-              : "Recebi a mensagem, mas a IA retornou uma resposta vazia.";
+              : "Recebi a mensagem, mas a Sofia não produziu uma resposta textual.";
             if (!generatedContent) responseStatus = "failed";
           }
         } catch (error) {
