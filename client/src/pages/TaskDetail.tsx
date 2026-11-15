@@ -60,6 +60,17 @@ export default function TaskDetail() {
     },
     onError: (error) => toast.error(error.message || "Não foi possível pausar a execução."),
   });
+  const resumeExecutionMutation = trpc.tasks.resumeExecution.useMutation({
+    onSuccess: async (result) => {
+      await taskQuery.refetch();
+      if (result.resumed) {
+        toast.success("Retomada confirmada pela Manus.");
+      } else {
+        toast.warning("A instrução de retomada foi enviada, mas a Manus ainda não confirmou running. A tarefa permanece PAUSED.");
+      }
+    },
+    onError: (error) => toast.error(error.message || "Não foi possível retomar a execução."),
+  });
   const lookupsQuery = trpc.lookups.listAll.useQuery(
     undefined,
     { enabled: canLoadTask && Boolean(taskQuery.data), retry: false },
@@ -476,6 +487,7 @@ export default function TaskDetail() {
     waiting_for_available_agent: "Aguardando agente elegível",
     waiting_for_pinned_agent: "Aguardando agente fixado",
     manual_pause_pending: "Pausa solicitada — aguardando processos em segundo plano",
+    manual_resume_pending: "Retomada solicitada — aguardando confirmação externa",
   };
   const externalStatusLabel = task.manusStatus
     ? externalStatusLabels[task.manusStatus.toLowerCase()] ?? task.manusStatus.replace(/_/g, " ")
@@ -944,6 +956,29 @@ export default function TaskDetail() {
                       >
                         {pauseExecutionMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         {task.manusStatus === "manual_pause_pending" ? "Verificar pausa" : "Pausar execução"}
+                      </Button>
+                    </div>
+                  )}
+                  {task.manusTaskId && currentStatusName === "PAUSED" && ["stopped", "manual_resume_pending"].includes((task.manusStatus ?? "").toLowerCase()) && (
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-4 sm:col-span-2 lg:col-span-3">
+                      <p className="text-xs text-muted-foreground">
+                        A retomada envia uma instrução à execução Manus e só altera o estado local para PROGRESS após confirmação externa.
+                      </p>
+                      <Button
+                        type="button"
+                        size="sm"
+                        disabled={resumeExecutionMutation.isPending}
+                        onClick={() => {
+                          const message = task.manusStatus === "manual_resume_pending"
+                            ? "Tentar novamente a retomada desta execução na Manus?"
+                            : "Retomar esta execução na Manus a partir do último ponto concluído?";
+                          if (window.confirm(message)) {
+                            resumeExecutionMutation.mutate({ taskId });
+                          }
+                        }}
+                      >
+                        {resumeExecutionMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {task.manusStatus === "manual_resume_pending" ? "Tentar retomada" : "Retomar execução"}
                       </Button>
                     </div>
                   )}
