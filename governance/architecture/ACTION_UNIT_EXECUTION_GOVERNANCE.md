@@ -153,3 +153,11 @@ Separação obrigatória de responsabilidades:
 - resposta operacional: reavaliação e contenção conforme políticas versionadas.
 
 ARC/PGC poderá fornecer sinais e evidências ao mecanismo de segurança e à avaliação de risco, mas não concede permissões, não substitui orçamento autorizado e não transforma score probabilístico em decisão de dispatch. A autorização continua vinculada a grants explícitos e verificáveis; sinais contínuos podem restringir, suspender ou provocar nova avaliação, nunca ampliar permissões implicitamente.
+
+## 12. AC-023a — ledger persistente de evidências
+
+Implementado `sofia.missionActionUnitGateEvidence` por meio da migration 0013. O ledger é append-only e server-only; cada registro é vinculado ao ID da unidade, missão raiz, documento/versão ACTION_PLAN, número, SHA-256 e Txx exatos. Tipos de gate fechados: DEPENDENCY, RISK_POLICY, BUDGET_AUTHORIZATION, UNIT_PERMISSION, EXECUTOR_ELIGIBILITY e ADAPTER_CAPABILITY. Decisões: VERIFIED, BLOCKED e UNKNOWN.
+
+A migration aplica FKs restritivas, constraints de identidade/formato, autoria OWNER vinculada ao proprietário da missão, trigger de imutabilidade e RLS server-only. O schema Drizzle foi reconstruído a partir de baseline limpo e contém uma declaração por tabela/relação. A validação CI 43708974232 passou: TypeScript, 56 testes, build, migrations 0010–0013 em PostgreSQL descartável e barreira de dispatch.
+
+O ledger não concede autorização nem promove estado. AC-023b/c ainda precisa implementar origens confiáveis, validação das evidências e avaliação consolidada; evidência ausente, stale ou hash divergente mantém BLOCKED. Ver OR-20261115-0042.
