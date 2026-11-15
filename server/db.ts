@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { eq, and, asc, desc, isNull, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
@@ -1910,6 +1910,206 @@ export async function hasExecutionReadyMissionDocuments(taskId: number): Promise
  * requires an exact, persisted unit authorization before any execution path.
  * Legacy missions without an ACTION_PLAN retain their existing dispatch path.
  */
+/**
+ * Registers every unit from the exact latest approved ACTION_PLAN version.
+ * Registration is idempotent and never creates operational tasks or dispatches.
+ */
+export async function registerMissionActionPlanUnits(input: {
+  missionTaskId: number;
+  ownerId: number;
+  documentId: number;
+  expectedVersion: number;
+  expectedContentHash: string;
+}) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+
+  return database.transaction(async (tx) => {
+    const [mission] = await tx.select({ createdBy: tasks.createdBy, parentTaskId: tasks.parentTaskId })
+      .from(tasks).where(eq(tasks.id, input.missionTaskId)).for("update").limit(1);
+    if (!mission || mission.parentTaskId !== null || mission.createdBy !== input.ownerId) {
+      throw new Error("Somente o proprietário da missão principal pode registrar suas unidades.");
+    }
+
+    const [plan] = await tx.select({
+      documentId: missionDocuments.id,
+      versionId: missionDocumentVersions.id,
+      version: missionDocumentVersions.version,
+      state: missionDocumentVersions.state,
+      content: missionDocumentVersions.content,
+      contentHash: missionDocumentVersions.contentHash,
+    }).from(missionDocuments)
+      .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
+      .innerJoin(missionDocumentVersions, eq(missionDocumentVersions.documentId, missionDocuments.id))
+      .where(and(
+        eq(missionDocuments.id, input.documentId),
+        eq(missionDocuments.taskId, input.missionTaskId),
+        eq(missionDocumentTypes.typeKey, "ACTION_PLAN"),
+        eq(missionDocuments.documentKey, "ACTION_PLAN"),
+        eq(missionDocumentVersions.version, input.expectedVersion),
+      )).limit(1);
+
+    if (!plan || plan.state !== "APPROVED" || plan.version !== input.expectedVersion) {
+      throw new Error("O registro exige a versão aprovada exata do ACTION_PLAN.");
+    }
+    const [latest] = await tx.select({ id: missionDocumentVersions.id, version: missionDocumentVersions.version })
+      .from(missionDocumentVersions)
+      .where(eq(missionDocumentVersions.documentId, input.documentId))
+      .orderBy(desc(missionDocumentVersions.version)).limit(1);
+    if (!latest || latest.id !== plan.versionId || latest.version !== input.expectedVersion) {
+      throw new Error("O ACTION_PLAN mudou; atualize o documento antes de registrar as unidades.");
+    }
+    const actualHash = createHash("sha256").update(plan.content, "utf8").digest("hex");
+    if (!plan.contentHash || actualHash !== plan.contentHash || actualHash !== input.expectedContentHash) {
+      throw new Error("O hash SHA-256 do ACTION_PLAN não corresponde à versão apresentada.");
+    }
+
+    let parsed: any;
+    try { parsed = JSON.parse(plan.content); } catch { throw new Error("O ACTION_PLAN aprovado não contém JSON válido."); }
+    if (!Array.isArray(parsed?.tasks) || parsed.tasks.length === 0) {
+      throw new Error("O ACTION_PLAN não contém unidades registráveis.");
+    }
+    const registeredAt = new Date().toISOString();
+    const rows = parsed.tasks.map((unit: any) => {
+      if (!/^T[0-9]{2}$/.test(unit?.id ?? "") || typeof unit?.title !== "string" || !unit.title.trim()) {
+        throw new Error("O ACTION_PLAN contém uma unidade sem identificador ou título válido.");
+      }
+      return {
+        missionTaskId: input.missionTaskId,
+        actionPlanDocumentId: plan.documentId,
+        actionPlanVersionId: plan.versionId,
+        actionPlanVersionNumber: plan.version,
+        actionPlanContentHash: actualHash,
+        unitId: unit.id,
+        unitTitle: unit.title,
+        idempotencyKey: randomUUID(),
+        state: "AWAITING_APPROVAL",
+        governanceEvidence: {
+          registration: {
+            registeredAt,
+            source: "approved_action_plan",
+            actionPlanVersion: plan.version,
+            actionPlanContentHash: actualHash,
+          },
+        },
+      };
+    });
+
+    await tx.insert(missionActionUnits).values(rows).onConflictDoNothing();
+    return tx.select({
+      id: missionActionUnits.id,
+      unitId: missionActionUnits.unitId,
+      unitTitle: missionActionUnits.unitTitle,
+      state: missionActionUnits.state,
+      approvalUserId: missionActionUnits.approvalUserId,
+      approvedAt: missionActionUnits.approvedAt,
+      governanceEvidence: missionActionUnits.governanceEvidence,
+    }).from(missionActionUnits)
+      .where(and(
+        eq(missionActionUnits.missionTaskId, input.missionTaskId),
+        eq(missionActionUnits.actionPlanVersionId, plan.versionId),
+      )).orderBy(asc(missionActionUnits.unitId));
+  });
+}
+
+/** Records an explicit owner approval for one registered unit; this does not authorize dispatch. */
+export async function approveMissionActionPlanUnit(input: {
+  missionTaskId: number;
+  ownerId: number;
+  unitId: string;
+  expectedVersion: number;
+  expectedContentHash: string;
+}) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+
+  return database.transaction(async (tx) => {
+    const [mission] = await tx.select({ createdBy: tasks.createdBy, parentTaskId: tasks.parentTaskId })
+      .from(tasks).where(eq(tasks.id, input.missionTaskId)).for("update").limit(1);
+    if (!mission || mission.parentTaskId !== null || mission.createdBy !== input.ownerId) {
+      throw new Error("Somente o proprietário da missão principal pode aprovar esta unidade.");
+    }
+
+    const [unit] = await tx.select().from(missionActionUnits)
+      .where(and(
+        eq(missionActionUnits.missionTaskId, input.missionTaskId),
+        eq(missionActionUnits.unitId, input.unitId),
+      )).for("update").limit(1);
+    if (!unit) throw new Error("Unidade não registrada. Registre o ACTION_PLAN aprovado primeiro.");
+    if (unit.state !== "AWAITING_APPROVAL") {
+      throw new Error("A unidade não está aguardando aprovação ou já foi processada.");
+    }
+
+    const [latest] = await tx.select({
+      id: missionDocumentVersions.id,
+      version: missionDocumentVersions.version,
+      state: missionDocumentVersions.state,
+      content: missionDocumentVersions.content,
+      contentHash: missionDocumentVersions.contentHash,
+    }).from(missionDocumentVersions)
+      .where(eq(missionDocumentVersions.documentId, unit.actionPlanDocumentId))
+      .orderBy(desc(missionDocumentVersions.version)).limit(1);
+    const actualHash = latest ? createHash("sha256").update(latest.content, "utf8").digest("hex") : "";
+    if (!latest || latest.id !== unit.actionPlanVersionId
+      || latest.version !== input.expectedVersion
+      || latest.version !== unit.actionPlanVersionNumber
+      || latest.state !== "APPROVED"
+      || actualHash !== unit.actionPlanContentHash
+      || actualHash !== input.expectedContentHash) {
+      throw new Error("A versão do ACTION_PLAN mudou ou não confere; a aprovação individual foi bloqueada.");
+    }
+
+    const approvedAt = new Date();
+    const evidence = {
+      ...(unit.governanceEvidence as Record<string, unknown> ?? {}),
+      individualApproval: {
+        approvedAt: approvedAt.toISOString(),
+        approvalUserId: input.ownerId,
+        actionPlanVersion: latest.version,
+        actionPlanContentHash: actualHash,
+        scope: "unit_intent_only_no_execution_authorization",
+      },
+    };
+    const [updated] = await tx.update(missionActionUnits).set({
+      state: "APPROVED",
+      approvalUserId: input.ownerId,
+      approvedAt,
+      governanceEvidence: evidence,
+      updatedAt: approvedAt,
+    }).where(eq(missionActionUnits.id, unit.id)).returning({
+      id: missionActionUnits.id,
+      unitId: missionActionUnits.unitId,
+      unitTitle: missionActionUnits.unitTitle,
+      state: missionActionUnits.state,
+      approvalUserId: missionActionUnits.approvalUserId,
+      approvedAt: missionActionUnits.approvedAt,
+      governanceEvidence: missionActionUnits.governanceEvidence,
+    });
+    return updated;
+  });
+}
+
+/** Lists persisted unit governance state for the owner of the root mission. */
+export async function listMissionActionPlanUnits(missionTaskId: number, ownerId: number) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+  const [mission] = await database.select({ createdBy: tasks.createdBy, parentTaskId: tasks.parentTaskId })
+    .from(tasks).where(eq(tasks.id, missionTaskId)).limit(1);
+  if (!mission || mission.parentTaskId !== null || mission.createdBy !== ownerId) {
+    throw new Error("Missão não encontrada ou sem permissão de acesso.");
+  }
+  return database.select({
+    id: missionActionUnits.id,
+    unitId: missionActionUnits.unitId,
+    unitTitle: missionActionUnits.unitTitle,
+    state: missionActionUnits.state,
+    approvalUserId: missionActionUnits.approvalUserId,
+    approvedAt: missionActionUnits.approvedAt,
+  }).from(missionActionUnits)
+    .where(eq(missionActionUnits.missionTaskId, missionTaskId))
+    .orderBy(asc(missionActionUnits.unitId));
+}
+
 export async function inspectTaskDispatchAuthorization(taskId: number): Promise<{
   authorized: boolean;
   requiresActionPlanUnit: boolean;
