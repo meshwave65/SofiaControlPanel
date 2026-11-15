@@ -1995,6 +1995,20 @@ export async function inspectTaskDispatchAuthorization(taskId: number): Promise<
       reason: "A integridade SHA-256 do ACTION_PLAN aprovado não confere.",
     };
   }
+  const [operationalTask] = await database
+    .select({ parentTaskId: tasks.parentTaskId })
+    .from(tasks)
+    .where(eq(tasks.id, taskId))
+    .limit(1);
+  if (!operationalTask || operationalTask.parentTaskId !== missionId) {
+    return {
+      authorized: false,
+      requiresActionPlanUnit: true,
+      idempotencyKey: null,
+      reason: "A unidade operacional precisa ser filha direta da missão raiz.",
+    };
+  }
+
   if (!relations.action_units_exist) {
     return {
       authorized: false,
