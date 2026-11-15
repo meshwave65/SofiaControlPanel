@@ -756,8 +756,28 @@ export const missionActionUnitGateEvidence = sofia.table("missionActionUnitGateE
   decisionCheck: check("missionActionUnitGateEvidence_decision_check", sql`${table.decision} IN ('VERIFIED', 'BLOCKED', 'UNKNOWN')`),
   actorTypeCheck: check("missionActionUnitGateEvidence_actor_type_check", sql`${table.actorType} IN ('SYSTEM', 'OWNER')`),
   actorPairCheck: check("missionActionUnitGateEvidence_actor_pair_check", sql`(${table.actorType} = 'OWNER' AND ${table.actorUserId} IS NOT NULL) OR (${table.actorType} = 'SYSTEM' AND ${table.actorUserId} IS NULL)`),
-  hashFormatCheck: check("missionActionUnitGateEvidence_hash_format", sql`${table.actionPlanContentHash} ~ '^[a-f0-9]{64}, ({ many }) => ({
-  documents: many(missionDocuments),
+  hashFormatCheck: check("missionActionUnitGateEvidence_hash_format", sql`${table.actionPlanContentHash} ~ '^[a-f0-9]{64}$'`),
+  unitIdFormatCheck: check("missionActionUnitGateEvidence_unit_id_format", sql`${table.unitId} ~ '^T[0-9]{2}$'`),
+  versionPositiveCheck: check("missionActionUnitGateEvidence_version_positive", sql`${table.actionPlanVersionNumber} > 0`),
+  sourceNonemptyCheck: check("missionActionUnitGateEvidence_source_nonempty", sql`length(trim(${table.source})) > 0`),
+  evidenceObjectCheck: check("missionActionUnitGateEvidence_evidence_object", sql`jsonb_typeof(${table.evidence}) = 'object'`),
+  validityCheck: check("missionActionUnitGateEvidence_validity_check", sql`${table.validUntil} IS NULL OR ${table.validUntil} > ${table.observedAt}`),
+  actionUnitFk: foreignKey({ columns: [table.actionUnitId], foreignColumns: [missionActionUnits.id] }).onDelete("restrict"),
+  missionFk: foreignKey({ columns: [table.missionTaskId], foreignColumns: [tasks.id] }).onDelete("restrict"),
+  documentFk: foreignKey({ columns: [table.actionPlanDocumentId], foreignColumns: [missionDocuments.id] }).onDelete("restrict"),
+  versionFk: foreignKey({ columns: [table.actionPlanVersionId], foreignColumns: [missionDocumentVersions.id] }).onDelete("restrict"),
+  actorUserFk: foreignKey({ columns: [table.actorUserId], foreignColumns: [users.id] }).onDelete("restrict"),
+}));
+
+export type MissionActionUnitGateEvidence = typeof missionActionUnitGateEvidence.$inferSelect;
+export type InsertMissionActionUnitGateEvidence = typeof missionActionUnitGateEvidence.$inferInsert;
+
+export const missionActionUnitGateEvidenceRelations = relations(missionActionUnitGateEvidence, ({ one }) => ({
+  actionUnit: one(missionActionUnits, { fields: [missionActionUnitGateEvidence.actionUnitId], references: [missionActionUnits.id] }),
+  mission: one(tasks, { fields: [missionActionUnitGateEvidence.missionTaskId], references: [tasks.id] }),
+  actionPlanDocument: one(missionDocuments, { fields: [missionActionUnitGateEvidence.actionPlanDocumentId], references: [missionDocuments.id] }),
+  actionPlanVersion: one(missionDocumentVersions, { fields: [missionActionUnitGateEvidence.actionPlanVersionId], references: [missionDocumentVersions.id] }),
+  actorUser: one(users, { fields: [missionActionUnitGateEvidence.actorUserId], references: [users.id] }),
 }));
 
 export const missionDocumentsRelations = relations(missionDocuments, ({ one, many }) => ({
