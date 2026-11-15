@@ -1141,7 +1141,6 @@ export const appRouter = router({
         if (!(await db.hasExecutionReadyMissionDocuments(input.taskId))) {
           throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O Blueprint não passou pela verificação de vínculo com a versão vigente do TR." });
         }
-        const stagedStatusId = await db.getTaskStatusIdByName("STAGED");
         await db.updateTaskStatus(input.taskId, stagedStatusId);
         return { validatedVersion: validated.version, statusId: stagedStatusId };
       }),
@@ -1169,7 +1168,6 @@ export const appRouter = router({
         if (!(await db.hasExecutionReadyMissionDocuments(input.taskId))) {
           throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Blueprint não está READY ou não referencia a versão vigente do TR." });
         }
-        const stagedStatusId = await db.getTaskStatusIdByName("STAGED");
         await db.updateTaskStatus(input.taskId, stagedStatusId);
         return { blueprintVersion: blueprint.version, statusId: stagedStatusId };
       }),
