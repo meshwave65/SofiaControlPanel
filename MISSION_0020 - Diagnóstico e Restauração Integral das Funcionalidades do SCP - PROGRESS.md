@@ -428,3 +428,10 @@ O ARC/PGC atual é somente um protótipo conceitual rudimentar, sem enforcement 
 - Antes de declarar o SCP operacional, identificar o projeto Supabase realmente conectado ao Render e verificar/aplicar migrations 0010–0013. CI em PostgreSQL descartável não comprova schema persistente; `ensure-database.mjs` não aplica essas quatro migrations.
 - Não contratar Browser Use, não criar infraestrutura paga, não alterar plano Free, não tocar em 20.3/Mateus e não chamar Manus/LLM/dispatch nem consumir créditos sem autorização operacional específica.
 - OR: `governance/operational_reports/OR-20261115-0050.md`.
+
+
+### Integração em main e publicação — OR-20261115-0050
+- PR #15 integrada por squash merge em 2026-11-15. Merge commit: `9e3f9bd3f7c09a7d2212bd7c1e30796cd020b78f`.
+- Deploy manual iniciado no Render Free existente: `dep-dbsvo1rbc2fs73cn5v1g`, usando o merge commit acima. Estado inicial: `build_in_progress`.
+- Auto-deploy permanece OFF; nenhuma configuração ou plano Render foi alterado. Nenhum Browser Use ou serviço pago foi contratado.
+- Deploy e comportamento funcional ainda precisam ser observados; migrations 0010–0013 no banco persistente não foram confirmadas. OR-20261115-0050.
