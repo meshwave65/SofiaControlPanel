@@ -102,13 +102,35 @@ BEGIN
     IF SQLERRM LIKE 'TEST FAILURE:%' THEN RAISE; END IF;
   END;
 
-  -- Task linkage is added only after approval; only then can the unit become dispatchable.
+  -- Materialization links the PAUSED child while the unit remains APPROVED.
+  -- This must not create an execution authorization or fire the dispatch trigger.
   UPDATE sofia."missionActionUnits"
-     SET "operationalTaskId" = child_id,
-         state = 'READY_FOR_DISPATCH'
+     SET "operationalTaskId" = child_id
    WHERE "missionTaskId" = root_id AND "unitId" = 'T01';
 
-  -- The exact approved unit mapping permits the trigger to reach the callback.
+  IF (SELECT state FROM sofia."missionActionUnits"
+       WHERE "missionTaskId" = root_id AND "unitId" = 'T01') <> 'APPROVED'
+     OR (SELECT "statusId" FROM sofia.tasks WHERE id = child_id)
+       <> (SELECT id FROM sofia."taskStatuses" WHERE name = 'PAUSED') THEN
+    RAISE EXCEPTION 'TEST FAILURE: PAUSED materialization changed the approval or task state';
+  END IF;
+
+  -- A linked PAUSED child is still blocked from STAGED until all gates separately
+  -- advance the unit to READY_FOR_DISPATCH.
+  BEGIN
+    UPDATE sofia.tasks
+       SET "statusId" = (SELECT id FROM sofia."taskStatuses" WHERE name = 'STAGED')
+     WHERE id = child_id;
+    RAISE EXCEPTION 'TEST FAILURE: APPROVED but not dispatch-ready child reached STAGED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'TEST FAILURE:%' THEN RAISE; END IF;
+  END;
+
+  UPDATE sofia."missionActionUnits"
+     SET state = 'READY_FOR_DISPATCH'
+   WHERE "missionTaskId" = root_id AND "unitId" = 'T01';
+
+  -- Only the exact approved, linked and dispatch-ready unit can reach the callback.
   -- Vault has no secrets in this fixture, so no network request is made.
   UPDATE sofia.tasks
      SET "statusId" = (SELECT id FROM sofia."taskStatuses" WHERE name = 'STAGED')
