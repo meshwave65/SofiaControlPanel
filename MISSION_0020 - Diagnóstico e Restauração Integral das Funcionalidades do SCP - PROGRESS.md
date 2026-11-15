@@ -398,3 +398,10 @@ Foi criado workflow dedicado para executar `pnpm check`, `pnpm test`, `pnpm buil
 
 ### Diretriz de segurança contínua — ARC/PGC
 O ARC/PGC atual é somente um protótipo conceitual rudimentar, sem enforcement prático. A direção futura é um módulo de segurança contínua e contextual: autenticação estabelece identidade inicial, enquanto comportamento, contexto, integridade, escopo e condições do executor são reavaliados durante a operação. Sinais contínuos podem restringir, suspender ou provocar revalidação; nunca concedem permissões implicitamente nem substituem grants explícitos. Ver atualização em ACTION_UNIT_EXECUTION_GOVERNANCE.md e OR-20261115-0041.
+
+### AC-023a — ledger persistente de evidências implementado (OR-20261115-0042)
+- Nova tabela `missionActionUnitGateEvidence`, append-only, server-only e vinculada à identidade imutável da unidade Txx e ao hash/versão exatos do ACTION_PLAN.
+- Seis categorias fechadas de gate; decisões VERIFIED/BLOCKED/UNKNOWN; autoria SYSTEM/OWNER com validação do proprietário; trigger rejeita UPDATE/DELETE; RLS e FKs restritivas.
+- Migration 0013 e teste SQL adicionados; schema Drizzle reconstruído a partir de baseline limpo.
+- CI run 43708974232 SUCCESS: TypeScript, 56 testes, build e PostgreSQL descartável migrations 0010–0013 + dispatch boundary.
+- Não grava grants reais, não libera gates por si só, não promove tarefa, não reserva agente nem despacha. Sem migration persistente, merge ou deploy. Task 20.3/Mateus intocada.
