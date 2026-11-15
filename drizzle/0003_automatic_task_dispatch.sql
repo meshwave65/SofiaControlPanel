@@ -20,7 +20,8 @@ DECLARE
   latest_action_plan_version_id integer;
   latest_action_plan_state text;
   latest_action_plan_hash text;
-  authorized_unit_id integer;
+  authorized_unit_row_id integer;
+  authorized_unit_id text;
   authorized_unit_key text;
   authorized_unit_title text;
 BEGIN
@@ -89,7 +90,7 @@ BEGIN
       END IF;
 
       SELECT id, "idempotencyKey", "unitId", "unitTitle"
-        INTO authorized_unit_id, authorized_unit_key, authorized_unit_id, authorized_unit_title
+        INTO authorized_unit_row_id, authorized_unit_key, authorized_unit_id, authorized_unit_title
         FROM sofia."missionActionUnits"
        WHERE "missionTaskId" = mission_id
          AND "operationalTaskId" = NEW.id
@@ -100,7 +101,7 @@ BEGIN
          AND "approvedAt" IS NOT NULL
        LIMIT 1;
 
-      IF authorized_unit_id IS NULL OR authorized_unit_key IS NULL THEN
+      IF authorized_unit_row_id IS NULL OR authorized_unit_key IS NULL OR authorized_unit_id IS NULL THEN
         RAISE EXCEPTION 'Sofia dispatch blocked: task % has no approved, dispatch-ready ACTION_PLAN unit mapping', NEW.id;
       END IF;
 
@@ -109,11 +110,7 @@ BEGIN
           FROM sofia."missionDocumentVersions" plan_version
           CROSS JOIN LATERAL jsonb_array_elements(plan_version.content::jsonb -> 'tasks') AS plan_task
          WHERE plan_version.id = latest_action_plan_version_id
-           AND plan_task ->> 'id' = (
-             SELECT unit_row."unitId"
-               FROM sofia."missionActionUnits" unit_row
-              WHERE unit_row.id = authorized_unit_id
-           )
+           AND plan_task ->> 'id' = authorized_unit_id
            AND plan_task ->> 'title' = authorized_unit_title
       ) THEN
         RAISE EXCEPTION 'Sofia dispatch blocked: persisted unit does not match the exact approved ACTION_PLAN content';
