@@ -38,7 +38,7 @@ jobs:
         run: pnpm build
 
   migration:
-    name: PostgreSQL migrations 0010–0011 syntax and DDL
+    name: PostgreSQL migrations 0010–0012 and dispatch boundary
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -69,3 +69,16 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: psql -h localhost -U postgres -d sofia_migration_test -v ON_ERROR_STOP=1 -f drizzle/0011_action_plan_document_type.sql
+
+      - name: Apply migration 0012 to disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d sofia_migration_test -v ON_ERROR_STOP=1 -f drizzle/0012_action_plan_unit_governance.sql
+      - name: Install automatic dispatch trigger in disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d sofia_migration_test -v ON_ERROR_STOP=1 -f drizzle/0003_automatic_task_dispatch.sql
+      - name: Verify ACTION_PLAN unit dispatch authorization
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d sofia_migration_test -v ON_ERROR_STOP=1 -f scripts/ci/mission-action-unit-dispatch-test.sql
