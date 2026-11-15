@@ -5,6 +5,10 @@ CREATE ROLE anon;
 CREATE ROLE authenticated;
 
 CREATE SCHEMA sofia;
+CREATE SCHEMA vault;
+CREATE SCHEMA net;
+
+CREATE TABLE vault.decrypted_secrets (name text PRIMARY KEY, decrypted_secret text);
 
 CREATE TABLE sofia."taskStatuses" (
   id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -24,6 +28,8 @@ CREATE TABLE sofia.tasks (
   "statusId" integer REFERENCES sofia."taskStatuses"(id),
   "agentId" integer REFERENCES sofia."agents"(id),
   "parentTaskId" integer REFERENCES sofia.tasks(id),
+  "createdBy" integer NOT NULL REFERENCES sofia."users"(id),
+  title varchar(255) NOT NULL DEFAULT 'Fixture task',
   "manusTaskId" varchar(128)
 );
 
