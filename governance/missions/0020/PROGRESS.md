@@ -25,9 +25,14 @@ A decisão metodológica mais recente estabelece visão global e planejamento in
 - CI do commit `9944dedebe02e92b267758bf13b311d3ee8baebf`: aprovado no run #43723491191 (TypeScript, testes, build e validações PostgreSQL/dispatch). Ver OR-20261115-0046. QA visual autenticado e teste real controlado do ciclo Manus ainda pendentes.
 - PR #15 permanece OPEN e não mergeada. Nenhuma alteração foi publicada em produção.
 
+## Incrementos recentes
+
+- Messenger central: UI implementada e CI aprovado; ligação de código para retorno do executor à conversa central rastreada. Ver OR-0045 e OR-0046.
+- Painel Execução e executor: UI implementada e CI aprovado; estado local e estado externo apresentados separadamente, com consulta do perfil público do agente sem credenciais. Ver OR-0047.
+
 ## Próxima ação
 
-Aguardar a avaliação visual/funcional do responsável sobre a aba Messenger e corrigir pontualmente se necessário. Após essa validação, selecionar a próxima unidade funcional da missão 20.4. Não antecipar implementação de pausa, retomada, transferência ou outras etapas no mesmo lote.
+Prosseguir a auditoria do ciclo de vida da missão com inspeção dos contratos e limites reais. Escolher uma única operação funcional para restaurar. Não simular pausa/retomada externa alterando apenas status local. QA visual e teste real controlado continuam dependentes de ambiente/autorização.
 
 ## Bloqueios e limites
 
