@@ -94,6 +94,9 @@ BEGIN
     END IF;
 
     IF latest_action_plan_version_id IS NOT NULL THEN
+      IF NEW."parentTaskId" IS DISTINCT FROM mission_id THEN
+        RAISE EXCEPTION 'Sofia dispatch blocked: ACTION_PLAN operational task must be a direct child of its mission root';
+      END IF;
       IF latest_action_plan_state IS DISTINCT FROM 'APPROVED'
          OR latest_action_plan_hash IS NULL THEN
         RAISE EXCEPTION 'Sofia dispatch blocked: current ACTION_PLAN is not approved or has no integrity hash';
