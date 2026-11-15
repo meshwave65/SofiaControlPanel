@@ -83,3 +83,5 @@ A defesa foi integrada aos quatro pontos de execução:
 `ensure-database.mjs` continua instalando a migration 0003; por isso a própria definição reinstalada do trigger foi atualizada, não apenas uma migration avulsa. Se o catálogo documental estiver presente mas a tabela 0012 ainda não estiver instalada, ACTION_PLAN falha fechado. Missões legadas sem ACTION_PLAN preservam o caminho anterior.
 
 O incremento não cria nem aprova registros de unidade e não cria tarefas operacionais. `READY_FOR_DISPATCH` só poderá ser atribuído por fluxo futuro que conclua dependências, risco, orçamento, permissão, elegibilidade específica, adaptador e aprovação humana individual. Nenhum dispatch foi realizado.
+
+A retomada de tarefas bloqueadas por créditos também revalida a autorização da unidade antes de enviar continuação ao executor ou criar nova execução após reatribuição. A autorização de dispatch não pode ser contornada pelo caminho de recuperação.
