@@ -370,3 +370,10 @@
 - Sem migration persistente, alteração Supabase/produção, execução LLM/Manus, reserva/créditos, merge/deploy/restart. Task 20.3/Mateus intocada. Próxima etapa: persistir e validar evidências de risco, orçamento, permissões, dependências e elegibilidade; então aprovação individual e materialização atômica PAUSED → vínculo → STAGED.
 
 - Defesa complementar AC-020: recuperação de tarefas em `waiting_credit` agora revalida autorização persistida da unidade antes de retomar mensagem ou criar execução após reatribuição; teste específico adicionado. CI final [43699884914](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43699884914) SUCCESS: migrations 0010–0012, trigger e teste PostgreSQL, TypeScript, testes e build.
+
+
+### Checkpoint 20.4 — registro e aprovação individual ACTION_PLAN (AC-021 / OR-20261115-0039)
+- Implementados na branch #15 os serviços transacionais de registro idempotente e aprovação individual das unidades Txx, com conferência de ownership, versão APPROVED vigente e hash SHA-256.
+- API tRPC para consultar, registrar e aprovar unidades; UI TaskDetail mostra estado e permite aprovação por unidade. A aprovação não autoriza execução e nenhum filho operacional é criado.
+- Evidência detalhada em `governance/operational_reports/OR-20261115-0039.md` e contrato atualizado em `governance/architecture/ACTION_UNIT_EXECUTION_GOVERNANCE.md`.
+- Validação CI deste incremento ainda pendente; não declarar check/test/build aprovados. Migration 0012 não aplicada em banco persistente. Sem dispatch, créditos, merge ou deploy. Task 20.3/Mateus intocada.
