@@ -157,17 +157,7 @@ export default function TaskDetail() {
     }
   })();
   const activeActionUnitId = selectedActionUnitId ?? actionPlanUnits[0]?.id ?? "T01";
-  const actionUnitGateQuery = trpc.tasks.documents.evaluateActionPlanUnit.useQuery(
-    { taskId, unitId: activeActionUnitId },
-    {
-      enabled: canLoadTask
-        && selectedDocument?.typeKey === "ACTION_PLAN"
-        && selectedDocument.latestVersion?.state === "APPROVED"
-        && selectedVersion === selectedDocument.latestVersion.version
-        && actionPlanUnits.length > 0,
-      retry: false,
-    },
-  );
+  const actionUnitGateMutation = trpc.tasks.documents.evaluateActionPlanUnit.useMutation();
   const actionPlanUnitRecordsQuery = trpc.tasks.documents.listActionPlanUnits.useQuery(
     { taskId },
     {
@@ -188,7 +178,6 @@ export default function TaskDetail() {
   const approveActionPlanUnitMutation = trpc.tasks.documents.approveActionPlanUnit.useMutation({
     onSuccess: async () => {
       await actionPlanUnitRecordsQuery.refetch();
-      await actionUnitGateQuery.refetch();
       toast.success("Aprovação individual registrada. Isso não libera execução nem dispatch.");
     },
     onError: (error) => toast.error(error.message),
@@ -765,11 +754,20 @@ export default function TaskDetail() {
                           </div>
                         );
                       })()}
-                      {actionUnitGateQuery.isLoading && <p className="text-xs text-muted-foreground">Avaliando pré-condições...</p>}
-                      {actionUnitGateQuery.isError && (
-                        <p className="text-sm text-destructive">{actionUnitGateQuery.error.message}</p>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => actionUnitGateMutation.mutate({ taskId, unitId: activeActionUnitId })}
+                        disabled={actionUnitGateMutation.isPending}
+                      >
+                        {actionUnitGateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Avaliar pré-condições da unidade
+                      </Button>
+                      {actionUnitGateMutation.isPending && <p className="text-xs text-muted-foreground">Avaliando pré-condições...</p>}
+                      {actionUnitGateMutation.isError && (
+                        <p className="text-sm text-destructive">{actionUnitGateMutation.error.message}</p>
                       )}
-                      {actionUnitGateQuery.data && (
+                      {actionUnitGateMutation.data && (
                         <div className="space-y-2">
                           <p className="text-sm font-semibold">
                             {actionUnitGateQuery.data.unit.id} — {actionUnitGateQuery.data.unit.title}
