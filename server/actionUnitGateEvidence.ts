@@ -1,4 +1,5 @@
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { createHash } from "node:crypto";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { getDb } from "./db";
 import {
   missionActionUnitGateEvidence,
@@ -100,17 +101,24 @@ export async function refreshActionUnitDependencyEvidence(input: {
   if (!unit) throw new Error("A unidade Txx não está registrada na versão/hash atual do ACTION_PLAN.");
 
   const [planVersion] = await database.execute(sql`
-    SELECT v.content, v.state, v.version
+    SELECT v.content, v.state, v.version, v."contentHash"
     FROM sofia."missionDocumentVersions" v
     WHERE v.id = ${input.actionPlanVersionId}
       AND v."documentId" = ${input.actionPlanDocumentId}
+      AND v.version = (
+        SELECT MAX(latest.version)
+        FROM sofia."missionDocumentVersions" latest
+        WHERE latest."documentId" = ${input.actionPlanDocumentId}
+      )
     LIMIT 1
   `) as any;
 
   if (!planVersion
     || Number(planVersion.version) !== input.actionPlanVersionNumber
-    || planVersion.state !== "APPROVED") {
-    throw new Error("A avaliação de dependências exige a versão APPROVED exata do ACTION_PLAN.");
+    || planVersion.state !== "APPROVED"
+    || planVersion.contentHash !== input.actionPlanContentHash
+    || createHash("sha256").update(planVersion.content, "utf8").digest("hex") !== input.actionPlanContentHash) {
+    throw new Error("A avaliação de dependências exige a versão APPROVED, mais recente e íntegra do ACTION_PLAN.");
   }
 
   const parsed = ActionPlanSchema.parse(JSON.parse(planVersion.content));
