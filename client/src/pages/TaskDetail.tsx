@@ -84,27 +84,6 @@ export default function TaskDetail() {
     ?? documents.find((document) => document.typeKey === "TR" && document.documentKey === "TR")
     ?? null;
   const selectedVersion = selectedVersionNumber ?? selectedDocument?.latestVersion?.version ?? 0;
-  const actionPlanUnits = (() => {
-    if (selectedDocument?.typeKey !== "ACTION_PLAN") return [];
-    try {
-      const parsed = JSON.parse(selectedDocumentVersionQuery.data?.version.content ?? "{}");
-      return Array.isArray(parsed.tasks) ? parsed.tasks : [];
-    } catch {
-      return [];
-    }
-  })();
-  const activeActionUnitId = selectedActionUnitId ?? actionPlanUnits[0]?.id ?? "T01";
-  const actionUnitGateQuery = trpc.tasks.documents.evaluateActionPlanUnit.useQuery(
-    { taskId, unitId: activeActionUnitId },
-    {
-      enabled: canLoadTask
-        && selectedDocument?.typeKey === "ACTION_PLAN"
-        && selectedDocument.latestVersion?.state === "APPROVED"
-        && selectedVersion === selectedDocument.latestVersion.version
-        && actionPlanUnits.length > 0,
-      retry: false,
-    },
-  );
   const trDocument = documents.find((document) => document.typeKey === "TR" && document.documentKey === "TR");
   const blueprintDocument = documents.find((document) => document.typeKey === "BLUEPRINT" && document.documentKey === "BLUEPRINT");
   const blueprintReady = Boolean(
@@ -125,6 +104,27 @@ export default function TaskDetail() {
       version: selectedVersion,
     },
     { enabled: canLoadTask && Boolean(selectedDocument?.latestVersion) && selectedVersion > 0, retry: false },
+  );
+  const actionPlanUnits = (() => {
+    if (selectedDocument?.typeKey !== "ACTION_PLAN") return [];
+    try {
+      const parsed = JSON.parse(selectedDocumentVersionQuery.data?.version.content ?? "{}");
+      return Array.isArray(parsed.tasks) ? parsed.tasks : [];
+    } catch {
+      return [];
+    }
+  })();
+  const activeActionUnitId = selectedActionUnitId ?? actionPlanUnits[0]?.id ?? "T01";
+  const actionUnitGateQuery = trpc.tasks.documents.evaluateActionPlanUnit.useQuery(
+    { taskId, unitId: activeActionUnitId },
+    {
+      enabled: canLoadTask
+        && selectedDocument?.typeKey === "ACTION_PLAN"
+        && selectedDocument.latestVersion?.state === "APPROVED"
+        && selectedVersion === selectedDocument.latestVersion.version
+        && actionPlanUnits.length > 0,
+      retry: false,
+    },
   );
   const reviseInitialTRMutation = trpc.tasks.documents.reviseInitialTR.useMutation({
     onSuccess: async () => {
