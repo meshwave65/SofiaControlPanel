@@ -309,7 +309,7 @@ export async function createTask(data: {
   const result = await db.insert(tasks).values({
     ...data,
     creatorType: data.creatorType ?? "user",
-    agentPinned: data.agentPinned ?? false,
+    agentPinned: data.agentPinned ?? data.agentId !== undefined,
   }).returning({ id: tasks.id });
 
   const taskId = result[0]?.id;
@@ -343,7 +343,7 @@ export async function createMissionWithInitialDocuments(input: {
       .values({
         ...input.task,
         creatorType: input.task.creatorType ?? "user",
-        agentPinned: input.task.agentPinned ?? false,
+        agentPinned: input.task.agentPinned ?? input.task.agentId !== undefined,
       })
       .returning();
 
