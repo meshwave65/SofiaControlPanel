@@ -20,6 +20,7 @@ DECLARE
   latest_action_plan_version_id integer;
   latest_action_plan_state text;
   latest_action_plan_hash text;
+  action_plan_document_exists boolean := false;
   authorized_unit_row_id integer;
   authorized_unit_id text;
   authorized_unit_key text;
@@ -78,6 +79,19 @@ BEGIN
        AND type_row."typeKey" = 'ACTION_PLAN'
      ORDER BY version_row.version DESC
      LIMIT 1;
+
+    SELECT EXISTS (
+      SELECT 1
+        FROM sofia."missionDocuments" document_row
+        JOIN sofia."missionDocumentTypes" type_row ON type_row.id = document_row."documentTypeId"
+       WHERE document_row."taskId" = mission_id
+         AND document_row."documentKey" = 'ACTION_PLAN'
+         AND type_row."typeKey" = 'ACTION_PLAN'
+    ) INTO action_plan_document_exists;
+
+    IF action_plan_document_exists AND latest_action_plan_version_id IS NULL THEN
+      RAISE EXCEPTION 'Sofia dispatch blocked: ACTION_PLAN document exists without a persisted version';
+    END IF;
 
     IF latest_action_plan_version_id IS NOT NULL THEN
       IF latest_action_plan_state IS DISTINCT FROM 'APPROVED'
