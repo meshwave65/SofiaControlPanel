@@ -152,6 +152,15 @@ export default function TaskDetail() {
     onError: (error) => toast.error(error.message),
   });
 
+  const materializeActionPlanUnitsMutation = trpc.tasks.documents.materializeApprovedActionPlanUnits.useMutation({
+    onSuccess: async (result) => {
+      await Promise.all([actionPlanUnitRecordsQuery.refetch(), subtasksQuery.refetch()]);
+      const createdCount = result.units.filter((unit) => unit.created).length;
+      toast.success(`${createdCount} tarefa(s) materializada(s) em PAUSED. Nenhum agente foi atribuído e nenhum dispatch ocorreu.`);
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
   const reviseInitialTRMutation = trpc.tasks.documents.reviseInitialTR.useMutation({
     onSuccess: async () => {
       setSelectedVersionNumber(null);
@@ -600,6 +609,22 @@ export default function TaskDetail() {
                           Registrar unidades para aprovação
                         </Button>
                       )}
+                      {actionPlanUnitRecordsQuery.data?.some((record: any) => record.state === "APPROVED" && !record.operationalTaskId) && (
+                        <div className="space-y-2 rounded-md border border-amber-500/30 p-3">
+                          <p className="text-xs text-muted-foreground">
+                            A materialização cria somente tarefas-filhas PAUSED, sem agente e sem autorização de execução. Os gates de dependências, risco, orçamento, permissões, executor e adaptador continuam obrigatórios.
+                          </p>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => materializeActionPlanUnitsMutation.mutate({ taskId })}
+                            disabled={materializeActionPlanUnitsMutation.isPending}
+                          >
+                            {materializeActionPlanUnitsMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Materializar unidades aprovadas em PAUSED
+                          </Button>
+                        </div>
+                      )}
                       <div className="flex flex-wrap gap-2">
                         {actionPlanUnits.map((unit: any) => (
                           <Button
@@ -623,6 +648,11 @@ export default function TaskDetail() {
                           <div className="rounded-md border p-3 space-y-2">
                             <p className="text-sm font-medium">{record.unitId} — {record.unitTitle}</p>
                             <p className="text-xs text-muted-foreground">Estado de governança: {record.state}</p>
+                            {record.operationalTaskId && (
+                              <p className="text-xs text-muted-foreground">
+                                Tarefa operacional: #{record.operationalTaskId} — criada em PAUSED, sem executor e sem dispatch.
+                              </p>
+                            )}
                             {record.state === "AWAITING_APPROVAL" && (
                               <Button
                                 size="sm"
