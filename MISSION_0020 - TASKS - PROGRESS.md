@@ -368,3 +368,5 @@
 - CI run [43699256796](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43699256796): migration PostgreSQL 16 descartável 0010+0011+0012, instalação do trigger e teste da barreira SQL passaram; `pnpm check`, `pnpm test` e `pnpm build` passaram.
 - Não há API/UI para registrar/aprovar unidade nem criação transacional da tarefa operacional nesta etapa. Nenhum registro READY_FOR_DISPATCH, subtarefa, status operacional ou dispatch foi criado.
 - Sem migration persistente, alteração Supabase/produção, execução LLM/Manus, reserva/créditos, merge/deploy/restart. Task 20.3/Mateus intocada. Próxima etapa: persistir e validar evidências de risco, orçamento, permissões, dependências e elegibilidade; então aprovação individual e materialização atômica PAUSED → vínculo → STAGED.
+
+- Defesa complementar AC-020: recuperação de tarefas em `waiting_credit` agora revalida autorização persistida da unidade antes de retomar mensagem ou criar execução após reatribuição; teste específico adicionado. Aguardando CI do head subsequente.
