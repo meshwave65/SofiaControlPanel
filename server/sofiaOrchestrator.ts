@@ -218,7 +218,7 @@ export class SofiaOrchestrator {
   /**
    * Inicia a missão local e cria a execução correspondente na API Manus.
    */
-  static async startTask(taskId: number): Promise<any> {
+  static async startTask(taskId: number, dispatchKey?: string): Promise<any> {
     const task = await db.getTaskById(taskId);
     if (!task) return null;
 
@@ -232,6 +232,14 @@ export class SofiaOrchestrator {
         executionStarted: Boolean(task.manusTaskId),
         externalTaskIds: task.manusTaskId ? [task.manusTaskId] : [],
       };
+    }
+    const dispatchAuthorization = await db.inspectTaskDispatchAuthorization(taskId);
+    if (!dispatchAuthorization.authorized) {
+      throw new Error("Dispatch bloqueado pela governança da unidade: " + (dispatchAuthorization.reason ?? "autorização não comprovada."));
+    }
+    if (dispatchAuthorization.requiresActionPlanUnit
+      && (!dispatchKey || dispatchKey !== dispatchAuthorization.idempotencyKey)) {
+      throw new Error("Dispatch bloqueado: tarefas vinculadas a ACTION_PLAN só podem ser iniciadas pelo callback interno com a chave de idempotência persistida da unidade aprovada.");
     }
     if (!(await db.hasExecutionReadyMissionDocuments(taskId))) {
       throw new Error("Execução bloqueada: a missão exige TR validado e Blueprint READY. Subtarefas herdam os documentos da missão principal.");
