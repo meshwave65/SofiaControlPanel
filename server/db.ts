@@ -2138,7 +2138,8 @@ export async function materializeApprovedMissionActionPlanUnits(input: {
         eq(missionDocuments.documentKey, "ACTION_PLAN"),
         eq(missionDocumentTypes.typeKey, "ACTION_PLAN"),
       ))
-      .limit(1);
+      .limit(1)
+      .for("update");
     if (!planDocument) throw new Error("A missão não possui ACTION_PLAN.");
 
     const [latestPlan] = await tx.select({
