@@ -145,6 +145,24 @@ export default function TaskDetail() {
     },
   });
 
+  const generateActionPlanMutation = trpc.tasks.documents.generateActionPlan.useMutation({
+    onSuccess: async (result) => {
+      setSelectedDocumentId(result.documentId);
+      setSelectedVersionNumber(null);
+      await documentsQuery.refetch();
+      toast.success("Plano de ação estruturado proposto e versionado. Nenhuma execução foi iniciada.");
+    },
+    onError: (error) => toast.error(error.message),
+  });
+  const approveActionPlanMutation = trpc.tasks.documents.approveActionPlan.useMutation({
+    onSuccess: async () => {
+      setSelectedVersionNumber(null);
+      await documentsQuery.refetch();
+      toast.success("Aprovação humana registrada para esta versão exata. Nenhuma execução foi iniciada.");
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
   const task = taskQuery.data;
   const messages = messagesQuery.data || [];
 
@@ -445,6 +463,54 @@ export default function TaskDetail() {
                     <pre className="max-h-[560px] overflow-auto whitespace-pre-wrap break-words rounded-md border bg-muted/20 p-4 font-sans text-sm leading-6 text-foreground">
                       {selectedDocumentVersionQuery.data?.version.content ?? "Conteúdo não disponível."}
                     </pre>
+                  )}
+                  {blueprintReady && selectedDocument.typeKey !== "ACTION_PLAN" && (
+                    <div className="flex justify-end">
+                      <Button
+                        variant="outline"
+                        onClick={() => generateActionPlanMutation.mutate({ taskId })}
+                        disabled={generateActionPlanMutation.isPending}
+                      >
+                        {generateActionPlanMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Propor plano de ação estruturado
+                      </Button>
+                    </div>
+                  )}
+                  {selectedDocument.typeKey === "ACTION_PLAN"
+                    && selectedVersion === selectedDocument.latestVersion?.version
+                    && selectedDocument.latestVersion?.state === "PROPOSED" && (
+                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-amber-500/30 bg-amber-500/5 p-4">
+                      <div>
+                        <p className="text-sm font-semibold">Aprovação humana necessária</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          A aprovação ficará vinculada ao hash e à versão exibida. Ela não inicia tarefas, reserva agentes ou autoriza consumo de créditos.
+                        </p>
+                      </div>
+                      <Button
+                        onClick={() => {
+                          const version = selectedDocumentVersionQuery.data?.version;
+                          if (!version?.contentHash) {
+                            toast.error("Hash da versão indisponível. Recarregue o documento antes de aprovar.");
+                            return;
+                          }
+                          approveActionPlanMutation.mutate({
+                            taskId,
+                            documentId: selectedDocument.id,
+                            expectedVersion: version.version,
+                            expectedContentHash: version.contentHash,
+                          });
+                        }}
+                        disabled={approveActionPlanMutation.isPending || !selectedDocumentVersionQuery.data?.version.contentHash}
+                      >
+                        {approveActionPlanMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Aprovar esta versão
+                      </Button>
+                    </div>
+                  )}
+                  {selectedDocument.typeKey === "ACTION_PLAN" && selectedDocument.latestVersion?.state === "APPROVED" && (
+                    <div className="rounded-md border border-green-500/30 p-3 text-sm text-green-600">
+                      Aprovação humana registrada. O plano permanece sem execução; cada ação operacional exige seu próprio gate governado.
+                    </div>
                   )}
                   {selectedDocument.typeKey === "TR" && selectedDocument.latestVersion?.state === "DRAFT" && (
                     <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-amber-500/30 bg-amber-500/5 p-3">
