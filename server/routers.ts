@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
@@ -12,6 +13,7 @@ import { mirrorTaskToGitHub } from "./githubMissionMirror";
 import { invokeLLM } from "./_core/llm";
 import { buildSofiaConversation, extractTextContent, normalizeOperatorMessage, OPERATOR_MESSAGE_MAX_LENGTH, SOFIA_MESSAGE_TOOLS } from "./messageService";
 import { validateMissionBlueprintContent } from "./missionBlueprint";
+import { validateActionPlan } from "./actionPlan";
 
 async function generateInitialMissionTR(title: string, description?: string | null): Promise<string> {
   const response = await invokeLLM({
@@ -393,6 +395,169 @@ export const appRouter = router({
           const missionRootId = await db.getMissionRootTaskId(input.taskId);
           if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
           return db.listMissionDocumentVersionsForTask(missionRootId, input.documentId, ctx.user.id, ctx.user.role === "admin");
+        }),
+      generateActionPlan: protectedProcedure
+        .input(z.object({ taskId: z.number().int().positive() }))
+        .mutation(async ({ input, ctx }) => {
+          const requestedTask = await db.getTaskById(input.taskId);
+          if (!requestedTask || (requestedTask.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+          }
+          const missionRootId = await db.getMissionRootTaskId(input.taskId);
+          if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
+          const mission = await db.getTaskById(missionRootId);
+          if (!mission || mission.createdBy !== ctx.user.id) {
+            throw new TRPCError({ code: "FORBIDDEN", message: "Somente o proprietário da missão pode propor seu plano de ação." });
+          }
+
+          const documents = await db.getMissionDocumentsForTask(missionRootId, ctx.user.id, false);
+          const tr = documents.find((document) => document.typeKey === "TR" && document.documentKey === "TR");
+          const blueprint = documents.find((document) => document.typeKey === "BLUEPRINT" && document.documentKey === "BLUEPRINT");
+          if (!tr?.latestVersion || !["VALIDATED", "ACTIVE", "REORIENTED"].includes(tr.latestVersion.state)
+            || !blueprint?.latestVersion || !["READY", "ACTIVE"].includes(blueprint.latestVersion.state)
+            || blueprint.latestVersion.sourceDocumentVersionId !== tr.latestVersion.id) {
+            throw new TRPCError({
+              code: "PRECONDITION_FAILED",
+              message: "O plano de ação exige TR vigente validado e Blueprint READY/ACTIVE vinculado àquela versão exata.",
+            });
+          }
+
+          const trRecord = await db.getMissionDocumentVersionForTask(
+            missionRootId, tr.id, tr.latestVersion.version, ctx.user.id, false,
+          );
+          const blueprintRecord = await db.getMissionDocumentVersionForTask(
+            missionRootId, blueprint.id, blueprint.latestVersion.version, ctx.user.id, false,
+          );
+          if (!trRecord || !blueprintRecord) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Versão-fonte do TR ou Blueprint não encontrada." });
+          }
+
+          const eligibility = await db.inspectTaskAgentEligibility(missionRootId, mission.createdBy);
+          const eligibleAgents = (eligibility?.candidates ?? [])
+            .filter((candidate: any) => candidate.eligible)
+            .map((candidate: any) => ({
+              agentId: candidate.agentId,
+              name: candidate.name,
+              creditsSnapshot: candidate.creditsRemaining,
+              creditsUpdatedAt: candidate.creditsUpdatedAt,
+            }));
+
+          const response = await invokeLLM({
+            messages: [
+              {
+                role: "system",
+                content: [
+                  "Você é SOFIA e deve propor um plano de ação estruturado, em JSON puro, sem Markdown ou cercas de código.",
+                  "O plano deve respeitar estritamente o TR validado e o Blueprint fornecidos. Não amplie escopo nem invente fatos, dependências, prazos, ferramentas, permissões ou recursos.",
+                  "Divida o trabalho em unidades pequenas, com IDs T01, T02 etc., dependências explícitas e critérios objetivos de aceite.",
+                  "Só proponha proposedAgentId dentre os agentes elegíveis fornecidos; se nenhum for adequado, use null e explique em agentRationale.",
+                  "Não existe neste sistema um modelo de preço/crédito verificado por tarefa: estimatedCredits deve ser null em todas as tarefas e creditEstimateBasis deve declarar essa limitação. Não confunda saldo disponível do agente com custo estimado.",
+                  "Registre riscos e reversibilidade por tarefa e globalmente. approvalRequired deve ser true. Não execute, reserve, despache, altere status ou atribua agentes.",
+                  "Retorne exatamente as propriedades do schema: schemaVersion, objective, expectedOutcome, tasks, globalRisks, reversibility, approvalRequired, approvalReason. Cada tarefa: id, title, description, dependsOn, proposedAgentId, agentRationale, estimatedCredits, creditEstimateBasis, acceptanceCriteria, risks, reversibility.",
+                ].join("\n"),
+              },
+              {
+                role: "user",
+                content: "Missão: " + mission.title
+                  + "\n\nTR validado (versão " + tr.latestVersion.version + "):\n" + trRecord.version.content
+                  + "\n\nBlueprint vigente (versão " + blueprint.latestVersion.version + "):\n" + blueprintRecord.version.content
+                  + "\n\nAgentes elegíveis no snapshot (não reservados):\n" + JSON.stringify(eligibleAgents),
+              },
+            ],
+            toolChoice: "none",
+            maxTokens: 6000,
+          });
+          const raw = extractTextContent(response.choices?.[0]?.message?.content);
+          let parsed: unknown;
+          try {
+            parsed = JSON.parse(raw);
+          } catch {
+            throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A SOFIA não retornou um plano JSON válido; nenhuma proposta foi persistida." });
+          }
+          let plan;
+          try {
+            plan = validateActionPlan(parsed, eligibleAgents.map((agent: any) => agent.agentId));
+          } catch (error) {
+            throw new TRPCError({
+              code: "PRECONDITION_FAILED",
+              message: error instanceof Error ? error.message : "Plano estruturado inválido.",
+              cause: error,
+            });
+          }
+
+          const content = JSON.stringify(plan, null, 2);
+          const contentHash = createHash("sha256").update(content, "utf8").digest("hex");
+          const existing = documents.find((document) => document.typeKey === "ACTION_PLAN" && document.documentKey === "ACTION_PLAN");
+          const version = {
+            content,
+            state: "PROPOSED",
+            authorType: "SOFIA" as const,
+            sourceDocumentVersionId: blueprintRecord.version.id,
+            provenance: {
+              source: "validated_TR_and_READY_BLUEPRINT",
+              sourceTRVersionId: trRecord.version.id,
+              sourceTRVersionNumber: trRecord.version.version,
+              sourceBlueprintVersionId: blueprintRecord.version.id,
+              sourceBlueprintVersionNumber: blueprintRecord.version.version,
+              eligibilityObservedAt: eligibility?.observedAt ?? null,
+              eligibleAgentIds: eligibleAgents.map((agent: any) => agent.agentId),
+            },
+            changeSummary: "Plano estruturado proposto pela SOFIA a partir do TR e Blueprint vigentes",
+            contentHash,
+            publishedAt: new Date(),
+          };
+
+          if (existing) {
+            const createdVersion = await db.createMissionDocumentRevision({
+              taskId: missionRootId,
+              documentId: existing.id,
+              ownerId: ctx.user.id,
+              canViewAll: false,
+              version,
+            });
+            return { documentId: existing.id, version: createdVersion };
+          }
+
+          const created = await db.createMissionDocumentWithVersion({
+            taskId: missionRootId,
+            ownerId: ctx.user.id,
+            canViewAll: false,
+            typeKey: "ACTION_PLAN",
+            documentKey: "ACTION_PLAN",
+            title: "Plano de ação — " + mission.title,
+            version,
+          });
+          return { documentId: created.document.id, version: created.version };
+        }),
+      approveActionPlan: protectedProcedure
+        .input(z.object({
+          taskId: z.number().int().positive(),
+          documentId: z.number().int().positive(),
+          expectedVersion: z.number().int().positive(),
+          expectedContentHash: z.string().regex(/^[a-f0-9]{64}$/),
+        }))
+        .mutation(async ({ input, ctx }) => {
+          const task = await db.getTaskById(input.taskId);
+          if (!task || task.createdBy !== ctx.user.id) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Somente o proprietário da missão pode aprovar o plano." });
+          }
+          const missionRootId = await db.getMissionRootTaskId(input.taskId);
+          if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
+          try {
+            return await db.approveMissionActionPlanVersion({
+              taskId: missionRootId,
+              documentId: input.documentId,
+              ownerId: ctx.user.id,
+              expectedVersion: input.expectedVersion,
+              expectedContentHash: input.expectedContentHash,
+            });
+          } catch (error) {
+            throw new TRPCError({
+              code: "PRECONDITION_FAILED",
+              message: error instanceof Error ? error.message : "Não foi possível aprovar a versão apresentada.",
+              cause: error,
+            });
+          }
         }),
       reviseInitialTR: protectedProcedure.input(z.object({ taskId: z.number().int().positive(), content: z.string().trim().min(1).max(50000) }))
         .mutation(async ({ input, ctx }) => {
