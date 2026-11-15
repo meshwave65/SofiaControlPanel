@@ -175,7 +175,9 @@ export async function refreshActionUnitDependencyEvidence(input: {
     evidenceId: evidenceRow?.id ?? null,
     decision: derived.decision,
     dependencies: derived.dependencies,
-    unitApproved: unit.approvalUserId === input.ownerId && unit.approvedAt !== null,
+    unitApproved: ["APPROVED", "READY_FOR_DISPATCH", "DISPATCHED"].includes(unit.state)
+      && unit.approvalUserId === input.ownerId
+      && unit.approvedAt !== null,
     idempotencyKey: unit.idempotencyKey,
   };
 }
