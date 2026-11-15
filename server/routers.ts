@@ -468,6 +468,28 @@ export const appRouter = router({
             });
           }
         }),
+      materializeApprovedActionPlanUnits: protectedProcedure
+        .input(z.object({ taskId: z.number().int().positive() }))
+        .mutation(async ({ input, ctx }) => {
+          const requestedTask = await db.getTaskById(input.taskId);
+          if (!requestedTask || requestedTask.createdBy !== ctx.user.id) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+          }
+          const missionRootId = await db.getMissionRootTaskId(input.taskId);
+          if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
+          try {
+            return await db.materializeApprovedMissionActionPlanUnits({
+              missionTaskId: missionRootId,
+              ownerId: ctx.user.id,
+            });
+          } catch (error) {
+            throw new TRPCError({
+              code: "PRECONDITION_FAILED",
+              message: error instanceof Error ? error.message : "Não foi possível materializar as unidades aprovadas.",
+              cause: error,
+            });
+          }
+        }),
       evaluateActionPlanUnit: protectedProcedure
         .input(z.object({
           taskId: z.number().int().positive(),
