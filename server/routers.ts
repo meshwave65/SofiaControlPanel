@@ -825,12 +825,16 @@ export const appRouter = router({
           const inspectCall = assistantTurn?.tool_calls?.find(
             (call) => call.function.name === "inspect_current_mission"
           );
+          const eligibilityCall = assistantTurn?.tool_calls?.find(
+            (call) => call.function.name === "inspect_agent_eligibility"
+          );
           const forwardCall = assistantTurn?.tool_calls?.find(
             (call) => call.function.name === "forward_operator_instruction_to_assigned_agent"
           );
 
-          if (inspectCall && forwardCall) {
-            throw new Error("A Sofia solicitou duas operações incompatíveis na mesma resposta.");
+          const requestedOperations = [inspectCall, eligibilityCall, forwardCall].filter(Boolean);
+          if (requestedOperations.length > 1) {
+            throw new Error("A Sofia solicitou operações incompatíveis na mesma resposta.");
           }
 
           if (inspectCall) {
@@ -921,6 +925,35 @@ export const appRouter = router({
             assistantContent = extractTextContent(followUp.choices?.[0]?.message?.content)
               || "Consultei os dados da missão, mas não consegui produzir uma síntese textual.";
             if (assistantContent.startsWith("Consultei os dados")) responseStatus = "failed";
+          } else if (eligibilityCall) {
+            const eligibilitySnapshot = await db.inspectTaskAgentEligibility(input.taskId, task.createdBy);
+            if (!eligibilitySnapshot) {
+              throw new TRPCError({ code: "NOT_FOUND", message: "Tarefa não encontrada para consulta de elegibilidade." });
+            }
+
+            const eligibleAgents = eligibilitySnapshot.candidates.filter((candidate: any) => candidate.eligible);
+            const snapshot = {
+              source: "database_read_only_agent_eligibility_snapshot",
+              ...eligibilitySnapshot,
+              eligibleAgentCount: eligibleAgents.length,
+              eligibleAgentIdsInClaimOrder: eligibleAgents.map((candidate: any) => candidate.agentId),
+              warning: "Elegibilidade é um snapshot; somente o claim transacional pode reservar o agente. Não houve reserva nesta consulta.",
+            };
+
+            const followUp = await invokeLLM({
+              messages: [
+                ...buildSofiaConversation(task, previousMessages),
+                {
+                  role: "user",
+                  content: "Resultado da ferramenta somente leitura inspect_agent_eligibility. Explique os critérios e os motivos de inelegibilidade usando exclusivamente os dados abaixo. Não afirme que um agente foi reservado ou que a elegibilidade está garantida no futuro:\\n" + JSON.stringify(snapshot),
+                },
+              ],
+              toolChoice: "none",
+              maxTokens: 2500,
+            });
+            assistantContent = extractTextContent(followUp.choices?.[0]?.message?.content)
+              || "Consultei os critérios de elegibilidade, mas não consegui produzir uma síntese textual.";
+            if (assistantContent.startsWith("Consultei os critérios")) responseStatus = "failed";
           } else if (forwardCall) {
             let toolArgs: { message?: string };
             try {
