@@ -114,6 +114,7 @@ describe("SofiaOrchestrator.startTask", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     dbMock.hasExecutionReadyMissionDocuments.mockResolvedValue(true);
+    dbMock.inspectTaskDispatchAuthorization.mockResolvedValue({ authorized: true, requiresActionPlanUnit: false, idempotencyKey: null, reason: null });
     dbMock.getTaskStatusNameById.mockImplementation(async (id: number) => id === 1 ? "STAGED" : id === 2 ? "PROGRESS" : "PAUSED");
     dbMock.getTaskStatusIdByName.mockImplementation(async (name: string) => {
       if (name === "STAGED") return 1;
@@ -261,6 +262,7 @@ describe("SofiaOrchestrator.factorizeTask", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     dbMock.hasExecutionReadyMissionDocuments.mockResolvedValue(true);
+    dbMock.inspectTaskDispatchAuthorization.mockResolvedValue({ authorized: true, requiresActionPlanUnit: false, idempotencyKey: null, reason: null });
     dbMock.getTaskStatusNameById.mockImplementation(async (id: number) => id === 1 ? "STAGED" : id === 2 ? "PROGRESS" : "PAUSED");
     dbMock.getTasksByParentId.mockResolvedValue([]);
     dbMock.getTaskStatusIdByName.mockResolvedValue(1);
@@ -341,6 +343,7 @@ describe("SofiaOrchestrator factorization depth", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     dbMock.hasExecutionReadyMissionDocuments.mockResolvedValue(true);
+    dbMock.inspectTaskDispatchAuthorization.mockResolvedValue({ authorized: true, requiresActionPlanUnit: false, idempotencyKey: null, reason: null });
     dbMock.getTaskStatusNameById.mockImplementation(async (id: number) => id === 1 ? "STAGED" : id === 2 ? "PROGRESS" : "PAUSED");
   });
 
