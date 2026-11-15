@@ -160,9 +160,16 @@ Implementado `sofia.missionActionUnitGateEvidence` por meio da migration 0013. O
 
 A migration aplica FKs restritivas, constraints de identidade/formato, autoria OWNER vinculada ao proprietário da missão, trigger de imutabilidade e RLS server-only. O schema Drizzle foi reconstruído a partir de baseline limpo e contém uma declaração por tabela/relação. A validação CI 43708974232 passou: TypeScript, 56 testes, build, migrations 0010–0013 em PostgreSQL descartável e barreira de dispatch.
 
-O ledger não concede autorização nem promove estado. AC-023b/c ainda precisa implementar origens confiáveis, validação das evidências e avaliação consolidada; evidência ausente, stale ou hash divergente mantém BLOCKED. Ver OR-20261115-0042.
+O ledger não concede autorização nem promove estado. AC-023b implementa a origem confiável DEPENDENCY, vinculada à versão/hash vigentes e ao vínculo Txx→tarefa DONE da mesma missão; os demais gates permanecem BLOCKED até suas fontes autorizativas. Ver OR-20261115-0042.
 
 
 ## 13. Separação consultiva ARC/PGC e autoridade decisória do SOFIA
 
 ARC e PGC fornecem avaliação contextual e evidências; não executam enforcement. ARC observa continuamente sinais contextuais; PGC é acionado apenas quando critérios do sistema exigem prova reforçada. Nenhum dos módulos pode, por iniciativa própria, bloquear conexão, suspender agente ou alterar a interação. A política do SOFIA interpreta as evidências e determina a resposta permitida. A decisão e sua execução devem ser registradas pelo mecanismo de controle do SOFIA, com política, evidências e ação rastreáveis.
+
+
+## 14. AC-023b — origem confiável para o gate DEPENDENCY
+
+`refreshActionUnitDependencyEvidence` revalida a versão APPROVED mais recente do ACTION_PLAN, o hash SHA-256, a identidade Txx e o título persistido. Cada dependência declarada exige registro da mesma versão/hash, `operationalTaskId`, tarefa filha direta da missão raiz, mesmo proprietário e status `DONE`. Ausência, não materialização, estado diferente de DONE ou divergência de escopo produz BLOCKED com motivo. A avaliação grava evidência SYSTEM append-only e o endpoint `evaluateActionPlanUnit` consome o resultado junto à aprovação individual e à idempotency key persistidas.
+
+A evidência de dependência é um retrato da avaliação e é recalculada em cada consulta; não substitui revalidação transacional no futuro gate de dispatch. Nenhum estado operacional é alterado. A aprovação individual não equivale a UNIT_PERMISSION. Risco/política, orçamento, permissão granular, elegibilidade do executor e capacidade do adaptador continuam bloqueados. CI [43719391912](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43719391912) validou TypeScript, testes, build, migrations 0010–0013 e barreira de dispatch em PostgreSQL descartável.
