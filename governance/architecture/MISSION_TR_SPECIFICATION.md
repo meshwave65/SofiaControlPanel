@@ -1,11 +1,12 @@
-# TR — Contrato do Relatório Transacional/Narrativo de Missão
+# TR — Transactional Report (Relatório Transacional da Missão)
 
 **Identificador:** TR  
-**Status:** requisito arquitetural aprovado; implementação pendente  
+**Denominação oficial:** Transactional Report  
+**Status:** contrato aprovado; implementação parcial na PR #15, com atualização contínua e origem autônoma ainda pendentes  
 **Missão de referência:** MISSION_0020 / tarefa 20.4  
 **Branch:** feat/sofia-cognitive-control-plane
 
-> A sigla TR e a denominação fornecida pelo responsável são preservadas. A expansão oficial do nome não é redefinida neste documento.
+> TR significa Transactional Report. “Narrativo” descreve uma característica de leitura do documento, não uma segunda denominação ou um artefato diferente.
 
 ## 1. Finalidade
 
