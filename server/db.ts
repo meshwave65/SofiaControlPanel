@@ -1933,6 +1933,21 @@ export async function inspectTaskDispatchAuthorization(taskId: number): Promise<
     return { authorized: false, requiresActionPlanUnit: false, idempotencyKey: null, reason: "A missão raiz não pôde ser resolvida." };
   }
 
+  const [actionPlanDocument] = await database
+    .select({ id: missionDocuments.id })
+    .from(missionDocuments)
+    .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
+    .where(and(
+      eq(missionDocuments.taskId, missionId),
+      eq(missionDocuments.documentKey, "ACTION_PLAN"),
+      eq(missionDocumentTypes.typeKey, "ACTION_PLAN"),
+    ))
+    .limit(1);
+
+  if (!actionPlanDocument) {
+    return { authorized: true, requiresActionPlanUnit: false, idempotencyKey: null, reason: null };
+  }
+
   const [latestPlan] = await database
     .select({
       documentId: missionDocuments.id,
@@ -1946,9 +1961,7 @@ export async function inspectTaskDispatchAuthorization(taskId: number): Promise<
     .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
     .innerJoin(missionDocumentVersions, eq(missionDocumentVersions.documentId, missionDocuments.id))
     .where(and(
-      eq(missionDocuments.taskId, missionId),
-      eq(missionDocuments.documentKey, "ACTION_PLAN"),
-      eq(missionDocumentTypes.typeKey, "ACTION_PLAN"),
+      eq(missionDocuments.id, actionPlanDocument.id),
       sql`${missionDocumentVersions.version} = (
         SELECT MAX(v2."version") FROM sofia."missionDocumentVersions" v2
         WHERE v2."documentId" = ${missionDocuments.id}
@@ -1957,7 +1970,12 @@ export async function inspectTaskDispatchAuthorization(taskId: number): Promise<
     .limit(1);
 
   if (!latestPlan) {
-    return { authorized: true, requiresActionPlanUnit: false, idempotencyKey: null, reason: null };
+    return {
+      authorized: false,
+      requiresActionPlanUnit: true,
+      idempotencyKey: null,
+      reason: "O documento ACTION_PLAN existe, mas não possui versão persistida íntegra.",
+    };
   }
   if (latestPlan.state !== "APPROVED") {
     return {
