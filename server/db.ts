@@ -2184,7 +2184,7 @@ export async function materializeApprovedMissionActionPlanUnits(input: {
       .orderBy(asc(missionActionUnits.unitId))
       .for("update");
 
-    const planUnits = new Map(plan.tasks.map((unit) => [unit.id, unit]));
+    const planUnits = new Map<string, (typeof plan.tasks)[number]>(plan.tasks.map((unit) => [unit.id, unit] as const));
     if (unitRows.length !== plan.tasks.length
       || unitRows.some((row) => {
         const planUnit = planUnits.get(row.unitId);
