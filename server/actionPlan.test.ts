@@ -44,4 +44,15 @@ describe("structured action plan validation", () => {
     const duplicate = { ...basePlan, tasks: [basePlan.tasks[0], { ...basePlan.tasks[0] }] };
     expect(() => validateActionPlan(duplicate, [7])).toThrow("duplicados");
   });
+
+  it("rejects cyclic task dependencies", () => {
+    const cyclic = {
+      ...basePlan,
+      tasks: [
+        { ...basePlan.tasks[0], dependsOn: ["T02"] },
+        { ...basePlan.tasks[0], id: "T02", dependsOn: ["T01"], proposedAgentId: null },
+      ],
+    };
+    expect(() => validateActionPlan(cyclic, [7])).toThrow("ciclo de dependências");
+  });
 });
