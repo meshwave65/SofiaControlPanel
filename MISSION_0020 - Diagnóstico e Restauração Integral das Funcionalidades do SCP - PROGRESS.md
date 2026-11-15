@@ -378,3 +378,13 @@ Foi criado workflow dedicado para executar `pnpm check`, `pnpm test`, `pnpm buil
 
 
 - Revisão de robustez AC-020: máquina de estados monotônica; vínculo operacional imutável após preenchido; tarefa obrigatoriamente filha direta; documento ACTION_PLAN sem versão bloqueia; constraints de hash/idempotência/título. CI final [43699884914](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43699884914) SUCCESS.
+
+
+### Checkpoint 20.4 — AC-021 / OR-20261115-0039 e AC-022 / OR-20261115-0040
+
+- AC-021 registra unidades Txx do ACTION_PLAN aprovado e permite aprovação individual pelo proprietário. A aprovação não autoriza execução.
+- Correção de rastreabilidade: workflow #283 passou no job PostgreSQL, mas falhou em TypeScript; testes e build foram pulados. A correção foi commitada, porém não foi possível confirmar check/test/build verdes no commit corrigido. AC-021 não deve ser classificado como CI integralmente validado.
+- AC-022 implementa materialização transacional das unidades individualmente aprovadas em tarefas-filhas PAUSED, sem agente, sem pinagem e sem dispatch. Lock da missão/documento, validação de versão/hash/schema, idempotência e vínculo operacional persistido.
+- A migration 0012 valida que qualquer tarefa vinculada é filha direta da missão e pertence ao mesmo proprietário. O teste PostgreSQL descarta tentativa de promover tarefa para STAGED enquanto a unidade permanece apenas APPROVED.
+- API tRPC e UI TaskDetail permitem materializar e visualizar o ID da tarefa-filha; o estado de governança permanece APPROVED e o estado operacional PAUSED.
+- Validação TypeScript, testes, build e PostgreSQL do head atualizado ainda pendentes. Nenhuma migration persistente, tarefa real, dispatch, chamada LLM/Manus, crédito, merge ou deploy. Task 20.3/Mateus intocada.
