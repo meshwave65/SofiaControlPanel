@@ -712,7 +712,7 @@ export const missionActionUnits = sofia.table("missionActionUnits", {
   idempotencyUnique: uniqueIndex("missionActionUnits_idempotencyKey_key").on(table.idempotencyKey),
   missionVersionUnitUnique: uniqueIndex("missionActionUnits_mission_version_unit_unique").on(table.missionTaskId, table.actionPlanVersionId, table.unitId),
   operationalTaskUnique: uniqueIndex("missionActionUnits_operationalTaskId_key").on(table.operationalTaskId),
-  unitIdFormatCheck: check("missionActionUnits_unit_id_format", sql`${table.unitId} ~ '^T[0-9]{2}, ({ many }) => ({
+  unitIdFormatCheck: check("missionActionUnits_unit_id_format", sql.raw('"unitId" ~ ''^T[0-9]{2}, ({ many }) => ({
   documents: many(missionDocuments),
 }));
 
@@ -747,8 +747,8 @@ export const missionDocumentVersionsRelations = relations(missionDocumentVersion
     relationName: "sourceVersion",
   }),
 }));
-`),
-  hashFormatCheck: check("missionActionUnits_hash_format", sql`${table.actionPlanContentHash} ~ '^[a-f0-9]{64}, ({ many }) => ({
+'')),
+  hashFormatCheck: check("missionActionUnits_hash_format", sql.raw('"actionPlanContentHash" ~ ''^[a-f0-9]{64}, ({ many }) => ({
   documents: many(missionDocuments),
 }));
 
@@ -783,12 +783,12 @@ export const missionDocumentVersionsRelations = relations(missionDocumentVersion
     relationName: "sourceVersion",
   }),
 }));
-`),
-  idempotencyLengthCheck: check("missionActionUnits_idempotency_length", sql`char_length(${table.idempotencyKey}) BETWEEN 16 AND 128`),
-  titleNonemptyCheck: check("missionActionUnits_title_nonempty", sql`length(trim(${table.unitTitle})) > 0`),
-  stateCheck: check("missionActionUnits_state_check", sql`${table.state} IN ('REGISTERED', 'AWAITING_APPROVAL', 'APPROVED', 'READY_FOR_DISPATCH', 'DISPATCHED', 'BLOCKED', 'CANCELLED')`),
-  approvalPairCheck: check("missionActionUnits_approval_pair_check", sql`(${table.approvalUserId} IS NULL) = (${table.approvedAt} IS NULL)`),
-  dispatchAttemptsCheck: check("missionActionUnits_dispatch_attempts_check", sql`${table.dispatchAttempts} >= 0`),
+'')),
+  idempotencyLengthCheck: check("missionActionUnits_idempotency_length", sql.raw('char_length("idempotencyKey") BETWEEN 16 AND 128')),
+  titleNonemptyCheck: check("missionActionUnits_title_nonempty", sql.raw('length(trim("unitTitle")) > 0')),
+  stateCheck: check("missionActionUnits_state_check", sql.raw('"state" IN (''REGISTERED'', ''AWAITING_APPROVAL'', ''APPROVED'', ''READY_FOR_DISPATCH'', ''DISPATCHED'', ''BLOCKED'', ''CANCELLED'')')),
+  approvalPairCheck: check("missionActionUnits_approval_pair_check", sql.raw('("approvalUserId" IS NULL) = ("approvedAt" IS NULL)')),
+  dispatchAttemptsCheck: check("missionActionUnits_dispatch_attempts_check", sql.raw('"dispatchAttempts" >= 0')),
   missionTaskFk: foreignKey({ columns: [table.missionTaskId], foreignColumns: [tasks.id] }).onDelete("restrict"),
   actionPlanDocumentFk: foreignKey({ columns: [table.actionPlanDocumentId], foreignColumns: [missionDocuments.id] }).onDelete("restrict"),
   actionPlanVersionFk: foreignKey({ columns: [table.actionPlanVersionId], foreignColumns: [missionDocumentVersions.id] }).onDelete("restrict"),
@@ -818,11 +818,11 @@ export const missionActionUnitGateEvidence = sofia.table("missionActionUnitGateE
 }, (table) => ({
   actionUnitIdx: index("missionActionUnitGateEvidence_action_unit_idx").on(table.actionUnitId),
   gateObservedIdx: index("missionActionUnitGateEvidence_gate_observed_idx").on(table.actionUnitId, table.gateKey, table.observedAt),
-  gateKeyCheck: check("missionActionUnitGateEvidence_gate_key_check", sql`${table.gateKey} IN ('DEPENDENCY', 'RISK_POLICY', 'BUDGET_AUTHORIZATION', 'UNIT_PERMISSION', 'EXECUTOR_ELIGIBILITY', 'ADAPTER_CAPABILITY')`),
-  decisionCheck: check("missionActionUnitGateEvidence_decision_check", sql`${table.decision} IN ('VERIFIED', 'BLOCKED', 'UNKNOWN')`),
-  actorTypeCheck: check("missionActionUnitGateEvidence_actor_type_check", sql`${table.actorType} IN ('SYSTEM', 'OWNER')`),
-  actorPairCheck: check("missionActionUnitGateEvidence_actor_pair_check", sql`(${table.actorType} = 'OWNER' AND ${table.actorUserId} IS NOT NULL) OR (${table.actorType} = 'SYSTEM' AND ${table.actorUserId} IS NULL)`),
-  hashFormatCheck: check("missionActionUnitGateEvidence_hash_format", sql`${table.actionPlanContentHash} ~ '^[a-f0-9]{64}, ({ many }) => ({
+  gateKeyCheck: check("missionActionUnitGateEvidence_gate_key_check", sql.raw('"gateKey" IN (''DEPENDENCY'', ''RISK_POLICY'', ''BUDGET_AUTHORIZATION'', ''UNIT_PERMISSION'', ''EXECUTOR_ELIGIBILITY'', ''ADAPTER_CAPABILITY'')')),
+  decisionCheck: check("missionActionUnitGateEvidence_decision_check", sql.raw('"decision" IN (''VERIFIED'', ''BLOCKED'', ''UNKNOWN'')')),
+  actorTypeCheck: check("missionActionUnitGateEvidence_actor_type_check", sql.raw('"actorType" IN (''SYSTEM'', ''OWNER'')')),
+  actorPairCheck: check("missionActionUnitGateEvidence_actor_pair_check", sql.raw('("actorType" = ''OWNER'' AND "actorUserId" IS NOT NULL) OR ("actorType" = ''SYSTEM'' AND "actorUserId" IS NULL)')),
+  hashFormatCheck: check("missionActionUnitGateEvidence_hash_format", sql.raw('"actionPlanContentHash" ~ ''^[a-f0-9]{64}, ({ many }) => ({
   documents: many(missionDocuments),
 }));
 
@@ -857,8 +857,8 @@ export const missionDocumentVersionsRelations = relations(missionDocumentVersion
     relationName: "sourceVersion",
   }),
 }));
-`),
-  unitIdFormatCheck: check("missionActionUnitGateEvidence_unit_id_format", sql`${table.unitId} ~ '^T[0-9]{2}, ({ many }) => ({
+'')),
+  unitIdFormatCheck: check("missionActionUnitGateEvidence_unit_id_format", sql.raw('"unitId" ~ ''^T[0-9]{2}, ({ many }) => ({
   documents: many(missionDocuments),
 }));
 
@@ -893,11 +893,11 @@ export const missionDocumentVersionsRelations = relations(missionDocumentVersion
     relationName: "sourceVersion",
   }),
 }));
-`),
-  versionPositiveCheck: check("missionActionUnitGateEvidence_version_positive", sql`${table.actionPlanVersionNumber} > 0`),
-  sourceNonemptyCheck: check("missionActionUnitGateEvidence_source_nonempty", sql`length(trim(${table.source})) > 0`),
-  evidenceObjectCheck: check("missionActionUnitGateEvidence_evidence_object", sql`jsonb_typeof(${table.evidence}) = 'object'`),
-  validityCheck: check("missionActionUnitGateEvidence_validity_check", sql`${table.validUntil} IS NULL OR ${table.validUntil} > ${table.observedAt}`),
+'')),
+  versionPositiveCheck: check("missionActionUnitGateEvidence_version_positive", sql.raw('"actionPlanVersionNumber" > 0')),
+  sourceNonemptyCheck: check("missionActionUnitGateEvidence_source_nonempty", sql.raw('length(trim("source")) > 0')),
+  evidenceObjectCheck: check("missionActionUnitGateEvidence_evidence_object", sql.raw('jsonb_typeof("evidence") = ''object''')),
+  validityCheck: check("missionActionUnitGateEvidence_validity_check", sql.raw('"validUntil" IS NULL OR "validUntil" > "observedAt"')),
   actionUnitFk: foreignKey({ columns: [table.actionUnitId], foreignColumns: [missionActionUnits.id] }).onDelete("restrict"),
   missionFk: foreignKey({ columns: [table.missionTaskId], foreignColumns: [tasks.id] }).onDelete("restrict"),
   documentFk: foreignKey({ columns: [table.actionPlanDocumentId], foreignColumns: [missionDocuments.id] }).onDelete("restrict"),
