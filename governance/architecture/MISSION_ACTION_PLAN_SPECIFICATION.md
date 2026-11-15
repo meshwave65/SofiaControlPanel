@@ -35,7 +35,7 @@ O conteúdo é JSON versionado com `schemaVersion=1` e os campos:
 
 Validação determinística:
 - IDs de tarefas únicos e no formato T01…;
-- dependências devem existir e não podem apontar para a própria tarefa;
+- dependências devem existir, não podem apontar para a própria tarefa, repetir a mesma referência ou formar ciclos;
 - Agent ID proposto deve pertencer ao snapshot de elegibilidade consultado;
 - `estimatedCredits` deve permanecer null enquanto não houver modelo de preço/consumo verificável;
 - propriedades desconhecidas são rejeitadas.
