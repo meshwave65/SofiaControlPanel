@@ -397,6 +397,77 @@ export const appRouter = router({
           if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
           return db.listMissionDocumentVersionsForTask(missionRootId, input.documentId, ctx.user.id, ctx.user.role === "admin");
         }),
+      listActionPlanUnits: protectedProcedure
+        .input(z.object({ taskId: z.number().int().positive() }))
+        .query(async ({ input, ctx }) => {
+          const requestedTask = await db.getTaskById(input.taskId);
+          if (!requestedTask || requestedTask.createdBy !== ctx.user.id) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+          }
+          const missionRootId = await db.getMissionRootTaskId(input.taskId);
+          if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
+          return db.listMissionActionPlanUnits(missionRootId, ctx.user.id);
+        }),
+      registerActionPlanUnits: protectedProcedure
+        .input(z.object({
+          taskId: z.number().int().positive(),
+          documentId: z.number().int().positive(),
+          expectedVersion: z.number().int().positive(),
+          expectedContentHash: z.string().regex(/^[a-f0-9]{64}$/),
+        }))
+        .mutation(async ({ input, ctx }) => {
+          const requestedTask = await db.getTaskById(input.taskId);
+          if (!requestedTask || requestedTask.createdBy !== ctx.user.id) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+          }
+          const missionRootId = await db.getMissionRootTaskId(input.taskId);
+          if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
+          try {
+            return await db.registerMissionActionPlanUnits({
+              missionTaskId: missionRootId,
+              ownerId: ctx.user.id,
+              documentId: input.documentId,
+              expectedVersion: input.expectedVersion,
+              expectedContentHash: input.expectedContentHash,
+            });
+          } catch (error) {
+            throw new TRPCError({
+              code: "PRECONDITION_FAILED",
+              message: error instanceof Error ? error.message : "Não foi possível registrar as unidades do plano.",
+              cause: error,
+            });
+          }
+        }),
+      approveActionPlanUnit: protectedProcedure
+        .input(z.object({
+          taskId: z.number().int().positive(),
+          unitId: z.string().regex(/^T[0-9]{2}$/),
+          expectedVersion: z.number().int().positive(),
+          expectedContentHash: z.string().regex(/^[a-f0-9]{64}$/),
+        }))
+        .mutation(async ({ input, ctx }) => {
+          const requestedTask = await db.getTaskById(input.taskId);
+          if (!requestedTask || requestedTask.createdBy !== ctx.user.id) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+          }
+          const missionRootId = await db.getMissionRootTaskId(input.taskId);
+          if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
+          try {
+            return await db.approveMissionActionPlanUnit({
+              missionTaskId: missionRootId,
+              ownerId: ctx.user.id,
+              unitId: input.unitId,
+              expectedVersion: input.expectedVersion,
+              expectedContentHash: input.expectedContentHash,
+            });
+          } catch (error) {
+            throw new TRPCError({
+              code: "PRECONDITION_FAILED",
+              message: error instanceof Error ? error.message : "Não foi possível aprovar esta unidade.",
+              cause: error,
+            });
+          }
+        }),
       evaluateActionPlanUnit: protectedProcedure
         .input(z.object({
           taskId: z.number().int().positive(),
