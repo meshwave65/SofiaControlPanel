@@ -11,6 +11,7 @@ const dbMock = vi.hoisted(() => ({
   getTasksByParentId: vi.fn(),
   getTaskStatusNameById: vi.fn(),
   getAgentsByOwnerId: vi.fn(),
+  inspectTaskAgentEligibility: vi.fn(),
 }));
 const invokeLLMMock = vi.hoisted(() => vi.fn());
 const sendManusMessageAndWaitMock = vi.hoisted(() => vi.fn());
@@ -38,6 +39,12 @@ describe("messages.create — persistência e resposta Sofia", () => {
     dbMock.getTasksByParentId.mockResolvedValue([]);
     dbMock.getTaskStatusNameById.mockResolvedValue("PROGRESS");
     dbMock.getAgentsByOwnerId.mockResolvedValue([]);
+    dbMock.inspectTaskAgentEligibility.mockResolvedValue({
+      observedAt: "2026-11-14T12:00:00.000Z",
+      task: { taskId: 19, ownerId: 152, status: "STAGED", assignedAgentId: null, agentPinned: false, assignmentMode: "AUTOMATIC" },
+      candidates: [],
+      interpretationLimits: ["Somente leitura."],
+    });
     dbMock.getTaskById.mockResolvedValue({
       id: 19,
       createdBy: 152,
@@ -272,6 +279,94 @@ describe("messages.create — persistência e resposta Sofia", () => {
     expect(result.responseStatus).toBe("replied");
     expect(result.reply).toMatchObject({
       content: "A missão está em PROGRESS e possui uma filha concluída.",
+      isAssistant: true,
+    });
+  });
+
+  it("consulta elegibilidade com os critérios do claim sem reservar agentes nem expor credenciais", async () => {
+    dbMock.getTaskById.mockResolvedValue({
+      id: 19,
+      createdBy: 152,
+      title: "Missão fixture",
+      description: "Validar elegibilidade",
+      statusId: 1,
+      agentId: null,
+      agentPinned: false,
+    });
+    dbMock.inspectTaskAgentEligibility.mockResolvedValue({
+      observedAt: "2026-11-14T12:00:00.000Z",
+      task: {
+        taskId: 19,
+        ownerId: 152,
+        status: "STAGED",
+        assignedAgentId: null,
+        agentPinned: false,
+        assignmentMode: "AUTOMATIC",
+      },
+      candidates: [
+        {
+          agentId: 7,
+          name: "Agente elegível",
+          status: "online",
+          connectionStatus: "connected",
+          hasCredential: true,
+          hasPositiveCredits: true,
+          creditSnapshotFresh: true,
+          hasNoProgressTask: true,
+          eligible: true,
+          reasons: [],
+        },
+        {
+          agentId: 8,
+          name: "Agente ocupado",
+          status: "online",
+          connectionStatus: "connected",
+          hasCredential: true,
+          hasPositiveCredits: true,
+          creditSnapshotFresh: true,
+          hasNoProgressTask: false,
+          eligible: false,
+          reasons: ["agent_has_progress_task"],
+        },
+      ],
+      interpretationLimits: ["O snapshot não reserva agentes."],
+    });
+    invokeLLMMock
+      .mockResolvedValueOnce({
+        choices: [{
+          message: {
+            role: "assistant",
+            content: null,
+            tool_calls: [{
+              id: "call-eligibility-1",
+              type: "function",
+              function: { name: "inspect_agent_eligibility", arguments: "{}" },
+            }],
+          },
+        }],
+      })
+      .mockResolvedValueOnce({
+        choices: [{ message: { role: "assistant", content: "O agente 7 atende aos critérios; o agente 8 está ocupado." } }],
+      });
+
+    const result = await appRouter.createCaller(context).messages.create({
+      taskId: 19,
+      typeId: 1,
+      content: "Quais agentes estão elegíveis para esta tarefa?",
+    });
+
+    expect(dbMock.inspectTaskAgentEligibility).toHaveBeenCalledWith(19, 152);
+    expect(invokeLLMMock).toHaveBeenCalledTimes(2);
+    const followUpMessages = invokeLLMMock.mock.calls[1][0].messages;
+    const toolContext = followUpMessages[followUpMessages.length - 1].content;
+    expect(toolContext).toContain('"eligibleAgentIdsInClaimOrder":[7]');
+    expect(toolContext).toContain("agent_has_progress_task");
+    expect(toolContext).not.toContain("manusToken");
+    expect(toolContext).not.toContain("MUST_NOT_LEAK");
+    expect(sendManusMessageAndWaitMock).not.toHaveBeenCalled();
+    expect(result.responseStatus).toBe("replied");
+    expect(result.reply).toMatchObject({
+      content: "O agente 7 atende aos critérios; o agente 8 está ocupado.",
       isAssistant: true,
     });
   });
