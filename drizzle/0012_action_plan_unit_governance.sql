@@ -75,13 +75,26 @@ BEGIN
        OR OLD."actionPlanContentHash" IS DISTINCT FROM NEW."actionPlanContentHash"
        OR OLD."unitId" IS DISTINCT FROM NEW."unitId"
        OR OLD."unitTitle" IS DISTINCT FROM NEW."unitTitle"
-       OR OLD."idempotencyKey" IS DISTINCT FROM NEW."idempotencyKey" THEN
+       OR OLD."idempotencyKey" IS DISTINCT FROM NEW."idempotencyKey"
+       OR (OLD."operationalTaskId" IS NOT NULL
+         AND OLD."operationalTaskId" IS DISTINCT FROM NEW."operationalTaskId") THEN
       RAISE EXCEPTION 'Action-plan unit identity is immutable';
     END IF;
     IF OLD."approvalUserId" IS NOT NULL
        AND (OLD."approvalUserId" IS DISTINCT FROM NEW."approvalUserId"
          OR OLD."approvedAt" IS DISTINCT FROM NEW."approvedAt") THEN
       RAISE EXCEPTION 'Action-plan unit approval is immutable';
+    END IF;
+    IF OLD.state IS DISTINCT FROM NEW.state THEN
+      IF NOT (
+        (OLD.state = 'REGISTERED' AND NEW.state IN ('AWAITING_APPROVAL', 'BLOCKED', 'CANCELLED'))
+        OR (OLD.state = 'AWAITING_APPROVAL' AND NEW.state IN ('APPROVED', 'BLOCKED', 'CANCELLED'))
+        OR (OLD.state = 'APPROVED' AND NEW.state IN ('READY_FOR_DISPATCH', 'BLOCKED', 'CANCELLED'))
+        OR (OLD.state = 'READY_FOR_DISPATCH' AND NEW.state IN ('DISPATCHED', 'BLOCKED', 'CANCELLED'))
+        OR (OLD.state = 'BLOCKED' AND NEW.state = 'CANCELLED')
+      ) THEN
+        RAISE EXCEPTION 'Invalid action-plan unit state transition: % -> %', OLD.state, NEW.state;
+      END IF;
     END IF;
   END IF;
 
