@@ -685,6 +685,50 @@ export const missionDocumentVersions = sofia.table("missionDocumentVersions", {
 export type MissionDocumentVersion = typeof missionDocumentVersions.$inferSelect;
 export type InsertMissionDocumentVersion = typeof missionDocumentVersions.$inferInsert;
 
+export const missionActionUnits = sofia.table("missionActionUnits", {
+  id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
+  missionTaskId: integer("missionTaskId").notNull(),
+  actionPlanDocumentId: integer("actionPlanDocumentId").notNull(),
+  actionPlanVersionId: integer("actionPlanVersionId").notNull(),
+  actionPlanVersionNumber: integer("actionPlanVersionNumber").notNull(),
+  actionPlanContentHash: varchar("actionPlanContentHash", { length: 64 }).notNull(),
+  unitId: varchar("unitId", { length: 8 }).notNull(),
+  unitTitle: varchar("unitTitle", { length: 255 }).notNull(),
+  idempotencyKey: varchar("idempotencyKey", { length: 128 }).notNull(),
+  operationalTaskId: integer("operationalTaskId"),
+  state: varchar("state", { length: 32 }).notNull().default("REGISTERED"),
+  approvalUserId: integer("approvalUserId"),
+  approvedAt: timestamp("approvedAt"),
+  dispatchRequestedAt: timestamp("dispatchRequestedAt"),
+  dispatchAttempts: integer("dispatchAttempts").notNull().default(0),
+  governanceEvidence: jsonb("governanceEvidence").notNull().default({}),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+}, (table) => ({
+  missionStateIdx: index("missionActionUnits_mission_state_idx").on(table.missionTaskId, table.state),
+  planVersionIdx: index("missionActionUnits_plan_version_idx").on(table.actionPlanVersionId),
+  operationalTaskIdx: index("missionActionUnits_operational_task_idx").on(table.operationalTaskId),
+  idempotencyUnique: uniqueIndex("missionActionUnits_idempotencyKey_unique").on(table.idempotencyKey),
+  missionVersionUnitUnique: uniqueIndex("missionActionUnits_mission_version_unit_unique").on(table.missionTaskId, table.actionPlanVersionId, table.unitId),
+  operationalTaskUnique: uniqueIndex("missionActionUnits_operationalTaskId_unique").on(table.operationalTaskId),
+  missionTaskFk: foreignKey({ columns: [table.missionTaskId], foreignColumns: [tasks.id] }).onDelete("restrict"),
+  actionPlanDocumentFk: foreignKey({ columns: [table.actionPlanDocumentId], foreignColumns: [missionDocuments.id] }).onDelete("restrict"),
+  actionPlanVersionFk: foreignKey({ columns: [table.actionPlanVersionId], foreignColumns: [missionDocumentVersions.id] }).onDelete("restrict"),
+  operationalTaskFk: foreignKey({ columns: [table.operationalTaskId], foreignColumns: [tasks.id] }).onDelete("restrict"),
+  approvalUserFk: foreignKey({ columns: [table.approvalUserId], foreignColumns: [users.id] }).onDelete("restrict"),
+}));
+
+export type MissionActionUnit = typeof missionActionUnits.$inferSelect;
+export type InsertMissionActionUnit = typeof missionActionUnits.$inferInsert;
+
+export const missionActionUnitsRelations = relations(missionActionUnits, ({ one }) => ({
+  mission: one(tasks, { fields: [missionActionUnits.missionTaskId], references: [tasks.id] }),
+  actionPlanDocument: one(missionDocuments, { fields: [missionActionUnits.actionPlanDocumentId], references: [missionDocuments.id] }),
+  actionPlanVersion: one(missionDocumentVersions, { fields: [missionActionUnits.actionPlanVersionId], references: [missionDocumentVersions.id] }),
+  operationalTask: one(tasks, { fields: [missionActionUnits.operationalTaskId], references: [tasks.id], relationName: "actionUnitOperationalTask" }),
+  approvalUser: one(users, { fields: [missionActionUnits.approvalUserId], references: [users.id] }),
+}));
+
 export const missionDocumentTypesRelations = relations(missionDocumentTypes, ({ many }) => ({
   documents: many(missionDocuments),
 }));
