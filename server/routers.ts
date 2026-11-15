@@ -472,7 +472,7 @@ export const appRouter = router({
               "## Campos preservados",
               "- Título: " + mission.title,
               "- Descrição: " + (mission.description?.trim() || "Não informada."),
-              "- Criada em: " + new Date(mission.createdAt).toISOString(),
+              "- Criada em: " + String(mission.createdAt),
               "- Criador registrado: " + (mission.creatorType === "system" ? "SOFIA" : "operador humano"),
             ].join("\n");
             await db.createMissionDocumentWithVersion({
@@ -602,7 +602,7 @@ export const appRouter = router({
               hasExternalExecution: Boolean(mission.manusTaskId),
             },
             childTasks: childSummaries,
-            documents: sourceDocuments.filter((document): document is NonNullable<typeof document> => document !== null),
+            documents: sourceDocuments.filter((document) => document !== null),
             messages,
             consolidatedReport,
           });
