@@ -347,4 +347,4 @@ Foi criado workflow dedicado para executar `pnpm check`, `pnpm test`, `pnpm buil
 - O plano explicita objetivo, entregáveis, unidades/dependências, agentes propostos, critérios de aceite, riscos e reversibilidade. Custos em créditos permanecem não estimados até existir modelo verificável.
 - A aprovação do proprietário é persistida como nova versão imutável APPROVED, vinculada ao hash da proposta exibida; a transação rejeita alterações concorrentes e fontes obsoletas.
 - Aprovação não despacha nem executa tarefas, não reserva agentes e não autoriza créditos. Execução por unidade e gates de risco/orçamento/permissão permanecem fases posteriores.
-- CI e migration 0011 em PostgreSQL descartável pendentes no momento do registro. Nenhuma migration persistente, merge, deploy ou execução externa. Task 20.3/Mateus intocada.
+- CI run [43668299189](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43668299189) SUCCESS: check, 47/47 testes, build e migrations 0010+0011 em PostgreSQL 16 descartável. Nenhuma migration persistente, merge, deploy ou execução externa. Task 20.3/Mateus intocada.
