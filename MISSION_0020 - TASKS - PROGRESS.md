@@ -409,5 +409,5 @@ O ARC/PGC atual é somente um protótipo conceitual rudimentar, sem enforcement 
 - Novo módulo `server/actionUnitGateEvidence.ts` revalida a versão APPROVED mais recente do ACTION_PLAN, o hash SHA-256 e a identidade Txx antes de derivar dependências.
 - Dependência só é VERIFIED com registro da mesma versão/hash, vínculo operacional, tarefa filha direta, mesmo proprietário e status DONE; ausência ou divergência gera BLOCKED com motivo.
 - A evidência é append-only, atribuída a SYSTEM e persistida no ledger 0013. A avaliação de unidade passa a consumir esse resultado e os dados de aprovação/idempotência já persistidos.
-- Testes unitários adicionados para dependências concluídas, ausentes, não materializadas, não DONE, fora do escopo e lista vazia. CI pendente.
+- Testes unitários adicionados para dependências concluídas, ausentes, não materializadas, não DONE, fora do escopo e lista vazia. CI [run 43719391912](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43719391912) SUCCESS: TypeScript, testes, build, migrations 0010–0013 e dispatch boundary em PostgreSQL 16 descartável.
 - Nenhum gate de risco, orçamento, permissão, executor ou adaptador foi liberado; nenhuma tarefa foi promovida, despachada ou executada. Sem DB persistente, merge/deploy, créditos ou chamada externa. Task 20.3/Mateus intocada.
