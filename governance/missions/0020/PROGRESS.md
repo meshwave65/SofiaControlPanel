@@ -54,3 +54,8 @@ O head `214c4d8` inclui proteção para que um eventual PR Preview não execute 
 Atenção operacional: as migrations 0010–0013 passaram em PostgreSQL descartável, mas não há comprovação de aplicação ao banco persistente. `scripts/ensure-database.mjs` não executa essas migrations. Identificar o projeto Supabase associado ao Render antes de aplicar DDL; não escolher por inferência.
 
 A cada etapa, persistir OR/PROGRESS/TASKS, distinguir CI de schema persistente/deploy/funcionalidade observada, não criar serviço pago, não contratar Browser Use, não tocar 20.3/Mateus e não executar chamadas externas/consumir créditos sem autorização própria.
+
+
+## PR #15 integrada — publicação iniciada
+
+PR #15 foi integrada em `main` por squash merge. Commit: `9e3f9bd3f7c09a7d2212bd7c1e30796cd020b78f`. Deploy manual do serviço Render Free iniciado com ID `dep-dbsvo1rbc2fs73cn5v1g`; estado inicial `build_in_progress`. Auto-deploy permanece desligado. O resultado do deploy e o comportamento em produção ainda não foram confirmados. Ver OR-20261115-0050.
