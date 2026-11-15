@@ -487,7 +487,7 @@ export const appRouter = router({
                 state: "PUBLISHED",
                 authorType,
                 authorUserId: authorType === "HUMAN" ? mission.createdBy : null,
-                authorAgentId: authorType === "SOFIA" ? mission.agentId ?? null : null,
+                authorAgentId: null,
                 provenance: { origin: "LEGACY_BACKFILL", source: "persisted_task_fields", reconstruction: true },
                 changeSummary: "Snapshot posterior dos campos históricos disponíveis; motivação original não presumida.",
                 publishedAt: new Date(),
@@ -1050,7 +1050,7 @@ export const appRouter = router({
           const task = await db.getTaskById(input.taskId);
           if (!task || task.createdBy !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND", message: "Somente o operador que criou a missão pode corrigir ou validar seu TR." });
           if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR pertence à missão principal; tarefas-filhas não podem alterá-lo." });
-          if (task.manusTaskId || task.manusStatus !== "awaiting_tr_validation") {
+          if (task.manusTaskId) {
             throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A revisão do TR só é permitida antes da primeira execução externa." });
           }
           const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, false);
@@ -1081,8 +1081,9 @@ export const appRouter = router({
         const task = await db.getTaskById(input.taskId);
         if (!task || task.createdBy !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND", message: "Somente o operador que criou a missão pode corrigir ou validar seu TR." });
         const pausedStatusId = await db.getTaskStatusIdByName("PAUSED");
-        if (task.statusId !== pausedStatusId || task.manusTaskId || task.manusStatus !== "awaiting_tr_validation") {
-          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A regeneração do TR só pode ocorrer enquanto a missão estiver no gate inicial de validação." });
+        const stagedStatusId = await db.getTaskStatusIdByName("STAGED");
+        if (![pausedStatusId, stagedStatusId].includes(task.statusId) || task.manusTaskId) {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A regeneração do TR exige missão PAUSED ou STAGED ainda sem execução externa." });
         }
         if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR pertence à missão principal; tarefas-filhas não podem alterá-lo." });
         const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, false);
