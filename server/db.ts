@@ -2030,16 +2030,15 @@ export async function approveMissionActionPlanUnit(input: {
       throw new Error("Somente o proprietário da missão principal pode aprovar esta unidade.");
     }
 
-    const [unit] = await tx.select().from(missionActionUnits)
+    const [planDocument] = await tx.select({ id: missionDocuments.id })
+      .from(missionDocuments)
+      .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
       .where(and(
-        eq(missionActionUnits.missionTaskId, input.missionTaskId),
-        eq(missionActionUnits.unitId, input.unitId),
-      )).for("update").limit(1);
-    if (!unit) throw new Error("Unidade não registrada. Registre o ACTION_PLAN aprovado primeiro.");
-    if (unit.state !== "AWAITING_APPROVAL") {
-      throw new Error("A unidade não está aguardando aprovação ou já foi processada.");
-    }
-
+        eq(missionDocuments.taskId, input.missionTaskId),
+        eq(missionDocuments.documentKey, "ACTION_PLAN"),
+        eq(missionDocumentTypes.typeKey, "ACTION_PLAN"),
+      )).limit(1);
+    if (!planDocument) throw new Error("A missão não possui ACTION_PLAN.");
     const [latest] = await tx.select({
       id: missionDocumentVersions.id,
       version: missionDocumentVersions.version,
@@ -2047,16 +2046,28 @@ export async function approveMissionActionPlanUnit(input: {
       content: missionDocumentVersions.content,
       contentHash: missionDocumentVersions.contentHash,
     }).from(missionDocumentVersions)
-      .where(eq(missionDocumentVersions.documentId, unit.actionPlanDocumentId))
+      .where(eq(missionDocumentVersions.documentId, planDocument.id))
       .orderBy(desc(missionDocumentVersions.version)).limit(1);
     const actualHash = latest ? createHash("sha256").update(latest.content, "utf8").digest("hex") : "";
-    if (!latest || latest.id !== unit.actionPlanVersionId
+    if (!latest || latest.state !== "APPROVED"
       || latest.version !== input.expectedVersion
-      || latest.version !== unit.actionPlanVersionNumber
-      || latest.state !== "APPROVED"
-      || actualHash !== unit.actionPlanContentHash
+      || actualHash !== latest.contentHash
       || actualHash !== input.expectedContentHash) {
       throw new Error("A versão do ACTION_PLAN mudou ou não confere; a aprovação individual foi bloqueada.");
+    }
+
+    const [unit] = await tx.select().from(missionActionUnits)
+      .where(and(
+        eq(missionActionUnits.missionTaskId, input.missionTaskId),
+        eq(missionActionUnits.actionPlanVersionId, latest.id),
+        eq(missionActionUnits.unitId, input.unitId),
+      )).for("update").limit(1);
+    if (!unit) throw new Error("Unidade não registrada para a versão atual. Registre o ACTION_PLAN aprovado primeiro.");
+    if (unit.state !== "AWAITING_APPROVAL") {
+      throw new Error("A unidade não está aguardando aprovação ou já foi processada.");
+    }
+    if (latest.version !== unit.actionPlanVersionNumber || actualHash !== unit.actionPlanContentHash) {
+      throw new Error("A identidade persistida da unidade não corresponde ao ACTION_PLAN vigente.");
     }
 
     const approvedAt = new Date();
@@ -2098,6 +2109,22 @@ export async function listMissionActionPlanUnits(missionTaskId: number, ownerId:
   if (!mission || mission.parentTaskId !== null || mission.createdBy !== ownerId) {
     throw new Error("Missão não encontrada ou sem permissão de acesso.");
   }
+  const [planDocument] = await database.select({ id: missionDocuments.id })
+    .from(missionDocuments)
+    .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
+    .where(and(
+      eq(missionDocuments.taskId, missionTaskId),
+      eq(missionDocuments.documentKey, "ACTION_PLAN"),
+      eq(missionDocumentTypes.typeKey, "ACTION_PLAN"),
+    )).limit(1);
+  if (!planDocument) return [];
+  const [latest] = await database.select({
+    id: missionDocumentVersions.id,
+    state: missionDocumentVersions.state,
+  }).from(missionDocumentVersions)
+    .where(eq(missionDocumentVersions.documentId, planDocument.id))
+    .orderBy(desc(missionDocumentVersions.version)).limit(1);
+  if (!latest || latest.state !== "APPROVED") return [];
   return database.select({
     id: missionActionUnits.id,
     unitId: missionActionUnits.unitId,
@@ -2106,7 +2133,10 @@ export async function listMissionActionPlanUnits(missionTaskId: number, ownerId:
     approvalUserId: missionActionUnits.approvalUserId,
     approvedAt: missionActionUnits.approvedAt,
   }).from(missionActionUnits)
-    .where(eq(missionActionUnits.missionTaskId, missionTaskId))
+    .where(and(
+      eq(missionActionUnits.missionTaskId, missionTaskId),
+      eq(missionActionUnits.actionPlanVersionId, latest.id),
+    ))
     .orderBy(asc(missionActionUnits.unitId));
 }
 
