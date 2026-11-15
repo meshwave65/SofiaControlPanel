@@ -97,4 +97,24 @@ O fluxo registra todas as unidades da versão APPROVED vigente em `missionAction
 
 A aprovação individual confirma apenas a intenção/escopo daquela unidade. Não satisfaz os gates de dependências, risco/política, orçamento, permissão, elegibilidade do executor ou adaptador e não altera estado de tarefa. A UI permite registrar o conjunto e aprovar Txx individualmente, mantendo a pré-avaliação de execução separada. Nenhuma tarefa operacional é criada neste incremento.
 
-A validação automatizada deste incremento ainda está pendente; ver OR-20261115-0039. Migration 0012 não aplicada em banco persistente.
+A validação integral de AC-021 permanece pendente: o job PostgreSQL do workflow #283 passou, mas o job de aplicação falhou no TypeScript antes dos testes/build. A correção posterior foi commitada; não foi possível confirmar execução verde no commit corrigido. Ver OR-20261115-0039. Migration 0012 não aplicada em banco persistente.
+
+
+## 10. Materialização estrutural em PAUSED (AC-022 / OR-20261115-0040)
+
+A mutation `tasks.documents.materializeApprovedActionPlanUnits` materializa somente unidades com aprovação individual persistida pelo proprietário. A função server-side:
+
+- trava a missão raiz e o documento ACTION_PLAN para serializar a operação contra materializações concorrentes e revisões do plano;
+- revalida ownership, versão APPROVED vigente, hash SHA-256, contrato estruturado e correspondência integral entre unidades do plano e registros persistidos;
+- cria cada tarefa-filha em `PAUSED`, com `agentId = NULL`, sem pinagem e sem execução externa;
+- grava `operationalTaskId` e evidência de materialização na mesma transação, mantendo a unidade no estado `APPROVED`;
+- é idempotente: vínculos já existentes são retornados e não geram uma segunda tarefa;
+- reverte toda a operação se uma tarefa ou vínculo falhar.
+
+A migration 0012 valida imediatamente qualquer `operationalTaskId` preenchido: a tarefa deve existir, pertencer ao mesmo proprietário e ser filha direta da missão raiz, mesmo quando a unidade continua APPROVED.
+
+A UI mostra a ação de materialização e o ID da tarefa-filha. A mensagem de estado deixa explícito que a tarefa está PAUSED, sem executor e sem dispatch.
+
+O teste PostgreSQL descartável agora verifica que o vínculo de uma tarefa PAUSED mantém a unidade APPROVED e que a tarefa não pode chegar a STAGED antes da transição independente para READY_FOR_DISPATCH. O caminho de produção continua fechado: AC-022 não promove estados, não atribui agentes, não faz claim, não chama Manus e não consome créditos.
+
+Validação TypeScript/testes/build e o job PostgreSQL do head atualizado ainda pendentes. AC-021 também permanece sem CI integral confirmado; ver OR-20261115-0039. Nenhuma migration persistente, tarefa real, merge ou deploy.
