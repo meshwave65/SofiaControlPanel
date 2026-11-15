@@ -15,6 +15,7 @@ import { buildSofiaConversation, extractTextContent, normalizeOperatorMessage, O
 import { validateMissionBlueprintContent } from "./missionBlueprint";
 import { validateActionPlan, ActionPlanSchema } from "./actionPlan";
 import { evaluateExecutionGate } from "./executionGovernance";
+import { refreshActionUnitDependencyEvidence } from "./actionUnitGateEvidence";
 
 async function generateInitialMissionTR(title: string, description?: string | null): Promise<string> {
   const response = await invokeLLM({
@@ -565,10 +566,20 @@ export const appRouter = router({
             }
           }
 
+          const dependencyEvidence = await refreshActionUnitDependencyEvidence({
+            missionTaskId: missionRootId,
+            ownerId: ctx.user.id,
+            actionPlanDocumentId: actionPlanDocument.id,
+            actionPlanVersionId: planVersionResult.version.id,
+            actionPlanVersionNumber: planVersionResult.version.version,
+            actionPlanContentHash: actualPlanHash,
+            unitId: unit.id,
+          });
+
           const gate = evaluateExecutionGate({
             planApproved: actionPlanDocument.latestVersion.state === "APPROVED",
             sourceVersionsCurrent,
-            dependenciesCompleted: unit.dependsOn.length === 0 ? true : null,
+            dependenciesCompleted: dependencyEvidence.decision === "VERIFIED",
             riskClass: null,
             maximumAllowedRisk: null,
             estimatedCredits: unit.estimatedCredits,
@@ -576,9 +587,9 @@ export const appRouter = router({
             budgetEstimateVerified: false,
             permissionGranted: false,
             agentEligible: false,
-            idempotencyKey: null,
+            idempotencyKey: dependencyEvidence.idempotencyKey,
             executionAdapterAvailable: false,
-            explicitUnitApproval: false,
+            explicitUnitApproval: dependencyEvidence.unitApproved,
           });
 
           return {
@@ -594,6 +605,7 @@ export const appRouter = router({
               estimatedCredits: unit.estimatedCredits,
             },
             gate,
+            dependencyEvidence,
             limitations: [
               "A avaliação é somente leitura e não cria autorização nem execução.",
               "Dependências do plano ainda não possuem vínculo persistido com tarefas operacionais; dependências não vazias permanecem bloqueadas.",
