@@ -1,4 +1,4 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { getDb } from "./db";
 import {
   missionActionUnitGateEvidence,
@@ -99,16 +99,13 @@ export async function refreshActionUnitDependencyEvidence(input: {
 
   if (!unit) throw new Error("A unidade Txx não está registrada na versão/hash atual do ACTION_PLAN.");
 
-  const [planVersion] = await database.execute(
-    // Keep the content/version binding exact; the router has already checked the SHA-256.
-    (await import("drizzle-orm")).sql`
-      SELECT v.content, v.state, v.version
-      FROM sofia."missionDocumentVersions" v
-      WHERE v.id = ${input.actionPlanVersionId}
-        AND v."documentId" = ${input.actionPlanDocumentId}
-      LIMIT 1
-    `
-  ) as any;
+  const [planVersion] = await database.execute(sql`
+    SELECT v.content, v.state, v.version
+    FROM sofia."missionDocumentVersions" v
+    WHERE v.id = ${input.actionPlanVersionId}
+      AND v."documentId" = ${input.actionPlanDocumentId}
+    LIMIT 1
+  `) as any;
 
   if (!planVersion
     || Number(planVersion.version) !== input.actionPlanVersionNumber
