@@ -10,6 +10,7 @@ type ManusTaskResponse = {
     id?: string;
     status?: string;
     credit_usage?: number;
+    has_running_background_jobs?: boolean;
   };
   error?: { code?: string; message?: string };
 };
@@ -76,6 +77,57 @@ export async function createManusTask(task: NonNullable<LocalTask>, continuation
   });
 
   return { manusTaskId, status: "running" as const };
+}
+
+async function getManusTaskDetail(task: NonNullable<LocalTask>, token: string) {
+  if (!task.manusTaskId) throw new Error("A tarefa não possui ID de execução Manus.");
+  const response = await manusRequest<ManusTaskResponse>(
+    token,
+    `/task.detail?task_id=${encodeURIComponent(task.manusTaskId)}`,
+    { method: "GET" },
+  );
+  if (!response.task?.status) throw new Error("A Manus não retornou o estado atual da execução.");
+  return response.task;
+}
+
+/**
+ * Interrompe a execução externa e confirma o estado via task.detail.
+ * A pausa só é considerada concluída quando stopped e has_running_background_jobs=false.
+ */
+export async function stopManusTask(task: NonNullable<LocalTask>, allowAlreadyStopped = false) {
+  if (!task.agentId || !task.manusTaskId) throw new Error("A tarefa não possui executor e execução Manus atribuídos.");
+  const credentials = await db.getManusCredentialsForAgent(task.agentId);
+  if (!credentials?.manusToken) throw new Error("O agente não possui uma API key Manus configurada.");
+
+  const before = await getManusTaskDetail(task, credentials.manusToken);
+  if (before.status === "stopped" && allowAlreadyStopped) {
+    return {
+      status: "stopped" as const,
+      hasRunningBackgroundJobs: typeof before.has_running_background_jobs === "boolean"
+        ? before.has_running_background_jobs
+        : null,
+    };
+  }
+  if (before.status !== "running") {
+    throw new Error(`A execução Manus não está em estado running (estado atual: ${before.status}). Atualize a missão antes de tentar pausar.`);
+  }
+
+  await manusRequest<ManusTaskResponse>(credentials.manusToken, "/task.stop", {
+    method: "POST",
+    body: JSON.stringify({ task_id: task.manusTaskId }),
+  });
+
+  const after = await getManusTaskDetail(task, credentials.manusToken);
+  if (after.status !== "stopped") {
+    throw new Error(`A Manus aceitou a solicitação, mas o estado confirmado ainda é ${after.status}. A missão local não foi marcada como pausada.`);
+  }
+
+  return {
+    status: "stopped" as const,
+    hasRunningBackgroundJobs: typeof after.has_running_background_jobs === "boolean"
+      ? after.has_running_background_jobs
+      : null,
+  };
 }
 
 export async function sendManusMessage(task: NonNullable<LocalTask>, text: string) {
@@ -232,6 +284,37 @@ async function syncRunningTask(task: NonNullable<LocalTask>) {
   if (!externalTask?.status) return null;
 
   const normalizedStatus = externalTask.status.toLowerCase();
+
+  // Uma pausa solicitada pelo operador não pode ser confundida com conclusão.
+  // Só finaliza em PAUSED quando a Manus confirma stopped e nenhum job em background.
+  if (task.manusStatus === "manual_pause_pending") {
+    if (normalizedStatus === "stopped" && externalTask.has_running_background_jobs === false) {
+      const pausedStatusId = await db.getTaskStatusIdByName("PAUSED");
+      await db.updateTaskExecution(task.id, {
+        manusStatus: "stopped",
+        creditsUsed: typeof externalTask.credit_usage === "number" ? externalTask.credit_usage : undefined,
+        completedAt: null,
+      });
+      await db.updateTaskStatus(task.id, pausedStatusId);
+      return { taskId: task.id, manusStatus: "stopped", creditsUsed: externalTask.credit_usage ?? null };
+    }
+    if (normalizedStatus === "error") {
+      const failStatusId = await db.getTaskStatusIdByName("FAIL");
+      await db.updateTaskExecution(task.id, {
+        manusStatus: "error",
+        completedAt: new Date(),
+      });
+      await db.updateTaskStatus(task.id, failStatusId);
+      return { taskId: task.id, manusStatus: "error", creditsUsed: externalTask.credit_usage ?? null };
+    }
+    await db.updateTaskExecution(task.id, {
+      manusStatus: "manual_pause_pending",
+      creditsUsed: typeof externalTask.credit_usage === "number" ? externalTask.credit_usage : undefined,
+      completedAt: null,
+    });
+    return { taskId: task.id, manusStatus: "manual_pause_pending", creditsUsed: externalTask.credit_usage ?? null };
+  }
+
   let isDone = normalizedStatus === "stopped";
   const isFailed = normalizedStatus === "error";
   let waitingForCredits = false;
