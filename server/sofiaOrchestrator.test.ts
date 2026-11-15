@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const dbMock = vi.hoisted(() => ({
   getTaskById: vi.fn(),
+  getAllTasksGlobal: vi.fn(),
+  getAllAgentsGlobal: vi.fn(),
   getTaskStatusIdByName: vi.fn(),
   getTaskStatusNameById: vi.fn(),
   hasExecutionReadyMissionDocuments: vi.fn(),
@@ -20,6 +22,7 @@ const dbMock = vi.hoisted(() => ({
 
 const manusMock = vi.hoisted(() => ({
   createManusTask: vi.fn(),
+  sendManusMessage: vi.fn(),
   syncAgentCredits: vi.fn(),
 }));
 
@@ -27,6 +30,32 @@ vi.mock("./db", () => dbMock);
 vi.mock("./manusExecutionService", () => manusMock);
 
 import { SofiaOrchestrator } from "./sofiaOrchestrator";
+
+describe("SofiaOrchestrator.resumeCreditBlockedTasks", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    dbMock.getAllTasksGlobal.mockResolvedValue([
+      { id: 42, manusStatus: "waiting_credit", agentId: 7, createdBy: 5 },
+    ]);
+    dbMock.getTaskStatusIdByName.mockResolvedValue(2);
+  });
+
+  it("does not resume a credit-blocked ACTION_PLAN unit without current persisted authorization", async () => {
+    dbMock.inspectTaskDispatchAuthorization.mockResolvedValueOnce({
+      authorized: false,
+      requiresActionPlanUnit: true,
+      idempotencyKey: null,
+      reason: "plano foi substituído",
+    });
+
+    const result = await SofiaOrchestrator.resumeCreditBlockedTasks();
+
+    expect(result).toEqual([]);
+    expect(dbMock.getAllAgentsGlobal).not.toHaveBeenCalled();
+    expect(manusMock.sendManusMessage).not.toHaveBeenCalled();
+    expect(manusMock.createManusTask).not.toHaveBeenCalled();
+  });
+});
 
 describe("SofiaOrchestrator.processTask", () => {
   beforeEach(() => {
