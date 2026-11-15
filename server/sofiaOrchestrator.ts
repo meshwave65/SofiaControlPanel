@@ -18,6 +18,11 @@ export class SofiaOrchestrator {
     const progressStatusId = await db.getTaskStatusIdByName(STATUS_PROGRESS);
     const results: Array<{ taskId: number; action: string; agentId: number }> = [];
     for (const task of waiting) {
+      const dispatchAuthorization = await db.inspectTaskDispatchAuthorization(task.id);
+      if (!dispatchAuthorization.authorized) {
+        console.warn(`[Orchestrator] Retomada bloqueada para tarefa ${task.id}: ${dispatchAuthorization.reason ?? "unidade ACTION_PLAN sem autorização vigente"}.`);
+        continue;
+      }
       if (!(await db.hasExecutionReadyMissionDocuments(task.id))) {
         console.warn(`[Orchestrator] Retomada bloqueada para missão ${task.id}: TR/Blueprint não estão elegíveis.`);
         continue;
