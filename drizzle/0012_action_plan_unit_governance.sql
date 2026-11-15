@@ -24,7 +24,13 @@ CREATE TABLE IF NOT EXISTS "sofia"."missionActionUnits" (
   CONSTRAINT "missionActionUnits_mission_version_unit_unique"
     UNIQUE ("missionTaskId", "actionPlanVersionId", "unitId"),
   CONSTRAINT "missionActionUnits_unit_id_format"
-    CHECK ("unitId" ~ '^T[0-9]{2}
+    CHECK ("unitId" ~ '^T[0-9]{2}$'),
+  CONSTRAINT "missionActionUnits_hash_format"
+    CHECK ("actionPlanContentHash" ~ '^[a-f0-9]{64}$'),
+  CONSTRAINT "missionActionUnits_idempotency_length"
+    CHECK (char_length("idempotencyKey") BETWEEN 16 AND 128),
+  CONSTRAINT "missionActionUnits_title_nonempty"
+    CHECK (length(trim("unitTitle")) > 0),
   CONSTRAINT "missionActionUnits_state_check"
     CHECK ("state" IN ('REGISTERED', 'AWAITING_APPROVAL', 'APPROVED', 'READY_FOR_DISPATCH', 'DISPATCHED', 'BLOCKED', 'CANCELLED')),
   CONSTRAINT "missionActionUnits_approval_pair_check"
