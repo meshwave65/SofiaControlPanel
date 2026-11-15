@@ -1,6 +1,15 @@
 import postgres from "postgres";
 import { readFile } from "node:fs/promises";
 
+// Render PR previews copy the base service's environment, including DATABASE_URL.
+// Never run startup DDL or reinstall dispatch triggers against the base database.
+if (process.env.IS_PULL_REQUEST === "true") {
+  console.log(
+    "[Database] Render PR preview detected; skipping database bootstrap to protect the shared database.",
+  );
+  process.exit(0);
+}
+
 const url = process.env.DATABASE_URL || process.env.VITE_DATABASE_URL;
 if (!url) {
   console.error("[Database] DATABASE_URL is required before starting SofiaControlPanel");
