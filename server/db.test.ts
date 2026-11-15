@@ -56,6 +56,9 @@ describe("Database Helpers - Type Validation", () => {
     expect(typeof db.createMissionDocumentRevision).toBe("function");
     expect(typeof db.approveMissionActionPlanVersion).toBe("function");
     expect(typeof db.inspectTaskDispatchAuthorization).toBe("function");
+    expect(typeof db.registerMissionActionPlanUnits).toBe("function");
+    expect(typeof db.approveMissionActionPlanUnit).toBe("function");
+    expect(typeof db.listMissionActionPlanUnits).toBe("function");
   });
 });
 
