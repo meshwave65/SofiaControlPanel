@@ -77,12 +77,34 @@ export default function TaskDetail() {
   );
   const [selectedDocumentId, setSelectedDocumentId] = useState<number | null>(null);
   const [selectedVersionNumber, setSelectedVersionNumber] = useState<number | null>(null);
+  const [selectedActionUnitId, setSelectedActionUnitId] = useState<string | null>(null);
   const [trCorrection, setTrCorrection] = useState("");
   const documents = documentsQuery.data ?? [];
   const selectedDocument = documents.find((document) => document.id === selectedDocumentId)
     ?? documents.find((document) => document.typeKey === "TR" && document.documentKey === "TR")
     ?? null;
   const selectedVersion = selectedVersionNumber ?? selectedDocument?.latestVersion?.version ?? 0;
+  const actionPlanUnits = (() => {
+    if (selectedDocument?.typeKey !== "ACTION_PLAN") return [];
+    try {
+      const parsed = JSON.parse(selectedDocumentVersionQuery.data?.version.content ?? "{}");
+      return Array.isArray(parsed.tasks) ? parsed.tasks : [];
+    } catch {
+      return [];
+    }
+  })();
+  const activeActionUnitId = selectedActionUnitId ?? actionPlanUnits[0]?.id ?? "T01";
+  const actionUnitGateQuery = trpc.tasks.documents.evaluateActionPlanUnit.useQuery(
+    { taskId, unitId: activeActionUnitId },
+    {
+      enabled: canLoadTask
+        && selectedDocument?.typeKey === "ACTION_PLAN"
+        && selectedDocument.latestVersion?.state === "APPROVED"
+        && selectedVersion === selectedDocument.latestVersion.version
+        && actionPlanUnits.length > 0,
+      retry: false,
+    },
+  );
   const trDocument = documents.find((document) => document.typeKey === "TR" && document.documentKey === "TR");
   const blueprintDocument = documents.find((document) => document.typeKey === "BLUEPRINT" && document.documentKey === "BLUEPRINT");
   const blueprintReady = Boolean(
@@ -510,6 +532,53 @@ export default function TaskDetail() {
                   {selectedDocument.typeKey === "ACTION_PLAN" && selectedDocument.latestVersion?.state === "APPROVED" && (
                     <div className="rounded-md border border-green-500/30 p-3 text-sm text-green-600">
                       Aprovação humana registrada. O plano permanece sem execução; cada ação operacional exige seu próprio gate governado.
+                    </div>
+                  )}
+
+                  {selectedDocument.typeKey === "ACTION_PLAN"
+                    && selectedDocument.latestVersion?.state === "APPROVED"
+                    && selectedVersion === selectedDocument.latestVersion.version && actionPlanUnits.length > 0 && (
+                    <div className="space-y-3 rounded-md border p-4">
+                      <div>
+                        <p className="text-sm font-semibold">Pré-avaliação de governança por unidade</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Consulta somente leitura. Nenhuma tarefa é criada, nenhum agente é reservado e nenhum dispatch é iniciado.
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {actionPlanUnits.map((unit: any) => (
+                          <Button
+                            key={unit.id}
+                            size="sm"
+                            variant={activeActionUnitId === unit.id ? "default" : "outline"}
+                            onClick={() => setSelectedActionUnitId(unit.id)}
+                          >
+                            {unit.id}
+                          </Button>
+                        ))}
+                      </div>
+                      {actionUnitGateQuery.isLoading && <p className="text-xs text-muted-foreground">Avaliando pré-condições...</p>}
+                      {actionUnitGateQuery.isError && (
+                        <p className="text-sm text-destructive">{actionUnitGateQuery.error.message}</p>
+                      )}
+                      {actionUnitGateQuery.data && (
+                        <div className="space-y-2">
+                          <p className="text-sm font-semibold">
+                            {actionUnitGateQuery.data.unit.id} — {actionUnitGateQuery.data.unit.title}
+                          </p>
+                          <p className="text-xs font-semibold text-destructive">
+                            Decisão: {actionUnitGateQuery.data.gate.decision}
+                          </p>
+                          <ul className="list-disc space-y-1 pl-5 text-xs text-muted-foreground">
+                            {actionUnitGateQuery.data.gate.blockers.map((blocker: any) => (
+                              <li key={blocker.code}><strong>{blocker.code}</strong>: {blocker.detail}</li>
+                            ))}
+                          </ul>
+                          <p className="text-xs text-muted-foreground">
+                            Esta avaliação não constitui autorização. A aprovação individual e o gate de dispatch permanecem etapas separadas.
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )}
                   {selectedDocument.typeKey === "TR" && selectedDocument.latestVersion?.state === "DRAFT" && (
