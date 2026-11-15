@@ -566,15 +566,33 @@ export const appRouter = router({
             }
           }
 
-          const dependencyEvidence = await refreshActionUnitDependencyEvidence({
-            missionTaskId: missionRootId,
-            ownerId: ctx.user.id,
-            actionPlanDocumentId: actionPlanDocument.id,
-            actionPlanVersionId: planVersionResult.version.id,
-            actionPlanVersionNumber: planVersionResult.version.version,
-            actionPlanContentHash: actualPlanHash,
-            unitId: unit.id,
-          });
+          const registeredUnits = actionPlanDocument.latestVersion.state === "APPROVED"
+            ? await db.listMissionActionPlanUnits(missionRootId, ctx.user.id)
+            : [];
+          const registeredUnit = registeredUnits.find((candidate) => candidate.unitId === unit.id);
+          const dependencyEvidence = registeredUnit
+            ? await refreshActionUnitDependencyEvidence({
+              missionTaskId: missionRootId,
+              ownerId: ctx.user.id,
+              actionPlanDocumentId: actionPlanDocument.id,
+              actionPlanVersionId: planVersionResult.version.id,
+              actionPlanVersionNumber: planVersionResult.version.version,
+              actionPlanContentHash: actualPlanHash,
+              unitId: unit.id,
+            })
+            : {
+              evidenceId: null,
+              decision: unit.dependsOn.length === 0 ? "VERIFIED" as const : "BLOCKED" as const,
+              dependencies: unit.dependsOn.map((dependencyId) => ({
+                unitId: dependencyId,
+                operationalTaskId: null,
+                taskStatus: null,
+                verified: false,
+                reason: "action_unit_not_registered",
+              })),
+              unitApproved: false,
+              idempotencyKey: null,
+            };
 
           const gate = evaluateExecutionGate({
             planApproved: actionPlanDocument.latestVersion.state === "APPROVED",
