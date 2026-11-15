@@ -66,3 +66,20 @@ Portanto, inserir uma filha já STAGED pode despachar automaticamente antes de q
 - Troca de plano/Blueprint invalida autorização não iniciada e preserva trilha histórica.
 - Atribuição do executor é específica à unidade, respeita pinagem e é validada no claim atômico.
 - Nenhuma aprovação do plano pai libera todas as unidades automaticamente.
+
+
+## 8. Identidade persistente e barreira de dispatch (AC-020 / OR-20261115-0038)
+
+A migration 0012 introduz `missionActionUnits`, com vínculo à missão raiz, ACTION_PLAN e versão/hash exatos, identificador/título Txx, idempotency key, tarefa operacional, estado e aprovação humana. A identidade do plano/unidade/chave é imutável; constraints impedem duplicação de unidade por versão, chave ou tarefa operacional. A tabela é server-only sob RLS.
+
+O trigger de validação da tabela confirma que a versão referenciada é a versão APPROVED mais recente do ACTION_PLAN, que o hash e o conteúdo Txx correspondem exatamente, que a aprovação é do proprietário e que a tarefa operacional, quando vinculada, é filha direta da mesma missão.
+
+A defesa foi integrada aos quatro pontos de execução:
+- SQL trigger `tasks_dispatch_staged`: se houver ACTION_PLAN vigente, bloqueia a raiz e qualquer filha sem registro de unidade aprovado, vinculado à tarefa e em `READY_FOR_DISPATCH`, antes de `net.http_post`.
+- Endpoint interno: recebe a chave de idempotência do callback autenticado.
+- Orquestrador: revalida o registro e exige a chave persistida para ACTION_PLAN; chamada de UI/tRPC sem chave não inicia execução.
+- Repositório: verifica versão/hash, vínculo Txx/título e estado do registro antes de autorizar o início.
+
+`ensure-database.mjs` continua instalando a migration 0003; por isso a própria definição reinstalada do trigger foi atualizada, não apenas uma migration avulsa. Se o catálogo documental estiver presente mas a tabela 0012 ainda não estiver instalada, ACTION_PLAN falha fechado. Missões legadas sem ACTION_PLAN preservam o caminho anterior.
+
+O incremento não cria nem aprova registros de unidade e não cria tarefas operacionais. `READY_FOR_DISPATCH` só poderá ser atribuído por fluxo futuro que conclua dependências, risco, orçamento, permissão, elegibilidade específica, adaptador e aprovação humana individual. Nenhum dispatch foi realizado.
