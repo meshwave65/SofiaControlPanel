@@ -2337,6 +2337,7 @@ export async function listMissionActionPlanUnits(missionTaskId: number, ownerId:
     state: missionActionUnits.state,
     approvalUserId: missionActionUnits.approvalUserId,
     approvedAt: missionActionUnits.approvedAt,
+    operationalTaskId: missionActionUnits.operationalTaskId,
   }).from(missionActionUnits)
     .where(and(
       eq(missionActionUnits.missionTaskId, missionTaskId),
