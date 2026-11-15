@@ -89,3 +89,12 @@ A retomada de tarefas bloqueadas por créditos também revalida a autorização 
 A migration 0012 também define uma máquina de estados monotônica: `REGISTERED → AWAITING_APPROVAL → APPROVED → READY_FOR_DISPATCH → DISPATCHED`, com saídas controladas para `BLOCKED/CANCELLED`. Não se insere uma unidade diretamente aprovada/pronta; a aprovação é registrada depois da criação e vinculada ao proprietário. Depois de definido, o vínculo à tarefa operacional não pode ser removido ou reatribuído. A tarefa deve ser filha direta da missão raiz, condição repetida no repositório e no trigger 0003.
 
 A migration valida formato do hash SHA-256, comprimento da idempotency key, título não vazio, unicidade e ownership. A query de autorização também falha fechado se existir documento ACTION_PLAN sem versão persistida. CI final [43699884914](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43699884914): TypeScript, testes, build, migrations 0010–0012, instalação do trigger e teste de barreira PostgreSQL 16 descartável passaram.
+
+
+## 9. Registro e aprovação individual (AC-021 / OR-20261115-0039)
+
+O fluxo registra todas as unidades da versão APPROVED vigente em `missionActionUnits`, com chave de idempotência por unidade e evidência da versão/hash de origem. O registro inicial fica em `AWAITING_APPROVAL`; somente o proprietário da missão raiz pode aprovar uma unidade individual. A transação revalida ownership, versão mais recente, estado APPROVED e hash SHA-256 antes de persistir `approvalUserId`, `approvedAt` e a evidência de aprovação.
+
+A aprovação individual confirma apenas a intenção/escopo daquela unidade. Não satisfaz os gates de dependências, risco/política, orçamento, permissão, elegibilidade do executor ou adaptador e não altera estado de tarefa. A UI permite registrar o conjunto e aprovar Txx individualmente, mantendo a pré-avaliação de execução separada. Nenhuma tarefa operacional é criada neste incremento.
+
+A validação automatizada deste incremento ainda está pendente; ver OR-20261115-0039. Migration 0012 não aplicada em banco persistente.
