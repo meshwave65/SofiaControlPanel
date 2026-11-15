@@ -356,5 +356,5 @@
 - Criado motor determinístico fail-closed para verificar plano aprovado, fontes atuais, dependências, risco/política, orçamento, permissões, elegibilidade específica, idempotência e adaptador.
 - Nova query read-only `evaluateActionPlanUnit` verifica ownership, unidade e cadeia de versões TR/Blueprint; UI permite selecionar unidade e ver bloqueios.
 - Identificado risco arquitetural crítico: trigger `tasks_dispatch_staged` da migration 0003 faz HTTP dispatch quando tarefa é inserida/alterada para STAGED; `ensure-database.mjs` instala o trigger no startup. Portanto, criar filha STAGED já pode disparar execução. Materialização de unidades fica bloqueada até a defesa transacional/SQL completa.
-- CI run [43669315311](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43669315311): SUCCESS — TypeScript, 53/53 testes (9 arquivos), build e migrations 0010+0011 em PostgreSQL 16 descartável.
+- CI run [43669350296](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43669350296): SUCCESS no código final — TypeScript, 53/53 testes (9 arquivos), build e migrations 0010+0011 em PostgreSQL 16 descartável.
 - Nenhuma subtarefa criada, status alterado, trigger/migration modificada, dispatch, execução, DB persistente, merge ou deploy. Task 20.3/Mateus intocada.
