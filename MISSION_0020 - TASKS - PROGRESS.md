@@ -425,3 +425,11 @@ O ARC/PGC atual é somente um protótipo conceitual rudimentar, sem enforcement 
 - Nenhuma chamada real Manus/LLM, mensagem externa, dispatch, consumo de créditos, migration persistente, merge, deploy ou restart. Task 20.3/Mateus intocada.
 - Próxima etapa: implementar controles de ciclo de vida no SCP, preservando identidade/contexto da missão e permitindo substituição do executor sem perda de continuidade.
 
+
+
+### Diretriz de execução atualizada — OR-20261115-0050
+- Método anterior de aguardar preview/QA visual antes de merge foi substituído por decisão explícita do operador: integrar pela PR existente para `main`, publicar no Render Free e corrigir com base no comportamento real.
+- PR #15 já aponta para `main`; não criar PR redundante. Auto-deploy permanece OFF; deploy manual após merge.
+- Browser Use e serviços pagos estão fora do processo. CI é evidência auxiliar, não gate artificial para interromper a implementação.
+- Registrar cada commit/alteração/resultado em OR, PROGRESS e TASKS. Separar CI, migration persistente, deploy e teste funcional real.
+- Verificar projeto Supabase efetivamente conectado antes de aplicar migrations 0010–0013; não inferir projeto pelo nome. Task 20.3/Mateus permanece intocada.
