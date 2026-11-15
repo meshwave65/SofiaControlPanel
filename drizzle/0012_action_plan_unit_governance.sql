@@ -67,6 +67,13 @@ DECLARE
   plan_type text;
   latest_plan_version_id integer;
 BEGIN
+  IF TG_OP = 'INSERT'
+     AND (NEW."state" NOT IN ('REGISTERED', 'AWAITING_APPROVAL')
+       OR NEW."approvalUserId" IS NOT NULL
+       OR NEW."approvedAt" IS NOT NULL) THEN
+    RAISE EXCEPTION 'Action-plan units must be registered before individual approval';
+  END IF;
+
   IF TG_OP = 'UPDATE' THEN
     IF OLD."missionTaskId" IS DISTINCT FROM NEW."missionTaskId"
        OR OLD."actionPlanDocumentId" IS DISTINCT FROM NEW."actionPlanDocumentId"
