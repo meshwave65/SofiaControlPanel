@@ -107,14 +107,14 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-background text-foreground">
         <header className="border-b-2 border-accent/30 px-6 py-6 sm:px-10">
-          <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="h-3 w-3 bg-accent animate-pulse" />
-              <span className="text-lg font-black uppercase tracking-[0.2em] text-accent">
+          <div className="mx-auto flex w-full min-w-0 max-w-6xl flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="h-3 w-3 shrink-0 bg-accent animate-pulse" />
+              <span className="text-base font-black uppercase tracking-[0.12em] text-accent sm:text-lg sm:tracking-[0.2em]">
                 SofiaControlPanel
               </span>
             </div>
-            <nav className="flex gap-4 text-xs uppercase tracking-wider text-muted-foreground">
+            <nav className="flex flex-wrap gap-x-4 gap-y-2 text-xs uppercase tracking-wider text-muted-foreground">
               <Link href="/privacity" className="hover:text-accent">
                 Privacidade
               </Link>
