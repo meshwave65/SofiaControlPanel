@@ -348,5 +348,5 @@
 - ACTION_PLAN usa o catálogo/versionamento documental existente. Migration 0011 registra apenas o novo tipo, sem tabela nova e sem execução automática no startup.
 - Aprovação cria versão imutável APPROVED, assinada pelo proprietário e vinculada a versão/hash exatos da proposta; servidor revalida integridade e atualidade do TR/Blueprint. Aprovação não inicia execução nem libera créditos.
 - UI integrada ao visualizador documental existente.
-- CI run do incremento em andamento; migration 0011 ainda será validada em PostgreSQL 16 descartável.
+- CI run [43668299189](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43668299189) SUCCESS: `pnpm check`, 47/47 testes (8 arquivos), `pnpm build` e migrations 0010+0011 em PostgreSQL 16 descartável.
 - Sem aplicação de migration persistente, merge, deploy, restart, dispatch, LLM/Manus real ou consumo de créditos. Task 20.3/Mateus intocada.
