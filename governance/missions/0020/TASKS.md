@@ -51,3 +51,10 @@ Primeiro reconciliar a branch da PR #15 com main, identificando e resolvendo con
 - PR #15 integrada por squash merge em `main`, commit `9e3f9bd3f7c09a7d2212bd7c1e30796cd020b78f`.
 - Deploy manual no Render Free iniciado, ID `dep-dbsvo1rbc2fs73cn5v1g`, estado inicial `build_in_progress`.
 - Não houve alteração do plano/serviço nem ativação de auto-deploy. Resultado funcional ainda não confirmado.
+
+
+### Estado real da publicação — OR-20261115-0050
+- Deploy Render Free concluído `live`; servidor iniciado na porta 10000 e Heartbeat ativo. Merge commit `9e3f9bd3f7c09a7d2212bd7c1e30796cd020b78f`.
+- URL principal: https://sofia-cp.meshwave.com.br.
+- Interface/Messenger ainda precisam de observação funcional pelo operador; não declarar aceite visual.
+- Consulta Supabase falhou por autenticação do conector read-only (28P01). Migrations 0010–0013 persistentes não confirmadas.
