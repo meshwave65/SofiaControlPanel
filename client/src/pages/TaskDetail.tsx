@@ -25,6 +25,14 @@ export default function TaskDetail() {
     { id: taskId },
     { enabled: canLoadTask, retry: false, refetchOnWindowFocus: false },
   );
+  const assignedAgentId = taskQuery.data?.agentId ?? null;
+  const assignedAgentQuery = trpc.agents.getById.useQuery(
+    { id: assignedAgentId ?? 0 },
+    {
+      enabled: canLoadTask && assignedAgentId !== null,
+      retry: false,
+    },
+  );
   const messagesQuery = trpc.messages.getByTask.useQuery(
     { taskId },
     { enabled: canLoadTask && Boolean(taskQuery.data), retry: false },
@@ -448,6 +456,18 @@ export default function TaskDetail() {
 
   const operationalReports = messages.filter(m => m.typeId === 2); // OperationalReport type
   const currentStatusName = statuses.find((status) => status.id === task.statusId)?.name.toUpperCase();
+  const externalStatusLabels: Record<string, string> = {
+    running: "Em execução",
+    completed: "Concluída",
+    stopped: "Interrompida",
+    error: "Erro",
+    awaiting_tr_validation: "Aguardando validação do TR",
+    waiting_for_available_agent: "Aguardando agente elegível",
+    waiting_for_pinned_agent: "Aguardando agente fixado",
+  };
+  const externalStatusLabel = task.manusStatus
+    ? externalStatusLabels[task.manusStatus.toLowerCase()] ?? task.manusStatus.replace(/_/g, " ")
+    : task.manusTaskId ? "Estado não informado" : "Não iniciada";
   const canStartExecution = currentStatusName === "STAGED" && !task.manusTaskId;
   const canReorientTR = ["PAUSED", "STAGED"].includes(currentStatusName ?? "") && !task.manusTaskId && task.manusStatus === "awaiting_tr_validation" && task.parentTaskId == null;
   const canFactorize = task.parentTaskId == null && ["STAGED", "PROGRESS"].includes(currentStatusName ?? "") && blueprintReady;
@@ -834,6 +854,58 @@ export default function TaskDetail() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-foreground whitespace-pre-wrap">{task.description || "Sem descrição"}</p>
+                </CardContent>
+              </Card>
+
+              {/* Visão operacional separa estado local da missão e execução externa. */}
+              <Card className="cad-card mt-6">
+                <CardHeader>
+                  <CardTitle className="text-lg">Execução e executor</CardTitle>
+                  <CardDescription>
+                    Estado da execução externa e atribuição atual. A situação do executor não substitui o estado da missão.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Executor atribuído</p>
+                    <p className="text-sm font-medium">
+                      {assignedAgentQuery.isLoading
+                        ? "Carregando executor..."
+                        : assignedAgentQuery.data?.name ?? (task.agentId ? `Agente #${task.agentId}` : "Nenhum executor atribuído")}
+                    </p>
+                    {task.agentId != null && (
+                      <p className="text-xs text-muted-foreground">
+                        {task.agentPinned ? "Atribuição fixada manualmente" : "Atribuição não fixada"}
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Estado do executor</p>
+                    <p className="text-sm font-medium">
+                      {assignedAgentQuery.data?.status ?? (task.agentId ? "Não disponível" : "—")}
+                    </p>
+                    {assignedAgentQuery.data?.connectionStatus && (
+                      <p className="text-xs text-muted-foreground">
+                        Conexão: {assignedAgentQuery.data.connectionStatus}
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Execução externa (Manus)</p>
+                    <Badge variant="outline">{externalStatusLabel}</Badge>
+                    {task.manusTaskId && (
+                      <p className="break-all text-xs text-muted-foreground">ID: {task.manusTaskId}</p>
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Créditos consumidos</p>
+                    <p className="text-sm font-medium tabular-nums">{task.creditsUsed ?? 0}</p>
+                  </div>
+                  {assignedAgentQuery.isError && (
+                    <p className="text-xs text-amber-600 sm:col-span-2 lg:col-span-3">
+                      Não foi possível carregar os dados públicos do executor. Os dados da missão continuam disponíveis.
+                    </p>
+                  )}
                 </CardContent>
               </Card>
 
