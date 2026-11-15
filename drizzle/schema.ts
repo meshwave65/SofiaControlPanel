@@ -1,5 +1,4 @@
-import { integer, pgEnum, pgTable, pgSchema, text, timestamp, varchar, boolean, numeric, jsonb, index, uniqueIndex, foreignKey, check } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
+import { integer, pgEnum, pgTable, pgSchema, text, timestamp, varchar, boolean, numeric, jsonb, index, uniqueIndex, foreignKey } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 const sofia = pgSchema("sofia");
@@ -712,83 +711,6 @@ export const missionActionUnits = sofia.table("missionActionUnits", {
   idempotencyUnique: uniqueIndex("missionActionUnits_idempotencyKey_key").on(table.idempotencyKey),
   missionVersionUnitUnique: uniqueIndex("missionActionUnits_mission_version_unit_unique").on(table.missionTaskId, table.actionPlanVersionId, table.unitId),
   operationalTaskUnique: uniqueIndex("missionActionUnits_operationalTaskId_key").on(table.operationalTaskId),
-  unitIdFormatCheck: check("missionActionUnits_unit_id_format", sql.raw('"unitId" ~ ''^T[0-9]{2}, ({ many }) => ({
-  documents: many(missionDocuments),
-}));
-
-export const missionDocumentsRelations = relations(missionDocuments, ({ one, many }) => ({
-  task: one(tasks, {
-    fields: [missionDocuments.taskId],
-    references: [tasks.id],
-  }),
-  documentType: one(missionDocumentTypes, {
-    fields: [missionDocuments.documentTypeId],
-    references: [missionDocumentTypes.id],
-  }),
-  versions: many(missionDocumentVersions),
-}));
-
-export const missionDocumentVersionsRelations = relations(missionDocumentVersions, ({ one }) => ({
-  document: one(missionDocuments, {
-    fields: [missionDocumentVersions.documentId],
-    references: [missionDocuments.id],
-  }),
-  authorUser: one(users, {
-    fields: [missionDocumentVersions.authorUserId],
-    references: [users.id],
-  }),
-  authorAgent: one(agents, {
-    fields: [missionDocumentVersions.authorAgentId],
-    references: [agents.id],
-  }),
-  sourceVersion: one(missionDocumentVersions, {
-    fields: [missionDocumentVersions.sourceDocumentVersionId],
-    references: [missionDocumentVersions.id],
-    relationName: "sourceVersion",
-  }),
-}));
-'')),
-  hashFormatCheck: check("missionActionUnits_hash_format", sql.raw('"actionPlanContentHash" ~ ''^[a-f0-9]{64}, ({ many }) => ({
-  documents: many(missionDocuments),
-}));
-
-export const missionDocumentsRelations = relations(missionDocuments, ({ one, many }) => ({
-  task: one(tasks, {
-    fields: [missionDocuments.taskId],
-    references: [tasks.id],
-  }),
-  documentType: one(missionDocumentTypes, {
-    fields: [missionDocuments.documentTypeId],
-    references: [missionDocumentTypes.id],
-  }),
-  versions: many(missionDocumentVersions),
-}));
-
-export const missionDocumentVersionsRelations = relations(missionDocumentVersions, ({ one }) => ({
-  document: one(missionDocuments, {
-    fields: [missionDocumentVersions.documentId],
-    references: [missionDocuments.id],
-  }),
-  authorUser: one(users, {
-    fields: [missionDocumentVersions.authorUserId],
-    references: [users.id],
-  }),
-  authorAgent: one(agents, {
-    fields: [missionDocumentVersions.authorAgentId],
-    references: [agents.id],
-  }),
-  sourceVersion: one(missionDocumentVersions, {
-    fields: [missionDocumentVersions.sourceDocumentVersionId],
-    references: [missionDocumentVersions.id],
-    relationName: "sourceVersion",
-  }),
-}));
-'')),
-  idempotencyLengthCheck: check("missionActionUnits_idempotency_length", sql.raw('char_length("idempotencyKey") BETWEEN 16 AND 128')),
-  titleNonemptyCheck: check("missionActionUnits_title_nonempty", sql.raw('length(trim("unitTitle")) > 0')),
-  stateCheck: check("missionActionUnits_state_check", sql.raw('"state" IN (''REGISTERED'', ''AWAITING_APPROVAL'', ''APPROVED'', ''READY_FOR_DISPATCH'', ''DISPATCHED'', ''BLOCKED'', ''CANCELLED'')')),
-  approvalPairCheck: check("missionActionUnits_approval_pair_check", sql.raw('("approvalUserId" IS NULL) = ("approvedAt" IS NULL)')),
-  dispatchAttemptsCheck: check("missionActionUnits_dispatch_attempts_check", sql.raw('"dispatchAttempts" >= 0')),
   missionTaskFk: foreignKey({ columns: [table.missionTaskId], foreignColumns: [tasks.id] }).onDelete("restrict"),
   actionPlanDocumentFk: foreignKey({ columns: [table.actionPlanDocumentId], foreignColumns: [missionDocuments.id] }).onDelete("restrict"),
   actionPlanVersionFk: foreignKey({ columns: [table.actionPlanVersionId], foreignColumns: [missionDocumentVersions.id] }).onDelete("restrict"),
@@ -818,86 +740,6 @@ export const missionActionUnitGateEvidence = sofia.table("missionActionUnitGateE
 }, (table) => ({
   actionUnitIdx: index("missionActionUnitGateEvidence_action_unit_idx").on(table.actionUnitId),
   gateObservedIdx: index("missionActionUnitGateEvidence_gate_observed_idx").on(table.actionUnitId, table.gateKey, table.observedAt),
-  gateKeyCheck: check("missionActionUnitGateEvidence_gate_key_check", sql.raw('"gateKey" IN (''DEPENDENCY'', ''RISK_POLICY'', ''BUDGET_AUTHORIZATION'', ''UNIT_PERMISSION'', ''EXECUTOR_ELIGIBILITY'', ''ADAPTER_CAPABILITY'')')),
-  decisionCheck: check("missionActionUnitGateEvidence_decision_check", sql.raw('"decision" IN (''VERIFIED'', ''BLOCKED'', ''UNKNOWN'')')),
-  actorTypeCheck: check("missionActionUnitGateEvidence_actor_type_check", sql.raw('"actorType" IN (''SYSTEM'', ''OWNER'')')),
-  actorPairCheck: check("missionActionUnitGateEvidence_actor_pair_check", sql.raw('("actorType" = ''OWNER'' AND "actorUserId" IS NOT NULL) OR ("actorType" = ''SYSTEM'' AND "actorUserId" IS NULL)')),
-  hashFormatCheck: check("missionActionUnitGateEvidence_hash_format", sql.raw('"actionPlanContentHash" ~ ''^[a-f0-9]{64}, ({ many }) => ({
-  documents: many(missionDocuments),
-}));
-
-export const missionDocumentsRelations = relations(missionDocuments, ({ one, many }) => ({
-  task: one(tasks, {
-    fields: [missionDocuments.taskId],
-    references: [tasks.id],
-  }),
-  documentType: one(missionDocumentTypes, {
-    fields: [missionDocuments.documentTypeId],
-    references: [missionDocumentTypes.id],
-  }),
-  versions: many(missionDocumentVersions),
-}));
-
-export const missionDocumentVersionsRelations = relations(missionDocumentVersions, ({ one }) => ({
-  document: one(missionDocuments, {
-    fields: [missionDocumentVersions.documentId],
-    references: [missionDocuments.id],
-  }),
-  authorUser: one(users, {
-    fields: [missionDocumentVersions.authorUserId],
-    references: [users.id],
-  }),
-  authorAgent: one(agents, {
-    fields: [missionDocumentVersions.authorAgentId],
-    references: [agents.id],
-  }),
-  sourceVersion: one(missionDocumentVersions, {
-    fields: [missionDocumentVersions.sourceDocumentVersionId],
-    references: [missionDocumentVersions.id],
-    relationName: "sourceVersion",
-  }),
-}));
-'')),
-  unitIdFormatCheck: check("missionActionUnitGateEvidence_unit_id_format", sql.raw('"unitId" ~ ''^T[0-9]{2}, ({ many }) => ({
-  documents: many(missionDocuments),
-}));
-
-export const missionDocumentsRelations = relations(missionDocuments, ({ one, many }) => ({
-  task: one(tasks, {
-    fields: [missionDocuments.taskId],
-    references: [tasks.id],
-  }),
-  documentType: one(missionDocumentTypes, {
-    fields: [missionDocuments.documentTypeId],
-    references: [missionDocumentTypes.id],
-  }),
-  versions: many(missionDocumentVersions),
-}));
-
-export const missionDocumentVersionsRelations = relations(missionDocumentVersions, ({ one }) => ({
-  document: one(missionDocuments, {
-    fields: [missionDocumentVersions.documentId],
-    references: [missionDocuments.id],
-  }),
-  authorUser: one(users, {
-    fields: [missionDocumentVersions.authorUserId],
-    references: [users.id],
-  }),
-  authorAgent: one(agents, {
-    fields: [missionDocumentVersions.authorAgentId],
-    references: [agents.id],
-  }),
-  sourceVersion: one(missionDocumentVersions, {
-    fields: [missionDocumentVersions.sourceDocumentVersionId],
-    references: [missionDocumentVersions.id],
-    relationName: "sourceVersion",
-  }),
-}));
-'')),
-  versionPositiveCheck: check("missionActionUnitGateEvidence_version_positive", sql.raw('"actionPlanVersionNumber" > 0')),
-  sourceNonemptyCheck: check("missionActionUnitGateEvidence_source_nonempty", sql.raw('length(trim("source")) > 0')),
-  evidenceObjectCheck: check("missionActionUnitGateEvidence_evidence_object", sql.raw('jsonb_typeof("evidence") = ''object''')),
-  validityCheck: check("missionActionUnitGateEvidence_validity_check", sql.raw('"validUntil" IS NULL OR "validUntil" > "observedAt"')),
   actionUnitFk: foreignKey({ columns: [table.actionUnitId], foreignColumns: [missionActionUnits.id] }).onDelete("restrict"),
   missionFk: foreignKey({ columns: [table.missionTaskId], foreignColumns: [tasks.id] }).onDelete("restrict"),
   documentFk: foreignKey({ columns: [table.actionPlanDocumentId], foreignColumns: [missionDocuments.id] }).onDelete("restrict"),
