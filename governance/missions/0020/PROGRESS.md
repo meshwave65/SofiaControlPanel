@@ -20,6 +20,7 @@ A decisão metodológica mais recente estabelece visão global e planejamento in
 - PR #15: https://github.com/meshwave65/SofiaControlPanel/pull/15
 - Branch: `feat/sofia-cognitive-control-plane`.
 - Estado da PR após CI do head `2fee6b7`: OPEN, não mergeada, `mergeable_state=dirty`; compare com main diverged, 464 commits ahead e 22 behind. Não fazer merge ou force-push antes de reconciliar conflitos. Ver OR-20261115-0049.
+- Auditoria de sobreposição: único arquivo alterado nos dois lados do merge-base foi `governance/operational_reports/INDEX.csv`. A versão da branch foi atualizada para a união exata dos registros de main e branch (202 chaves compostas, sem registros conflitantes ou perdidos); main não tem linhas ausentes nessa versão. A PR ainda aparece `dirty`, portanto uma reconciliação formal do histórico continua necessária. A atualização do índice está no commit `462a7e1`.
 - Roteamento de mensagens da missão-raiz para executor ativo em tarefa-filha está implementado na branch e possui workflow anterior aprovado conforme OR-0043.
 - Commit `fabaff376cfbe7889752dc57ec3d7785e959d0aa` atualiza rótulos e descrição do TR na UI.
 - Commit `9944dedebe02e92b267758bf13b311d3ee8baebf` adiciona a aba Messenger ao detalhe da missão. A consulta e a gravação usam sempre o ID da missão-raiz, mesmo a partir de tarefa-filha.
