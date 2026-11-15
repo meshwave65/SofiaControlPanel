@@ -405,3 +405,17 @@ O ARC/PGC atual é somente um protótipo conceitual rudimentar, sem enforcement 
 - Migration 0013 e teste SQL adicionados; schema Drizzle reconstruído a partir de baseline limpo.
 - CI run 43708974232 SUCCESS: TypeScript, 56 testes, build e PostgreSQL descartável migrations 0010–0013 + dispatch boundary.
 - Não grava grants reais, não libera gates por si só, não promove tarefa, não reserva agente nem despacha. Sem migration persistente, merge ou deploy. Task 20.3/Mateus intocada.
+
+
+### Checkpoint 20.4 — OR-20261115-0043: reorientação do SCP e roteamento do Messenger
+
+- Correção de escopo: prioridade volta ao ciclo de vida da missão, orquestração soberana pelo SCP/SOFIA e interlocução do operador pelo Messenger. Agentes são executores temporários, nunca proprietários das missões.
+- AC-023 e expansão de ARC/PGC como fontes/gates ficam estacionados; não serão ampliados nesta etapa. Código já existente permanece para revisão de escopo, sem reversão destrutiva automática. ARC/PGC são consultivos; o SOFIA decide e aplica políticas.
+- TR padronizado como **Transactional Report**. Especificação atualizada para refletir implementação parcial já existente na PR #15 e lacunas de atualização contínua/origem autônoma.
+- Auditoria confirmou criação humana com ORIGINAL_REQUEST/TR transacional, correção/validação/versionamento, Blueprint vinculado à versão exata e visualizador documental no TaskDetail. Ainda faltam missão originada autonomamente pela SOFIA e atualização event-driven do TR.
+- Messenger corrigido na branch: resolve missão-raiz e filhas diretas do mesmo proprietário; encontra execuções PROGRESS com Agent ID + Manus Task ID; encaminha automaticamente se houver um executor; se houver vários, não escolhe arbitrariamente e pede desambiguação; aceita taskId explícito somente após validação server-side de pertencimento e execução ativa.
+- Testes cobrem executor em filha, múltiplos executores ambíguos e seleção explícita. Workflow [43720232937](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43720232937) SUCCESS: TypeScript, testes, build, migrations 0010–0013 e dispatch boundary em PostgreSQL 16 descartável.
+- Lacunas prioritárias: pause/resume/transferência operacional dedicada; semântica de pai coordenador/consolidador e leases de filhas; missão autônoma da SOFIA; atualização contínua do TR.
+- Nenhuma chamada real Manus/LLM, mensagem externa, dispatch, consumo de créditos, migration persistente, merge, deploy ou restart. Task 20.3/Mateus intocada.
+- Próxima etapa: implementar controles de ciclo de vida no SCP, preservando identidade/contexto da missão e permitindo substituição do executor sem perda de continuidade.
+
