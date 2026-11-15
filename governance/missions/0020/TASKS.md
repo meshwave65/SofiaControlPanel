@@ -31,7 +31,8 @@ A aba de conversa central com a SOFIA foi implementada em `TaskDetail.tsx` no co
 - Messenger central implementado em TaskDetail; CI aprovado. OR-0045 e OR-0046.
 - Painel Execução e executor implementado em TaskDetail; CI aprovado. OR-0047.
 - Pausa e retomada Manus implementadas com confirmação externa e estados pendentes; CI aprovado (77 testes). OR-0048.
+- PR #15 está divergente e não mergeable (464 ahead / 22 behind; mergeable_state=dirty). Reconciliar conflitos antes de qualquer merge; não fazer force-push. OR-0049.
 
 ## Próximo incremento
 
-Continuar a auditoria de sincronização/observabilidade do ciclo de vida, em uma unidade funcional por vez. Pausa/retomada estão implementadas e passaram CI, mas o teste real controlado e QA visual ainda dependem de ambiente publicado/autorização. Não realizar chamadas reais ou deploy sem autorização específica.
+Primeiro reconciliar a branch da PR #15 com main, identificando e resolvendo conflitos sem reset/force-push; executar CI completo novamente. Só depois retomar a auditoria de sincronização/observabilidade. Pausa/retomada passaram CI, mas teste real controlado e QA visual dependem de ambiente publicado/autorização. Não realizar chamadas reais ou deploy sem autorização específica.
