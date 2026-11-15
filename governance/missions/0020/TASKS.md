@@ -31,7 +31,7 @@ A aba de conversa central com a SOFIA foi implementada em `TaskDetail.tsx` no co
 - Messenger central implementado em TaskDetail; CI aprovado. OR-0045 e OR-0046.
 - Painel Execução e executor implementado em TaskDetail; CI aprovado. OR-0047.
 - Pausa e retomada Manus implementadas com confirmação externa e estados pendentes; CI aprovado (77 testes). OR-0048.
-- PR #15 está divergente e não mergeable (464 ahead / 22 behind; mergeable_state=dirty). Reconciliar conflitos antes de qualquer merge; não fazer force-push. OR-0049.
+- PR #15 está divergente e não mergeable (464 ahead / 22 behind; mergeable_state=dirty). O único arquivo sobreposto detectado no compare foi `governance/operational_reports/INDEX.csv`; o índice da branch agora preserva a união dos registros de ambos os lados, commit `462a7e1`, mas a PR ainda reporta `dirty`. Reconciliar o histórico formalmente antes de qualquer merge; não fazer force-push. OR-0049.
 
 ## Próximo incremento
 
