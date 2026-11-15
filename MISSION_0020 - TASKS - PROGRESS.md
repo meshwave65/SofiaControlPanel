@@ -328,3 +328,13 @@
 - CI run 43655671495 SUCCESS: `pnpm check`, 41/41 testes, `pnpm build` e migration 0010 em PostgreSQL 16 descartável.
 - Próxima etapa: consulta de elegibilidade reproduzindo exatamente o predicado do claim, ainda sem reservar ou modificar agentes; depois planos estruturados e confirmação persistente.
 - Sem DB persistente, migration aplicada, deploy, restart, dispatch, LLM/Manus real ou consumo de créditos. PR #15 sem merge. Task 20.3/Mateus intocada. OR-20261114-0034.
+
+### Checkpoint 20.4 — OR-20261114-0035: elegibilidade de agentes (2026-11-14)
+
+- Implementada `inspectTaskAgentEligibility(taskId, ownerId)` em `server/db.ts` e ferramenta cognitiva `inspect_agent_eligibility` no Messenger.
+- Reproduz o predicado de `claimStagedTaskWithAvailableAgent`: tarefa STAGED; pinagem humana; agente online; conexão configured/connected; credencial presente (booleano, sem segredo); créditos positivos; snapshot de até 60 segundos; ausência de outra tarefa PROGRESS.
+- Lista motivos de inelegibilidade e ordena candidatos elegíveis como o claim atual: créditos decrescentes, snapshot mais antigo, Agent ID.
+- Consulta sem lock, FOR UPDATE, SKIP LOCKED, reserva ou escrita. É snapshot, não garante elegibilidade futura nem valida credencial/ saldo em tempo real na Manus.
+- CI run 43656100735 SUCCESS: `pnpm check`, 43/43 testes, `pnpm build` e migration 0010 em PostgreSQL 16 descartável.
+- Próxima etapa: planos de ação persistíveis, versionados e vinculados ao TR/Blueprint, com efeitos/custos/riscos/dependências e confirmação humana explícita antes de ferramenta mutável.
+- Sem DB persistente, migration aplicada, merge, deploy, restart, dispatch, LLM/Manus real ou créditos. PR #15 sem merge. Task 20.3/Mateus intocada. OR-20261114-0035.
