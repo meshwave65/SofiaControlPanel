@@ -137,3 +137,19 @@ Contrato para a próxima implementação:
 - nenhuma evidência ou aprovação isolada promove para READY_FOR_DISPATCH.
 
 A auditoria e as decisões estão em OR-20261115-0041. AC-023a deve implementar o ledger e a verificação de dependências sem inventar política permissiva. Contratos de risco, orçamento e permissão continuam gates fechados até existirem fontes explícitas.
+
+## ARC/PGC — papel estratégico e limite do protótipo
+
+O ARC/PGC existente é um protótipo conceitual rudimentar, sem função prática de segurança ou enforcement em produção. Sua finalidade atual é demonstrar o conceito e a direção arquitetural; não deve ser apresentado como controle de segurança já implementado, nem usado como fonte de autorização operacional na AC-023.
+
+A direção estratégica é evoluir para um módulo de segurança contínua e contextual. A autenticação pontual estabelece a identidade inicial; não é suficiente para garantir que agente, sessão, contexto, recursos e operação permaneçam íntegros durante toda a execução. O sistema deverá reavaliar continuamente sinais de identidade e comportamento, integridade do contexto e dos recursos, aderência da ação ao escopo autorizado, elegibilidade do executor e alterações relevantes de risco.
+
+Essa avaliação contínua poderá alimentar decisões de monitoramento e resposta — por exemplo, manter, limitar, exigir revalidação, suspender ou bloquear uma operação — conforme políticas explícitas e auditáveis. A capacidade de detectar alterações em tempo real é um objetivo arquitetural futuro, não uma capacidade que se atribui ao protótipo atual.
+
+Separação obrigatória de responsabilidades:
+- autenticação: identidade inicial e prova de controle de credenciais;
+- autorização determinística: ação, recurso, escopo, sujeito, missão e orçamento explicitamente permitidos;
+- segurança contínua ARC/PGC: sinais dinâmicos de confiança, comportamento e integridade ao longo da operação;
+- resposta operacional: reavaliação e contenção conforme políticas versionadas.
+
+ARC/PGC poderá fornecer sinais e evidências ao mecanismo de segurança e à avaliação de risco, mas não concede permissões, não substitui orçamento autorizado e não transforma score probabilístico em decisão de dispatch. A autorização continua vinculada a grants explícitos e verificáveis; sinais contínuos podem restringir, suspender ou provocar nova avaliação, nunca ampliar permissões implicitamente.
