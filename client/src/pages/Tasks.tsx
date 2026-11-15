@@ -143,7 +143,7 @@ export default function Tasks() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-full bg-background text-foreground">
       {/* Header */}
       <div className="technical-header px-6 py-8 border-b-2 border-foreground/30 bg-foreground/5">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
