@@ -435,3 +435,12 @@ O ARC/PGC atual é somente um protótipo conceitual rudimentar, sem enforcement 
 - Deploy manual iniciado no Render Free existente: `dep-dbsvo1rbc2fs73cn5v1g`, usando o merge commit acima. Estado inicial: `build_in_progress`.
 - Auto-deploy permanece OFF; nenhuma configuração ou plano Render foi alterado. Nenhum Browser Use ou serviço pago foi contratado.
 - Deploy e comportamento funcional ainda precisam ser observados; migrations 0010–0013 no banco persistente não foram confirmadas. OR-20261115-0050.
+
+
+### Publicação em produção — OR-20261115-0050
+- PR #15 integrada em `main` por squash merge: `9e3f9bd3f7c09a7d2212bd7c1e30796cd020b78f`.
+- Deploy Render Free `dep-dbsvo1rbc2fs73cn5v1g` finalizado com status `live`. Build concluído; startup executou ensure-db, verificou colunas de execução, instalou trigger 0003 e aplicou ajuste 0008; servidor iniciou na porta 10000 e Heartbeat iniciou.
+- URL principal: https://sofia-cp.meshwave.com.br. URL Render: https://sofiacontrolpanel-web.onrender.com.
+- Não foi feita validação visual/autenticada nem teste funcional do Messenger. Deploy live não equivale a aceite funcional.
+- A tentativa de listar tabelas no Supabase falhou por erro de autenticação do conector read-only (28P01); migrations 0010–0013 no banco persistente continuam sem confirmação. Nenhuma migration foi aplicada por essa tentativa.
+- Próximo passo: observar a UI real com o operador e corrigir diretamente o primeiro problema encontrado; recuperar acesso Supabase para fechar o estado do schema.
