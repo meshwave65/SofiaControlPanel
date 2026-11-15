@@ -152,7 +152,7 @@ Separação obrigatória de responsabilidades:
 - segurança contínua ARC/PGC: sinais dinâmicos de confiança, comportamento e integridade ao longo da operação;
 - resposta operacional: reavaliação e contenção conforme políticas versionadas.
 
-ARC/PGC poderá fornecer sinais e evidências ao mecanismo de segurança e à avaliação de risco, mas não concede permissões, não substitui orçamento autorizado e não transforma score probabilístico em decisão de dispatch. A autorização continua vinculada a grants explícitos e verificáveis; sinais contínuos podem restringir, suspender ou provocar nova avaliação, nunca ampliar permissões implicitamente.
+ARC e PGC são módulos consultivos: observam, analisam e fornecem contexto, evidências e avaliações ao SOFIA. Não possuem autoridade própria para bloquear conexões, suspender agentes, alterar permissões ou modificar interações. O PGC é acionado somente quando critérios definidos pelo sistema exigem prova complementar; não é executado continuamente. A avaliação (inclusive confiança muito baixa ou prova inválida) não equivale a uma decisão operacional. O SOFIA, por meio de suas políticas e mecanismos determinísticos, decide se mantém, monitora, solicita nova verificação, restringe, suspende ou bloqueia uma operação. ARC/PGC nunca concede permissões nem amplia escopo implicitamente.
 
 ## 12. AC-023a — ledger persistente de evidências
 
@@ -161,3 +161,8 @@ Implementado `sofia.missionActionUnitGateEvidence` por meio da migration 0013. O
 A migration aplica FKs restritivas, constraints de identidade/formato, autoria OWNER vinculada ao proprietário da missão, trigger de imutabilidade e RLS server-only. O schema Drizzle foi reconstruído a partir de baseline limpo e contém uma declaração por tabela/relação. A validação CI 43708974232 passou: TypeScript, 56 testes, build, migrations 0010–0013 em PostgreSQL descartável e barreira de dispatch.
 
 O ledger não concede autorização nem promove estado. AC-023b/c ainda precisa implementar origens confiáveis, validação das evidências e avaliação consolidada; evidência ausente, stale ou hash divergente mantém BLOCKED. Ver OR-20261115-0042.
+
+
+## 13. Separação consultiva ARC/PGC e autoridade decisória do SOFIA
+
+ARC e PGC fornecem avaliação contextual e evidências; não executam enforcement. ARC observa continuamente sinais contextuais; PGC é acionado apenas quando critérios do sistema exigem prova reforçada. Nenhum dos módulos pode, por iniciativa própria, bloquear conexão, suspender agente ou alterar a interação. A política do SOFIA interpreta as evidências e determina a resposta permitida. A decisão e sua execução devem ser registradas pelo mecanismo de controle do SOFIA, com política, evidências e ação rastreáveis.
