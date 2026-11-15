@@ -7,6 +7,7 @@ import { ENV } from './_core/env';
 import { decryptCredential, encryptCredential } from './credentials';
 import { evaluateArcShadow } from './arcEvaluator';
 import { scoreConfidence } from './confidenceScorer';
+import { ActionPlanSchema } from "./actionPlan";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 let _dbPromise: Promise<ReturnType<typeof drizzle> | null> | null = null;
@@ -2097,6 +2098,210 @@ export async function approveMissionActionPlanUnit(input: {
       governanceEvidence: missionActionUnits.governanceEvidence,
     });
     return updated;
+  });
+}
+
+/**
+ * Materializes only individually approved ACTION_PLAN units as PAUSED child tasks.
+ * This is a structural operation only: no executor assignment, STAGED transition,
+ * agent reservation, external task creation, or dispatch is performed.
+ */
+export async function materializeApprovedMissionActionPlanUnits(input: {
+  missionTaskId: number;
+  ownerId: number;
+}) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+
+  return database.transaction(async (tx) => {
+    const [mission] = await tx.select({
+      id: tasks.id,
+      createdBy: tasks.createdBy,
+      parentTaskId: tasks.parentTaskId,
+      title: tasks.title,
+      priorityId: tasks.priorityId,
+      creatorType: tasks.creatorType,
+    }).from(tasks)
+      .where(eq(tasks.id, input.missionTaskId))
+      .for("update")
+      .limit(1);
+
+    if (!mission || mission.parentTaskId !== null || mission.createdBy !== input.ownerId) {
+      throw new Error("Somente o proprietário da missão principal pode materializar suas unidades.");
+    }
+
+    const [planDocument] = await tx.select({ id: missionDocuments.id })
+      .from(missionDocuments)
+      .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
+      .where(and(
+        eq(missionDocuments.taskId, input.missionTaskId),
+        eq(missionDocuments.documentKey, "ACTION_PLAN"),
+        eq(missionDocumentTypes.typeKey, "ACTION_PLAN"),
+      ))
+      .limit(1);
+    if (!planDocument) throw new Error("A missão não possui ACTION_PLAN.");
+
+    const [latestPlan] = await tx.select({
+      id: missionDocumentVersions.id,
+      version: missionDocumentVersions.version,
+      state: missionDocumentVersions.state,
+      content: missionDocumentVersions.content,
+      contentHash: missionDocumentVersions.contentHash,
+    }).from(missionDocumentVersions)
+      .where(eq(missionDocumentVersions.documentId, planDocument.id))
+      .orderBy(desc(missionDocumentVersions.version))
+      .for("update")
+      .limit(1);
+
+    if (!latestPlan || latestPlan.state !== "APPROVED") {
+      throw new Error("Materialização bloqueada: a versão vigente do ACTION_PLAN não está aprovada.");
+    }
+    const actualHash = createHash("sha256").update(latestPlan.content, "utf8").digest("hex");
+    if (!latestPlan.contentHash || actualHash !== latestPlan.contentHash) {
+      throw new Error("Materialização bloqueada: o hash SHA-256 do ACTION_PLAN vigente não confere.");
+    }
+
+    let plan: ReturnType<typeof ActionPlanSchema.parse>;
+    try {
+      plan = ActionPlanSchema.parse(JSON.parse(latestPlan.content));
+    } catch {
+      throw new Error("Materialização bloqueada: o ACTION_PLAN vigente não corresponde ao contrato estruturado.");
+    }
+
+    const [pausedStatus] = await tx.select({ id: taskStatuses.id })
+      .from(taskStatuses).where(eq(taskStatuses.name, "PAUSED")).limit(1);
+    if (!pausedStatus) throw new Error("Materialização bloqueada: status PAUSED não está configurado.");
+
+    const unitRows = await tx.select().from(missionActionUnits)
+      .where(and(
+        eq(missionActionUnits.missionTaskId, mission.id),
+        eq(missionActionUnits.actionPlanDocumentId, planDocument.id),
+        eq(missionActionUnits.actionPlanVersionId, latestPlan.id),
+        eq(missionActionUnits.actionPlanVersionNumber, latestPlan.version),
+        eq(missionActionUnits.actionPlanContentHash, actualHash),
+      ))
+      .orderBy(asc(missionActionUnits.unitId))
+      .for("update");
+
+    const planUnits = new Map(plan.tasks.map((unit) => [unit.id, unit]));
+    if (unitRows.length !== plan.tasks.length
+      || unitRows.some((row) => {
+        const planUnit = planUnits.get(row.unitId);
+        return !planUnit || planUnit.title !== row.unitTitle;
+      })) {
+      throw new Error("Materialização bloqueada: o registro persistido não representa todas as unidades da versão aprovada.");
+    }
+
+    const results: Array<{
+      unitId: string;
+      unitTitle: string;
+      taskId: number;
+      status: string;
+      created: boolean;
+    }> = [];
+
+    for (const row of unitRows) {
+      const unit = planUnits.get(row.unitId)!;
+      if (row.operationalTaskId !== null) {
+        const [existingTask] = await tx.select({
+          id: tasks.id,
+          createdBy: tasks.createdBy,
+          parentTaskId: tasks.parentTaskId,
+        }).from(tasks).where(eq(tasks.id, row.operationalTaskId)).limit(1);
+        if (!existingTask || existingTask.createdBy !== mission.createdBy || existingTask.parentTaskId !== mission.id) {
+          throw new Error(`Vínculo operacional inconsistente para ${row.unitId}; materialização interrompida.`);
+        }
+        results.push({
+          unitId: row.unitId,
+          unitTitle: row.unitTitle,
+          taskId: existingTask.id,
+          status: "EXISTING",
+          created: false,
+        });
+        continue;
+      }
+
+      if (row.state !== "APPROVED") continue;
+      if (row.approvalUserId !== input.ownerId || !row.approvedAt) {
+        throw new Error(`Materialização bloqueada: aprovação individual inválida para ${row.unitId}.`);
+      }
+
+      const description = [
+        `Unidade ${unit.id} do ACTION_PLAN aprovado (versão ${latestPlan.version}).`,
+        `Objetivo da missão: ${plan.objective}`,
+        `Descrição: ${unit.description}`,
+        `Dependências: ${unit.dependsOn.length ? unit.dependsOn.join(", ") : "Nenhuma declarada"}`,
+        `Critérios de aceite: ${unit.acceptanceCriteria}`,
+        `Agente proposto (não atribuído): ${unit.proposedAgentId ?? "Nenhum"}`,
+        `Justificativa do agente: ${unit.agentRationale}`,
+        `Risco declarado: ${unit.risks.length ? unit.risks.join("; ") : "Nenhum declarado"}`,
+        `Reversibilidade: ${unit.reversibility}`,
+        `Riscos globais: ${plan.globalRisks.length ? plan.globalRisks.join("; ") : "Nenhum declarado"}`,
+        "Governança: tarefa materializada em PAUSED; sem executor, reserva, autorização de execução ou dispatch. Não promover para STAGED antes da conclusão independente de todos os gates.",
+      ].join("\n\n");
+
+      const [inserted] = await tx.insert(tasks).values({
+        createdBy: mission.createdBy,
+        creatorType: mission.creatorType === "system" ? "system" : "user",
+        title: `${unit.id} — ${unit.title}`,
+        description,
+        statusId: pausedStatus.id,
+        priorityId: mission.priorityId,
+        parentTaskId: mission.id,
+        agentId: null,
+        agentPinned: false,
+        manusStatus: "awaiting_execution_governance",
+        githubSyncStatus: "pending",
+      }).returning({ id: tasks.id });
+
+      if (!inserted) throw new Error(`Não foi possível criar a tarefa PAUSED para ${unit.id}.`);
+      const missionKey = `SCP-TASK-${String(inserted.id).padStart(6, "0")}`;
+      await tx.update(tasks).set({ missionKey, updatedAt: new Date() }).where(eq(tasks.id, inserted.id));
+
+      const materializedAt = new Date();
+      const evidence = {
+        ...(row.governanceEvidence as Record<string, unknown> ?? {}),
+        materialization: {
+          materializedAt: materializedAt.toISOString(),
+          operationalTaskId: inserted.id,
+          operationalStatus: "PAUSED",
+          executorAssigned: false,
+          dispatchPerformed: false,
+          actionPlanVersion: latestPlan.version,
+          actionPlanContentHash: actualHash,
+        },
+      };
+      const [linked] = await tx.update(missionActionUnits).set({
+        operationalTaskId: inserted.id,
+        governanceEvidence: evidence,
+        updatedAt: materializedAt,
+      }).where(and(
+        eq(missionActionUnits.id, row.id),
+        eq(missionActionUnits.state, "APPROVED"),
+        isNull(missionActionUnits.operationalTaskId),
+      )).returning({ id: missionActionUnits.id });
+
+      if (!linked) throw new Error(`O vínculo operacional de ${unit.id} não pôde ser persistido com segurança.`);
+      results.push({
+        unitId: row.unitId,
+        unitTitle: row.unitTitle,
+        taskId: inserted.id,
+        status: "PAUSED",
+        created: true,
+      });
+    }
+
+    if (results.length === 0) {
+      throw new Error("Nenhuma unidade aprovada e ainda não materializada está disponível.");
+    }
+
+    return {
+      missionTaskId: mission.id,
+      actionPlanVersion: latestPlan.version,
+      actionPlanContentHash: actualHash,
+      dispatchPerformed: false as const,
+      units: results,
+    };
   });
 }
 
