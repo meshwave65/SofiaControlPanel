@@ -13,18 +13,21 @@ A decisão metodológica mais recente estabelece visão global e planejamento in
 
 - OR-20261115-0043: reorientação do SCP, papel do Messenger, TR como Transactional Report, fronteiras de ARC/PGC, auditoria funcional e limites operacionais.
 - OR-20261115-0044: operar em modo missão com decisões persistidas; visão global com implementação incremental; reduzir risco por pequenos incrementos verificáveis; continuidade independente de chat.
+- OR-20261115-0045: primeiro incremento da conversa central com a SOFIA na UI TaskDetail; histórico vinculado à missão-raiz, com consulta periódica e envio pelo contrato existente.
 
 ## Estado técnico conhecido
 
 - PR #15: https://github.com/meshwave65/SofiaControlPanel/pull/15
 - Branch: `feat/sofia-cognitive-control-plane`.
 - Roteamento de mensagens da missão-raiz para executor ativo em tarefa-filha está implementado na branch e possui workflow anterior aprovado conforme OR-0043.
-- Commit `fabaff376cfbe7889752dc57ec3d7785e959d0aa` atualiza rótulos e descrição do TR na UI. Não foi observado workflow CI associado a esse commit.
-- Nenhuma dessas alterações está declarada como publicada em produção. PR #15 permanece sem merge conforme último estado registrado; reconciliar antes de qualquer nova ação.
+- Commit `fabaff376cfbe7889752dc57ec3d7785e959d0aa` atualiza rótulos e descrição do TR na UI.
+- Commit `9944dedebe02e92b267758bf13b311d3ee8baebf` adiciona a aba Messenger ao detalhe da missão. A consulta e a gravação usam sempre o ID da missão-raiz, mesmo a partir de tarefa-filha.
+- CI/status checks do commit `9944dedebe02e92b267758bf13b311d3ee8baebf`: nenhum resultado observado até a atualização deste documento. Build/testes e QA visual permanecem pendentes.
+- PR #15 permanece OPEN e não mergeada. Nenhuma alteração foi publicada em produção.
 
 ## Próxima ação
 
-Um incremento de UI no Messenger da missão: inspecionar a interface e contratos existentes e tornar visível/utilizável a conversa central com a SOFIA. A próxima instância deve fazer somente essa etapa, demonstrá-la e parar para avaliação do responsável.
+Aguardar a avaliação visual/funcional do responsável sobre a aba Messenger e corrigir pontualmente se necessário. Após essa validação, selecionar a próxima unidade funcional da missão 20.4. Não antecipar implementação de pausa, retomada, transferência ou outras etapas no mesmo lote.
 
 ## Bloqueios e limites
 
