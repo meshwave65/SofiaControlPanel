@@ -419,3 +419,12 @@ O ARC/PGC atual é somente um protótipo conceitual rudimentar, sem enforcement 
 - Nenhuma chamada real Manus/LLM, mensagem externa, dispatch, consumo de créditos, migration persistente, merge, deploy ou restart. Task 20.3/Mateus intocada.
 - Próxima etapa: implementar controles de ciclo de vida no SCP, preservando identidade/contexto da missão e permitindo substituição do executor sem perda de continuidade.
 
+
+
+### Diretriz operacional — OR-20261115-0050
+- O operador determinou seguir por PR para `main` e publicação no Render Free existente, sem exigir Browser Use, preview pago ou QA visual como pré-condição.
+- PR #15 é a PR existente para `main`; não abrir PR duplicada. Manter auto-deploy desligado e disparar publicação manual após integração.
+- Cada incremento, decisão, commit, merge, deploy e comportamento observado deve ser registrado em OR e nos documentos da missão.
+- Antes de declarar o SCP operacional, identificar o projeto Supabase realmente conectado ao Render e verificar/aplicar migrations 0010–0013. CI em PostgreSQL descartável não comprova schema persistente; `ensure-database.mjs` não aplica essas quatro migrations.
+- Não contratar Browser Use, não criar infraestrutura paga, não alterar plano Free, não tocar em 20.3/Mateus e não chamar Manus/LLM/dispatch nem consumir créditos sem autorização operacional específica.
+- OR: `governance/operational_reports/OR-20261115-0050.md`.
