@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { eq, and, asc, desc, isNull, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
@@ -1901,4 +1902,97 @@ export async function hasExecutionReadyMissionDocuments(taskId: number): Promise
     && ["READY", "ACTIVE"].includes(blueprint.state)
     && blueprint.sourceDocumentVersionId === tr.id
   );
+}
+
+
+/**
+ * Approves the exact latest ACTION_PLAN proposal version.
+ * Approval is appended as a new immutable document version and never releases execution.
+ */
+export async function approveMissionActionPlanVersion(input: {
+  taskId: number;
+  documentId: number;
+  ownerId: number;
+  expectedVersion: number;
+  expectedContentHash: string;
+}) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+
+  return database.transaction(async (transaction) => {
+    const [document] = await transaction
+      .select({
+        id: missionDocuments.id,
+        taskId: missionDocuments.taskId,
+        typeKey: missionDocumentTypes.typeKey,
+        ownerId: tasks.createdBy,
+      })
+      .from(missionDocuments)
+      .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
+      .innerJoin(tasks, eq(missionDocuments.taskId, tasks.id))
+      .where(and(
+        eq(missionDocuments.id, input.documentId),
+        eq(missionDocuments.taskId, input.taskId),
+        eq(tasks.createdBy, input.ownerId),
+      ))
+      .limit(1)
+      .for("update");
+
+    if (!document || document.typeKey !== "ACTION_PLAN") {
+      throw new Error("Action plan not found or access denied");
+    }
+
+    const [latest] = await transaction
+      .select()
+      .from(missionDocumentVersions)
+      .where(eq(missionDocumentVersions.documentId, document.id))
+      .orderBy(desc(missionDocumentVersions.version))
+      .limit(1);
+
+    if (!latest || latest.state !== "PROPOSED") {
+      throw new Error("Only the current PROPOSED action plan can be approved");
+    }
+    if (latest.version !== input.expectedVersion || !latest.contentHash
+      || latest.contentHash !== input.expectedContentHash) {
+      throw new Error("The action plan changed after it was displayed; reload and review the current version");
+    }
+
+    const actualHash = createHash("sha256").update(latest.content, "utf8").digest("hex");
+    if (actualHash !== latest.contentHash) {
+      throw new Error("Action plan integrity check failed; approval was rejected");
+    }
+
+    await validateMissionDocumentAuthor(transaction, document.ownerId, {
+      authorType: "HUMAN",
+      authorUserId: input.ownerId,
+    });
+
+    const [approvedVersion] = await transaction
+      .insert(missionDocumentVersions)
+      .values({
+        documentId: document.id,
+        version: latest.version + 1,
+        state: "APPROVED",
+        content: latest.content,
+        authorType: "HUMAN",
+        authorUserId: input.ownerId,
+        sourceDocumentVersionId: latest.sourceDocumentVersionId,
+        provenance: {
+          action: "explicit_human_approval",
+          approvedProposalVersionId: latest.id,
+          approvedProposalVersion: latest.version,
+          approvedProposalContentHash: latest.contentHash,
+        },
+        changeSummary: "Aprovação humana explícita da proposta v" + latest.version,
+        contentHash: latest.contentHash,
+        publishedAt: new Date(),
+      })
+      .returning();
+
+    await transaction.update(missionDocuments)
+      .set({ updatedAt: new Date() })
+      .where(eq(missionDocuments.id, document.id));
+
+    return approvedVersion;
+  });
 }
