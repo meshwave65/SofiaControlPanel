@@ -147,6 +147,89 @@ describe("messages.create — persistência e resposta Sofia", () => {
     }));
   });
 
+  it("encaminha pela missão raiz para a única tarefa-filha em execução", async () => {
+    const root = {
+      id: 19, createdBy: 152, title: "Missão coordenadora",
+      description: "Executar etapas", agentId: null, manusTaskId: null,
+    };
+    const child = {
+      id: 20, createdBy: 152, parentTaskId: 19, title: "Etapa em execução",
+      description: "Executar etapa", agentId: 8, manusTaskId: "manus-child-20",
+      agentPinned: false, manusStatus: "running", statusId: 3,
+    };
+    dbMock.getMissionRootTaskId.mockResolvedValue(19);
+    dbMock.getTaskById.mockImplementation(async (id: number) => id === 20 ? child : root);
+    dbMock.getTasksByParentId.mockResolvedValue([child]);
+    dbMock.getTaskStatusNameById.mockResolvedValue("PROGRESS");
+    invokeLLMMock.mockResolvedValue({
+      choices: [{
+        message: {
+          role: "assistant",
+          content: null,
+          tool_calls: [{
+            id: "call-forward-child",
+            type: "function",
+            function: {
+              name: "forward_operator_instruction_to_assigned_agent",
+              arguments: JSON.stringify({ message: "Continue a etapa." }),
+            },
+          }],
+        },
+      }],
+    });
+    sendManusMessageAndWaitMock.mockResolvedValue("Etapa concluída.");
+
+    const result = await appRouter.createCaller(context).messages.create({
+      taskId: 19, typeId: 1, content: "Envie ao executor atual: continue a etapa.",
+    });
+
+    expect(sendManusMessageAndWaitMock).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 20, agentId: 8, manusTaskId: "manus-child-20" }),
+      "Continue a etapa.",
+    );
+    expect(result.responseStatus).toBe("replied");
+    expect(result.reply.content).toContain("tarefa #20");
+  });
+
+  it("não escolhe arbitrariamente quando há várias execuções ativas", async () => {
+    const root = {
+      id: 19, createdBy: 152, title: "Missão coordenadora",
+      agentId: null, manusTaskId: null,
+    };
+    const children = [20, 21].map((id) => ({
+      id, createdBy: 152, parentTaskId: 19, title: `Etapa ${id}`,
+      agentId: id, manusTaskId: `manus-${id}`, manusStatus: "running", statusId: 3,
+    }));
+    dbMock.getTaskById.mockResolvedValue(root);
+    dbMock.getTasksByParentId.mockResolvedValue(children);
+    dbMock.getTaskStatusNameById.mockResolvedValue("PROGRESS");
+    invokeLLMMock.mockResolvedValue({
+      choices: [{
+        message: {
+          role: "assistant",
+          content: null,
+          tool_calls: [{
+            id: "call-forward-ambiguous",
+            type: "function",
+            function: {
+              name: "forward_operator_instruction_to_assigned_agent",
+              arguments: JSON.stringify({ message: "Reoriente a execução." }),
+            },
+          }],
+        },
+      }],
+    });
+
+    const result = await appRouter.createCaller(context).messages.create({
+      taskId: 19, typeId: 1, content: "Envie ao executor: reoriente a execução.",
+    });
+
+    expect(sendManusMessageAndWaitMock).not.toHaveBeenCalled();
+    expect(result.responseStatus).toBe("failed");
+    expect(result.reply.content).toContain("#20");
+    expect(result.reply.content).toContain("#21");
+  });
+
   it("responde perguntas pela Sofia sem encaminhá-las automaticamente ao agente", async () => {
     dbMock.getTaskById.mockResolvedValue({
       id: 19,
