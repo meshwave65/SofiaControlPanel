@@ -85,3 +85,7 @@ A defesa foi integrada aos quatro pontos de execução:
 O incremento não cria nem aprova registros de unidade e não cria tarefas operacionais. `READY_FOR_DISPATCH` só poderá ser atribuído por fluxo futuro que conclua dependências, risco, orçamento, permissão, elegibilidade específica, adaptador e aprovação humana individual. Nenhum dispatch foi realizado.
 
 A retomada de tarefas bloqueadas por créditos também revalida a autorização da unidade antes de enviar continuação ao executor ou criar nova execução após reatribuição. A autorização de dispatch não pode ser contornada pelo caminho de recuperação.
+
+A migration 0012 também define uma máquina de estados monotônica: `REGISTERED → AWAITING_APPROVAL → APPROVED → READY_FOR_DISPATCH → DISPATCHED`, com saídas controladas para `BLOCKED/CANCELLED`. Não se insere uma unidade diretamente aprovada/pronta; a aprovação é registrada depois da criação e vinculada ao proprietário. Depois de definido, o vínculo à tarefa operacional não pode ser removido ou reatribuído. A tarefa deve ser filha direta da missão raiz, condição repetida no repositório e no trigger 0003.
+
+A migration valida formato do hash SHA-256, comprimento da idempotency key, título não vazio, unicidade e ownership. A query de autorização também falha fechado se existir documento ACTION_PLAN sem versão persistida. CI final [43699884914](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43699884914): TypeScript, testes, build, migrations 0010–0012, instalação do trigger e teste de barreira PostgreSQL 16 descartável passaram.
