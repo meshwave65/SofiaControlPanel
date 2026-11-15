@@ -26,6 +26,11 @@
 
 A aba de conversa central com a SOFIA foi implementada em `TaskDetail.tsx` no commit `9944dedebe02e92b267758bf13b311d3ee8baebf`. A consulta/gravação usa a missão-raiz inclusive em detalhes de tarefas-filhas. CI aprovado (TypeScript, testes, build e validações PostgreSQL/dispatch); QA visual autenticado e teste real do ciclo Manus ainda pendentes. Ver OR-20261115-0045 e OR-20261115-0046.
 
+## Incrementos recentes
+
+- Messenger central implementado em TaskDetail; CI aprovado. OR-0045 e OR-0046.
+- Painel Execução e executor implementado em TaskDetail; CI aprovado. OR-0047.
+
 ## Próximo incremento
 
-Aguardar avaliação do responsável sobre o Messenger implementado. Corrigir localmente se necessário; depois escolher a próxima unidade funcional sem agrupar etapas futuras.
+Auditar um ponto específico do ciclo de vida da missão e os contratos de execução externa antes de implementar. Não oferecer pausa/retomada/transferência que apenas altere o estado local sem confirmação do executor. Um incremento por vez; QA visual e teste real controlado ainda pendentes.
