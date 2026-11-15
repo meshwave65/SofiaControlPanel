@@ -266,3 +266,15 @@ Controles e limites:
 - O status `configured` permanece elegível porque o claim atual o aceita; esta entrega não modifica a regra de atribuição.
 - O claim transacional continua sendo a única autoridade para reservar agente sob concorrência.
 - Testes do Messenger mockam banco e provedor; a execução SQL em banco persistente e a integração cognitiva externa real permanecem pendentes.
+
+## 19. Plano de ação estruturado e aprovação humana versionada (AC-018 / OR-20261114-0036)
+
+A SOFIA pode propor um plano de ação estruturado somente a partir do TR vigente validado e do Blueprint vigente READY/ACTIVE que referencia aquela versão exata do TR. O conteúdo é JSON validado deterministicamente no servidor e persistido como documento ACTION_PLAN, usando o catálogo e o versionamento imutável existentes.
+
+O plano inclui objetivo, resultado esperado, unidades de trabalho, dependências, critérios de aceite, propostas de agentes, riscos, reversibilidade e aprovação obrigatória. Agentes propostos devem pertencer ao snapshot read-only de elegibilidade. O snapshot não reserva agente e pode ficar obsoleto. Enquanto não existir modelo verificável de custo/crédito por unidade, estimativas de créditos permanecem null; saldo do agente não é custo de execução.
+
+A proposta é persistida como versão PROPOSED, com hash SHA-256 e proveniência para as versões exatas do TR e Blueprint. A aprovação humana é uma nova versão imutável APPROVED, de autoria do proprietário, com referência à versão e hash aprovados. A transação verifica versão/hash, integridade e atualidade das fontes; proposta alterada ou desatualizada não pode ser aprovada.
+
+A aprovação documental não cria tarefas-filhas, não atribui/reserva agentes, não altera status, não inicia execução, não despacha Manus e não autoriza consumo de créditos. Gates de risco, orçamento, permissões, idempotência e execução por unidade continuam sendo responsabilidades determinísticas futuras.
+
+A migration 0011 somente registra ACTION_PLAN no catálogo documental já protegido por RLS server-only; não cria nova tabela e não é executada automaticamente no startup. A validação externa do LLM e banco persistente não foi realizada.
