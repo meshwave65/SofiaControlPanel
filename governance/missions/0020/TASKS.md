@@ -8,7 +8,7 @@
 | 20.1 | Inventário funcional e diagnóstico inicial | DONE / histórico | ORs históricos da missão | Inventário e fronteiras iniciais de falha documentados; revalidar quando necessário. |
 | 20.2 | Integração e execução externa | DONE / histórico parcial | MISSION_0016 e ORs históricos | Integração Manus existente; validação real ponta a ponta depende de autorização e ambiente de teste. |
 | 20.3 | Unidade atribuída a Mateus | PRESERVADA — NÃO ALTERAR | Registro operacional próprio | Fora do escopo desta sequência; não modificar nem assumir. |
-| 20.4 | Auditoria e restauração funcional do SCP | PROGRESS | OR-20261115-0043, OR-20261115-0044, PR #15 | Evoluir o SCP como gestor soberano de missões; Messenger, ciclo de vida, coordenação pai/filhas, TR e autonomia em incrementos pequenos e verificáveis. |
+| 20.4 | Auditoria e restauração funcional do SCP | PROGRESS | OR-20261115-0043 a OR-20261115-0045, PR #15 | Evoluir o SCP como gestor soberano de missões; Messenger, ciclo de vida, coordenação pai/filhas, TR e autonomia em incrementos pequenos e verificáveis. |
 
 ## Regras de execução de 20.4
 
@@ -22,6 +22,10 @@
 - Não ampliar AC-023 ou integrações ARC/PGC estacionadas.
 - Não alterar 20.3/Mateus.
 
+## Estado do incremento Messenger
+
+A aba de conversa central com a SOFIA foi implementada em `TaskDetail.tsx` no commit `9944dedebe02e92b267758bf13b311d3ee8baebf`. A consulta/gravação usa a missão-raiz inclusive em detalhes de tarefas-filhas. CI e validação visual ainda não comprovados. Ver OR-20261115-0045.
+
 ## Próximo incremento
 
-Inspecionar o estado atual do Messenger em TaskDetail e expor um único fluxo funcional de conversa central com a SOFIA, reutilizando o roteamento já existente na PR #15. Delimitar a alteração depois de inspecionar o código real; não antecipar o restante da arquitetura.
+Aguardar avaliação do responsável sobre o Messenger implementado. Corrigir localmente se necessário; depois escolher a próxima unidade funcional sem agrupar etapas futuras.
