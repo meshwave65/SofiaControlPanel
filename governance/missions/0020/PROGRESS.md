@@ -22,7 +22,7 @@ A decisão metodológica mais recente estabelece visão global e planejamento in
 - Roteamento de mensagens da missão-raiz para executor ativo em tarefa-filha está implementado na branch e possui workflow anterior aprovado conforme OR-0043.
 - Commit `fabaff376cfbe7889752dc57ec3d7785e959d0aa` atualiza rótulos e descrição do TR na UI.
 - Commit `9944dedebe02e92b267758bf13b311d3ee8baebf` adiciona a aba Messenger ao detalhe da missão. A consulta e a gravação usam sempre o ID da missão-raiz, mesmo a partir de tarefa-filha.
-- CI/status checks do commit `9944dedebe02e92b267758bf13b311d3ee8baebf`: nenhum resultado observado até a atualização deste documento. Build/testes e QA visual permanecem pendentes.
+- CI do commit `9944dedebe02e92b267758bf13b311d3ee8baebf`: aprovado no run #43723491191 (TypeScript, testes, build e validações PostgreSQL/dispatch). Ver OR-20261115-0046. QA visual autenticado e teste real controlado do ciclo Manus ainda pendentes.
 - PR #15 permanece OPEN e não mergeada. Nenhuma alteração foi publicada em produção.
 
 ## Próxima ação
