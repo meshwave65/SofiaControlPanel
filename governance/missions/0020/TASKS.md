@@ -30,7 +30,8 @@ A aba de conversa central com a SOFIA foi implementada em `TaskDetail.tsx` no co
 
 - Messenger central implementado em TaskDetail; CI aprovado. OR-0045 e OR-0046.
 - Painel Execução e executor implementado em TaskDetail; CI aprovado. OR-0047.
+- Pausa e retomada Manus implementadas com confirmação externa e estados pendentes; CI aprovado (77 testes). OR-0048.
 
 ## Próximo incremento
 
-Auditar um ponto específico do ciclo de vida da missão e os contratos de execução externa antes de implementar. Não oferecer pausa/retomada/transferência que apenas altere o estado local sem confirmação do executor. Um incremento por vez; QA visual e teste real controlado ainda pendentes.
+Continuar a auditoria de sincronização/observabilidade do ciclo de vida, em uma unidade funcional por vez. Pausa/retomada estão implementadas e passaram CI, mas o teste real controlado e QA visual ainda dependem de ambiente publicado/autorização. Não realizar chamadas reais ou deploy sem autorização específica.
