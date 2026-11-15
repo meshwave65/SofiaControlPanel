@@ -86,7 +86,7 @@ export default function Messages() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-full bg-background text-foreground">
       {/* Header */}
       <div className="technical-header px-6 py-8 border-b-2 border-foreground/30 bg-foreground/5">
         <div className="max-w-7xl mx-auto flex justify-between items-end">
@@ -105,11 +105,11 @@ export default function Messages() {
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Sidebar - Tarefas */}
           <div className="lg:col-span-1 space-y-4">
-            <Card className="cad-card flex flex-col h-[650px] p-0 overflow-hidden border-2">
+            <Card className="cad-card flex min-h-0 h-[min(70svh,650px)] min-h-[360px] flex-col p-0 overflow-hidden border-2 lg:h-[650px]">
               <div className="p-4 border-b-2 border-foreground/10 bg-foreground/5">
                 <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground">Canais de Missão</h3>
               </div>
-              <ScrollArea className="flex-1">
+              <ScrollArea className="min-h-0 flex-1">
                 <div className="p-3 space-y-2">
                   {tasks.map((task: any) => (
                     <button
@@ -151,7 +151,7 @@ export default function Messages() {
 
           {/* Main - Chat */}
           <div className="lg:col-span-3">
-            <Card className="cad-card h-[650px] flex flex-col p-0 overflow-hidden relative border-2">
+            <Card className="cad-card flex min-h-0 h-[min(70svh,650px)] min-h-[360px] flex-col p-0 overflow-hidden relative border-2 lg:h-[650px]">
               {selectedTaskId === null ? (
                 <div className="flex items-center justify-center h-full text-muted-foreground bg-foreground/[0.02]">
                   <div className="text-center p-8 border-2 border-dashed border-foreground/10">
@@ -178,7 +178,7 @@ export default function Messages() {
                   </div>
 
                   {/* Mensagens */}
-                  <ScrollArea className="flex-1 p-6 bg-foreground/[0.01]">
+                  <ScrollArea className="min-h-0 flex-1 p-6 bg-foreground/[0.01]">
                     <div className="space-y-8">
                       {threadedMessages.length > 0 ? (
                         threadedMessages.map((thread) => (
