@@ -375,3 +375,6 @@ Foi criado workflow dedicado para executar `pnpm check`, `pnpm test`, `pnpm buil
 - Teste PostgreSQL descartável confirmou bloqueio da raiz, aceitação do caminho unitário autorizado e rejeição de filha sem vínculo. CI [43699256796](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43699256796) SUCCESS: migrations 0010–0012, trigger, teste SQL, TypeScript, testes e build.
 - Ainda não existe API/UI para registrar e aprovar unidade ou materializar tarefa-filha. Nenhuma tarefa criada, nenhum registro READY_FOR_DISPATCH, dispatch ou execução externa.
 - Sem migration persistente, Supabase/produção, merge, deploy, restart, LLM/Manus ou créditos. Task 20.3/Mateus intocada.
+
+
+- Revisão de robustez AC-020: máquina de estados monotônica; vínculo operacional imutável após preenchido; tarefa obrigatoriamente filha direta; documento ACTION_PLAN sem versão bloqueia; constraints de hash/idempotência/título. CI final [43699884914](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43699884914) SUCCESS.
