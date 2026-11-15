@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { eq, and, asc, desc, isNull, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { InsertUser, InsertAgent, users, agents, tasks, messages, activityLogs, contextReports, taskStatuses, taskPriorities, messageTypes, activityEventTypes, arcPolicies, arcAssessments, arcEvidence, arcAccessEvents, arcDeviceProfiles, arcConfidenceSnapshots, missionDocumentTypes, missionDocuments, missionDocumentVersions } from "../drizzle/schema";
+import { InsertUser, InsertAgent, users, agents, tasks, messages, activityLogs, contextReports, taskStatuses, taskPriorities, messageTypes, activityEventTypes, arcPolicies, arcAssessments, arcEvidence, arcAccessEvents, arcDeviceProfiles, arcConfidenceSnapshots, missionDocumentTypes, missionDocuments, missionDocumentVersions, missionActionUnits } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { decryptCredential, encryptCredential } from './credentials';
 import { evaluateArcShadow } from './arcEvaluator';
@@ -1904,6 +1904,145 @@ export async function hasExecutionReadyMissionDocuments(taskId: number): Promise
   );
 }
 
+
+/**
+ * Checks whether a task belongs to an approved ACTION_PLAN and, if so,
+ * requires an exact, persisted unit authorization before any execution path.
+ * Legacy missions without an ACTION_PLAN retain their existing dispatch path.
+ */
+export async function inspectTaskDispatchAuthorization(taskId: number): Promise<{
+  authorized: boolean;
+  requiresActionPlanUnit: boolean;
+  idempotencyKey: string | null;
+  reason: string | null;
+}> {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+
+  const [relations] = await database.execute(sql`
+    SELECT
+      to_regclass('sofia."missionDocuments"') IS NOT NULL AS documents_exist,
+      to_regclass('sofia."missionActionUnits"') IS NOT NULL AS action_units_exist
+  `) as any;
+  if (!relations?.documents_exist) {
+    return { authorized: true, requiresActionPlanUnit: false, idempotencyKey: null, reason: null };
+  }
+
+  const missionId = await resolveMissionRootTaskId(database, taskId);
+  if (missionId == null) {
+    return { authorized: false, requiresActionPlanUnit: false, idempotencyKey: null, reason: "A missão raiz não pôde ser resolvida." };
+  }
+
+  const [latestPlan] = await database
+    .select({
+      documentId: missionDocuments.id,
+      versionId: missionDocumentVersions.id,
+      version: missionDocumentVersions.version,
+      state: missionDocumentVersions.state,
+      content: missionDocumentVersions.content,
+      contentHash: missionDocumentVersions.contentHash,
+    })
+    .from(missionDocuments)
+    .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
+    .innerJoin(missionDocumentVersions, eq(missionDocumentVersions.documentId, missionDocuments.id))
+    .where(and(
+      eq(missionDocuments.taskId, missionId),
+      eq(missionDocuments.documentKey, "ACTION_PLAN"),
+      eq(missionDocumentTypes.typeKey, "ACTION_PLAN"),
+      sql`${missionDocumentVersions.version} = (
+        SELECT MAX(v2."version") FROM sofia."missionDocumentVersions" v2
+        WHERE v2."documentId" = ${missionDocuments.id}
+      )`,
+    ))
+    .limit(1);
+
+  if (!latestPlan) {
+    return { authorized: true, requiresActionPlanUnit: false, idempotencyKey: null, reason: null };
+  }
+  if (latestPlan.state !== "APPROVED") {
+    return {
+      authorized: false,
+      requiresActionPlanUnit: true,
+      idempotencyKey: null,
+      reason: "Existe um ACTION_PLAN vigente sem aprovação humana atual; dispatch está bloqueado.",
+    };
+  }
+
+  const actualHash = createHash("sha256").update(latestPlan.content, "utf8").digest("hex");
+  if (!latestPlan.contentHash || actualHash !== latestPlan.contentHash) {
+    return {
+      authorized: false,
+      requiresActionPlanUnit: true,
+      idempotencyKey: null,
+      reason: "A integridade SHA-256 do ACTION_PLAN aprovado não confere.",
+    };
+  }
+  if (!relations.action_units_exist) {
+    return {
+      authorized: false,
+      requiresActionPlanUnit: true,
+      idempotencyKey: null,
+      reason: "A persistência de identidade/autorização das unidades ainda não está instalada.",
+    };
+  }
+
+  const [unit] = await database
+    .select({
+      unitId: missionActionUnits.unitId,
+      unitTitle: missionActionUnits.unitTitle,
+      idempotencyKey: missionActionUnits.idempotencyKey,
+    })
+    .from(missionActionUnits)
+    .where(and(
+      eq(missionActionUnits.missionTaskId, missionId),
+      eq(missionActionUnits.actionPlanDocumentId, latestPlan.documentId),
+      eq(missionActionUnits.actionPlanVersionId, latestPlan.versionId),
+      eq(missionActionUnits.actionPlanVersionNumber, latestPlan.version),
+      eq(missionActionUnits.actionPlanContentHash, latestPlan.contentHash),
+      eq(missionActionUnits.operationalTaskId, taskId),
+      eq(missionActionUnits.state, "READY_FOR_DISPATCH"),
+      sql`${missionActionUnits.approvalUserId} IS NOT NULL`,
+      sql`${missionActionUnits.approvedAt} IS NOT NULL`,
+    ))
+    .limit(1);
+
+  if (!unit || !unit.idempotencyKey) {
+    return {
+      authorized: false,
+      requiresActionPlanUnit: true,
+      idempotencyKey: null,
+      reason: "A tarefa não possui vínculo aprovado e pronto para dispatch com uma unidade Txx da versão vigente.",
+    };
+  }
+
+  let planTasks: Array<{ id?: string; title?: string }> = [];
+  try {
+    const parsed = JSON.parse(latestPlan.content);
+    planTasks = Array.isArray(parsed.tasks) ? parsed.tasks : [];
+  } catch {
+    return {
+      authorized: false,
+      requiresActionPlanUnit: true,
+      idempotencyKey: null,
+      reason: "O conteúdo do ACTION_PLAN não é JSON válido.",
+    };
+  }
+  if (!planTasks.some((item) => item.id === unit.unitId && item.title === unit.unitTitle)) {
+    return {
+      authorized: false,
+      requiresActionPlanUnit: true,
+      idempotencyKey: null,
+      reason: "A unidade persistida não corresponde ao conteúdo exato do ACTION_PLAN aprovado.",
+    };
+  }
+
+  return {
+    authorized: true,
+    requiresActionPlanUnit: true,
+    idempotencyKey: unit.idempotencyKey,
+    reason: null,
+  };
+}
 
 /**
  * Approves the exact latest ACTION_PLAN proposal version.
