@@ -245,7 +245,7 @@ function DashboardLayoutContent({
         />
       </div>
 
-      <SidebarInset className="min-h-screen min-w-0">
+      <SidebarInset className="h-svh min-h-svh min-w-0 overflow-hidden">
         {isMobile && (
           <header className="sticky top-0 z-40 flex h-14 items-center gap-2 border-b bg-background/95 px-2 backdrop-blur">
             <Button
@@ -278,7 +278,7 @@ function DashboardLayoutContent({
           </header>
         )}
 
-        <main className={`min-w-0 flex-1 p-3 pb-24 sm:p-4 sm:pb-4 ${isMobile ? "pb-[calc(6rem+env(safe-area-inset-bottom))]" : ""}`}>
+        <main className={`min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain p-3 pb-24 sm:p-4 sm:pb-4 ${isMobile ? "pb-[calc(6rem+env(safe-area-inset-bottom))]" : ""}`}>
           {children}
         </main>
 
