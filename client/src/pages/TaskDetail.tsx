@@ -117,6 +117,24 @@ export default function TaskDetail() {
     { taskId },
     { enabled: canLoadTask && Boolean(taskQuery.data), retry: false },
   );
+  const initializeLegacyTRMutation = trpc.tasks.documents.initializeLegacyTR.useMutation({
+    onSuccess: async (result) => {
+      setSelectedDocumentId(result.documentId);
+      setSelectedVersionNumber(null);
+      await documentsQuery.refetch();
+      toast.success(result.alreadyExists ? "O TR desta missão já estava persistido." : "TR reconstruído a partir dos registros disponíveis. Revise antes de validar.");
+    },
+    onError: (error) => toast.error(error.message || "Não foi possível reconstruir o TR."),
+  });
+  const generateFORMutation = trpc.tasks.documents.generateFOR.useMutation({
+    onSuccess: async (result) => {
+      setSelectedDocumentId(result.documentId);
+      setSelectedVersionNumber(null);
+      await documentsQuery.refetch();
+      toast.success(result.alreadyExists ? "O FOR desta missão já estava persistido." : "FOR gerado a partir dos registros e evidências disponíveis.");
+    },
+    onError: (error) => toast.error(error.message || "Não foi possível gerar o FOR."),
+  });
   const [selectedDocumentId, setSelectedDocumentId] = useState<number | null>(null);
   const [selectedVersionNumber, setSelectedVersionNumber] = useState<number | null>(null);
   const [selectedActionUnitId, setSelectedActionUnitId] = useState<string | null>(null);
@@ -482,7 +500,7 @@ export default function TaskDetail() {
     ? externalStatusLabels[task.manusStatus.toLowerCase()] ?? task.manusStatus.replace(/_/g, " ")
     : task.manusTaskId ? "Estado não informado" : "Não iniciada";
   const canStartExecution = currentStatusName === "STAGED" && !task.manusTaskId;
-  const canReorientTR = ["PAUSED", "STAGED"].includes(currentStatusName ?? "") && !task.manusTaskId && task.manusStatus === "awaiting_tr_validation" && task.parentTaskId == null;
+  const canReorientTR = ["PAUSED", "STAGED"].includes(currentStatusName ?? "") && !task.manusTaskId && task.parentTaskId == null;
   const canFactorize = task.parentTaskId == null && ["STAGED", "PROGRESS"].includes(currentStatusName ?? "") && blueprintReady;
 
   return (
@@ -547,6 +565,17 @@ export default function TaskDetail() {
                       </option>
                     ))}
                   </select>
+                  {currentStatusName === "DONE" && !documents.some((document) => document.typeKey === "FOR") && task.parentTaskId == null && (
+                    <Button
+                      className="mt-2 w-full"
+                      variant="outline"
+                      onClick={() => generateFORMutation.mutate({ taskId })}
+                      disabled={generateFORMutation.isPending}
+                    >
+                      {generateFORMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Gerar FOR — Relatório final
+                    </Button>
+                  )}
                 </div>
               </div>
             </CardHeader>
@@ -558,8 +587,20 @@ export default function TaskDetail() {
                   Não foi possível carregar o catálogo documental. {documentsQuery.error.message}
                 </div>
               ) : !selectedDocument ? (
-                <div className="rounded-md border border-dashed p-5 text-sm text-muted-foreground">
-                  O TR inicial ainda não está disponível. A missão permanece bloqueada para execução até que o documento seja gerado e validado.
+                <div className="rounded-md border border-dashed p-5 text-sm text-muted-foreground space-y-3">
+                  <p>O TR ainda não está persistido para esta missão. Se ela foi criada antes do catálogo documental, a SOFIA pode reconstruí-lo usando apenas os campos e registros disponíveis, identificando lacunas e sem inventar a motivação original ou resultados.</p>
+                  {task.parentTaskId == null ? (
+                    <Button
+                      variant="outline"
+                      onClick={() => initializeLegacyTRMutation.mutate({ taskId })}
+                      disabled={initializeLegacyTRMutation.isPending}
+                    >
+                      {initializeLegacyTRMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Reconstruir TR desta missão
+                    </Button>
+                  ) : (
+                    <p>Abra a missão principal para iniciar a reconstrução documental.</p>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-4">
