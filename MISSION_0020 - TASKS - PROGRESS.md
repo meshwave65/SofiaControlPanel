@@ -395,7 +395,7 @@
 - Relatório: governance/operational_reports/OR-20261115-0041.md. Nenhuma migration persistente, execução, dispatch, consumo de créditos, merge ou deploy. Task 20.3/Mateus intocada.
 
 ### Diretriz de segurança contínua — ARC/PGC
-O ARC/PGC atual é somente um protótipo conceitual rudimentar, sem enforcement prático. A direção futura é um módulo de segurança contínua e contextual: autenticação estabelece identidade inicial, enquanto comportamento, contexto, integridade, escopo e condições do executor são reavaliados durante a operação. Sinais contínuos podem restringir, suspender ou provocar revalidação; nunca concedem permissões implicitamente nem substituem grants explícitos. Ver atualização em ACTION_UNIT_EXECUTION_GOVERNANCE.md e OR-20261115-0041.
+O ARC/PGC atual é somente um protótipo conceitual rudimentar, sem enforcement prático. A direção futura é um módulo de segurança contínua e contextual: autenticação estabelece identidade inicial, enquanto comportamento, contexto, integridade, escopo e condições do executor são reavaliados durante a operação. ARC/PGC fornecem somente avaliações e evidências consultivas; não bloqueiam conexões nem alteram interações autonomamente. O SOFIA aplica suas políticas e decide qualquer revalidação, restrição, suspensão ou bloqueio. PGC é acionado somente por critérios definidos pelo sistema; nenhum módulo concede permissões implicitamente. Ver atualização em ACTION_UNIT_EXECUTION_GOVERNANCE.md e OR-20261115-0041.
 
 ### AC-023a — ledger persistente de evidências implementado (OR-20261115-0042)
 - Nova tabela `missionActionUnitGateEvidence`, append-only, server-only e vinculada à identidade imutável da unidade Txx e ao hash/versão exatos do ACTION_PLAN.
@@ -403,3 +403,11 @@ O ARC/PGC atual é somente um protótipo conceitual rudimentar, sem enforcement 
 - Migration 0013 e teste SQL adicionados; schema Drizzle reconstruído a partir de baseline limpo.
 - CI run 43708974232 SUCCESS: TypeScript, 56 testes, build e PostgreSQL descartável migrations 0010–0013 + dispatch boundary.
 - Não grava grants reais, não libera gates por si só, não promove tarefa, não reserva agente nem despacha. Sem migration persistente, merge ou deploy. Task 20.3/Mateus intocada.
+
+
+### AC-023b — evidência de dependências (implementação em branch)
+- Novo módulo `server/actionUnitGateEvidence.ts` revalida a versão APPROVED mais recente do ACTION_PLAN, o hash SHA-256 e a identidade Txx antes de derivar dependências.
+- Dependência só é VERIFIED com registro da mesma versão/hash, vínculo operacional, tarefa filha direta, mesmo proprietário e status DONE; ausência ou divergência gera BLOCKED com motivo.
+- A evidência é append-only, atribuída a SYSTEM e persistida no ledger 0013. A avaliação de unidade passa a consumir esse resultado e os dados de aprovação/idempotência já persistidos.
+- Testes unitários adicionados para dependências concluídas, ausentes, não materializadas, não DONE, fora do escopo e lista vazia. CI pendente.
+- Nenhum gate de risco, orçamento, permissão, executor ou adaptador foi liberado; nenhuma tarefa foi promovida, despachada ou executada. Sem DB persistente, merge/deploy, créditos ou chamada externa. Task 20.3/Mateus intocada.
