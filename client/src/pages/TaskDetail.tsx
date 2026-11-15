@@ -770,13 +770,13 @@ export default function TaskDetail() {
                       {actionUnitGateMutation.data && (
                         <div className="space-y-2">
                           <p className="text-sm font-semibold">
-                            {actionUnitGateQuery.data.unit.id} — {actionUnitGateQuery.data.unit.title}
+                            {actionUnitGateMutation.data.unit.id} — {actionUnitGateMutation.data.unit.title}
                           </p>
                           <p className="text-xs font-semibold text-destructive">
-                            Decisão: {actionUnitGateQuery.data.gate.decision}
+                            Decisão: {actionUnitGateMutation.data.gate.decision}
                           </p>
                           <ul className="list-disc space-y-1 pl-5 text-xs text-muted-foreground">
-                            {actionUnitGateQuery.data.gate.blockers.map((blocker: any) => (
+                            {actionUnitGateMutation.data.gate.blockers.map((blocker: any) => (
                               <li key={blocker.code}><strong>{blocker.code}</strong>: {blocker.detail}</li>
                             ))}
                           </ul>
