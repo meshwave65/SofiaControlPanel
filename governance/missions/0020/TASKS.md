@@ -45,3 +45,9 @@ Primeiro reconciliar a branch da PR #15 com main, identificando e resolvendo con
 - Documentar cada etapa em OR/PROGRESS/TASKS, incluindo commit, merge, migrations, deploy e observação real.
 - Migrations 0010–0013 ainda precisam ser conferidas no banco persistente realmente conectado ao Render; CI descartável não equivale a aplicação persistente. Não inferir projeto Supabase.
 - Sem Browser Use pago, sem novo serviço, sem alteração do plano Free, sem task 20.3/Mateus e sem chamadas reais/consumo de créditos não autorizados.
+
+
+### Publicação inicial — OR-20261115-0050
+- PR #15 integrada por squash merge em `main`, commit `9e3f9bd3f7c09a7d2212bd7c1e30796cd020b78f`.
+- Deploy manual no Render Free iniciado, ID `dep-dbsvo1rbc2fs73cn5v1g`, estado inicial `build_in_progress`.
+- Não houve alteração do plano/serviço nem ativação de auto-deploy. Resultado funcional ainda não confirmado.
