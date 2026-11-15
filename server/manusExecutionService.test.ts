@@ -14,6 +14,7 @@ vi.mock("./db", () => dbMock);
 import {
   createManusTask,
   findNewAssistantReply,
+  stopManusTask,
   syncAgentCredits,
   syncRunningManusTasks,
 } from "./manusExecutionService";
@@ -71,6 +72,91 @@ describe("manusExecutionService — fluxo controlado de execução", () => {
       manusTaskId: "fixture-manus-1",
       manusStatus: "running",
     });
+  });
+
+  it("só confirma pausa após task.stop e task.detail reportarem stopped sem jobs em background", async () => {
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(new Response(JSON.stringify({ ok: true, task: { status: "running" } }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ ok: true, request_id: "stop-1" }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        ok: true,
+        task: { status: "stopped", has_running_background_jobs: false },
+      }), { status: 200 }));
+
+    const result = await stopManusTask({
+      id: 110,
+      agentId: 7,
+      manusTaskId: "fixture-manus-pause",
+    } as any);
+
+    expect(result).toEqual({ status: "stopped", hasRunningBackgroundJobs: false });
+    expect(fetch).toHaveBeenNthCalledWith(2,
+      "https://api.manus.ai/v2/task.stop",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ task_id: "fixture-manus-pause" }),
+      }),
+    );
+  });
+
+  it("não considera pausada uma tarefa stopped com jobs em background ativos", async () => {
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(new Response(JSON.stringify({ ok: true, task: { status: "running" } }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ ok: true }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        ok: true,
+        task: { status: "stopped", has_running_background_jobs: true },
+      }), { status: 200 }));
+
+    await expect(stopManusTask({
+      id: 111,
+      agentId: 7,
+      manusTaskId: "fixture-manus-background",
+    } as any)).resolves.toEqual({ status: "stopped", hasRunningBackgroundJobs: true });
+  });
+
+  it("mantém manual_pause_pending enquanto a Manus reportar jobs em background", async () => {
+    dbMock.getAllTasksGlobal.mockResolvedValue([{
+      id: 112,
+      agentId: 7,
+      manusTaskId: "fixture-manus-pending",
+      manusStatus: "manual_pause_pending",
+    }]);
+    vi.mocked(fetch).mockResolvedValueOnce(new Response(JSON.stringify({
+      ok: true,
+      task: { status: "stopped", has_running_background_jobs: true },
+    }), { status: 200 }));
+
+    const result = await syncRunningManusTasks();
+
+    expect(result).toEqual([{ taskId: 112, manusStatus: "manual_pause_pending", creditsUsed: null }]);
+    expect(dbMock.updateTaskExecution).toHaveBeenCalledWith(112, expect.objectContaining({
+      manusStatus: "manual_pause_pending",
+      completedAt: null,
+    }));
+    expect(dbMock.updateTaskStatus).not.toHaveBeenCalled();
+  });
+
+  it("finaliza manual_pause_pending como PAUSED quando não há jobs em background", async () => {
+    dbMock.getAllTasksGlobal.mockResolvedValue([{
+      id: 113,
+      agentId: 7,
+      manusTaskId: "fixture-manus-paused",
+      manusStatus: "manual_pause_pending",
+    }]);
+    vi.mocked(fetch).mockResolvedValueOnce(new Response(JSON.stringify({
+      ok: true,
+      task: { status: "stopped", has_running_background_jobs: false },
+    }), { status: 200 }));
+
+    const result = await syncRunningManusTasks();
+
+    expect(result).toEqual([{ taskId: 113, manusStatus: "stopped", creditsUsed: null }]);
+    expect(dbMock.updateTaskStatus).toHaveBeenCalledWith(113, 4);
+    expect(dbMock.updateTaskExecution).toHaveBeenCalledWith(113, expect.objectContaining({
+      manusStatus: "stopped",
+      completedAt: null,
+    }));
   });
 
   it("converte stopped em DONE após polling e reconcilia créditos", async () => {
