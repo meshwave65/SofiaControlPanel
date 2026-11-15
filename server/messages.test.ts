@@ -12,7 +12,6 @@ const dbMock = vi.hoisted(() => ({
   getTaskStatusNameById: vi.fn(),
   getAgentsByOwnerId: vi.fn(),
   inspectTaskAgentEligibility: vi.fn(),
-  getTaskStatusNameById: vi.fn(),
   getTaskStatusIdByName: vi.fn(),
   updateTaskExecution: vi.fn(),
   updateTaskStatus: vi.fn(),
@@ -150,6 +149,7 @@ describe("messages.create — persistência e resposta Sofia", () => {
       missionKey: null,
     });
     dbMock.getTaskStatusNameById.mockResolvedValue("PAUSED");
+    dbMock.getTaskStatusIdByName.mockResolvedValue(2);
     resumeManusTaskMock.mockResolvedValue({ resumed: true, status: "running" });
 
     const result = await appRouter.createCaller(context).tasks.resumeExecution({ taskId: 94 });
