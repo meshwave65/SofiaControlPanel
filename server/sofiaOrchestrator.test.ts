@@ -5,6 +5,7 @@ const dbMock = vi.hoisted(() => ({
   getTaskStatusIdByName: vi.fn(),
   getTaskStatusNameById: vi.fn(),
   hasExecutionReadyMissionDocuments: vi.fn(),
+  inspectTaskDispatchAuthorization: vi.fn(),
   getTasksByParentId: vi.fn(),
   updateTaskStatus: vi.fn(),
   claimStagedTask: vi.fn(),
@@ -31,6 +32,7 @@ describe("SofiaOrchestrator.processTask", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     dbMock.hasExecutionReadyMissionDocuments.mockResolvedValue(true);
+    dbMock.inspectTaskDispatchAuthorization.mockResolvedValue({ authorized: true, requiresActionPlanUnit: false, idempotencyKey: null, reason: null });
     dbMock.getTaskStatusNameById.mockImplementation(async (id: number) => id === 1 ? "STAGED" : id === 2 ? "PROGRESS" : "PAUSED");
     dbMock.getTaskStatusIdByName.mockImplementation(async (name: string) => {
       if (name === "STAGED") return 1;
@@ -126,6 +128,37 @@ describe("SofiaOrchestrator.startTask", () => {
     dbMock.updateTaskStatus.mockResolvedValue(undefined);
     dbMock.getAgentsByOwnerId.mockResolvedValue([{ id: 6, hasCredential: true, status: "online", creditsUpdatedAt: new Date() }]);
     manusMock.syncAgentCredits.mockResolvedValue(100);
+  });
+
+  it("blocks an approved ACTION_PLAN task when no persisted unit authorization exists", async () => {
+    dbMock.getTaskById.mockResolvedValueOnce(stagedTask);
+    dbMock.inspectTaskDispatchAuthorization.mockResolvedValueOnce({
+      authorized: false,
+      requiresActionPlanUnit: true,
+      idempotencyKey: null,
+      reason: "unidade sem vínculo aprovado",
+    });
+
+    await expect(SofiaOrchestrator.startTask(30)).rejects.toThrow("unidade sem vínculo aprovado");
+
+    expect(dbMock.claimStagedTaskWithAvailableAgent).not.toHaveBeenCalled();
+    expect(dbMock.getAgentsByOwnerId).not.toHaveBeenCalled();
+    expect(manusMock.createManusTask).not.toHaveBeenCalled();
+  });
+
+  it("requires the persisted idempotency key for ACTION_PLAN unit dispatch", async () => {
+    dbMock.getTaskById.mockResolvedValueOnce(stagedTask);
+    dbMock.inspectTaskDispatchAuthorization.mockResolvedValueOnce({
+      authorized: true,
+      requiresActionPlanUnit: true,
+      idempotencyKey: "unit-idempotency-key-0001",
+      reason: null,
+    });
+
+    await expect(SofiaOrchestrator.startTask(30)).rejects.toThrow("chave de idempotência persistida");
+
+    expect(dbMock.claimStagedTaskWithAvailableAgent).not.toHaveBeenCalled();
+    expect(manusMock.createManusTask).not.toHaveBeenCalled();
   });
 
   it("does not treat a PAUSED mission with an assigned agent as an in-flight claim", async () => {
