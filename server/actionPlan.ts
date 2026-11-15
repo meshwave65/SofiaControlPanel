@@ -34,6 +34,9 @@ export function validateActionPlan(value: unknown, eligibleAgentIds: number[]): 
     throw new Error("Plano inválido: existem identificadores de tarefa duplicados.");
   }
   for (const task of plan.tasks) {
+    if (new Set(task.dependsOn).size !== task.dependsOn.length) {
+      throw new Error("Plano inválido: dependência duplicada em " + task.id + ".");
+    }
     if (task.dependsOn.some((dependency) => !ids.has(dependency) || dependency === task.id)) {
       throw new Error("Plano inválido: dependência inexistente ou autorreferente em " + task.id + ".");
     }
@@ -44,5 +47,19 @@ export function validateActionPlan(value: unknown, eligibleAgentIds: number[]): 
       throw new Error("Plano inválido: não há modelo de custo/crédito verificado para estimar consumo.");
     }
   }
+
+  const byId = new Map(plan.tasks.map((task) => [task.id, task]));
+  const visiting = new Set<string>();
+  const visited = new Set<string>();
+  const visit = (taskId: string): void => {
+    if (visiting.has(taskId)) throw new Error("Plano inválido: ciclo de dependências detectado.");
+    if (visited.has(taskId)) return;
+    visiting.add(taskId);
+    for (const dependency of byId.get(taskId)?.dependsOn ?? []) visit(dependency);
+    visiting.delete(taskId);
+    visited.add(taskId);
+  };
+  for (const task of plan.tasks) visit(task.id);
+
   return plan;
 }
