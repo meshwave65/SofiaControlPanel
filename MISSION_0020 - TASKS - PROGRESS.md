@@ -374,6 +374,15 @@
 
 ### Checkpoint 20.4 — registro e aprovação individual ACTION_PLAN (AC-021 / OR-20261115-0039)
 - Implementados na branch #15 os serviços transacionais de registro idempotente e aprovação individual das unidades Txx, com conferência de ownership, versão APPROVED vigente e hash SHA-256.
-- API tRPC para consultar, registrar e aprovar unidades; UI TaskDetail mostra estado e permite aprovação por unidade. A aprovação não autoriza execução e nenhum filho operacional é criado.
-- Evidência detalhada em `governance/operational_reports/OR-20261115-0039.md` e contrato atualizado em `governance/architecture/ACTION_UNIT_EXECUTION_GOVERNANCE.md`.
-- Validação CI deste incremento ainda pendente; não declarar check/test/build aprovados. Migration 0012 não aplicada em banco persistente. Sem dispatch, créditos, merge ou deploy. Task 20.3/Mateus intocada.
+- API tRPC para consultar, registrar e aprovar unidades; UI TaskDetail mostra estado e permite aprovação por unidade. A aprovação não autoriza execução.
+- CI #283: PostgreSQL 16 descartável + migrations 0010–0012 + barreira SQL SUCCESS; o job da aplicação falhou em TypeScript, e os testes/build foram pulados. Correção aplicada depois; não há evidência confirmada de CI integral verde no head corrigido. Ver OR-20261115-0039.
+- Nenhuma migration persistente, tarefa operacional, dispatch, reserva/crédito, merge ou deploy. Task 20.3/Mateus intocada.
+
+### Checkpoint 20.4 — materialização de unidades aprovadas em PAUSED (AC-022 / OR-20261115-0040)
+- Implementado helper transacional `materializeApprovedMissionActionPlanUnits`: revalida missão raiz/owner, documento ACTION_PLAN e versão APPROVED vigente, SHA-256, schema JSON e correspondência completa de todas as unidades persistidas.
+- Materializa apenas unidades individualmente aprovadas, criando filhas PAUSED, sem agente, sem pinagem e sem execução externa; grava `operationalTaskId` e evidência na mesma transação. Repetição reutiliza vínculo existente.
+- Lock da missão e do documento serializa concorrência com materializações e revisões do ACTION_PLAN. A migration 0012 agora valida ownership e parent direto imediatamente ao estabelecer qualquer vínculo operacional, ainda que a unidade permaneça APPROVED.
+- Nova mutation tRPC e ação na TaskDetail exibem a materialização e o ID da tarefa-filha. Estado da unidade permanece APPROVED e a tarefa permanece PAUSED; nenhum caminho para STAGED/dispatch foi implementado.
+- Fixture SQL ampliada: vínculo PAUSED não concede READY_FOR_DISPATCH; tentativa de promover para STAGED antes da autorização é rejeitada.
+- Evidência em OR-20261115-0040 e contrato em `governance/architecture/ACTION_UNIT_EXECUTION_GOVERNANCE.md`.
+- TypeScript, testes, build e job PostgreSQL do head atualizado ainda pendentes. Nenhuma migration persistente, tarefa real, dispatch, LLM/Manus, crédito, merge ou deploy. Task 20.3/Mateus intocada.
