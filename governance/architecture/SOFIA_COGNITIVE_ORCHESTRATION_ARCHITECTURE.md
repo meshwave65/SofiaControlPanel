@@ -288,3 +288,14 @@ A query `tasks.documents.evaluateActionPlanUnit` é somente leitura, valida owne
 Restrição crítica identificada: `drizzle/0003_automatic_task_dispatch.sql` cria trigger AFTER INSERT OR UPDATE OF `statusId`, `agentId`; uma tarefa que entra em STAGED dispara `net.http_post`. `scripts/ensure-database.mjs` instala esse trigger na inicialização. Assim, criar subtarefa STAGED pode iniciar dispatch antes de qualquer confirmação posterior. Não materializar Txx em tarefas operacionais até existir protocolo transacional e defesa no servidor, orquestrador, endpoint interno e trigger SQL.
 
 A pré-avaliação atual bloqueia por ausência de mapeamento de dependências, política de risco, orçamento verificado, permissão por unidade, elegibilidade do executor-filho, idempotência persistida e adaptador específico. Mesmo o resultado positivo futuro será apenas `READY_FOR_SEPARATE_DISPATCH_GATE`; a função sempre declara `dispatchPerformed=false`. Nenhuma migration, alteração de trigger, tarefa-filho, dispatch ou execução foi realizada.
+
+
+## 21. Identidade persistente e autorização transacional de unidades ACTION_PLAN (AC-020 / OR-20261115-0038)
+
+A tabela server-only `missionActionUnits` registra a identidade operacional de cada Txx vinculada à missão raiz e à versão/hash imutáveis do ACTION_PLAN aprovado. Guarda chave de idempotência única, vínculo opcional à tarefa operacional, estado e autoria/data da aprovação individual. O trigger da tabela rejeita plano desatualizado, conteúdo Txx divergente, aprovação que não seja do proprietário e tarefa operacional fora da árvore direta da missão.
+
+A barreira de dispatch foi integrada à migration 0003, que é reinstalada pelo `scripts/ensure-database.mjs`. Para missões com ACTION_PLAN, a raiz e qualquer tarefa sem registro de unidade aprovado, em `READY_FOR_DISPATCH`, e vinculado à tarefa não chegam ao HTTP callback. A função verifica também o conteúdo exato Txx/título e a versão/hash atual do plano. Se a migration 0012 ainda não existir numa instalação que já tenha o catálogo documental, o fluxo falha fechado.
+
+O repositório server-side e o orquestrador repetem a validação. O endpoint interno recebe a chave de idempotência do trigger; chamadas diretas da UI/tRPC sem essa chave não podem iniciar unidades ACTION_PLAN. Missões legadas sem ACTION_PLAN preservam o dispatch existente.
+
+Esta etapa não implementa ainda a API/UI para registrar/aprovar unidade, materialização transacional da tarefa-filha ou atualização de estado após execução. Nenhum registro foi colocado em `READY_FOR_DISPATCH`, nenhuma subtarefa foi criada e nenhum dispatch foi executado. A etapa seguinte deverá persistir pré-condições operacionais (dependências, risco, orçamento, permissões, elegibilidade e adaptador), aprovação individual e criação atômica em PAUSED → vínculo → STAGED.
