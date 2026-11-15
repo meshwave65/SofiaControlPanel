@@ -1962,6 +1962,53 @@ export async function approveMissionActionPlanVersion(input: {
       throw new Error("Action plan integrity check failed; approval was rejected");
     }
 
+    const [sourceBlueprint] = await transaction
+      .select({
+        id: missionDocumentVersions.id,
+        documentId: missionDocumentVersions.documentId,
+        state: missionDocumentVersions.state,
+        sourceDocumentVersionId: missionDocumentVersions.sourceDocumentVersionId,
+        typeKey: missionDocumentTypes.typeKey,
+        sourceTaskId: missionDocuments.taskId,
+      })
+      .from(missionDocumentVersions)
+      .innerJoin(missionDocuments, eq(missionDocumentVersions.documentId, missionDocuments.id))
+      .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
+      .where(eq(missionDocumentVersions.id, latest.sourceDocumentVersionId ?? -1))
+      .limit(1);
+
+    if (!sourceBlueprint || sourceBlueprint.typeKey !== "BLUEPRINT" || sourceBlueprint.sourceTaskId !== input.taskId) {
+      throw new Error("Action plan source Blueprint is missing or belongs to another mission");
+    }
+    const [currentBlueprint] = await transaction
+      .select({ id: missionDocumentVersions.id })
+      .from(missionDocumentVersions)
+      .where(eq(missionDocumentVersions.documentId, sourceBlueprint.documentId))
+      .orderBy(desc(missionDocumentVersions.version))
+      .limit(1);
+    const [currentTR] = await transaction
+      .select({
+        id: missionDocumentVersions.id,
+        state: missionDocumentVersions.state,
+      })
+      .from(missionDocumentVersions)
+      .innerJoin(missionDocuments, eq(missionDocumentVersions.documentId, missionDocuments.id))
+      .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
+      .where(and(
+        eq(missionDocuments.taskId, input.taskId),
+        eq(missionDocuments.documentKey, "TR"),
+        eq(missionDocumentTypes.typeKey, "TR"),
+      ))
+      .orderBy(desc(missionDocumentVersions.version))
+      .limit(1);
+
+    if (!currentBlueprint || currentBlueprint.id !== sourceBlueprint.id
+      || !["READY", "ACTIVE"].includes(sourceBlueprint.state)
+      || !currentTR || !["VALIDATED", "ACTIVE", "REORIENTED"].includes(currentTR.state)
+      || sourceBlueprint.sourceDocumentVersionId !== currentTR.id) {
+      throw new Error("The action plan is stale: its exact source Blueprint/TR is no longer current and execution-ready");
+    }
+
     await validateMissionDocumentAuthor(transaction, document.ownerId, {
       authorType: "HUMAN",
       authorUserId: input.ownerId,
