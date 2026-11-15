@@ -340,3 +340,11 @@ Foi criado workflow dedicado para executar `pnpm check`, `pnpm test`, `pnpm buil
 - CI run 43656100735 SUCCESS: `pnpm check`, 43/43 testes, `pnpm build` e migration 0010 em PostgreSQL 16 descartável.
 - Próxima etapa: planos de ação persistíveis, versionados e vinculados ao TR/Blueprint, com efeitos/custos/riscos/dependências e confirmação humana explícita antes de ferramenta mutável.
 - Sem DB persistente, migration aplicada, merge, deploy, restart, dispatch, LLM/Manus real ou créditos. PR #15 sem merge. Task 20.3/Mateus intocada. OR-20261114-0035.
+
+### Checkpoint 20.4 — plano de ação estruturado (OR-20261114-0036)
+
+- SOFIA agora pode propor um plano JSON versionado, derivado do TR validado e do Blueprint vigente.
+- O plano explicita objetivo, entregáveis, unidades/dependências, agentes propostos, critérios de aceite, riscos e reversibilidade. Custos em créditos permanecem não estimados até existir modelo verificável.
+- A aprovação do proprietário é persistida como nova versão imutável APPROVED, vinculada ao hash da proposta exibida; a transação rejeita alterações concorrentes e fontes obsoletas.
+- Aprovação não despacha nem executa tarefas, não reserva agentes e não autoriza créditos. Execução por unidade e gates de risco/orçamento/permissão permanecem fases posteriores.
+- CI e migration 0011 em PostgreSQL descartável pendentes no momento do registro. Nenhuma migration persistente, merge, deploy ou execução externa. Task 20.3/Mateus intocada.
