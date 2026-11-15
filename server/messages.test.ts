@@ -12,14 +12,23 @@ const dbMock = vi.hoisted(() => ({
   getTaskStatusNameById: vi.fn(),
   getAgentsByOwnerId: vi.fn(),
   inspectTaskAgentEligibility: vi.fn(),
+  getTaskStatusNameById: vi.fn(),
+  getTaskStatusIdByName: vi.fn(),
+  updateTaskExecution: vi.fn(),
+  updateTaskStatus: vi.fn(),
+  getOrCreateActivityEventType: vi.fn(),
+  createActivityLog: vi.fn(),
+  updateTaskGitHubSync: vi.fn(),
 }));
 const invokeLLMMock = vi.hoisted(() => vi.fn());
 const sendManusMessageAndWaitMock = vi.hoisted(() => vi.fn());
+const stopManusTaskMock = vi.hoisted(() => vi.fn());
 
 vi.mock("./db", () => dbMock);
 vi.mock("./_core/llm", () => ({ invokeLLM: invokeLLMMock }));
 vi.mock("./manusExecutionService", () => ({
   sendManusMessageAndWait: sendManusMessageAndWaitMock,
+  stopManusTask: stopManusTaskMock,
   syncAgentCredits: vi.fn(),
 }));
 
@@ -45,6 +54,9 @@ describe("messages.create — persistência e resposta Sofia", () => {
       candidates: [],
       interpretationLimits: ["Somente leitura."],
     });
+    dbMock.getTaskStatusNameById.mockResolvedValue("PROGRESS");
+    dbMock.getTaskStatusIdByName.mockResolvedValue(4);
+    dbMock.getOrCreateActivityEventType.mockResolvedValue({ id: 9, name: "task_execution_paused" });
     dbMock.getTaskById.mockResolvedValue({
       id: 19,
       createdBy: 152,
@@ -64,6 +76,80 @@ describe("messages.create — persistência e resposta Sofia", () => {
     invokeLLMMock.mockResolvedValue({
       choices: [{ message: { role: "assistant", content: "Canal confirmado." } }],
     });
+  });
+
+  it("pausa a tarefa local somente após confirmação externa sem jobs em background", async () => {
+    dbMock.getTaskById.mockResolvedValue({
+      id: 91,
+      createdBy: 152,
+      statusId: 2,
+      agentId: 7,
+      manusTaskId: "manus-pause-91",
+      manusStatus: "running",
+      missionKey: null,
+    });
+    stopManusTaskMock.mockResolvedValue({
+      status: "stopped",
+      hasRunningBackgroundJobs: false,
+    });
+
+    const result = await appRouter.createCaller(context).tasks.pauseExecution({ taskId: 91 });
+
+    expect(result).toEqual({
+      paused: true,
+      pending: false,
+      externalStatus: "stopped",
+      hasRunningBackgroundJobs: false,
+    });
+    expect(stopManusTaskMock).toHaveBeenCalledWith(expect.objectContaining({ id: 91 }), false);
+    expect(dbMock.updateTaskExecution).toHaveBeenCalledWith(91, { manusStatus: "stopped", completedAt: null });
+    expect(dbMock.updateTaskStatus).toHaveBeenCalledWith(91, 4);
+    expect(dbMock.createActivityLog).toHaveBeenCalled();
+  });
+
+  it("mantém PROGRESS quando a Manus ainda reporta processos em segundo plano", async () => {
+    dbMock.getTaskById.mockResolvedValue({
+      id: 92,
+      createdBy: 152,
+      statusId: 2,
+      agentId: 7,
+      manusTaskId: "manus-pause-92",
+      manusStatus: "running",
+      missionKey: null,
+    });
+    stopManusTaskMock.mockResolvedValue({
+      status: "stopped",
+      hasRunningBackgroundJobs: true,
+    });
+
+    const result = await appRouter.createCaller(context).tasks.pauseExecution({ taskId: 92 });
+
+    expect(result).toEqual({
+      paused: false,
+      pending: true,
+      externalStatus: "stopped",
+      hasRunningBackgroundJobs: true,
+    });
+    expect(dbMock.updateTaskExecution).toHaveBeenCalledWith(92, {
+      manusStatus: "manual_pause_pending",
+      completedAt: null,
+    });
+    expect(dbMock.updateTaskStatus).not.toHaveBeenCalled();
+  });
+
+  it("não permite pausar tarefa de outro proprietário", async () => {
+    dbMock.getTaskById.mockResolvedValue({
+      id: 93,
+      createdBy: 999,
+      statusId: 2,
+      agentId: 7,
+      manusTaskId: "manus-pause-93",
+      manusStatus: "running",
+    });
+
+    await expect(appRouter.createCaller(context).tasks.pauseExecution({ taskId: 93 }))
+      .rejects.toMatchObject({ code: "NOT_FOUND" });
+    expect(stopManusTaskMock).not.toHaveBeenCalled();
   });
 
   it("persiste o operador, envia o histórico à IA e persiste a resposta como filha", async () => {
