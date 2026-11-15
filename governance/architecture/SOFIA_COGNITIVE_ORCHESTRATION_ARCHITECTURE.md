@@ -278,3 +278,13 @@ A proposta é persistida como versão PROPOSED, com hash SHA-256 e proveniência
 A aprovação documental não cria tarefas-filhas, não atribui/reserva agentes, não altera status, não inicia execução, não despacha Manus e não autoriza consumo de créditos. Gates de risco, orçamento, permissões, idempotência e execução por unidade continuam sendo responsabilidades determinísticas futuras.
 
 A migration 0011 somente registra ACTION_PLAN no catálogo documental já protegido por RLS server-only; não cria nova tabela e não é executada automaticamente no startup. A validação externa do LLM e banco persistente não foi realizada.
+
+## 20. Pré-avaliação determinística de governança por unidade (AC-019 / OR-20261114-0037)
+
+O ACTION_PLAN aprovado não autoriza automaticamente a execução de suas unidades. O motor `evaluateExecutionGate` aplica avaliação determinística fail-closed para aprovação do plano, atualidade de TR/Blueprint, dependências concluídas, classificação/limite de risco, estimativa e orçamento verificados, permissão por unidade, elegibilidade específica do executor, idempotência e adaptador de execução.
+
+A query `tasks.documents.evaluateActionPlanUnit` é somente leitura, valida ownership, carrega a versão vigente do ACTION_PLAN, identifica a unidade e revalida a cadeia de origem Blueprint→TR. A UI permite selecionar uma unidade e visualizar os bloqueios. Evidência desconhecida resulta em bloqueio; elegibilidade do agente-pai não é usada como prova para futura tarefa-filha.
+
+Restrição crítica identificada: `drizzle/0003_automatic_task_dispatch.sql` cria trigger AFTER INSERT OR UPDATE OF `statusId`, `agentId`; uma tarefa que entra em STAGED dispara `net.http_post`. `scripts/ensure-database.mjs` instala esse trigger na inicialização. Assim, criar subtarefa STAGED pode iniciar dispatch antes de qualquer confirmação posterior. Não materializar Txx em tarefas operacionais até existir protocolo transacional e defesa no servidor, orquestrador, endpoint interno e trigger SQL.
+
+A pré-avaliação atual bloqueia por ausência de mapeamento de dependências, política de risco, orçamento verificado, permissão por unidade, elegibilidade do executor-filho, idempotência persistida e adaptador específico. Mesmo o resultado positivo futuro será apenas `READY_FOR_SEPARATE_DISPATCH_GATE`; a função sempre declara `dispatchPerformed=false`. Nenhuma migration, alteração de trigger, tarefa-filho, dispatch ou execução foi realizada.
