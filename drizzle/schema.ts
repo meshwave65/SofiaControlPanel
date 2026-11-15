@@ -729,6 +729,347 @@ export const missionActionUnitsRelations = relations(missionActionUnits, ({ one 
   approvalUser: one(users, { fields: [missionActionUnits.approvalUserId], references: [users.id] }),
 }));
 
+
+export const missionActionUnitGateEvidence = sofia.table("missionActionUnitGateEvidence", {
+  id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
+  actionUnitId: integer("actionUnitId").notNull(),
+  missionTaskId: integer("missionTaskId").notNull(),
+  actionPlanDocumentId: integer("actionPlanDocumentId").notNull(),
+  actionPlanVersionId: integer("actionPlanVersionId").notNull(),
+  actionPlanVersionNumber: integer("actionPlanVersionNumber").notNull(),
+  actionPlanContentHash: varchar("actionPlanContentHash", { length: 64 }).notNull(),
+  unitId: varchar("unitId", { length: 8 }).notNull(),
+  gateKey: varchar("gateKey", { length: 40 }).notNull(),
+  decision: varchar("decision", { length: 16 }).notNull(),
+  actorType: varchar("actorType", { length: 16 }).notNull(),
+  actorUserId: integer("actorUserId"),
+  source: varchar("source", { length: 128 }).notNull(),
+  sourceRef: text("sourceRef"),
+  evidence: jsonb("evidence").notNull(),
+  observedAt: timestamp("observedAt").notNull().defaultNow(),
+  validUntil: timestamp("validUntil"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  actionUnitIdx: index("missionActionUnitGateEvidence_action_unit_idx").on(table.actionUnitId),
+  gateObservedIdx: index("missionActionUnitGateEvidence_gate_observed_idx").on(table.actionUnitId, table.gateKey, table.observedAt),
+  gateKeyCheck: check("missionActionUnitGateEvidence_gate_key_check", sql`${table.gateKey} IN ('DEPENDENCY', 'RISK_POLICY', 'BUDGET_AUTHORIZATION', 'UNIT_PERMISSION', 'EXECUTOR_ELIGIBILITY', 'ADAPTER_CAPABILITY')`),
+  decisionCheck: check("missionActionUnitGateEvidence_decision_check", sql`${table.decision} IN ('VERIFIED', 'BLOCKED', 'UNKNOWN')`),
+  actorTypeCheck: check("missionActionUnitGateEvidence_actor_type_check", sql`${table.actorType} IN ('SYSTEM', 'OWNER')`),
+  actorPairCheck: check("missionActionUnitGateEvidence_actor_pair_check", sql`(${table.actorType} = 'OWNER' AND ${table.actorUserId} IS NOT NULL) OR (${table.actorType} = 'SYSTEM' AND ${table.actorUserId} IS NULL)`),
+  hashFormatCheck: check("missionActionUnitGateEvidence_hash_format", sql`${table.actionPlanContentHash} ~ '^[a-f0-9]{64}, ({ many }) => ({
+  documents: many(missionDocuments),
+}));
+
+export const missionDocumentsRelations = relations(missionDocuments, ({ one, many }) => ({
+  task: one(tasks, {
+    fields: [missionDocuments.taskId],
+    references: [tasks.id],
+  }),
+  documentType: one(missionDocumentTypes, {
+    fields: [missionDocuments.documentTypeId],
+    references: [missionDocumentTypes.id],
+  }),
+  versions: many(missionDocumentVersions),
+}));
+
+export const missionDocumentVersionsRelations = relations(missionDocumentVersions, ({ one }) => ({
+  document: one(missionDocuments, {
+    fields: [missionDocumentVersions.documentId],
+    references: [missionDocuments.id],
+  }),
+  authorUser: one(users, {
+    fields: [missionDocumentVersions.authorUserId],
+    references: [users.id],
+  }),
+  authorAgent: one(agents, {
+    fields: [missionDocumentVersions.authorAgentId],
+    references: [agents.id],
+  }),
+  sourceVersion: one(missionDocumentVersions, {
+    fields: [missionDocumentVersions.sourceDocumentVersionId],
+    references: [missionDocumentVersions.id],
+    relationName: "sourceVersion",
+  }),
+}));
+`),
+  hashFormatCheck: check("missionActionUnits_hash_format", sql`${table.actionPlanContentHash} ~ '^[a-f0-9]{64}
+  actionPlanDocumentFk: foreignKey({ columns: [table.actionPlanDocumentId], foreignColumns: [missionDocuments.id] }).onDelete("restrict"),
+  actionPlanVersionFk: foreignKey({ columns: [table.actionPlanVersionId], foreignColumns: [missionDocumentVersions.id] }).onDelete("restrict"),
+  operationalTaskFk: foreignKey({ columns: [table.operationalTaskId], foreignColumns: [tasks.id] }).onDelete("restrict"),
+  approvalUserFk: foreignKey({ columns: [table.approvalUserId], foreignColumns: [users.id] }).onDelete("restrict"),
+}));
+
+export type MissionActionUnit = typeof missionActionUnits.$inferSelect;
+export type InsertMissionActionUnit = typeof missionActionUnits.$inferInsert;
+
+export const missionActionUnitsRelations = relations(missionActionUnits, ({ one }) => ({
+  mission: one(tasks, { fields: [missionActionUnits.missionTaskId], references: [tasks.id] }),
+  actionPlanDocument: one(missionDocuments, { fields: [missionActionUnits.actionPlanDocumentId], references: [missionDocuments.id] }),
+  actionPlanVersion: one(missionDocumentVersions, { fields: [missionActionUnits.actionPlanVersionId], references: [missionDocumentVersions.id] }),
+  operationalTask: one(tasks, { fields: [missionActionUnits.operationalTaskId], references: [tasks.id], relationName: "actionUnitOperationalTask" }),
+  approvalUser: one(users, { fields: [missionActionUnits.approvalUserId], references: [users.id] }),
+}));
+
+export const missionDocumentTypesRelations = relations(missionDocumentTypes, ({ many }) => ({
+  documents: many(missionDocuments),
+}));
+
+export const missionDocumentsRelations = relations(missionDocuments, ({ one, many }) => ({
+  task: one(tasks, {
+    fields: [missionDocuments.taskId],
+    references: [tasks.id],
+  }),
+  documentType: one(missionDocumentTypes, {
+    fields: [missionDocuments.documentTypeId],
+    references: [missionDocumentTypes.id],
+  }),
+  versions: many(missionDocumentVersions),
+}));
+
+export const missionDocumentVersionsRelations = relations(missionDocumentVersions, ({ one }) => ({
+  document: one(missionDocuments, {
+    fields: [missionDocumentVersions.documentId],
+    references: [missionDocuments.id],
+  }),
+  authorUser: one(users, {
+    fields: [missionDocumentVersions.authorUserId],
+    references: [users.id],
+  }),
+  authorAgent: one(agents, {
+    fields: [missionDocumentVersions.authorAgentId],
+    references: [agents.id],
+  }),
+  sourceVersion: one(missionDocumentVersions, {
+    fields: [missionDocumentVersions.sourceDocumentVersionId],
+    references: [missionDocumentVersions.id],
+    relationName: "sourceVersion",
+  }),
+}));
+`),
+  idempotencyLengthCheck: check("missionActionUnits_idempotency_length", sql`char_length(${table.idempotencyKey}) BETWEEN 16 AND 128`),
+  titleNonemptyCheck: check("missionActionUnits_title_nonempty", sql`length(trim(${table.unitTitle})) > 0`),
+  missionTaskFk: foreignKey({ columns: [table.missionTaskId], foreignColumns: [tasks.id] }).onDelete("restrict"),
+  actionPlanDocumentFk: foreignKey({ columns: [table.actionPlanDocumentId], foreignColumns: [missionDocuments.id] }).onDelete("restrict"),
+  actionPlanVersionFk: foreignKey({ columns: [table.actionPlanVersionId], foreignColumns: [missionDocumentVersions.id] }).onDelete("restrict"),
+  operationalTaskFk: foreignKey({ columns: [table.operationalTaskId], foreignColumns: [tasks.id] }).onDelete("restrict"),
+  approvalUserFk: foreignKey({ columns: [table.approvalUserId], foreignColumns: [users.id] }).onDelete("restrict"),
+}));
+
+export type MissionActionUnit = typeof missionActionUnits.$inferSelect;
+export type InsertMissionActionUnit = typeof missionActionUnits.$inferInsert;
+
+export const missionActionUnitsRelations = relations(missionActionUnits, ({ one }) => ({
+  mission: one(tasks, { fields: [missionActionUnits.missionTaskId], references: [tasks.id] }),
+  actionPlanDocument: one(missionDocuments, { fields: [missionActionUnits.actionPlanDocumentId], references: [missionDocuments.id] }),
+  actionPlanVersion: one(missionDocumentVersions, { fields: [missionActionUnits.actionPlanVersionId], references: [missionDocumentVersions.id] }),
+  operationalTask: one(tasks, { fields: [missionActionUnits.operationalTaskId], references: [tasks.id], relationName: "actionUnitOperationalTask" }),
+  approvalUser: one(users, { fields: [missionActionUnits.approvalUserId], references: [users.id] }),
+}));
+
+export const missionDocumentTypesRelations = relations(missionDocumentTypes, ({ many }) => ({
+  documents: many(missionDocuments),
+}));
+
+export const missionDocumentsRelations = relations(missionDocuments, ({ one, many }) => ({
+  task: one(tasks, {
+    fields: [missionDocuments.taskId],
+    references: [tasks.id],
+  }),
+  documentType: one(missionDocumentTypes, {
+    fields: [missionDocuments.documentTypeId],
+    references: [missionDocumentTypes.id],
+  }),
+  versions: many(missionDocumentVersions),
+}));
+
+export const missionDocumentVersionsRelations = relations(missionDocumentVersions, ({ one }) => ({
+  document: one(missionDocuments, {
+    fields: [missionDocumentVersions.documentId],
+    references: [missionDocuments.id],
+  }),
+  authorUser: one(users, {
+    fields: [missionDocumentVersions.authorUserId],
+    references: [users.id],
+  }),
+  authorAgent: one(agents, {
+    fields: [missionDocumentVersions.authorAgentId],
+    references: [agents.id],
+  }),
+  sourceVersion: one(missionDocumentVersions, {
+    fields: [missionDocumentVersions.sourceDocumentVersionId],
+    references: [missionDocumentVersions.id],
+    relationName: "sourceVersion",
+  }),
+}));
+`),
+  unitIdFormatCheck: check("missionActionUnitGateEvidence_unit_id_format", sql`${table.unitId} ~ '^T[0-9]{2}, ({ many }) => ({
+  documents: many(missionDocuments),
+}));
+
+export const missionDocumentsRelations = relations(missionDocuments, ({ one, many }) => ({
+  task: one(tasks, {
+    fields: [missionDocuments.taskId],
+    references: [tasks.id],
+  }),
+  documentType: one(missionDocumentTypes, {
+    fields: [missionDocuments.documentTypeId],
+    references: [missionDocumentTypes.id],
+  }),
+  versions: many(missionDocumentVersions),
+}));
+
+export const missionDocumentVersionsRelations = relations(missionDocumentVersions, ({ one }) => ({
+  document: one(missionDocuments, {
+    fields: [missionDocumentVersions.documentId],
+    references: [missionDocuments.id],
+  }),
+  authorUser: one(users, {
+    fields: [missionDocumentVersions.authorUserId],
+    references: [users.id],
+  }),
+  authorAgent: one(agents, {
+    fields: [missionDocumentVersions.authorAgentId],
+    references: [agents.id],
+  }),
+  sourceVersion: one(missionDocumentVersions, {
+    fields: [missionDocumentVersions.sourceDocumentVersionId],
+    references: [missionDocumentVersions.id],
+    relationName: "sourceVersion",
+  }),
+}));
+`),
+  hashFormatCheck: check("missionActionUnits_hash_format", sql`${table.actionPlanContentHash} ~ '^[a-f0-9]{64}
+  actionPlanDocumentFk: foreignKey({ columns: [table.actionPlanDocumentId], foreignColumns: [missionDocuments.id] }).onDelete("restrict"),
+  actionPlanVersionFk: foreignKey({ columns: [table.actionPlanVersionId], foreignColumns: [missionDocumentVersions.id] }).onDelete("restrict"),
+  operationalTaskFk: foreignKey({ columns: [table.operationalTaskId], foreignColumns: [tasks.id] }).onDelete("restrict"),
+  approvalUserFk: foreignKey({ columns: [table.approvalUserId], foreignColumns: [users.id] }).onDelete("restrict"),
+}));
+
+export type MissionActionUnit = typeof missionActionUnits.$inferSelect;
+export type InsertMissionActionUnit = typeof missionActionUnits.$inferInsert;
+
+export const missionActionUnitsRelations = relations(missionActionUnits, ({ one }) => ({
+  mission: one(tasks, { fields: [missionActionUnits.missionTaskId], references: [tasks.id] }),
+  actionPlanDocument: one(missionDocuments, { fields: [missionActionUnits.actionPlanDocumentId], references: [missionDocuments.id] }),
+  actionPlanVersion: one(missionDocumentVersions, { fields: [missionActionUnits.actionPlanVersionId], references: [missionDocumentVersions.id] }),
+  operationalTask: one(tasks, { fields: [missionActionUnits.operationalTaskId], references: [tasks.id], relationName: "actionUnitOperationalTask" }),
+  approvalUser: one(users, { fields: [missionActionUnits.approvalUserId], references: [users.id] }),
+}));
+
+export const missionDocumentTypesRelations = relations(missionDocumentTypes, ({ many }) => ({
+  documents: many(missionDocuments),
+}));
+
+export const missionDocumentsRelations = relations(missionDocuments, ({ one, many }) => ({
+  task: one(tasks, {
+    fields: [missionDocuments.taskId],
+    references: [tasks.id],
+  }),
+  documentType: one(missionDocumentTypes, {
+    fields: [missionDocuments.documentTypeId],
+    references: [missionDocumentTypes.id],
+  }),
+  versions: many(missionDocumentVersions),
+}));
+
+export const missionDocumentVersionsRelations = relations(missionDocumentVersions, ({ one }) => ({
+  document: one(missionDocuments, {
+    fields: [missionDocumentVersions.documentId],
+    references: [missionDocuments.id],
+  }),
+  authorUser: one(users, {
+    fields: [missionDocumentVersions.authorUserId],
+    references: [users.id],
+  }),
+  authorAgent: one(agents, {
+    fields: [missionDocumentVersions.authorAgentId],
+    references: [agents.id],
+  }),
+  sourceVersion: one(missionDocumentVersions, {
+    fields: [missionDocumentVersions.sourceDocumentVersionId],
+    references: [missionDocumentVersions.id],
+    relationName: "sourceVersion",
+  }),
+}));
+`),
+  idempotencyLengthCheck: check("missionActionUnits_idempotency_length", sql`char_length(${table.idempotencyKey}) BETWEEN 16 AND 128`),
+  titleNonemptyCheck: check("missionActionUnits_title_nonempty", sql`length(trim(${table.unitTitle})) > 0`),
+  missionTaskFk: foreignKey({ columns: [table.missionTaskId], foreignColumns: [tasks.id] }).onDelete("restrict"),
+  actionPlanDocumentFk: foreignKey({ columns: [table.actionPlanDocumentId], foreignColumns: [missionDocuments.id] }).onDelete("restrict"),
+  actionPlanVersionFk: foreignKey({ columns: [table.actionPlanVersionId], foreignColumns: [missionDocumentVersions.id] }).onDelete("restrict"),
+  operationalTaskFk: foreignKey({ columns: [table.operationalTaskId], foreignColumns: [tasks.id] }).onDelete("restrict"),
+  approvalUserFk: foreignKey({ columns: [table.approvalUserId], foreignColumns: [users.id] }).onDelete("restrict"),
+}));
+
+export type MissionActionUnit = typeof missionActionUnits.$inferSelect;
+export type InsertMissionActionUnit = typeof missionActionUnits.$inferInsert;
+
+export const missionActionUnitsRelations = relations(missionActionUnits, ({ one }) => ({
+  mission: one(tasks, { fields: [missionActionUnits.missionTaskId], references: [tasks.id] }),
+  actionPlanDocument: one(missionDocuments, { fields: [missionActionUnits.actionPlanDocumentId], references: [missionDocuments.id] }),
+  actionPlanVersion: one(missionDocumentVersions, { fields: [missionActionUnits.actionPlanVersionId], references: [missionDocumentVersions.id] }),
+  operationalTask: one(tasks, { fields: [missionActionUnits.operationalTaskId], references: [tasks.id], relationName: "actionUnitOperationalTask" }),
+  approvalUser: one(users, { fields: [missionActionUnits.approvalUserId], references: [users.id] }),
+}));
+
+export const missionDocumentTypesRelations = relations(missionDocumentTypes, ({ many }) => ({
+  documents: many(missionDocuments),
+}));
+
+export const missionDocumentsRelations = relations(missionDocuments, ({ one, many }) => ({
+  task: one(tasks, {
+    fields: [missionDocuments.taskId],
+    references: [tasks.id],
+  }),
+  documentType: one(missionDocumentTypes, {
+    fields: [missionDocuments.documentTypeId],
+    references: [missionDocumentTypes.id],
+  }),
+  versions: many(missionDocumentVersions),
+}));
+
+export const missionDocumentVersionsRelations = relations(missionDocumentVersions, ({ one }) => ({
+  document: one(missionDocuments, {
+    fields: [missionDocumentVersions.documentId],
+    references: [missionDocuments.id],
+  }),
+  authorUser: one(users, {
+    fields: [missionDocumentVersions.authorUserId],
+    references: [users.id],
+  }),
+  authorAgent: one(agents, {
+    fields: [missionDocumentVersions.authorAgentId],
+    references: [agents.id],
+  }),
+  sourceVersion: one(missionDocumentVersions, {
+    fields: [missionDocumentVersions.sourceDocumentVersionId],
+    references: [missionDocumentVersions.id],
+    relationName: "sourceVersion",
+  }),
+}));
+`),
+  versionPositiveCheck: check("missionActionUnitGateEvidence_version_positive", sql`${table.actionPlanVersionNumber} > 0`),
+  sourceNonemptyCheck: check("missionActionUnitGateEvidence_source_nonempty", sql`length(trim(${table.source})) > 0`),
+  evidenceObjectCheck: check("missionActionUnitGateEvidence_evidence_object", sql`jsonb_typeof(${table.evidence}) = 'object'`),
+  validityCheck: check("missionActionUnitGateEvidence_validity_check", sql`${table.validUntil} IS NULL OR ${table.validUntil} > ${table.observedAt}`),
+  actionUnitFk: foreignKey({ columns: [table.actionUnitId], foreignColumns: [missionActionUnits.id] }).onDelete("restrict"),
+  missionFk: foreignKey({ columns: [table.missionTaskId], foreignColumns: [tasks.id] }).onDelete("restrict"),
+  documentFk: foreignKey({ columns: [table.actionPlanDocumentId], foreignColumns: [missionDocuments.id] }).onDelete("restrict"),
+  versionFk: foreignKey({ columns: [table.actionPlanVersionId], foreignColumns: [missionDocumentVersions.id] }).onDelete("restrict"),
+  actorUserFk: foreignKey({ columns: [table.actorUserId], foreignColumns: [users.id] }).onDelete("restrict"),
+}));
+
+export type MissionActionUnitGateEvidence = typeof missionActionUnitGateEvidence.$inferSelect;
+export type InsertMissionActionUnitGateEvidence = typeof missionActionUnitGateEvidence.$inferInsert;
+
+export const missionActionUnitGateEvidenceRelations = relations(missionActionUnitGateEvidence, ({ one }) => ({
+  actionUnit: one(missionActionUnits, { fields: [missionActionUnitGateEvidence.actionUnitId], references: [missionActionUnits.id] }),
+  mission: one(tasks, { fields: [missionActionUnitGateEvidence.missionTaskId], references: [tasks.id] }),
+  actionPlanDocument: one(missionDocuments, { fields: [missionActionUnitGateEvidence.actionPlanDocumentId], references: [missionDocuments.id] }),
+  actionPlanVersion: one(missionDocumentVersions, { fields: [missionActionUnitGateEvidence.actionPlanVersionId], references: [missionDocumentVersions.id] }),
+  actorUser: one(users, { fields: [missionActionUnitGateEvidence.actorUserId], references: [users.id] }),
+}));
+
 export const missionDocumentTypesRelations = relations(missionDocumentTypes, ({ many }) => ({
   documents: many(missionDocuments),
 }));
