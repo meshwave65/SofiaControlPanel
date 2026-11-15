@@ -78,23 +78,34 @@ BEGIN
 
   INSERT INTO sofia."missionActionUnits" (
     "missionTaskId", "actionPlanDocumentId", "actionPlanVersionId", "actionPlanVersionNumber",
-    "actionPlanContentHash", "unitId", "unitTitle", "idempotencyKey", "operationalTaskId",
+    "actionPlanContentHash", "unitId", "unitTitle", "idempotencyKey",
     state
   )
   VALUES (
     root_id, action_plan_document_id, action_plan_version_id, 1,
-    action_plan_hash, 'T01', 'Unidade autorizada', 'fixture-idempotency-key-0001', child_id,
-    'REGISTERED'
+    action_plan_hash, 'T01', 'Unidade autorizada', 'fixture-idempotency-key-0001',
+    'AWAITING_APPROVAL'
   );
 
-  UPDATE sofia."missionActionUnits"
-     SET state = 'AWAITING_APPROVAL'
-   WHERE "missionTaskId" = root_id AND "unitId" = 'T01';
+  -- A unit is registered without an operational child; owner approval is a separate transition.
   UPDATE sofia."missionActionUnits"
      SET state = 'APPROVED', "approvalUserId" = owner_id, "approvedAt" = now()
    WHERE "missionTaskId" = root_id AND "unitId" = 'T01';
+
+  -- Approval identity is immutable after it has been recorded.
+  BEGIN
+    UPDATE sofia."missionActionUnits"
+       SET "approvalUserId" = owner_id + 100000
+     WHERE "missionTaskId" = root_id AND "unitId" = 'T01';
+    RAISE EXCEPTION 'TEST FAILURE: individual approval identity was mutable';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'TEST FAILURE:%' THEN RAISE; END IF;
+  END;
+
+  -- Task linkage is added only after approval; only then can the unit become dispatchable.
   UPDATE sofia."missionActionUnits"
-     SET state = 'READY_FOR_DISPATCH'
+     SET "operationalTaskId" = child_id,
+         state = 'READY_FOR_DISPATCH'
    WHERE "missionTaskId" = root_id AND "unitId" = 'T01';
 
   -- The exact approved unit mapping permits the trigger to reach the callback.
