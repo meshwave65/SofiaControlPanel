@@ -117,4 +117,4 @@ A UI mostra a ação de materialização e o ID da tarefa-filha. A mensagem de e
 
 O teste PostgreSQL descartável agora verifica que o vínculo de uma tarefa PAUSED mantém a unidade APPROVED e que a tarefa não pode chegar a STAGED antes da transição independente para READY_FOR_DISPATCH. O caminho de produção continua fechado: AC-022 não promove estados, não atribui agentes, não faz claim, não chama Manus e não consome créditos.
 
-Validação TypeScript/testes/build e o job PostgreSQL do head atualizado ainda pendentes. AC-021 também permanece sem CI integral confirmado; ver OR-20261115-0039. Nenhuma migration persistente, tarefa real, merge ou deploy.
+CI validado no workflow [#317](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43707809264): TypeScript, 56/56 testes, build e PostgreSQL 16 descartável com migrations 0010–0012, trigger e teste de barreira SUCCESS. O mesmo workflow confirmou a correção de AC-021. Nenhuma migration persistente, tarefa real, merge ou deploy.
