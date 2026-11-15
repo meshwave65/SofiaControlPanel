@@ -191,6 +191,47 @@ describe("messages.create — persistência e resposta Sofia", () => {
     expect(result.reply.content).toContain("tarefa #20");
   });
 
+  it("permite selecionar a tarefa executora após a ambiguidade ter sido esclarecida", async () => {
+    const root = {
+      id: 19, createdBy: 152, title: "Missão coordenadora",
+      agentId: null, manusTaskId: null,
+    };
+    const children = [20, 21].map((id) => ({
+      id, createdBy: 152, parentTaskId: 19, title: `Etapa ${id}`,
+      agentId: id, manusTaskId: `manus-${id}`, manusStatus: "running", statusId: 3,
+    }));
+    dbMock.getTaskById.mockResolvedValue(root);
+    dbMock.getTasksByParentId.mockResolvedValue(children);
+    dbMock.getTaskStatusNameById.mockResolvedValue("PROGRESS");
+    invokeLLMMock.mockResolvedValue({
+      choices: [{
+        message: {
+          role: "assistant",
+          content: null,
+          tool_calls: [{
+            id: "call-forward-selected",
+            type: "function",
+            function: {
+              name: "forward_operator_instruction_to_assigned_agent",
+              arguments: JSON.stringify({ message: "Atualize a etapa 21.", taskId: 21 }),
+            },
+          }],
+        },
+      }],
+    });
+    sendManusMessageAndWaitMock.mockResolvedValue("Etapa 21 atualizada.");
+
+    const result = await appRouter.createCaller(context).messages.create({
+      taskId: 19, typeId: 1, content: "Encaminhe para a etapa #21: atualize.",
+    });
+
+    expect(sendManusMessageAndWaitMock).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 21, agentId: 21, manusTaskId: "manus-21" }),
+      "Atualize a etapa 21.",
+    );
+    expect(result.responseStatus).toBe("replied");
+  });
+
   it("não escolhe arbitrariamente quando há várias execuções ativas", async () => {
     const root = {
       id: 19, createdBy: 152, title: "Missão coordenadora",
