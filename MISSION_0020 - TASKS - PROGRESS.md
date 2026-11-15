@@ -350,3 +350,11 @@
 - UI integrada ao visualizador documental existente.
 - CI run [43668453513](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43668453513) SUCCESS: `pnpm check`, 48/48 testes (8 arquivos), `pnpm build` e migrations 0010+0011 em PostgreSQL 16 descartável.
 - Sem aplicação de migration persistente, merge, deploy, restart, dispatch, LLM/Manus real ou consumo de créditos. Task 20.3/Mateus intocada.
+
+### Checkpoint 20.4 — OR-20261114-0037: pré-avaliação de governança por unidade
+
+- Criado motor determinístico fail-closed para verificar plano aprovado, fontes atuais, dependências, risco/política, orçamento, permissões, elegibilidade específica, idempotência e adaptador.
+- Nova query read-only `evaluateActionPlanUnit` verifica ownership, unidade e cadeia de versões TR/Blueprint; UI permite selecionar unidade e ver bloqueios.
+- Identificado risco arquitetural crítico: trigger `tasks_dispatch_staged` da migration 0003 faz HTTP dispatch quando tarefa é inserida/alterada para STAGED; `ensure-database.mjs` instala o trigger no startup. Portanto, criar filha STAGED já pode disparar execução. Materialização de unidades fica bloqueada até a defesa transacional/SQL completa.
+- CI run [43669315311](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43669315311): SUCCESS — TypeScript, 53/53 testes (9 arquivos), build e migrations 0010+0011 em PostgreSQL 16 descartável.
+- Nenhuma subtarefa criada, status alterado, trigger/migration modificada, dispatch, execução, DB persistente, merge ou deploy. Task 20.3/Mateus intocada.
