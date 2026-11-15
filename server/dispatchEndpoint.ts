@@ -30,12 +30,17 @@ router.post("/task-dispatch", async (req, res) => {
   }
 
   const taskId = req.body?.taskId;
+  const idempotencyKey = req.body?.idempotencyKey;
   if (!Number.isSafeInteger(taskId) || taskId <= 0) {
     return res.status(400).json({ success: false, error: "invalid_task_id" });
   }
+  if (idempotencyKey !== undefined
+    && (typeof idempotencyKey !== "string" || idempotencyKey.length < 16 || idempotencyKey.length > 128)) {
+    return res.status(400).json({ success: false, error: "invalid_idempotency_key" });
+  }
 
   try {
-    const result = await SofiaOrchestrator.startTask(taskId);
+    const result = await SofiaOrchestrator.startTask(taskId, idempotencyKey);
     if (!result) {
       return res.status(404).json({ success: false, error: "task_not_found" });
     }
