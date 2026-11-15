@@ -375,7 +375,7 @@
 ### Checkpoint 20.4 — registro e aprovação individual ACTION_PLAN (AC-021 / OR-20261115-0039)
 - Implementados na branch #15 os serviços transacionais de registro idempotente e aprovação individual das unidades Txx, com conferência de ownership, versão APPROVED vigente e hash SHA-256.
 - API tRPC para consultar, registrar e aprovar unidades; UI TaskDetail mostra estado e permite aprovação por unidade. A aprovação não autoriza execução.
-- CI #283: PostgreSQL 16 descartável + migrations 0010–0012 + barreira SQL SUCCESS; o job da aplicação falhou em TypeScript, e os testes/build foram pulados. Correção aplicada depois; não há evidência confirmada de CI integral verde no head corrigido. Ver OR-20261115-0039.
+- CI #283 inicial falhou em TypeScript; correção aplicada. Workflow final [#317](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43707809264) aprovou TypeScript, 56/56 testes, build e PostgreSQL 16 descartável. Ver OR-20261115-0039.
 - Nenhuma migration persistente, tarefa operacional, dispatch, reserva/crédito, merge ou deploy. Task 20.3/Mateus intocada.
 
 ### Checkpoint 20.4 — materialização de unidades aprovadas em PAUSED (AC-022 / OR-20261115-0040)
@@ -385,4 +385,4 @@
 - Nova mutation tRPC e ação na TaskDetail exibem a materialização e o ID da tarefa-filha. Estado da unidade permanece APPROVED e a tarefa permanece PAUSED; nenhum caminho para STAGED/dispatch foi implementado.
 - Fixture SQL ampliada: vínculo PAUSED não concede READY_FOR_DISPATCH; tentativa de promover para STAGED antes da autorização é rejeitada.
 - Evidência em OR-20261115-0040 e contrato em `governance/architecture/ACTION_UNIT_EXECUTION_GOVERNANCE.md`.
-- TypeScript, testes, build e job PostgreSQL do head atualizado ainda pendentes. Nenhuma migration persistente, tarefa real, dispatch, LLM/Manus, crédito, merge ou deploy. Task 20.3/Mateus intocada.
+- CI [#317](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43707809264) SUCCESS: TypeScript, 56/56 testes, build e migrations 0010–0012 + trigger/barreira PostgreSQL 16 descartável. Nenhuma migration persistente, tarefa real, dispatch, LLM/Manus, crédito, merge ou deploy. Task 20.3/Mateus intocada.
