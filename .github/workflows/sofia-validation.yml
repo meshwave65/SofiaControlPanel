@@ -38,7 +38,7 @@ jobs:
         run: pnpm build
 
   migration:
-    name: PostgreSQL migration 0010 syntax and DDL
+    name: PostgreSQL migrations 0010–0011 syntax and DDL
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -65,3 +65,7 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: psql -h localhost -U postgres -d sofia_migration_test -v ON_ERROR_STOP=1 -f drizzle/0010_mission_document_catalog.sql
+      - name: Apply migration 0011 to disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d sofia_migration_test -v ON_ERROR_STOP=1 -f drizzle/0011_action_plan_document_type.sql
