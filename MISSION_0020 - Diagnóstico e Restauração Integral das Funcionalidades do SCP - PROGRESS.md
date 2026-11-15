@@ -356,3 +356,13 @@ Foi criado workflow dedicado para executar `pnpm check`, `pnpm test`, `pnpm buil
 - Auditoria encontrou trigger automático de dispatch ao inserir/alterar tarefa para STAGED (migration 0003, instalada por ensure-database). A próxima etapa deverá proteger o trigger e todo o caminho de dispatch antes de materializar unidades.
 - CI [43669500711](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43669500711) SUCCESS no código final com verificação SHA-256: check, 53/53 testes, build e migrations 0010+0011 em PostgreSQL descartável.
 - Sem criação de subtarefas, alteração de status/trigger, dispatch, DB persistente, merge, deploy ou consumo de créditos.
+
+
+### Checkpoint 20.4 — AC-020 / OR-20261115-0038: identidade e autorização de unidades ACTION_PLAN
+
+- Migration 0012 adiciona `missionActionUnits`: missão raiz, ACTION_PLAN/versão/hash exatos, unidade Txx/título, chave de idempotência única, tarefa operacional opcional, estado e aprovação individual. Constraints e trigger validam imutabilidade, atualidade, correspondência do JSON e ownership.
+- A migration 0003 foi endurecida: se existe ACTION_PLAN, a missão raiz e qualquer tarefa sem registro de unidade aprovado, READY_FOR_DISPATCH e vinculado à tarefa são bloqueados antes do HTTP callback. A definição reinstalada no startup também foi atualizada.
+- `inspectTaskDispatchAuthorization` e `SofiaOrchestrator.startTask` repetem a validação server-side; endpoint interno transmite a chave persistida. UI/tRPC sem chave não pode iniciar unidade ACTION_PLAN. Missões sem ACTION_PLAN mantêm fluxo legado.
+- CI run [43699256796](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43699256796): migration PostgreSQL 16 descartável 0010+0011+0012, instalação do trigger e teste da barreira SQL passaram; `pnpm check` e `pnpm test` passaram; build estava em execução na atualização inicial.
+- Não há API/UI para registrar/aprovar unidade nem criação transacional da tarefa operacional nesta etapa. Nenhum registro READY_FOR_DISPATCH, subtarefa, status operacional ou dispatch foi criado.
+- Sem migration persistente, alteração Supabase/produção, execução LLM/Manus, reserva/créditos, merge/deploy/restart. Task 20.3/Mateus intocada. Próxima etapa: persistir e validar evidências de risco, orçamento, permissões, dependências e elegibilidade; então aprovação individual e materialização atômica PAUSED → vínculo → STAGED.
