@@ -386,3 +386,10 @@
 - Fixture SQL ampliada: vínculo PAUSED não concede READY_FOR_DISPATCH; tentativa de promover para STAGED antes da autorização é rejeitada.
 - Evidência em OR-20261115-0040 e contrato em `governance/architecture/ACTION_UNIT_EXECUTION_GOVERNANCE.md`.
 - CI [#317](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43707809264) SUCCESS: TypeScript, 56/56 testes, build e migrations 0010–0012 + trigger/barreira PostgreSQL 16 descartável. Nenhuma migration persistente, tarefa real, dispatch, LLM/Manus, crédito, merge ou deploy. Task 20.3/Mateus intocada.
+
+### Checkpoint 20.4 — AC-023: auditoria das fontes de evidência (OR-20261115-0041)
+- Auditoria do schema confirmou 21 tabelas. Não existem fontes dedicadas para risco operacional, orçamento de missão/unidade, permissões granulares, catálogo de capacidades de executor ou adaptadores.
+- ARC/PGC permanece telemetria/confiança; saldo de agente permanece snapshot financeiro do executor, não orçamento de missão. Nenhum dos dois libera execução.
+- Dependências serão comprovadas por Txx→operationalTaskId e status DONE; elegibilidade e adaptador serão snapshots específicos do executor/tarefa e revalidados no runtime.
+- Contrato AC-023 definido: ledger append-only de evidências tipadas e vinculado à versão/hash/unidade; ausência ou obsolescência mantém BLOCKED. Sem READY_FOR_DISPATCH nesta etapa.
+- Relatório: governance/operational_reports/OR-20261115-0041.md. Nenhuma migration persistente, execução, dispatch, consumo de créditos, merge ou deploy. Task 20.3/Mateus intocada.
