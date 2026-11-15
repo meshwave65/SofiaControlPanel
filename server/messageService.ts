@@ -53,6 +53,10 @@ export const SOFIA_MESSAGE_TOOLS = [
         type: "object",
         properties: {
           message: { type: "string", minLength: 1, maxLength: 12000 },
+          taskId: {
+            type: "integer",
+            description: "ID da tarefa executora ativa, somente quando o histórico da conversa já identificou qual etapa deve receber a instrução. Deve pertencer à missão aberta.",
+          },
         },
         required: ["message"],
         additionalProperties: false,
