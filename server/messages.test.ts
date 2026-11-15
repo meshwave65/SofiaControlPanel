@@ -23,12 +23,14 @@ const dbMock = vi.hoisted(() => ({
 const invokeLLMMock = vi.hoisted(() => vi.fn());
 const sendManusMessageAndWaitMock = vi.hoisted(() => vi.fn());
 const stopManusTaskMock = vi.hoisted(() => vi.fn());
+const resumeManusTaskMock = vi.hoisted(() => vi.fn());
 
 vi.mock("./db", () => dbMock);
 vi.mock("./_core/llm", () => ({ invokeLLM: invokeLLMMock }));
 vi.mock("./manusExecutionService", () => ({
   sendManusMessageAndWait: sendManusMessageAndWaitMock,
   stopManusTask: stopManusTaskMock,
+  resumeManusTask: resumeManusTaskMock,
   syncAgentCredits: vi.fn(),
 }));
 
@@ -132,6 +134,51 @@ describe("messages.create — persistência e resposta Sofia", () => {
     });
     expect(dbMock.updateTaskExecution).toHaveBeenCalledWith(92, {
       manusStatus: "manual_pause_pending",
+      completedAt: null,
+    });
+    expect(dbMock.updateTaskStatus).not.toHaveBeenCalled();
+  });
+
+  it("retoma tarefa PAUSED somente após confirmação running na Manus", async () => {
+    dbMock.getTaskById.mockResolvedValue({
+      id: 94,
+      createdBy: 152,
+      statusId: 4,
+      agentId: 7,
+      manusTaskId: "manus-resume-94",
+      manusStatus: "stopped",
+      missionKey: null,
+    });
+    dbMock.getTaskStatusNameById.mockResolvedValue("PAUSED");
+    resumeManusTaskMock.mockResolvedValue({ resumed: true, status: "running" });
+
+    const result = await appRouter.createCaller(context).tasks.resumeExecution({ taskId: 94 });
+
+    expect(result).toEqual({ resumed: true, pending: false, externalStatus: "running" });
+    expect(resumeManusTaskMock).toHaveBeenCalledWith(expect.objectContaining({ id: 94 }));
+    expect(dbMock.updateTaskExecution).toHaveBeenCalledWith(94, { manusStatus: "running", completedAt: null });
+    expect(dbMock.updateTaskStatus).toHaveBeenCalledWith(94, 2);
+    expect(dbMock.createActivityLog).toHaveBeenCalled();
+  });
+
+  it("mantém PAUSED enquanto a retomada externa ainda não foi confirmada", async () => {
+    dbMock.getTaskById.mockResolvedValue({
+      id: 95,
+      createdBy: 152,
+      statusId: 4,
+      agentId: 7,
+      manusTaskId: "manus-resume-95",
+      manusStatus: "stopped",
+      missionKey: null,
+    });
+    dbMock.getTaskStatusNameById.mockResolvedValue("PAUSED");
+    resumeManusTaskMock.mockResolvedValue({ resumed: false, status: "stopped" });
+
+    const result = await appRouter.createCaller(context).tasks.resumeExecution({ taskId: 95 });
+
+    expect(result).toEqual({ resumed: false, pending: true, externalStatus: "stopped" });
+    expect(dbMock.updateTaskExecution).toHaveBeenCalledWith(95, {
+      manusStatus: "manual_resume_pending",
       completedAt: null,
     });
     expect(dbMock.updateTaskStatus).not.toHaveBeenCalled();
