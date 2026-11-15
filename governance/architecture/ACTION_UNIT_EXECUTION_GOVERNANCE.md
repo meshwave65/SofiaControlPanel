@@ -118,3 +118,22 @@ A UI mostra a ação de materialização e o ID da tarefa-filha. A mensagem de e
 O teste PostgreSQL descartável agora verifica que o vínculo de uma tarefa PAUSED mantém a unidade APPROVED e que a tarefa não pode chegar a STAGED antes da transição independente para READY_FOR_DISPATCH. O caminho de produção continua fechado: AC-022 não promove estados, não atribui agentes, não faz claim, não chama Manus e não consome créditos.
 
 CI validado no workflow [#317](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43707809264): TypeScript, 56/56 testes, build e PostgreSQL 16 descartável com migrations 0010–0012, trigger e teste de barreira SUCCESS. O mesmo workflow confirmou a correção de AC-021. Nenhuma migration persistente, tarefa real, merge ou deploy.
+
+
+## 11. AC-023 — auditoria das fontes de evidência (OR-20261115-0041)
+
+A auditoria do schema encontrou 21 tabelas, mas não encontrou fontes dedicadas de orçamento por missão/unidade, risco operacional, permissões granulares, catálogo de capacidade de executores ou capacidades de adaptadores.
+
+Os dados ARC/PGC permanecem limitados à confiança/telemetria do agente. `arcPolicies` não é política de risco da ação; `arcAssessments`/ `arcEvidence` não concedem permissão. `agents.creditsRemaining` é snapshot do saldo do executor, não orçamento da missão nem ledger. `ActionPlanSchema` rejeita estimativas numéricas enquanto não existir modelo verificável.
+
+Dependências podem ser verificadas somente por ACTION_PLAN vigente + vínculo Txx→operationalTaskId + status DONE da tarefa predecessora. Elegibilidade do executor precisa ser específica da tarefa-filha e revalidada no runtime. A existência do adaptador Manus não demonstra compatibilidade com qualquer unidade.
+
+Contrato para a próxima implementação:
+- ledger de evidências append-only tipadas por gate, vinculado à missão, ACTION_PLAN version/hash e Txx;
+- categorias fechadas: DEPENDENCY, RISK_POLICY, BUDGET_AUTHORIZATION, UNIT_PERMISSION, EXECUTOR_ELIGIBILITY e ADAPTER_CAPABILITY;
+- evidência com origem/autor, status, payload validado, observedAt e validade quando aplicável;
+- RLS server-only, constraints de identidade e trigger de imutabilidade;
+- ausência, obsolescência ou incompatibilidade mantém BLOCKED;
+- nenhuma evidência ou aprovação isolada promove para READY_FOR_DISPATCH.
+
+A auditoria e as decisões estão em OR-20261115-0041. AC-023a deve implementar o ledger e a verificação de dependências sem inventar política permissiva. Contratos de risco, orçamento e permissão continuam gates fechados até existirem fontes explícitas.
