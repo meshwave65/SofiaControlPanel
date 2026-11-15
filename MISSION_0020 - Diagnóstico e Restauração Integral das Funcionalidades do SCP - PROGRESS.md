@@ -366,3 +366,12 @@ Foi criado workflow dedicado para executar `pnpm check`, `pnpm test`, `pnpm buil
 - CI run [43699256796](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43699256796): migration PostgreSQL 16 descartável 0010+0011+0012, instalação do trigger e teste da barreira SQL passaram; `pnpm check` e `pnpm test` passaram; build estava em execução na atualização inicial.
 - Não há API/UI para registrar/aprovar unidade nem criação transacional da tarefa operacional nesta etapa. Nenhum registro READY_FOR_DISPATCH, subtarefa, status operacional ou dispatch foi criado.
 - Sem migration persistente, alteração Supabase/produção, execução LLM/Manus, reserva/créditos, merge/deploy/restart. Task 20.3/Mateus intocada. Próxima etapa: persistir e validar evidências de risco, orçamento, permissões, dependências e elegibilidade; então aprovação individual e materialização atômica PAUSED → vínculo → STAGED.
+
+
+### Checkpoint 20.4 — AC-020 / OR-20261115-0038
+
+- Criada migration 0012 e tabela server-only `missionActionUnits`, vinculando Txx à versão/hash exatos do ACTION_PLAN, com idempotência, tarefa operacional e aprovação individual persistíveis.
+- Trigger 0003, endpoint interno, repositório e orquestrador passaram a exigir autorização persistida para missões com ACTION_PLAN; chamada direta UI/tRPC sem chave de idempotência não inicia execução.
+- Teste PostgreSQL descartável confirmou bloqueio da raiz, aceitação do caminho unitário autorizado e rejeição de filha sem vínculo. CI [43699256796](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43699256796) SUCCESS: migrations 0010–0012, trigger, teste SQL, TypeScript, testes e build.
+- Ainda não existe API/UI para registrar e aprovar unidade ou materializar tarefa-filha. Nenhuma tarefa criada, nenhum registro READY_FOR_DISPATCH, dispatch ou execução externa.
+- Sem migration persistente, Supabase/produção, merge, deploy, restart, LLM/Manus ou créditos. Task 20.3/Mateus intocada.
