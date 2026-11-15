@@ -8,7 +8,7 @@ import * as db from "./db";
 import { SofiaOrchestrator } from "./sofiaOrchestrator";
 import { TRPCError } from "@trpc/server";
 import { getConsolidatedTaskReport, uploadConsolidatedTaskReport } from "./controlPanelStorage";
-import { sendManusMessageAndWait, syncAgentCredits } from "./manusExecutionService";
+import { sendManusMessageAndWait, stopManusTask, syncAgentCredits } from "./manusExecutionService";
 import { mirrorTaskToGitHub } from "./githubMissionMirror";
 import { invokeLLM } from "./_core/llm";
 import { buildSofiaConversation, extractTextContent, normalizeOperatorMessage, OPERATOR_MESSAGE_MAX_LENGTH, SOFIA_MESSAGE_TOOLS } from "./messageService";
@@ -1107,6 +1107,17 @@ export const appRouter = router({
         if (requestedStatus === "STAGED" && !(await db.hasExecutionReadyMissionDocuments(input.id))) {
           throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A missão não pode entrar em STAGED sem TR validado e Blueprint READY vinculado à versão vigente." });
         }
+        if (
+          requestedStatus === "PAUSED"
+          && currentStatus === "PROGRESS"
+          && task.manusTaskId
+          && !["stopped", "waiting_credit"].includes((task.manusStatus ?? "").toLowerCase())
+        ) {
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message: "A execução externa ainda não está pausada. Use a operação de pausa, que confirma o estado na Manus antes de alterar o estado local.",
+          });
+        }
         const result = await db.updateTaskStatus(input.id, input.statusId);
         if (task.missionKey) {
           const mirror = await mirrorTaskToGitHub({
@@ -1122,6 +1133,75 @@ export const appRouter = router({
           });
         }
         return result;
+      }),
+
+    pauseExecution: protectedProcedure
+      .input(z.object({ taskId: z.number().int().positive() }))
+      .mutation(async ({ input, ctx }) => {
+        const task = await db.getTaskById(input.taskId);
+        if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+        }
+        const currentStatus = (await db.getTaskStatusNameById(task.statusId))?.toUpperCase();
+        if (currentStatus !== "PROGRESS") {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Somente uma tarefa em PROGRESS pode solicitar pausa da execução externa." });
+        }
+        if (!task.agentId || !task.manusTaskId) {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A tarefa não possui executor e execução Manus atribuídos." });
+        }
+
+        let pauseResult: Awaited<ReturnType<typeof stopManusTask>>;
+        try {
+          pauseResult = await stopManusTask(task, task.manusStatus === "manual_pause_pending");
+        } catch (error) {
+          throw new TRPCError({
+            code: "BAD_GATEWAY",
+            message: error instanceof Error ? error.message : "Não foi possível confirmar a pausa na Manus.",
+            cause: error,
+          });
+        }
+
+        const pauseConfirmed = pauseResult.hasRunningBackgroundJobs === false;
+        if (pauseConfirmed) {
+          const pausedStatusId = await db.getTaskStatusIdByName("PAUSED");
+          await db.updateTaskExecution(task.id, { manusStatus: "stopped", completedAt: null });
+          await db.updateTaskStatus(task.id, pausedStatusId);
+          if (task.missionKey) {
+            const mirror = await mirrorTaskToGitHub({ ...task, statusId: pausedStatusId });
+            await db.updateTaskGitHubSync(task.id, {
+              missionKey: mirror.missionKey,
+              githubPath: mirror.path,
+              githubSha: mirror.sha,
+              githubSyncStatus: mirror.status,
+              githubSyncError: mirror.error ?? null,
+            });
+          }
+        } else {
+          await db.updateTaskExecution(task.id, { manusStatus: "manual_pause_pending", completedAt: null });
+        }
+
+        try {
+          const eventType = await db.getOrCreateActivityEventType(
+            pauseConfirmed ? "task_execution_paused" : "task_execution_pause_pending",
+          );
+          await db.createActivityLog({
+            agentId: task.agentId,
+            taskId: task.id,
+            eventTypeId: eventType.id,
+            details: pauseConfirmed
+              ? "Execução Manus confirmada como stopped, sem processos em segundo plano ativos. Estado local alterado para PAUSED."
+              : "Solicitação de pausa enviada. A Manus informou processos em segundo plano ativos ou não confirmou esse campo; a tarefa permanece PROGRESS até confirmação segura.",
+          });
+        } catch (error) {
+          console.warn("[Tasks] Could not record execution pause activity:", error);
+        }
+
+        return {
+          paused: pauseConfirmed,
+          pending: !pauseConfirmed,
+          externalStatus: pauseResult.status,
+          hasRunningBackgroundJobs: pauseResult.hasRunningBackgroundJobs,
+        };
       }),
 
     factorize: protectedProcedure
