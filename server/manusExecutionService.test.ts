@@ -14,6 +14,7 @@ vi.mock("./db", () => dbMock);
 import {
   createManusTask,
   findNewAssistantReply,
+  resumeManusTask,
   stopManusTask,
   syncAgentCredits,
   syncRunningManusTasks,
@@ -157,6 +158,70 @@ describe("manusExecutionService — fluxo controlado de execução", () => {
       manusStatus: "stopped",
       completedAt: null,
     }));
+  });
+
+  it("retoma tarefa stopped sem jobs em background e confirma running", async () => {
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        ok: true,
+        task: { status: "stopped", has_running_background_jobs: false },
+      }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ ok: true, request_id: "resume-1" }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        ok: true,
+        task: { status: "running", has_running_background_jobs: false },
+      }), { status: 200 }));
+
+    const result = await resumeManusTask({
+      id: 114,
+      agentId: 7,
+      manusTaskId: "fixture-manus-resume",
+    } as any);
+
+    expect(result).toEqual({ resumed: true, status: "running" });
+    expect(fetch).toHaveBeenNthCalledWith(2,
+      "https://api.manus.ai/v2/task.sendMessage",
+      expect.objectContaining({
+        method: "POST",
+        body: expect.stringContaining("Retome a execução desta tarefa"),
+      }),
+    );
+  });
+
+  it("bloqueia retomada enquanto há jobs em background", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(new Response(JSON.stringify({
+      ok: true,
+      task: { status: "stopped", has_running_background_jobs: true },
+    }), { status: 200 }));
+
+    await expect(resumeManusTask({
+      id: 115,
+      agentId: 7,
+      manusTaskId: "fixture-manus-resume-background",
+    } as any)).rejects.toThrow("processos em segundo plano");
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("reconcilia manual_resume_pending para PROGRESS quando a Manus confirma running", async () => {
+    dbMock.getAllTasksGlobal.mockResolvedValue([{
+      id: 116,
+      agentId: 7,
+      manusTaskId: "fixture-manus-resume-pending",
+      manusStatus: "manual_resume_pending",
+    }]);
+    vi.mocked(fetch).mockResolvedValueOnce(new Response(JSON.stringify({
+      ok: true,
+      task: { status: "running" },
+    }), { status: 200 }));
+
+    const result = await syncRunningManusTasks();
+
+    expect(result).toEqual([{ taskId: 116, manusStatus: "running", creditsUsed: null }]);
+    expect(dbMock.updateTaskExecution).toHaveBeenCalledWith(116, expect.objectContaining({
+      manusStatus: "running",
+      completedAt: null,
+    }));
+    expect(dbMock.updateTaskStatus).toHaveBeenCalledWith(116, 2);
   });
 
   it("converte stopped em DONE após polling e reconcilia créditos", async () => {
