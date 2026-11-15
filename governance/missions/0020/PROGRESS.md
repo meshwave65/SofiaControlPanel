@@ -59,3 +59,10 @@ A cada etapa, persistir OR/PROGRESS/TASKS, distinguir CI de schema persistente/d
 ## PR #15 integrada — publicação iniciada
 
 PR #15 foi integrada em `main` por squash merge. Commit: `9e3f9bd3f7c09a7d2212bd7c1e30796cd020b78f`. Deploy manual do serviço Render Free iniciado com ID `dep-dbsvo1rbc2fs73cn5v1g`; estado inicial `build_in_progress`. Auto-deploy permanece desligado. O resultado do deploy e o comportamento em produção ainda não foram confirmados. Ver OR-20261115-0050.
+
+
+## Estado após publicação
+
+Deploy Render Free `dep-dbsvo1rbc2fs73cn5v1g` está `live` no merge commit `9e3f9bd3f7c09a7d2212bd7c1e30796cd020b78f`. Startup confirmou schema/colunas de execução, trigger 0003, ajuste 0008, servidor na porta 10000 e Heartbeat. URL principal: https://sofia-cp.meshwave.com.br.
+
+Ainda não há validação visual/autenticada nem confirmação funcional do Messenger. A consulta de tabelas Supabase falhou com erro de autenticação do conector read-only (28P01); migrations 0010–0013 persistentes continuam sem confirmação. Não foi aplicada migration por essa tentativa.
