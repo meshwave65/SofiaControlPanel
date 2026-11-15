@@ -36,3 +36,12 @@ A aba de conversa central com a SOFIA foi implementada em `TaskDetail.tsx` no co
 ## Próximo incremento
 
 Primeiro reconciliar a branch da PR #15 com main, identificando e resolvendo conflitos sem reset/force-push; executar CI completo novamente. Só depois retomar a auditoria de sincronização/observabilidade. Pausa/retomada passaram CI, mas teste real controlado e QA visual dependem de ambiente publicado/autorização. Não realizar chamadas reais ou deploy sem autorização específica.
+
+
+## Diretriz de execução — OR-20261115-0050
+
+- A partir desta decisão, implementar via PR para `main`, publicar no Render Free existente e corrigir com base no comportamento real; preview/browser externo não é gate.
+- PR #15 é a PR existente. Não abrir PR duplicada. Auto-deploy continua OFF e a publicação será manual.
+- Documentar cada etapa em OR/PROGRESS/TASKS, incluindo commit, merge, migrations, deploy e observação real.
+- Migrations 0010–0013 ainda precisam ser conferidas no banco persistente realmente conectado ao Render; CI descartável não equivale a aplicação persistente. Não inferir projeto Supabase.
+- Sem Browser Use pago, sem novo serviço, sem alteração do plano Free, sem task 20.3/Mateus e sem chamadas reais/consumo de créditos não autorizados.
