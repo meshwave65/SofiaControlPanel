@@ -431,6 +431,14 @@ export const appRouter = router({
           );
           if (!planVersionResult) throw new TRPCError({ code: "NOT_FOUND", message: "Versão atual do plano não encontrada." });
 
+          const actualPlanHash = createHash("sha256")
+            .update(planVersionResult.version.content, "utf8")
+            .digest("hex");
+          if (!planVersionResult.version.contentHash
+            || actualPlanHash !== planVersionResult.version.contentHash) {
+            throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A integridade SHA-256 da versão aprovada não confere; pré-avaliação bloqueada." });
+          }
+
           let plan;
           try {
             plan = ActionPlanSchema.parse(JSON.parse(planVersionResult.version.content));
