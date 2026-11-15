@@ -448,9 +448,13 @@ export default function TaskDetail() {
             <CardHeader className="border-b border-foreground/10">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <CardTitle className="text-xl">Documentos da missão</CardTitle>
+                  <CardTitle className="text-xl">
+                    {selectedDocument?.typeKey === "TR" ? "Entendimento da missão — TR" : "Documentos da missão"}
+                  </CardTitle>
                   <CardDescription className="mt-1">
-                    Contexto, planejamento e registros da missão em um único visualizador.
+                    {selectedDocument?.typeKey === "TR"
+                      ? "Esta é a leitura estruturada da SOFIA sobre o pedido: objetivo, motivação, escopo e resultado esperado. Não é apenas a descrição original."
+                      : "Contexto, planejamento e registros da missão em um único visualizador."}
                     {task.parentTaskId != null && " Este documento é herdado da missão principal."}
                   </CardDescription>
                 </div>
@@ -789,7 +793,7 @@ export default function TaskDetail() {
             <div className="lg:col-span-2">
               <Card className="cad-card">
                 <CardHeader>
-                  <CardTitle className="text-lg">Descrição</CardTitle>
+                  <CardTitle className="text-lg">Solicitação original</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-foreground whitespace-pre-wrap">{task.description || "Sem descrição"}</p>
