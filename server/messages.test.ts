@@ -277,10 +277,11 @@ describe("messages.create — persistência e resposta Sofia", () => {
     expect(toolContext).not.toContain("FOREIGN_SECRET");
     expect(sendManusMessageAndWaitMock).not.toHaveBeenCalled();
     expect(result.responseStatus).toBe("replied");
-    expect(result.reply).toMatchObject({
+    expect(dbMock.createMessage).toHaveBeenNthCalledWith(2, expect.objectContaining({
       content: "A missão está em PROGRESS e possui uma filha concluída.",
       isAssistant: true,
-    });
+    }));
+    expect(result.reply).toMatchObject({ id: 101, isAssistant: true });
   });
 
   it("consulta elegibilidade com os critérios do claim sem reservar agentes nem expor credenciais", async () => {
@@ -365,10 +366,11 @@ describe("messages.create — persistência e resposta Sofia", () => {
     expect(toolContext).not.toContain("MUST_NOT_LEAK");
     expect(sendManusMessageAndWaitMock).not.toHaveBeenCalled();
     expect(result.responseStatus).toBe("replied");
-    expect(result.reply).toMatchObject({
+    expect(dbMock.createMessage).toHaveBeenNthCalledWith(2, expect.objectContaining({
       content: "O agente 7 atende aos critérios; o agente 8 está ocupado.",
       isAssistant: true,
-    });
+    }));
+    expect(result.reply).toMatchObject({ id: 101, isAssistant: true });
   });
 
   it("bloqueia encaminhamento quando a missão não tem execução externa identificada", async () => {
