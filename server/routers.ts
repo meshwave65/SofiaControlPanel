@@ -8,7 +8,7 @@ import * as db from "./db";
 import { SofiaOrchestrator } from "./sofiaOrchestrator";
 import { TRPCError } from "@trpc/server";
 import { getConsolidatedTaskReport, uploadConsolidatedTaskReport } from "./controlPanelStorage";
-import { sendManusMessageAndWait, stopManusTask, syncAgentCredits } from "./manusExecutionService";
+import { resumeManusTask, sendManusMessageAndWait, stopManusTask, syncAgentCredits } from "./manusExecutionService";
 import { mirrorTaskToGitHub } from "./githubMissionMirror";
 import { invokeLLM } from "./_core/llm";
 import { buildSofiaConversation, extractTextContent, normalizeOperatorMessage, OPERATOR_MESSAGE_MAX_LENGTH, SOFIA_MESSAGE_TOOLS } from "./messageService";
@@ -1201,6 +1201,73 @@ export const appRouter = router({
           pending: !pauseConfirmed,
           externalStatus: pauseResult.status,
           hasRunningBackgroundJobs: pauseResult.hasRunningBackgroundJobs,
+        };
+      }),
+
+    resumeExecution: protectedProcedure
+      .input(z.object({ taskId: z.number().int().positive() }))
+      .mutation(async ({ input, ctx }) => {
+        const task = await db.getTaskById(input.taskId);
+        if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+        }
+        const currentStatus = (await db.getTaskStatusNameById(task.statusId))?.toUpperCase();
+        if (currentStatus !== "PAUSED") {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Somente uma tarefa em PAUSED pode solicitar retomada." });
+        }
+        if (!task.agentId || !task.manusTaskId) {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A tarefa não possui executor e execução Manus para retomar." });
+        }
+
+        let resumeResult: Awaited<ReturnType<typeof resumeManusTask>>;
+        try {
+          resumeResult = await resumeManusTask(task);
+        } catch (error) {
+          throw new TRPCError({
+            code: "BAD_GATEWAY",
+            message: error instanceof Error ? error.message : "Não foi possível confirmar a retomada na Manus.",
+            cause: error,
+          });
+        }
+
+        if (resumeResult.resumed) {
+          const progressStatusId = await db.getTaskStatusIdByName("PROGRESS");
+          await db.updateTaskExecution(task.id, { manusStatus: "running", completedAt: null });
+          await db.updateTaskStatus(task.id, progressStatusId);
+          if (task.missionKey) {
+            const mirror = await mirrorTaskToGitHub({ ...task, statusId: progressStatusId });
+            await db.updateTaskGitHubSync(task.id, {
+              missionKey: mirror.missionKey,
+              githubPath: mirror.path,
+              githubSha: mirror.sha,
+              githubSyncStatus: mirror.status,
+              githubSyncError: mirror.error ?? null,
+            });
+          }
+        } else {
+          await db.updateTaskExecution(task.id, { manusStatus: "manual_resume_pending", completedAt: null });
+        }
+
+        try {
+          const eventType = await db.getOrCreateActivityEventType(
+            resumeResult.resumed ? "task_execution_resumed" : "task_execution_resume_pending",
+          );
+          await db.createActivityLog({
+            agentId: task.agentId,
+            taskId: task.id,
+            eventTypeId: eventType.id,
+            details: resumeResult.resumed
+              ? "Retomada confirmada pela Manus; estado local alterado para PROGRESS."
+              : `Instrução de retomada aceita, mas o estado externo ainda é ${resumeResult.status}; a tarefa permanece PAUSED até confirmação.`,
+          });
+        } catch (error) {
+          console.warn("[Tasks] Could not record execution resume activity:", error);
+        }
+
+        return {
+          resumed: resumeResult.resumed,
+          pending: !resumeResult.resumed,
+          externalStatus: resumeResult.status,
         };
       }),
 
