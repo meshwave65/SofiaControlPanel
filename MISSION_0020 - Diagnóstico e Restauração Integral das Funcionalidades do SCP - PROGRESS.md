@@ -354,5 +354,5 @@ Foi criado workflow dedicado para executar `pnpm check`, `pnpm test`, `pnpm buil
 - O motor de governança avalia evidências verificáveis e bloqueia qualquer lacuna; a API e a UI exibem a decisão por unidade do ACTION_PLAN aprovado.
 - A consulta revalida ownership e a cadeia Blueprint→TR. Não trata o agente da missão-pai como executor elegível da tarefa-filha.
 - Auditoria encontrou trigger automático de dispatch ao inserir/alterar tarefa para STAGED (migration 0003, instalada por ensure-database). A próxima etapa deverá proteger o trigger e todo o caminho de dispatch antes de materializar unidades.
-- CI [43669315311](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43669315311) SUCCESS: check, 53/53 testes, build e migrations 0010+0011 em PostgreSQL descartável.
+- CI [43669350296](https://github.com/meshwave65/SofiaControlPanel/actions/runs/43669350296) SUCCESS no código final: check, 53/53 testes, build e migrations 0010+0011 em PostgreSQL descartável.
 - Sem criação de subtarefas, alteração de status/trigger, dispatch, DB persistente, merge, deploy ou consumo de créditos.
