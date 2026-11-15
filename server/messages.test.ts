@@ -188,7 +188,10 @@ describe("messages.create — persistência e resposta Sofia", () => {
       "Continue a etapa.",
     );
     expect(result.responseStatus).toBe("replied");
-    expect(result.reply.content).toContain("tarefa #20");
+    expect(dbMock.createMessage).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      content: expect.stringContaining("tarefa #20"),
+      isAssistant: true,
+    }));
   });
 
   it("permite selecionar a tarefa executora após a ambiguidade ter sido esclarecida", async () => {
@@ -267,8 +270,14 @@ describe("messages.create — persistência e resposta Sofia", () => {
 
     expect(sendManusMessageAndWaitMock).not.toHaveBeenCalled();
     expect(result.responseStatus).toBe("failed");
-    expect(result.reply.content).toContain("#20");
-    expect(result.reply.content).toContain("#21");
+    expect(dbMock.createMessage).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      content: expect.stringContaining("#20"),
+      isAssistant: true,
+    }));
+    expect(dbMock.createMessage).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      content: expect.stringContaining("#21"),
+      isAssistant: true,
+    }));
   });
 
   it("responde perguntas pela Sofia sem encaminhá-las automaticamente ao agente", async () => {
@@ -524,7 +533,7 @@ describe("messages.create — persistência e resposta Sofia", () => {
     expect(sendManusMessageAndWaitMock).not.toHaveBeenCalled();
     expect(result.responseStatus).toBe("failed");
     expect(dbMock.createMessage).toHaveBeenNthCalledWith(2, expect.objectContaining({
-      content: expect.stringContaining("não possui agente atribuído"),
+      content: expect.stringContaining("Não localizei uma execução externa ativa"),
       isAssistant: true,
     }));
   });
