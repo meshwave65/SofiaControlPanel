@@ -79,13 +79,23 @@ BEGIN
   INSERT INTO sofia."missionActionUnits" (
     "missionTaskId", "actionPlanDocumentId", "actionPlanVersionId", "actionPlanVersionNumber",
     "actionPlanContentHash", "unitId", "unitTitle", "idempotencyKey", "operationalTaskId",
-    state, "approvalUserId", "approvedAt"
+    state
   )
   VALUES (
     root_id, action_plan_document_id, action_plan_version_id, 1,
     action_plan_hash, 'T01', 'Unidade autorizada', 'fixture-idempotency-key-0001', child_id,
-    'READY_FOR_DISPATCH', owner_id, now()
+    'REGISTERED'
   );
+
+  UPDATE sofia."missionActionUnits"
+     SET state = 'AWAITING_APPROVAL'
+   WHERE "missionTaskId" = root_id AND "unitId" = 'T01';
+  UPDATE sofia."missionActionUnits"
+     SET state = 'APPROVED', "approvalUserId" = owner_id, "approvedAt" = now()
+   WHERE "missionTaskId" = root_id AND "unitId" = 'T01';
+  UPDATE sofia."missionActionUnits"
+     SET state = 'READY_FOR_DISPATCH'
+   WHERE "missionTaskId" = root_id AND "unitId" = 'T01';
 
   -- The exact approved unit mapping permits the trigger to reach the callback.
   -- Vault has no secrets in this fixture, so no network request is made.
