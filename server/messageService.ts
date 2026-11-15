@@ -48,7 +48,7 @@ export const SOFIA_MESSAGE_TOOLS = [
     type: "function" as const,
     function: {
       name: "forward_operator_instruction_to_assigned_agent",
-      description: "Encaminha uma instrução explícita do operador ao agente atualmente atribuído à missão e à execução externa já identificada. Use somente quando o operador pedir claramente para enviar/encaminhar uma instrução ao agente. Nunca use para perguntas, análises, pedidos de status ou solicitações de transferência.",
+      description: "Encaminha uma instrução explícita do operador ao executor externo que está trabalhando na etapa relevante da missão. O servidor resolve a execução ativa; se houver mais de uma, não escolha arbitrariamente. Use somente quando o operador pedir claramente para enviar/encaminhar uma instrução. Nunca use para perguntas, análises, pedidos de status ou solicitações de transferência.",
       parameters: {
         type: "object",
         properties: {
