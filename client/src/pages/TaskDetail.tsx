@@ -126,6 +126,32 @@ export default function TaskDetail() {
       retry: false,
     },
   );
+  const actionPlanUnitRecordsQuery = trpc.tasks.documents.listActionPlanUnits.useQuery(
+    { taskId },
+    {
+      enabled: canLoadTask
+        && selectedDocument?.typeKey === "ACTION_PLAN"
+        && selectedDocument.latestVersion?.state === "APPROVED"
+        && selectedVersion === selectedDocument.latestVersion.version,
+      retry: false,
+    },
+  );
+  const registerActionPlanUnitsMutation = trpc.tasks.documents.registerActionPlanUnits.useMutation({
+    onSuccess: async () => {
+      await actionPlanUnitRecordsQuery.refetch();
+      toast.success("Unidades registradas. Cada uma aguarda aprovação individual; nenhuma tarefa foi criada.");
+    },
+    onError: (error) => toast.error(error.message),
+  });
+  const approveActionPlanUnitMutation = trpc.tasks.documents.approveActionPlanUnit.useMutation({
+    onSuccess: async () => {
+      await actionPlanUnitRecordsQuery.refetch();
+      await actionUnitGateQuery.refetch();
+      toast.success("Aprovação individual registrada. Isso não libera execução nem dispatch.");
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
   const reviseInitialTRMutation = trpc.tasks.documents.reviseInitialTR.useMutation({
     onSuccess: async () => {
       setSelectedVersionNumber(null);
@@ -541,11 +567,39 @@ export default function TaskDetail() {
                     && selectedVersion === selectedDocument.latestVersion.version && actionPlanUnits.length > 0 && (
                     <div className="space-y-3 rounded-md border p-4">
                       <div>
-                        <p className="text-sm font-semibold">Pré-avaliação de governança por unidade</p>
+                        <p className="text-sm font-semibold">Governança individual das unidades</p>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          Consulta somente leitura. Nenhuma tarefa é criada, nenhum agente é reservado e nenhum dispatch é iniciado.
+                          Registre as unidades deste plano aprovado e aprove cada uma separadamente. A aprovação confirma o escopo; não autoriza execução, reserva de agente, crédito ou dispatch.
                         </p>
                       </div>
+                      {actionPlanUnitRecordsQuery.isLoading && (
+                        <p className="text-xs text-muted-foreground">Carregando registros de governança...</p>
+                      )}
+                      {actionPlanUnitRecordsQuery.isError && (
+                        <p className="text-sm text-destructive">{actionPlanUnitRecordsQuery.error.message}</p>
+                      )}
+                      {actionPlanUnitRecordsQuery.data?.length === 0 && (
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            const version = selectedDocumentVersionQuery.data?.version;
+                            if (!version?.contentHash || !selectedDocument?.id) {
+                              toast.error("Versão/hash indisponível. Recarregue o plano antes de registrar.");
+                              return;
+                            }
+                            registerActionPlanUnitsMutation.mutate({
+                              taskId,
+                              documentId: selectedDocument.id,
+                              expectedVersion: version.version,
+                              expectedContentHash: version.contentHash,
+                            });
+                          }}
+                          disabled={registerActionPlanUnitsMutation.isPending || !selectedDocumentVersionQuery.data?.version.contentHash}
+                        >
+                          {registerActionPlanUnitsMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          Registrar unidades para aprovação
+                        </Button>
+                      )}
                       <div className="flex flex-wrap gap-2">
                         {actionPlanUnits.map((unit: any) => (
                           <Button
@@ -555,9 +609,47 @@ export default function TaskDetail() {
                             onClick={() => setSelectedActionUnitId(unit.id)}
                           >
                             {unit.id}
+                            {actionPlanUnitRecordsQuery.data?.find((record: any) => record.unitId === unit.id)?.state
+                              ? " · " + actionPlanUnitRecordsQuery.data.find((record: any) => record.unitId === unit.id).state
+                              : ""}
                           </Button>
                         ))}
                       </div>
+                      {(() => {
+                        const record = actionPlanUnitRecordsQuery.data?.find((item: any) => item.unitId === activeActionUnitId);
+                        const version = selectedDocumentVersionQuery.data?.version;
+                        if (!record) return null;
+                        return (
+                          <div className="rounded-md border p-3 space-y-2">
+                            <p className="text-sm font-medium">{record.unitId} — {record.unitTitle}</p>
+                            <p className="text-xs text-muted-foreground">Estado de governança: {record.state}</p>
+                            {record.state === "AWAITING_APPROVAL" && (
+                              <Button
+                                size="sm"
+                                onClick={() => {
+                                  if (!version?.contentHash) {
+                                    toast.error("Hash da versão indisponível. Recarregue o plano.");
+                                    return;
+                                  }
+                                  approveActionPlanUnitMutation.mutate({
+                                    taskId,
+                                    unitId: record.unitId,
+                                    expectedVersion: version.version,
+                                    expectedContentHash: version.contentHash,
+                                  });
+                                }}
+                                disabled={approveActionPlanUnitMutation.isPending || !version?.contentHash}
+                              >
+                                {approveActionPlanUnitMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Aprovar unidade {record.unitId}
+                              </Button>
+                            )}
+                            {record.state === "APPROVED" && (
+                              <p className="text-xs text-green-600">Aprovação individual registrada; os demais gates de execução continuam obrigatórios.</p>
+                            )}
+                          </div>
+                        );
+                      })()}
                       {actionUnitGateQuery.isLoading && <p className="text-xs text-muted-foreground">Avaliando pré-condições...</p>}
                       {actionUnitGateQuery.isError && (
                         <p className="text-sm text-destructive">{actionUnitGateQuery.error.message}</p>
