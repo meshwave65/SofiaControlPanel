@@ -29,6 +29,18 @@ export default function TaskDetail() {
     { taskId },
     { enabled: canLoadTask && Boolean(taskQuery.data), retry: false },
   );
+  // A conversa pertence à missão-raiz, mesmo quando o operador abre uma tarefa-filha.
+  const missionRootTaskId = taskQuery.data?.parentTaskId ?? taskId;
+  const missionMessagesQuery = trpc.messages.getByTask.useQuery(
+    { taskId: missionRootTaskId },
+    {
+      enabled: canLoadTask && Boolean(taskQuery.data),
+      retry: false,
+      refetchInterval: 5000,
+    },
+  );
+  const [messageContent, setMessageContent] = useState("");
+  const createMissionMessageMutation = trpc.messages.create.useMutation();
   const lookupsQuery = trpc.lookups.listAll.useQuery(
     undefined,
     { enabled: canLoadTask && Boolean(taskQuery.data), retry: false },
@@ -222,6 +234,31 @@ export default function TaskDetail() {
 
   const task = taskQuery.data;
   const messages = messagesQuery.data || [];
+  const missionMessages = (missionMessagesQuery.data || []).filter((message) => message.typeId === 1);
+
+  const handleSendMissionMessage = async () => {
+    const content = messageContent.trim();
+    if (!content || !missionRootTaskId || createMissionMessageMutation.isPending) return;
+
+    try {
+      const result = await createMissionMessageMutation.mutateAsync({
+        taskId: missionRootTaskId,
+        typeId: 1,
+        content,
+      });
+      setMessageContent("");
+      await missionMessagesQuery.refetch();
+      if (result.responseStatus === "replied") {
+        toast.success("SOFIA respondeu no Messenger da missão.");
+      } else if (result.responseStatus === "pending") {
+        toast.info("Mensagem registrada. A resposta externa ainda está pendente.");
+      } else {
+        toast.warning("Mensagem registrada, mas a SOFIA não conseguiu concluir a resposta.");
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível enviar a mensagem.");
+    }
+  };
 
   useEffect(() => {
     setSelectedVersionNumber(null);
@@ -1069,11 +1106,95 @@ export default function TaskDetail() {
 
           {/* Tabs para Subtarefas e Relatórios */}
           <Tabs defaultValue="subtasks" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="subtasks">Subtarefas ({subtasks.length})</TabsTrigger>
+              <TabsTrigger value="messenger">Messenger</TabsTrigger>
               <TabsTrigger value="reports">Relatórios ({messages.length})</TabsTrigger>
               <TabsTrigger value="consolidated">Consolidado</TabsTrigger>
             </TabsList>
+
+            {/* Messenger central da missão: mensagens sempre ficam vinculadas à raiz. */}
+            <TabsContent value="messenger" className="mt-6">
+              <Card className="cad-card">
+                <CardHeader className="border-b border-foreground/10">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <CardTitle>Conversa com a SOFIA</CardTitle>
+                      <CardDescription>
+                        Canal central da missão #{missionRootTaskId}. A SOFIA responde aqui e só encaminha instruções ao executor quando você solicitar explicitamente.
+                      </CardDescription>
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => void missionMessagesQuery.refetch()}
+                      disabled={missionMessagesQuery.isFetching}
+                    >
+                      {missionMessagesQuery.isFetching && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Atualizar
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4 pt-5">
+                  {missionMessagesQuery.isError ? (
+                    <div className="rounded-md border border-destructive/30 p-4 text-sm text-destructive">
+                      Não foi possível carregar a conversa. {missionMessagesQuery.error.message}
+                    </div>
+                  ) : missionMessagesQuery.isLoading ? (
+                    <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" />Carregando conversa...
+                    </div>
+                  ) : missionMessages.length === 0 ? (
+                    <div className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
+                      Ainda não há mensagens nesta missão. Envie uma pergunta ou orientação para iniciar a conversa com a SOFIA.
+                    </div>
+                  ) : (
+                    <div className="max-h-[520px] space-y-4 overflow-y-auto rounded-md border bg-muted/10 p-4">
+                      {missionMessages.map((message) => (
+                        <div key={message.id} className={`flex ${message.isAssistant ? "justify-start" : "justify-end"}`}>
+                          <div className={`max-w-[90%] rounded-lg border px-4 py-3 sm:max-w-[80%] ${
+                            message.isAssistant
+                              ? "border-foreground/10 bg-card"
+                              : "border-accent/30 bg-accent/10"
+                          }`}>
+                            <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                              <strong className="text-foreground">{message.isAssistant ? "SOFIA" : "Você"}</strong>
+                              <span>{new Date(message.createdAt).toLocaleString()}</span>
+                            </div>
+                            <p className="whitespace-pre-wrap break-words text-sm leading-6">{message.content}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="space-y-3 border-t border-foreground/10 pt-4">
+                    <Textarea
+                      value={messageContent}
+                      onChange={(event) => setMessageContent(event.target.value)}
+                      placeholder="Pergunte à SOFIA sobre a missão ou registre uma orientação..."
+                      rows={4}
+                      maxLength={12000}
+                      disabled={createMissionMessageMutation.isPending}
+                    />
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <p className="text-xs text-muted-foreground">
+                        Até 12.000 caracteres. Perguntas não são encaminhadas ao agente; o encaminhamento exige pedido explícito.
+                      </p>
+                      <Button
+                        type="button"
+                        onClick={() => void handleSendMissionMessage()}
+                        disabled={!messageContent.trim() || createMissionMessageMutation.isPending}
+                      >
+                        {createMissionMessageMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Enviar mensagem
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
             {/* Subtarefas */}
             <TabsContent value="subtasks" className="mt-6">
