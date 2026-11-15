@@ -440,3 +440,10 @@ O ARC/PGC atual é somente um protótipo conceitual rudimentar, sem enforcement 
 - Deploy manual no Render Free: `dep-dbsvo1rbc2fs73cn5v1g`; estado inicial `build_in_progress`.
 - Auto-deploy continua desligado. Aguardar resultado real do deploy e registrar falhas/correções sem reverter automaticamente a missão.
 - Banco Supabase efetivo e migrations 0010–0013 persistentes ainda não confirmados. Ver OR-20261115-0050.
+
+
+### Produção publicada — OR-20261115-0050
+- PR #15 integrada e deploy Render Free concluído com status `live` (deploy `dep-dbsvo1rbc2fs73cn5v1g`, merge commit `9e3f9bd3f7c09a7d2212bd7c1e30796cd020b78f`).
+- Startup confirmou `ensure-db`, colunas, trigger 0003, ajuste 0008, servidor na porta 10000 e Heartbeat ativo.
+- URL: https://sofia-cp.meshwave.com.br. Ainda não houve QA visual nem confirmação do Messenger em uso real.
+- Consulta Supabase falhou por autenticação read-only do conector (28P01); migrations 0010–0013 permanecem não confirmadas no banco persistente. Não executar DDL em projeto inferido.
