@@ -167,10 +167,9 @@ BEGIN
     RAISE EXCEPTION 'Action-plan unit state requires explicit human approval';
   END IF;
 
-  IF NEW."state" IN ('READY_FOR_DISPATCH', 'DISPATCHED') THEN
-    IF NEW."operationalTaskId" IS NULL THEN
-      RAISE EXCEPTION 'Dispatchable action-plan unit requires an operational task';
-    END IF;
+  -- Any established operational-task link is validated immediately, even
+  -- while the unit remains APPROVED and the child is safely PAUSED.
+  IF NEW."operationalTaskId" IS NOT NULL THEN
     SELECT "createdBy", "parentTaskId"
       INTO task_owner_id, task_parent_id
       FROM sofia.tasks
@@ -179,6 +178,11 @@ BEGIN
        OR task_parent_id IS DISTINCT FROM NEW."missionTaskId" THEN
       RAISE EXCEPTION 'Operational task must be a direct child of the same mission owner';
     END IF;
+  END IF;
+
+  IF NEW."state" IN ('READY_FOR_DISPATCH', 'DISPATCHED')
+     AND NEW."operationalTaskId" IS NULL THEN
+    RAISE EXCEPTION 'Dispatchable action-plan unit requires an operational task';
   END IF;
 
   NEW."updatedAt" := now();
