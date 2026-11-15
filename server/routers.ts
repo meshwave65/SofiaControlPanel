@@ -496,7 +496,7 @@ export const appRouter = router({
           taskId: z.number().int().positive(),
           unitId: z.string().regex(/^T[0-9]{2}$/),
         }))
-        .query(async ({ input, ctx }) => {
+        .mutation(async ({ input, ctx }) => {
           const requestedTask = await db.getTaskById(input.taskId);
           if (!requestedTask || requestedTask.createdBy !== ctx.user.id) {
             throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
