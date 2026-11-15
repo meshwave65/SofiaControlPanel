@@ -190,6 +190,7 @@ export default function TaskDetail() {
 
   useEffect(() => {
     setSelectedVersionNumber(null);
+    setSelectedActionUnitId(null);
   }, [selectedDocument?.id]);
 
   useEffect(() => {
