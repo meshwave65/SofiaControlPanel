@@ -239,4 +239,30 @@ Controles:
 - A ferramenta não altera missão, estado, atribuição, prioridade, execução ou créditos.
 - O resultado é sintetizado pela SOFIA em uma segunda chamada cognitiva; testes automatizados mockam o provedor.
 
-Esta primeira ferramenta cobre somente a missão aberta, sua raiz e filhas diretas. A consulta de candidatos elegíveis deve reproduzir o predicado transacional do claim sem adquirir locks nem reservar agentes. Consultas de módulos e planos estruturados permanecem fases posteriores.
+Esta primeira ferramenta cobre somente a missão aberta, sua raiz e filhas diretas. A consulta de candidatos elegíveis foi implementada separadamente pela ferramenta `inspect_agent_eligibility` (OR-20261114-0035), com o predicado do claim reproduzido em modo somente leitura. Consultas de módulos e planos estruturados permanecem fases posteriores.
+
+## 18. Ferramenta cognitiva de elegibilidade de agentes (OR-20261114-0035)
+
+A ferramenta `inspect_agent_eligibility` permite à SOFIA responder quais agentes do proprietário da tarefa atendem ao predicado atual de `claimStagedTaskWithAvailableAgent`, e por quais razões os demais não atendem.
+
+A função de banco `inspectTaskAgentEligibility(taskId, ownerId)` deriva o escopo da tarefa já validada pelo Messenger. O LLM não fornece owner ID, agent IDs ou filtros de consulta.
+
+O predicado reproduzido é:
+- tarefa em `STAGED`;
+- pinagem humana: quando há agente pinado, somente esse agente pode ser elegível;
+- status do agente `online`;
+- conexão `configured` ou `connected`;
+- credencial presente, exposta ao contexto cognitivo somente como booleano;
+- saldo de créditos positivo;
+- `creditsUpdatedAt` nos últimos 60 segundos;
+- ausência de outra tarefa do mesmo agente em `PROGRESS`.
+
+A ordenação de candidatos elegíveis acompanha a seleção automática do claim: saldo decrescente, snapshot mais antigo e Agent ID.
+
+Controles e limites:
+- A consulta não usa `FOR UPDATE`, `SKIP LOCKED`, reserva, transação de claim ou escrita.
+- O resultado é um snapshot e pode mudar antes de uma tentativa posterior de claim.
+- Não valida credencial com o provedor externo nem atualiza créditos; usa a presença da credencial e o snapshot persistido.
+- O status `configured` permanece elegível porque o claim atual o aceita; esta entrega não modifica a regra de atribuição.
+- O claim transacional continua sendo a única autoridade para reservar agente sob concorrência.
+- Testes do Messenger mockam banco e provedor; a execução SQL em banco persistente e a integração cognitiva externa real permanecem pendentes.
