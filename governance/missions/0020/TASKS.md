@@ -58,3 +58,13 @@ Primeiro reconciliar a branch da PR #15 com main, identificando e resolvendo con
 - URL principal: https://sofia-cp.meshwave.com.br.
 - Interface/Messenger ainda precisam de observação funcional pelo operador; não declarar aceite visual.
 - Consulta Supabase falhou por autenticação do conector read-only (28P01). Migrations 0010–0013 persistentes não confirmadas.
+
+### Piloto de reconciliação documental — SCP-TASK-000017
+
+- **Estado:** TR retrospectivo produzido e submetido à validação humana.
+- **OR:** OR-20261115-0053.
+- **ORIGINAL_REQUEST:** documentId=1/versionId=1, PUBLISHED.
+- **TR:** documentId=2/versionId=2, AWAITING_HUMAN_VALIDATION.
+- **Arquivos:** `missions/SCP-TASK-000017.md` e `missions/SCP-TASK-000017-TR-v0.1.0-DRAFT.md`.
+- **Próximo gate:** validação/correção explícita do TR; só depois derivar Blueprint mestre e reconciliar a unidade estratégica 24.
+- **Preservação:** pai 17 PAUSED, filhas 22/23 DONE, filha 24 FAIL; nenhum dispatch, consumo de créditos ou alteração de estado nesta etapa.
