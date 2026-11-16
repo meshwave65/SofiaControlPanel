@@ -1,34 +1,52 @@
 # MISSION_0026 — Progresso
 
-**Estado:** STAGED — AGUARDANDO APROVAÇÃO DO TR  
-**Prioridade:** CRÍTICA  
+**Estado:** PROGRESS  
+**Prioridade:** CRÍTICA — nível máximo  
 **Criada em:** 2026-11-16  
 **Última atualização:** 2026-11-16
 
-## Registro inicial
+## Aprovação e liberação
 
-Missão aberta para avaliar o reaproveitamento de tecnologias maduras do ecossistema Ethereum na arquitetura MeshWave, com foco em EVM, contratos inteligentes, padrões de tokens, infraestrutura, MWN, UMS, MW-Ex, ledger, carteiras e PoUW.
+- O responsável aprovou expressamente o TR v0.1.0 nesta conversa.
+- TR aprovado publicado em `TR-v0.1.0-APPROVED.md`.
+- Blueprint v1.0.0 publicado em `BLUEPRINT.md`, estado READY, derivado do TR aprovado.
+- Tarefa operacional raiz criada como `SCP-TASK-000027`, prioridade CRÍTICA, estado STAGED.
+- Missão de governança atualizada para PROGRESS no Supabase.
+
+## Segurança — correção RLS
+
+Inspeção anterior constatou:
+- `sofia."governanceMissions"` estava com RLS desabilitado.
+- Não havia policies na tabela.
+- Não havia grants para `anon` ou `authenticated`; o schema `sofia` também não concedia USAGE a esses papéis.
+- O acesso observado estava limitado ao owner `postgres`.
+
+Correção aplicada por migração `secure_governance_missions_rls`:
+- RLS habilitado.
+- Política RESTRICTIVE para `anon` e `authenticated`, com `USING(false)` e `WITH CHECK(false)`.
+- Nenhum grant ou acesso de cliente foi concedido.
+- Nenhuma outra tabela, policy, grant ou dado financeiro foi alterado.
+
+A política restritiva funciona como defesa em profundidade: mesmo que uma policy permissiva seja adicionada futuramente para esses papéis, a restrição continuará negando acesso até ser revista deliberadamente. O acesso backend/admin permanece sujeito ao modelo de privilégios existente.
 
 ## Estado documental
 
-- ORIGINAL_REQUEST: registrado.
-- TR v0.1.0: draft criado; aguardando validação humana.
-- Blueprint: não criado, aguardando aprovação do TR.
-- TASKS: quadro criado com etapas bloqueadas.
-- Operational Reports de execução: nenhum; não houve tarefa de análise assumida.
-- Registro de governança no Supabase: criado como `MISSION_0026`, ID interno 25, status STAGED, canonicalPath `governance/missions/0026/`.
-- Registro operacional SCP: ainda não criado. O banco rejeitou corretamente a criação da tarefa STAGED porque exige TR validado e Blueprint READY derivado da última versão. Não foi contornado o gate.
+- ORIGINAL_REQUEST: preservado.
+- TR-v0.1.0-DRAFT: preservado como histórico supersedido.
+- TR-v0.1.0-APPROVED: VALIDATED.
+- BLUEPRINT v1.0.0: READY.
+- TASKS: atualizado com oito work packages e dependências.
+- PROGRESS: atualizado.
+- RLS migration: aplicada.
+- Registro de governança no Supabase: `MISSION_0026`, ID interno 25, status PROGRESS, canonicalPath `governance/missions/0026/`.
+- Tarefa operacional: SCP-TASK-000027, prioridade CRÍTICA.
 
-## Estado técnico
+## Execução técnica
 
-A pesquisa preliminar usada para formular o TR confirma:
-- Ethereum foi proposto em 2013 e sua mainnet foi lançada em 30/07/2015.
-- Ethereum iniciou com Proof-of-Work e migrou para Proof-of-Stake em 15/09/2022.
-- EVM/contratos inteligentes e consenso são camadas conceitualmente distintas.
-- PoUW possui literatura e propostas próprias, mas não deve ser presumido como solução pronta nem confundido com o consenso atual do Ethereum.
+Nenhum work package foi concluído ainda. A liberação da missão não equivale à conclusão da análise.
 
-Esses pontos são contexto de abertura, não conclusão da análise de arquitetura MeshWave.
+Nenhum contrato, token, carteira, chave, transação, migração econômica, POC executável ou deploy foi iniciado. Nenhum serviço pago foi contratado.
 
 ## Próximo passo
 
-Aguardar aprovação explícita do [TR-v0.1.0-DRAFT.md](./TR-v0.1.0-DRAFT.md). Após aprovação, produzir Blueprint READY derivado do TR aprovado, criar a tarefa operacional no SCP com prioridade CRÍTICA e iniciar a análise conforme a sequência de tarefas, sem alterar código, dados, contratos, carteiras ou ambientes.
+Iniciar WP26.1, WP26.2 e WP26.3 conforme disponibilidade de agentes no SCP, sem atribuição fixa. Cada unidade deve produzir OR com evidências e atualizar o índice operacional.
