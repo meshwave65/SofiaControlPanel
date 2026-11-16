@@ -39,7 +39,7 @@ A política restritiva funciona como defesa em profundidade: mesmo que uma polic
 - BLUEPRINT v1.0.0: READY.
 - TASKS: atualizado com estados atuais dos work packages.
 - OPERATIONAL_INDEX: criado.
-- OR-WP26.1: parcial, com bloqueio de confirmação live do banco MWN.
+- OR-WP26.1: revisado com consulta direta read-only ao Supabase MeshWave65; baseline live corrigido (77 blocos/77 transações), ainda parcial pelas pendências de reconciliação funcional e inventário.
 - OR-WP26.2: concluído.
 - OR-WP26.3: concluído.
 - RLS migration: aplicada.
@@ -50,9 +50,9 @@ A política restritiva funciona como defesa em profundidade: mesmo que uma polic
 ### WP26.1 — Baseline MeshWave
 - Inspecionados meshwave-blockchain, newsite, Foundation_MeshWave, migrações e fontes relacionadas.
 - Verificado deployment Vercel Hobby do newsite em estado READY, no commit c8973f7701ea056a39477f708fe18590a05fbe32.
-- Evidência disponível indica piloto de ledger de operador único, separado da aplicação financeira atual.
+- Evidência live no Supabase MeshWave65 confirma cadeia/ledger piloto de operador único com 77 blocos e 77 transações; a fotografia de dois blocos de 24/10 é histórica e não representa o estado atual.
 - O código local do piloto permite transferência UMS no scaffold; isso não comprova comportamento do banco operacional.
-- A leitura read-only do projeto Supabase MWN falhou por autenticação do conector. Flags de ativos, saldos e ordens live não foram confirmados.
+- A consulta direta read-only ao projeto Supabase MeshWave65 (`ufylccbdjfzydbwhpmpp`) confirmou 77 blocos (0–76), 77 transações confirmadas, 129 lançamentos em `mw_account_ledger`, 29 transações MW-Ex e 34 lançamentos MW-Ex. Metadata declara `network=pilot`, `canonical=false`, `consensus=single-operator`. Sequência e referências `previous_hash` sem divergências estruturais; transações sem bloco ou órfãs: zero. Não foi feita auditoria criptográfica independente.
 - Estado: PARTIAL.
 
 ### WP26.2 — Catálogo Ethereum/EVM
@@ -75,6 +75,6 @@ A política restritiva funciona como defesa em profundidade: mesmo que uma polic
 
 ## Próximos passos
 
-1. Resolver a consulta read-only ao banco MWN e concluir WP26.1 sem alterar dados.
+1. Reconciliar eventos da cadeia, ledger de contas e ledger MW-Ex; verificar flags e liquidação MW-Ex; completar inventário de execução/rede e localizar a missão original de replicação MeshWalker.
 2. Reconciliar o estado PAUSED da tarefa SCP com a documentação STAGED e sincronizar o arquivo espelho, sem acionar agente pago.
 3. Liberar WP26.4 somente após o baseline estar suficientemente fechado; então seguir a matriz de equivalências e gaps.
