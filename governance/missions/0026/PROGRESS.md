@@ -16,6 +16,8 @@ Missão aberta para avaliar o reaproveitamento de tecnologias maduras do ecossis
 - Blueprint: não criado, aguardando aprovação do TR.
 - TASKS: quadro criado com etapas bloqueadas.
 - Operational Reports de execução: nenhum; não houve tarefa de análise assumida.
+- Registro de governança no Supabase: criado como `MISSION_0026`, ID interno 25, status STAGED, canonicalPath `governance/missions/0026/`.
+- Registro operacional SCP: ainda não criado. O banco rejeitou corretamente a criação da tarefa STAGED porque exige TR validado e Blueprint READY derivado da última versão. Não foi contornado o gate.
 
 ## Estado técnico
 
@@ -29,4 +31,4 @@ Esses pontos são contexto de abertura, não conclusão da análise de arquitetu
 
 ## Próximo passo
 
-Aguardar aprovação explícita do [TR-v0.1.0-DRAFT.md](./TR-v0.1.0-DRAFT.md). Após aprovação, produzir Blueprint e iniciar a análise conforme a sequência de tarefas, sem alterar código, dados, contratos, carteiras ou ambientes.
+Aguardar aprovação explícita do [TR-v0.1.0-DRAFT.md](./TR-v0.1.0-DRAFT.md). Após aprovação, produzir Blueprint READY derivado do TR aprovado, criar a tarefa operacional no SCP com prioridade CRÍTICA e iniciar a análise conforme a sequência de tarefas, sem alterar código, dados, contratos, carteiras ou ambientes.
