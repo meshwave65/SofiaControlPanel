@@ -1,27 +1,30 @@
 # Índice canônico de missões e tarefas
 
-Este repositório contém **duas séries diferentes de registros**, além de seus artefatos históricos. Elas não devem ser somadas como se fossem a mesma tabela.
+Este repositório contém duas séries diferentes de registros, além de artefatos históricos. Elas não devem ser somadas como se fossem a mesma tabela.
 
 ## 1. Onde cada coisa é salva
 
 | Camada | Fonte de verdade | Local no GitHub | Quantidade atual | O que representa |
 | --- | --- | --- | ---: | --- |
-| Missões operacionais do painel | Supabase `sofia.tasks` | `missions/SCP-TASK-XXXXXX.md` | 15 registros, IDs 2–16 | Tarefas/missões criadas ou materializadas pelo SofiaControlPanel, incluindo relações pai-filho. |
-| Missões de governança | Documentação versionada | `governance/missions/<ID>/` quando existe | 26 IDs, 0001–0026 | Programas de trabalho, blueprints, gates, checkpoints e continuidade. |
-| Snapshots legados de governança | Histórico Git | raiz, `MISSION_*.md` | 47 arquivos | Cópias/status históricos mantidos para preservar links e rastreabilidade. Não são 47 missões novas. |
-| Artefatos de missão | Git | dentro de `governance/missions/<ID>/` | 106 arquivos | Blueprints, progresso, tarefas, checkpoints, evidências e relatórios. Não são missões adicionais. |
+| Missões operacionais do painel | Supabase `sofia.tasks` | `missions/SCP-TASK-XXXXXX.md` | 26 registros, IDs 2–27 | Tarefas/missões operacionais do SofiaControlPanel, incluindo relações pai-filho. |
+| Missões de governança | Documentação versionada | `governance/missions/<ID>/` | 26 IDs, 0001–0026 | Programas de trabalho, blueprints, gates, checkpoints e continuidade. |
+| Snapshots legados de governança | Histórico Git | raiz, `MISSION_*.md` | 47 arquivos | Cópias/status históricos mantidos por compatibilidade e rastreabilidade; não são missões novas. |
+| Artefatos de missão | Git | dentro de `governance/missions/<ID>/` | 108 arquivos | Blueprints, progresso, tarefas, checkpoints, evidências e relatórios. Não são missões adicionais. |
 
 ## 2. Missões operacionais do Supabase
 
-A série `SCP-TASK-*` é o espelho executável do painel. O Supabase é a fonte operacional; o GitHub registra contexto, proveniência e estado espelhado. A hierarquia atual é:
+A série `SCP-TASK-*` é o espelho executável do painel. O Supabase é a fonte operacional; o GitHub registra contexto, proveniência e estado espelhado. A hierarquia é:
 
-- Raízes: `2`, `3`, `7`, `12` e `16`.
+- Raízes: `2`, `3`, `7`, `12`, `16`, `17`, `18`, `25` e `27`.
 - Filhas de `3`: `4`, `5` e `6`.
 - Filha de `7`: `8`.
 - Filhas de `6`: `9`, `10` e `11`.
 - Filhas de `12`: `13`, `14` e `15`.
+- Filhas de `18`: `19`, `20` e `21`.
+- Filhas de `17`: `22`, `23` e `24`.
+- Filha de `25`: `26`.
 
-Todos os 15 registros possuem `missionKey`, `githubPath`, `githubSha` e `githubSyncStatus='synced'` no Supabase. Consulte [`missions/README.md`](missions/README.md) para o contrato operacional.
+Os registros 2–27 totalizam 26 tarefas operacionais. Alguns registros históricos ainda possuem sincronização pendente ou caminho GitHub ausente; não declarar sincronização integral sem reconciliação. Consulte [`missions/README.md`](missions/README.md) para o contrato operacional.
 
 ## 3. Missões de governança
 
@@ -54,14 +57,14 @@ A numeração `MISSION_0001`–`MISSION_0026` é uma série documental distinta 
 | 0023 | PROGRESS | `governance/missions/0023/README.md`, `BLUEPRINT.md`, `TASKS.md` |
 | 0024 | DONE — publicada em produção | `governance/missions/0024/README.md`, `BLUEPRINT.md`, `TASKS.md`, `PROGRESS.md` |
 | 0025 | STAGED — aguardando aprovação humana do TR | `governance/missions/0025/README.md`, `TR-v0.1.0-DRAFT.md`, `TASKS.md`, `PROGRESS.md` |
-| 0026 | STAGED — aguardando aprovação humana do TR; prioridade CRÍTICA | `governance/missions/0026/README.md`, `TR-v0.1.0-DRAFT.md`, `TASKS.md`, `PROGRESS.md` |
+| 0026 | PROGRESS — TR VALIDATED, Blueprint READY, tarefa operacional SCP-TASK-000027 em prioridade CRÍTICA | `governance/missions/0026/README.md`, `TR-v0.1.0-APPROVED.md`, `BLUEPRINT.md`, `TASKS.md`, `PROGRESS.md` |
 
-Os arquivos da raiz continuam versionados por compatibilidade histórica. Eles não devem ser apagados nem tratados como novos registros. Quando houver `governance/missions/<ID>/README.md` ou `BLUEPRINT.md`, esses documentos governam a continuidade da missão; os arquivos da raiz são snapshots/legado de execução anterior.
+Os arquivos da raiz continuam versionados por compatibilidade histórica. Eles não devem ser apagados nem tratados como novas missões. Quando houver `governance/missions/<ID>/README.md` ou `BLUEPRINT.md`, esses documentos governam a continuidade da missão; os arquivos da raiz são snapshots/legado.
 
 ## 4. Regra para não voltar a gerar a confusão
 
-- Criar/alterar uma tarefa operacional: usar `sofia.tasks` pelo SofiaControlPanel; o espelho correspondente fica em `missions/SCP-TASK-XXXXXX.md`.
-- Criar/alterar uma missão de governança: criar ou atualizar `governance/missions/<ID>/` e seu blueprint/README; não criar outro arquivo solto na raiz, salvo manutenção histórica explícita.
+- Criar/alterar tarefa operacional: usar `sofia.tasks` pelo SofiaControlPanel; o espelho correspondente fica em `missions/SCP-TASK-XXXXXX.md`.
+- Criar/alterar missão de governança: criar/atualizar `governance/missions/<ID>/` e seus documentos; não criar outro arquivo solto na raiz, salvo manutenção histórica explícita.
 - Arquivos `MISSION_* - TASKS` são quadros de tarefas da missão de governança, não missões adicionais.
 - Relatórios, checkpoints e documentos dentro de `governance/missions/<ID>/` são artefatos, não novos IDs de missão.
 - Não misturar `SCP-TASK-*` com `MISSION_####`: são namespaces diferentes, com fontes de verdade diferentes.
