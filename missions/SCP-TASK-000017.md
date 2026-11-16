@@ -94,3 +94,18 @@ Key principles captured from the reference:
 - The separate “who has the ball” metadata uses `0` (fulfilled), `1` (manager) and `2` (agent) in the intervention cycle described by the reference. These are responsibility metadata values, not task status codes.
 
 The existing lifecycle decisions and this reference have not yet been reconciled against the current SCP status catalog, permissions model or implementation. No implementation, database change, TR approval, dispatch or external execution is authorized by this documentation update.
+
+## Implementation audit — 2026-11-16
+
+A static audit of branch `feat/sofia-cognitive-control-plane` against the operator's reference document and the decisions in OR-20261116-0054 was recorded in [OR-20261116-0055](../governance/operational_reports/OR-20261116-0055.md).
+
+Main findings:
+- The current implementation uses `STAGED` as automatic-dispatch eligibility, while the operator defines it as the unique genesis state before SCP assumption. Human-origin missions currently start in `PAUSED` and are promoted to `STAGED` after TR/Blueprint gates.
+- No dedicated persisted “who has the ball” responsibility metadata was found.
+- The current Messenger supports ordinary messages, read-only mission/eligibility tools and explicit forwarding of instructions; it does not implement the full Order → manager hold → agent response → manager release → agent acknowledgement/resumption protocol.
+- Recursive factorization is explicitly blocked for tasks that already have a parent; inspection and consolidation operate on direct children.
+- Consolidation is manual and flat; continuous monitoring/integration of child drafts into the parent's draft was not found.
+- FR is absent from the initial document catalog, and the current TR specification's terminology/definition requires reconciliation with the operator's FR/TR distinction.
+- No `remake_count` or persisted processing-cycle model was found in the inspected schema.
+
+This is a static repository audit, not a production-state verification. No database, task status, TR, Blueprint, code, migration, Manus execution, credit balance or deployment was changed.
