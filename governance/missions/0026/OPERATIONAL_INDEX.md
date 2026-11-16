@@ -7,7 +7,7 @@
 
 | Unidade | Estado | Relatório | Observação |
 |---|---|---|---|
-| WP26.1 — Baseline MeshWave | PARTIAL | [OR-WP26.1](./operational_reports/OR-WP26.1-2026-11-16.md) | Inventário documental concluído; leitura do banco MWN e confirmação live pendentes |
+| WP26.1 — Baseline MeshWave | PARTIAL | [OR-WP26.1](./operational_reports/OR-WP26.1-2026-11-16.md) | Baseline live MeshWave65 confirmado: 77 blocos/77 transações; reconciliação funcional e inventário complementar pendentes |
 | WP26.2 — Catálogo Ethereum/EVM | DONE | [OR-WP26.2](./operational_reports/OR-WP26.2-2026-11-16.md) | Catálogo técnico inicial com fontes primárias |
 | WP26.3 — PoUW e consenso | DONE | [OR-WP26.3](./operational_reports/OR-WP26.3-2026-11-16.md) | Separação conceitual e análise de ameaças concluídas |
 | WP26.4 — Equivalências e gaps | BLOCKED | — | Depende da conclusão do WP26.1 |
@@ -18,7 +18,7 @@
 
 ## Bloqueios ativos
 
-1. A conexão read-only do Supabase do projeto MWN falhou; estado live de ativos, saldos e ordens não foi confirmado.
+1. Baseline da cadeia confirmado diretamente no Supabase MeshWave65: 77 blocos, 77 transações; metadata declara pilot/single-operator/canonical=false. Permanecem pendentes reconciliação dos ledgers e validação funcional de flags/ordens MW-Ex.
 2. O registro de `SCP-TASK-000027` está `PAUSED` no banco, embora a documentação da missão diga `STAGED`.
 3. O arquivo de espelho `missions/SCP-TASK-000027.md` ainda não existe e `githubSyncStatus` permanece `pending`.
 
