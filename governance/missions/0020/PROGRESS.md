@@ -66,3 +66,13 @@ PR #15 foi integrada em `main` por squash merge. Commit: `9e3f9bd3f7c09a7d2212bd
 Deploy Render Free `dep-dbsvo1rbc2fs73cn5v1g` está `live` no merge commit `9e3f9bd3f7c09a7d2212bd7c1e30796cd020b78f`. Startup confirmou schema/colunas de execução, trigger 0003, ajuste 0008, servidor na porta 10000 e Heartbeat. URL principal: https://sofia-cp.meshwave.com.br.
 
 Ainda não há validação visual/autenticada nem confirmação funcional do Messenger. A consulta de tabelas Supabase falhou com erro de autenticação do conector read-only (28P01); migrations 0010–0013 persistentes continuam sem confirmação. Não foi aplicada migration por essa tentativa.
+
+## Auditoria de conformidade documental — OR-20261115-0052
+
+- Inventário inicial publicado em `governance/missions/0020/RECONCILIATION_INVENTORY_2026-11-15.md`.
+- Foram auditadas as missões de governança MISSION_0009–0024 e os registros operacionais SCP-TASK-000016–000026.
+- O catálogo documental do Supabase contém ORIGINAL_REQUEST, TR, BLUEPRINT, OR, FOR e ACTION_PLAN; FR não consta como tipo oficial.
+- A consulta read-only encontrou zero instâncias/versões documentais para as tarefas operacionais 2–26. O catálogo existe, mas os documentos não estão vinculados às tarefas.
+- O backfill de TR/Blueprint/FOR deve ser retrospectivo, preservar proveniência e não alterar automaticamente status ou reexecutar missões concluídas.
+- Próxima etapa: confirmar a nomenclatura “FR” e validar o piloto SCP-TASK-000017/000024. A tarefa 17 permanece PAUSED e a 24 FAIL; nenhum dispatch foi realizado.
+- Nenhum status técnico, dado operacional, schema, migration ou deploy foi alterado nesta auditoria.
