@@ -3,27 +3,29 @@
 **Estado:** PROGRESS  
 **Prioridade:** CRÍTICA — nível máximo  
 **Criada em:** 2026-11-16  
-**Última atualização:** 2026-11-16
+**Última atualização:** 2026-11-16  
+**Índice operacional:** [OPERATIONAL_INDEX.md](./OPERATIONAL_INDEX.md)
 
-## Aprovação e liberação
+## Aprovação e governança
 
 - O responsável aprovou expressamente o TR v0.1.0 nesta conversa.
-- TR aprovado publicado em `TR-v0.1.0-APPROVED.md`.
-- Blueprint v1.0.0 publicado em `BLUEPRINT.md`, estado READY, derivado do TR aprovado.
-- Tarefa operacional raiz criada como `SCP-TASK-000027`, prioridade CRÍTICA, estado STAGED.
-- Missão de governança atualizada para PROGRESS no Supabase.
+- TR aprovado publicado em TR-v0.1.0-APPROVED.md.
+- Blueprint v1.0.0 publicado em BLUEPRINT.md, estado READY, derivado do TR aprovado.
+- Missão de governança MISSION_0026 permanece em PROGRESS no Supabase.
+- A tarefa operacional raiz SCP-TASK-000027 foi criada com prioridade CRÍTICA. Estado atual consultado no banco: PAUSED, sem agente atribuído e com githubSyncStatus=pending. Isso diverge do estado STAGED registrado anteriormente nos documentos. Nenhuma mudança de status foi feita para evitar eventual disparo automático de agente ou consumo de créditos.
+- O arquivo espelho missions/SCP-TASK-000027.md ainda não existe no GitHub.
 
 ## Segurança — correção RLS
 
 Inspeção anterior constatou:
-- `sofia."governanceMissions"` estava com RLS desabilitado.
+- sofia.governanceMissions estava com RLS desabilitado.
 - Não havia policies na tabela.
-- Não havia grants para `anon` ou `authenticated`; o schema `sofia` também não concedia USAGE a esses papéis.
-- O acesso observado estava limitado ao owner `postgres`.
+- Não havia grants para anon ou authenticated; o schema sofia também não concedia USAGE a esses papéis.
+- O acesso observado estava limitado ao owner postgres.
 
-Correção aplicada por migração `secure_governance_missions_rls`:
+Correção aplicada por migração secure_governance_missions_rls:
 - RLS habilitado.
-- Política RESTRICTIVE para `anon` e `authenticated`, com `USING(false)` e `WITH CHECK(false)`.
+- Política RESTRICTIVE para anon e authenticated, com USING(false) e WITH CHECK(false).
 - Nenhum grant ou acesso de cliente foi concedido.
 - Nenhuma outra tabela, policy, grant ou dado financeiro foi alterado.
 
@@ -35,18 +37,44 @@ A política restritiva funciona como defesa em profundidade: mesmo que uma polic
 - TR-v0.1.0-DRAFT: preservado como histórico supersedido.
 - TR-v0.1.0-APPROVED: VALIDATED.
 - BLUEPRINT v1.0.0: READY.
-- TASKS: atualizado com oito work packages e dependências.
-- PROGRESS: atualizado.
+- TASKS: atualizado com estados atuais dos work packages.
+- OPERATIONAL_INDEX: criado.
+- OR-WP26.1: parcial, com bloqueio de confirmação live do banco MWN.
+- OR-WP26.2: concluído.
+- OR-WP26.3: concluído.
 - RLS migration: aplicada.
-- Registro de governança no Supabase: `MISSION_0026`, ID interno 25, status PROGRESS, canonicalPath `governance/missions/0026/`.
-- Tarefa operacional: SCP-TASK-000027, prioridade CRÍTICA.
+- Registro de governança no Supabase: MISSION_0026, ID interno 25, status PROGRESS, canonicalPath governance/missions/0026/.
 
-## Execução técnica
+## Execução técnica — 2026-11-16
 
-Nenhum work package foi concluído ainda. A liberação da missão não equivale à conclusão da análise.
+### WP26.1 — Baseline MeshWave
+- Inspecionados meshwave-blockchain, newsite, Foundation_MeshWave, migrações e fontes relacionadas.
+- Verificado deployment Vercel Hobby do newsite em estado READY, no commit c8973f7701ea056a39477f708fe18590a05fbe32.
+- Evidência disponível indica piloto de ledger de operador único, separado da aplicação financeira atual.
+- O código local do piloto permite transferência UMS no scaffold; isso não comprova comportamento do banco operacional.
+- A leitura read-only do projeto Supabase MWN falhou por autenticação do conector. Flags de ativos, saldos e ordens live não foram confirmados.
+- Estado: PARTIAL.
 
-Nenhum contrato, token, carteira, chave, transação, migração econômica, POC executável ou deploy foi iniciado. Nenhum serviço pago foi contratado.
+### WP26.2 — Catálogo Ethereum/EVM
+- Avaliados EVM, Solidity, ERCs, OpenZeppelin, Hardhat, Foundry, viem, revm, account abstraction, L2/rollups, Besu e Cosmos SDK/CometBFT.
+- Conclusão desta unidade: existe amplo ecossistema reutilizável; EVM é execução determinística e não fornece consenso por si só.
+- Estado: DONE.
 
-## Próximo passo
+### WP26.3 — PoUW e consenso
+- Separados consenso, execução EVM, trabalho útil, verificação e recompensa.
+- Revisada literatura de 2025/2026 e documentação de Golem/Akash.
+- Conclusão desta unidade: PoUW MeshWave, conforme a documentação conceitual, é mais amplo que consenso PoUW e deve ser avaliado como camada de reconhecimento/verificação de contribuições e contabilização de UMS.
+- Estado: DONE.
 
-Iniciar WP26.1, WP26.2 e WP26.3 conforme disponibilidade de agentes no SCP, sem atribuição fixa. Cada unidade deve produzir OR com evidências e atualizar o índice operacional.
+## Limites respeitados
+
+- Ferramentas utilizadas: GitHub, Vercel Hobby, Supabase read-only e fontes públicas.
+- Nenhum serviço pago ou crédito externo utilizado.
+- Nenhum código, contrato, token, carteira, chave, saldo, ordem, schema ou configuração financeira alterado.
+- Nenhuma transação, POC executável, migração econômica ou deploy realizado.
+
+## Próximos passos
+
+1. Resolver a consulta read-only ao banco MWN e concluir WP26.1 sem alterar dados.
+2. Reconciliar o estado PAUSED da tarefa SCP com a documentação STAGED e sincronizar o arquivo espelho, sem acionar agente pago.
+3. Liberar WP26.4 somente após o baseline estar suficientemente fechado; então seguir a matriz de equivalências e gaps.
