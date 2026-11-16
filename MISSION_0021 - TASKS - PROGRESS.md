@@ -150,3 +150,11 @@
 ## Frente corretiva vinculada — MISSION_0023
 
 A MISSION_0023 foi criada para isolar a correção de segregação de ativos, indivisibilidade MWN e auditabilidade dos extratos. Ela complementa os critérios da tarefa 21.7, mas não a encerra automaticamente. Consultar governance/missions/0023/BLUEPRINT.md e governance/missions/0023/TASKS.md. O status da tarefa 21.7 permanece PROGRESS até validação documentada.
+
+
+## Checkpoint complementar — cadastro por indicação com identificador fiscal (2026-11-15)
+
+- Em `meshwave65/newsite`, alterados localmente `src/pages/ReferralOnboarding.jsx` e `src/pages/MwcWallet.jsx`: o cadastro por indicação passa a coletar CPF/NIF ou celular provisório; o celular informado é persistido em `mwc_meshwalker_profiles.tax_id` (`tax_id_type=OTHER`) para habilitar o gate de perfil da aquisição e pode ser substituído depois pelo documento fiscal.
+- Metadados do cadastro permitem reconstruir o perfil MW-Ex no primeiro login após confirmação de e-mail.
+- Validação: `npm run build` e ESLint isolado de `ReferralOnboarding.jsx` passaram; lint global mantém 7 erros/2 avisos em outros arquivos; `git diff --check` passou. Relatório: `OperationalReports/OperationalReport_20261115_MWEX_referral_fiscal_identifier.md`.
+- Mudanças somente locais, sem migration aplicada, acesso/escrita remota, commit, push, deploy ou liberação a usuários. Handoff pendente de revisão e publicação autorizadas separadamente. Status das tarefas 21.x não alterado.
