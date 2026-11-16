@@ -60,3 +60,22 @@ A missão não cria uma base paralela de pessoas. Cada contato conserva seu mast
 ## Synchronization note
 
 O registro Supabase informa githubSyncStatus=not_configured e erro histórico de ausência de GITHUB_PAT no Render. Este espelho foi publicado diretamente no repositório para preservar a continuidade documental; não foi alterado o estado de sincronização no banco nem alegada sincronização automática.
+
+## Governance decisions captured during lifecycle diagnosis — 2026-11-16
+
+During the diagnosis of TR approval and Messenger failures, the operator established lifecycle-design principles for the SCP. These are recorded as design decisions, not as implemented behavior:
+
+- `STAGED` is the unique genesis state: every new mission, whether system-created or operator-created, starts there while awaiting workspace/framework preparation by the SCP. Once the SCP assumes the mission, it never returns to `STAGED`.
+- After dispatch to an eligible agent, the agent prepares the workspace and framework (including TR and FR draft). The mission then indicates that the operator has the next action to approve the TR.
+- The operator may approve the TR and release execution, or request a review that assigns the next action back to the agent. The status, not message-text inference, must identify who has the next action.
+- The Message Panel is the interaction channel. Informational messages must be distinguished from operational interventions that cause authorized, auditable state transitions.
+- The lifecycle is monotonic: a mission advances, may be paused/cancelled/closed under defined rules, but does not return to an earlier lifecycle stage.
+- A full remake is a new processing cycle linked to the preserved prior cycle; it is not a return to `STAGED`, and it must remain visibly exceptional.
+- `remake_count` is an integer initialized to `0` (not NULL). Each formally authorized and started full remake increments it. The displayed status reuses the ordinary state with a cycle prefix: `R1_`, `R2_`, …, `Rn_`. Reviews, corrections, pauses and resumptions do not increment it.
+- Multiple remakes are a governance signal to investigate specification, acceptance criteria, instructions and agent/system orientation; they are not, by themselves, proof of intrinsic AI failure.
+
+The labels `TR_PENDING` (awaiting operator approval) and `TR_REVIEW` (review requested from agent) are working names only. Their final keys and the complete transition matrix must be checked against the operator's existing status-dance and Message Panel specification before implementation.
+
+**Operational Report:** [OR-20261116-0054](../governance/operational_reports/OR-20261116-0054.md).
+
+These decisions do not change the current task status, validate the retrospective TR, authorize a dispatch, or authorize a new external execution. The task's existing technical and documentary states remain governed by the prior reconciliation records.
