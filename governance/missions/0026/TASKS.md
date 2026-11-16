@@ -8,7 +8,7 @@
 
 | WP | Tarefa | Estado atual | Dependência | Saída |
 |---|---|---|---|---|
-| 26.1 | Inventariar o estado atual de blockchain, MWN, UMS, MW-Ex, ledger, carteiras e PoUW | PARTIAL — leitura live do banco MWN pendente | TR + Blueprint | [OR-WP26.1](./operational_reports/OR-WP26.1-2026-11-16.md) |
+| 26.1 | Inventariar o estado atual de blockchain, MWN, UMS, MW-Ex, ledger, carteiras e PoUW | PARTIAL — baseline live MeshWave65 confirmado; reconciliação funcional e inventário complementar pendentes | TR + Blueprint | [OR-WP26.1](./operational_reports/OR-WP26.1-2026-11-16.md) |
 | 26.2 | Mapear stack Ethereum/EVM, padrões, ferramentas, clientes e infraestrutura | DONE | TR + Blueprint | [OR-WP26.2](./operational_reports/OR-WP26.2-2026-11-16.md) |
 | 26.3 | Avaliar PoUW separadamente de consenso e execução EVM | DONE | TR + Blueprint | [OR-WP26.3](./operational_reports/OR-WP26.3-2026-11-16.md) |
 | 26.4 | Mapear equivalências e lacunas MeshWave × Ethereum | BLOCKED | 26.1, 26.2, 26.3 | Matriz de equivalências e gaps |
@@ -19,7 +19,7 @@
 
 ## Execução atual
 
-- WP26.1 foi parcialmente concluído com inspeção de repositórios, código e deployment. A confirmação do estado live do banco MWN permanece bloqueada por falha de autenticação read-only do conector.
+- WP26.1 foi revisado com consulta direta read-only ao Supabase MeshWave65 (`ufylccbdjfzydbwhpmpp`): 77 blocos, 77 transações confirmadas, 129 lançamentos em `mw_account_ledger`, 29 transações MW-Ex e 34 lançamentos MW-Ex. Metadata: `pilot`, `canonical=false`, `single-operator`. Permanecem pendentes reconciliação funcional, flags/liquidação MW-Ex, inventário complementar e recuperação do documento da replicação MeshWalker.
 - WP26.2 e WP26.3 foram concluídos em análise documental/técnica e possuem OR próprio.
 - A execução desta etapa foi manual, com ferramentas gratuitas; nenhum agente externo foi despachado e nenhum crédito pago foi consumido.
 - O registro do SCP mostra SCP-TASK-000027 como PAUSED, sem agente e com githubSyncStatus=pending, divergindo do estado STAGED registrado anteriormente nesta documentação. Não alterar o status até confirmar que a mudança não dispara execução paga.
