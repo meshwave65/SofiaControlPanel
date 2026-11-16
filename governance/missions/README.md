@@ -1,6 +1,6 @@
 # `governance/missions/` — missões de governança
 
-Este diretório contém a documentação canônica de contexto das missões de governança numeradas `0001`–`0024`: blueprints, README de continuidade, progresso, quadros de tarefas, checkpoints, evidências e decisões.
+Este diretório contém a documentação canônica de contexto das missões de governança numeradas `0001`–`0025`: blueprints, README de continuidade, progresso, quadros de tarefas, checkpoints, evidências e decisões.
 
 A série de governança é diferente da série operacional `SCP-TASK-*` em `missions/`. A missão de governança pode conter muitas tarefas e muitos artefatos; esses arquivos não são novas missões independentes.
 
