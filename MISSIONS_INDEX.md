@@ -7,7 +7,7 @@ Este repositório contém **duas séries diferentes de registros**, além de seu
 | Camada | Fonte de verdade | Local no GitHub | Quantidade atual | O que representa |
 | --- | --- | --- | ---: | --- |
 | Missões operacionais do painel | Supabase `sofia.tasks` | `missions/SCP-TASK-XXXXXX.md` | 15 registros, IDs 2–16 | Tarefas/missões criadas ou materializadas pelo SofiaControlPanel, incluindo relações pai-filho. |
-| Missões de governança | Documentação versionada | `governance/missions/<ID>/` quando existe | 24 IDs, 0001–0024 | Programas de trabalho, blueprints, gates, checkpoints e continuidade. |
+| Missões de governança | Documentação versionada | `governance/missions/<ID>/` quando existe | 25 IDs, 0001–0025 | Programas de trabalho, blueprints, gates, checkpoints e continuidade. |
 | Snapshots legados de governança | Histórico Git | raiz, `MISSION_*.md` | 47 arquivos | Cópias/status históricos mantidos para preservar links e rastreabilidade. Não são 47 missões novas. |
 | Artefatos de missão | Git | dentro de `governance/missions/<ID>/` | 96 arquivos | Blueprints, progresso, tarefas, checkpoints, evidências e relatórios. Não são missões adicionais. |
 
@@ -53,6 +53,7 @@ A numeração `MISSION_0001`–`MISSION_0024` é uma série documental distinta 
 | 0022 | STAGED | `governance/missions/0022/README.md`, `BLUEPRINT.md`, `TASKS.md` |
 | 0023 | PROGRESS | `governance/missions/0023/README.md`, `BLUEPRINT.md`, `TASKS.md` |
 | 0024 | DONE — publicada em produção | `governance/missions/0024/README.md`, `BLUEPRINT.md`, `TASKS.md`, `PROGRESS.md` |
+| 0025 | STAGED — aguardando aprovação humana do TR | `governance/missions/0025/README.md`, `TR-v0.1.0-DRAFT.md`, `TASKS.md`, `PROGRESS.md` |
 
 Os arquivos da raiz continuam versionados por compatibilidade histórica. Eles não devem ser apagados nem tratados como novos registros. Quando houver `governance/missions/<ID>/README.md` ou `BLUEPRINT.md`, esses documentos governam a continuidade da missão; os arquivos da raiz são snapshots/legado de execução anterior.
 
