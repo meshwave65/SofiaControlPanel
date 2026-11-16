@@ -109,3 +109,7 @@ Main findings:
 - No `remake_count` or persisted processing-cycle model was found in the inspected schema.
 
 This is a static repository audit, not a production-state verification. No database, task status, TR, Blueprint, code, migration, Manus execution, credit balance or deployment was changed.
+
+## Lifecycle specification draft — 2026-11-16
+
+The consolidated lifecycle draft is [MISSION_LIFECYCLE_SPECIFICATION_DRAFT.md](../governance/architecture/MISSION_LIFECYCLE_SPECIFICATION_DRAFT.md). It separates lifecycle status, next-action responsibility, interaction events and processing cycles; records confirmed rules and open decisions; and remains non-normative pending explicit operator approval. No implementation is authorized by the draft.
