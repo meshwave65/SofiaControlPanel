@@ -79,3 +79,18 @@ The labels `TR_PENDING` (awaiting operator approval) and `TR_REVIEW` (review req
 **Operational Report:** [OR-20261116-0054](../governance/operational_reports/OR-20261116-0054.md).
 
 These decisions do not change the current task status, validate the retrospective TR, authorize a dispatch, or authorize a new external execution. The task's existing technical and documentary states remain governed by the prior reconciliation records.
+
+## Task decomposition, continuous synthesis and Message Manager reference — 2026-11-16
+
+The operator's reference document [INTERAÇÃO CRIAÇÃO DE TAREFAS](https://docs.google.com/document/d/1wr-fgra5GOFmP_cVT7mJq5-hN1_WBkFIVi5xhjEEBp8/edit?usp=drivesdk) was read in full and its design implications were recorded in [OR-20261116-0054](../governance/operational_reports/OR-20261116-0054.md), sections 11–13.
+
+Key principles captured from the reference:
+
+- Task decomposition is recursive. A specialist may factor its own task into subtasks and thereby assume the manager role for those children.
+- The parent creates its own draft with chapters/placeholders for delegated tasks and continuously monitors child drafts while developing its own report in parallel. It does not wait for child completion to begin synthesis.
+- The parent's artifact structure expands as descendants create subtasks; the intended Genesis report integrates the full task and artifact hierarchy.
+- The Message Manager distinguishes Message, Order, Response, Report and Create Task interactions. An Order is an operational intervention: the manager may suspend a child using `on_hold_bymanager`; the agent responds; the manager evaluates and releases; only then does the agent acknowledge and effectively resume.
+- Manager release and agent resumption are separate events. A task must not be represented as actively resumed merely because the manager released it.
+- The separate “who has the ball” metadata uses `0` (fulfilled), `1` (manager) and `2` (agent) in the intervention cycle described by the reference. These are responsibility metadata values, not task status codes.
+
+The existing lifecycle decisions and this reference have not yet been reconciled against the current SCP status catalog, permissions model or implementation. No implementation, database change, TR approval, dispatch or external execution is authorized by this documentation update.
