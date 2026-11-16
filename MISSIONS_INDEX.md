@@ -9,7 +9,7 @@ Este repositório contém **duas séries diferentes de registros**, além de seu
 | Missões operacionais do painel | Supabase `sofia.tasks` | `missions/SCP-TASK-XXXXXX.md` | 15 registros, IDs 2–16 | Tarefas/missões criadas ou materializadas pelo SofiaControlPanel, incluindo relações pai-filho. |
 | Missões de governança | Documentação versionada | `governance/missions/<ID>/` quando existe | 25 IDs, 0001–0025 | Programas de trabalho, blueprints, gates, checkpoints e continuidade. |
 | Snapshots legados de governança | Histórico Git | raiz, `MISSION_*.md` | 47 arquivos | Cópias/status históricos mantidos para preservar links e rastreabilidade. Não são 47 missões novas. |
-| Artefatos de missão | Git | dentro de `governance/missions/<ID>/` | 96 arquivos | Blueprints, progresso, tarefas, checkpoints, evidências e relatórios. Não são missões adicionais. |
+| Artefatos de missão | Git | dentro de `governance/missions/<ID>/` | 101 arquivos | Blueprints, progresso, tarefas, checkpoints, evidências e relatórios. Não são missões adicionais. |
 
 ## 2. Missões operacionais do Supabase
 
