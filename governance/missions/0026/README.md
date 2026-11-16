@@ -1,11 +1,15 @@
 # MISSION_0026 — Avaliação da Stack Ethereum para MeshWave
 
-**Estado:** PROGRESS — TR aprovado, Blueprint READY e missão operacional liberada  
+**Estado:** PROGRESS — TR aprovado, Blueprint READY; execução documental manual em andamento  
 **Prioridade:** CRÍTICA — nível máximo cadastrado no SCP  
 **TR aprovado:** [TR-v0.1.0-APPROVED.md](./TR-v0.1.0-APPROVED.md)  
 **Blueprint:** [BLUEPRINT.md](./BLUEPRINT.md)  
 **Solicitação original:** [ORIGINAL_REQUEST.md](./ORIGINAL_REQUEST.md)  
-**Tarefa operacional:** [SCP-TASK-000027](../../missions/SCP-TASK-000027.md)
+**Progresso:** [PROGRESS.md](./PROGRESS.md)  
+**Tarefas:** [TASKS.md](./TASKS.md)  
+**Índice e ORs:** [OPERATIONAL_INDEX.md](./OPERATIONAL_INDEX.md)
+
+**Tarefa operacional:** SCP-TASK-000027 — o registro atual no Supabase está PAUSED e o espelho GitHub ainda está pendente.
 
 ## Objetivo
 
@@ -21,9 +25,10 @@ A hipótese prioritária a testar é uma arquitetura híbrida: reaproveitar uma 
 
 - O TR v0.1.0 foi aprovado explicitamente pelo responsável em 2026-11-16.
 - O Blueprint v1.0.0 foi derivado do TR aprovado e está READY.
-- A tarefa operacional SCP-TASK-000027 foi liberada em prioridade CRÍTICA.
+- A tarefa operacional SCP-TASK-000027 foi criada em prioridade CRÍTICA; o estado atual no banco é PAUSED, divergindo do STAGED anteriormente documentado.
 - A missão é de análise e recomendação; não autoriza implementação, POC executável, migração, transação ou deploy.
 - Não consumir créditos pagos nem iniciar execução em provedores externos.
+- A execução documental atual é manual e usa apenas ferramentas gratuitas.
 - Não presumir que documentos antigos ou snapshots reflitam o estado atual; verificar repositórios, commits, deployments e dados atuais estritamente pertinentes.
 - Não transformar a investigação em auditoria geral de todos os projetos MeshWave.
 - Não designar agente fixo; o SCP deve permitir atribuição conforme elegibilidade e disponibilidade.
@@ -42,17 +47,18 @@ A hipótese prioritária a testar é uma arquitetura híbrida: reaproveitar uma 
 
 ## Continuidade
 
-1. Em nova sessão, ler este README, o TR aprovado, BLUEPRINT, TASKS e PROGRESS.
-2. Executar os work packages na ordem e dependências do Blueprint.
-3. Registrar cada unidade com OR próprio, evidências e atualização do índice operacional.
-4. Distinguir sempre fato observado, hipótese, recomendação e decisão humana.
-5. Encerrar com decisão objetiva: adotar, integrar parcialmente, manter arquitetura atual ou rejeitar a hipótese, acompanhada de plano e gates.
+1. Em nova sessão, ler este README, o TR aprovado, BLUEPRINT, TASKS, PROGRESS e OPERATIONAL_INDEX.
+2. Consultar os ORs para acompanhar evidências, conclusões preliminares e bloqueios.
+3. Executar os work packages na ordem e dependências do Blueprint.
+4. Registrar cada unidade com OR próprio, evidências e atualização do índice operacional.
+5. Distinguir sempre fato observado, hipótese, inferência, recomendação e decisão humana.
+6. Encerrar com decisão objetiva: adotar, integrar parcialmente, manter arquitetura atual ou rejeitar a hipótese, acompanhada de plano e gates.
 
 ## Segurança e RLS
 
-A tabela `sofia."governanceMissions"` estava com RLS desabilitado. Foi corrigida por migração dedicada:
+A tabela sofia.governanceMissions estava com RLS desabilitado. Foi corrigida por migração dedicada:
 - RLS habilitado.
-- Política restritiva para `anon` e `authenticated` nega todas as operações.
+- Política restritiva para anon e authenticated nega todas as operações.
 - Nenhum grant de acesso direto foi concedido a esses papéis.
 - Acesso administrativo/backend existente não foi ampliado nem removido.
 - Nenhuma outra tabela, política ou grant foi alterado.
@@ -63,7 +69,7 @@ A política é intencionalmente fechada até que exista um desenho de acesso mí
 
 - Solicitação original preservada.
 - TR v0.1.0 aprovado e registrado como VALIDATED.
-- Blueprint v1.0.0 criado e registrado como READY, derivado da versão aprovada do TR.
+- Blueprint v1.0.0 criado e registrado como READY, derivado do TR aprovado.
 - RLS de governanceMissions corrigido.
-- Tarefa operacional SCP-TASK-000027 criada em prioridade CRÍTICA.
+- WP26.1 parcial; WP26.2 e WP26.3 concluídos; ver índice operacional.
 - Nenhuma implementação Ethereum, contrato, token, carteira, transação ou POC foi iniciada.
