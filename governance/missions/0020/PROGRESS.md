@@ -76,3 +76,12 @@ Ainda não há validação visual/autenticada nem confirmação funcional do Mes
 - O backfill de TR/Blueprint/FOR deve ser retrospectivo, preservar proveniência e não alterar automaticamente status ou reexecutar missões concluídas.
 - Próxima etapa: confirmar a nomenclatura “FR” e validar o piloto SCP-TASK-000017/000024. A tarefa 17 permanece PAUSED e a 24 FAIL; nenhum dispatch foi realizado.
 - Nenhum status técnico, dado operacional, schema, migration ou deploy foi alterado nesta auditoria.
+
+## Piloto de backfill — SCP-TASK-000017 — OR-20261115-0053
+
+- Reconstruída e persistida a solicitação ORIGINAL_REQUEST (documentId=1, versionId=1, PUBLISHED) e o TR retrospectivo v0.1.0 (documentId=2, versionId=2, AWAITING_HUMAN_VALIDATION) no catálogo documental Supabase.
+- TR publicado em `missions/SCP-TASK-000017-TR-v0.1.0-DRAFT.md`; espelho operacional criado em `missions/SCP-TASK-000017.md`.
+- Confirmado vínculo de contexto com MISSION_0009, sem misturar os namespaces. A correção de escopo de 2026-10-28 mantém MISSION_0009 em SOFIA/SWE e MWN na MISSION_0011.
+- O TR identifica a motivação original como não localizada, separa fatos de interpretação e preserva a filha 24 como FAIL sem resultado estratégico comprovado.
+- O pai continua PAUSED; filhas 22/23 DONE e 24 FAIL. Nenhum status, Agent Task ID, execução Manus ou crédito foi alterado.
+- Próxima etapa: revisão/correção e validação explícita do TR pelo responsável. Não criar Blueprint nem liberar dispatch antes disso.
