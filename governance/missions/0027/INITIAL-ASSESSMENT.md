@@ -51,10 +51,11 @@ Playwright oferece emulação nativa de viewport/dispositivo e modo offline. Per
 - O repositório `meshwave65/sofia` mantém arquivos legados `engine/backend/skills.csv`, `personas.csv` e `persona_skills.csv`.
 
 ### Lacunas confirmadas
+- As tabelas legadas `public.skills`, `public.personas` e `public.persona_skills` estão com RLS desabilitado; os papéis `anon` e `authenticated` possuem privilégio SELECT. Os registros atuais são metadados genéricos, mas a exposição deve ser revisada antes de inserir perfis ou instruções privadas. Esta missão não alterou RLS nem grants.
 - O código atual do SCP cria tarefas Manus por meio de `server/manusExecutionService.ts`; o orquestrador atual não expõe um adaptador genérico Playwright.
 - O runtime principal atual está acoplado ao despacho de tarefas para a API Manus. Uma skill textual, sozinha, não cria capacidade de controle de navegador.
 - O repositório SOFIA na branch principal não apresenta diretório operacional `skills/` em `engine/`; os CSVs existentes são legado e não comprovam um carregador de skills ativo.
-- No schema atual, `public.skills`, `public.personas` e `public.persona_skills` existem, mas estão vazias; não foi encontrada tabela equivalente no schema `sofia` consultado.
+- No banco atual, `public.skills` contém 8 competências genéricas, `public.personas` contém 6 papéis de agentes (Executor, Escriba, RH, Worker, Condenser e Oracle) e `public.persona_skills` contém 9 associações. Não são as 25 personas de UX do plugin. O schema Drizzle atual do SCP não mapeia essas tabelas e `server/db.ts` não as utiliza; portanto, o catálogo existe no banco, mas não está integrado ao runtime atual do painel.
 - A página pública do SCP foi inspecionada, mas o fluxo autenticado e as telas internas não foram testados.
 
 ## 4. Arquitetura candidata para independência do Claude
