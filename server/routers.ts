@@ -1581,7 +1581,7 @@ export const appRouter = router({
     types: protectedProcedure.query(async () => db.getAllMessageTypes()),
 
     getGeneral: protectedProcedure.query(async ({ ctx }) =>
-      db.getMessagesByOwner(ctx.user.id, null, 200)
+      ctx.user.role === "admin" ? db.getAllGeneralMessages(500) : db.getMessagesByOwner(ctx.user.id, null, 200)
     ),
 
     createGeneral: protectedProcedure
@@ -1594,6 +1594,9 @@ export const appRouter = router({
         const messageType = await db.getMessageTypeById(input.typeId);
         if (!messageType) {
           throw new TRPCError({ code: "BAD_REQUEST", message: "Tipo de interação inválido." });
+        }
+        if (messageType.name.toLowerCase() === "reply" && input.parentMessageId === undefined) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Uma resposta precisa estar vinculada à mensagem original." });
         }
 
         if (input.parentMessageId !== undefined) {
@@ -1703,6 +1706,9 @@ export const appRouter = router({
         const messageType = await db.getMessageTypeById(input.typeId);
         if (!messageType) {
           throw new TRPCError({ code: "BAD_REQUEST", message: "Tipo de mensagem inválido." });
+        }
+        if (messageType.name.toLowerCase() === "reply" && input.parentMessageId === undefined) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Uma resposta precisa estar vinculada à mensagem original." });
         }
         if (input.parentMessageId !== undefined) {
           const parentMessage = await db.getMessageByIdForTask(input.parentMessageId, input.taskId);
@@ -1940,7 +1946,7 @@ export const appRouter = router({
           taskId: input.taskId,
           senderId: ctx.user.id,
           parentMessageId: operatorMessage?.id,
-          typeId: input.typeId,
+          typeId: (await db.getAllMessageTypes()).find((type) => type.name.toLowerCase() === "reply")?.id ?? input.typeId,
           content: assistantContent,
           isAssistant: true,
         });
