@@ -8,15 +8,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import {
   AlertCircle,
-  Archive,
-  ArrowDownLeft,
-  ArrowUpRight,
-  Check,
-  ChevronDown,
   ClipboardList,
-  File,
+  File as FileIcon,
   FilePlus2,
-  Filter,
   Inbox,
   MessageSquare,
   Paperclip,
@@ -336,7 +330,7 @@ export default function Messages() {
                 <div className="flex flex-wrap gap-2 border-t px-5 py-3">
                   {attachments.map((file, index) => (
                     <div key={`${file.name}-${index}`} className="flex max-w-full items-center gap-2 rounded-md border bg-background px-2.5 py-1.5 text-xs">
-                      <File className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                      <FileIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                       <span className="max-w-[220px] truncate">{file.name}</span>
                       <button type="button" onClick={() => removeAttachment(index)} aria-label={`Remover ${file.name}`} className="text-muted-foreground hover:text-destructive">
                         <X className="h-3.5 w-3.5" />
