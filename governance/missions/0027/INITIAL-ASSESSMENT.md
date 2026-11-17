@@ -47,7 +47,7 @@ Playwright oferece emulação nativa de viewport/dispositivo e modo offline. Per
 ### Evidências positivas
 - O SCP possui registro de governança `sofia.governanceMissions` e tarefas operacionais `sofia.tasks`.
 - O repositório `meshwave65/SofiaControlPanel` possui orquestração de tarefas, documentos de missão, gates de execução e sincronização GitHub.
-- O serviço web público do SCP respondeu e apresentou a tela pública de entrada.
+- O Render confirma o serviço `SofiaControlPanel-web` ativo, no plano Free, com URL `https://sofiacontrolpanel-web.onrender.com`; a tentativa de leitura da página por navegador web não conseguiu acessá-la, portanto não há confirmação de carregamento da interface.
 - O repositório `meshwave65/sofia` mantém arquivos legados `engine/backend/skills.csv`, `personas.csv` e `persona_skills.csv`.
 
 ### Lacunas confirmadas
@@ -56,7 +56,7 @@ Playwright oferece emulação nativa de viewport/dispositivo e modo offline. Per
 - O runtime principal atual está acoplado ao despacho de tarefas para a API Manus. Uma skill textual, sozinha, não cria capacidade de controle de navegador.
 - O repositório SOFIA na branch principal não apresenta diretório operacional `skills/` em `engine/`; os CSVs existentes são legado e não comprovam um carregador de skills ativo.
 - No banco atual, `public.skills` contém 8 competências genéricas, `public.personas` contém 6 papéis de agentes (Executor, Escriba, RH, Worker, Condenser e Oracle) e `public.persona_skills` contém 9 associações. Não são as 25 personas de UX do plugin. O schema Drizzle atual do SCP não mapeia essas tabelas e `server/db.ts` não as utiliza; portanto, o catálogo existe no banco, mas não está integrado ao runtime atual do painel.
-- A página pública do SCP foi inspecionada, mas o fluxo autenticado e as telas internas não foram testados.
+- A interface web e o fluxo autenticado do SCP ainda não foram testados por navegador interativo.
 
 ## 4. Arquitetura candidata para independência do Claude
 
