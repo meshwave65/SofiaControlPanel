@@ -1006,6 +1006,15 @@ export async function getAllMessageTypes() {
   return database.select().from(messageTypes).orderBy(asc(messageTypes.id));
 }
 
+export async function getAllGeneralMessages(limit = 200) {
+  const database = await getDb();
+  if (!database) return [];
+  return database.select().from(messages)
+    .where(isNull(messages.taskId))
+    .orderBy(asc(messages.createdAt), asc(messages.id))
+    .limit(limit);
+}
+
 export async function getMessagesByOwner(ownerId: number, taskId: number | null, limit = 100) {
   const database = await getDb();
   if (!database) return [];
