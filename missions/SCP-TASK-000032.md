@@ -7,8 +7,8 @@
 - **Prioridade:** ALTA
 - **Agente:** não atribuído (despacho dinâmico)
 - **Criador:** usuário
-- **TR:** VALIDATED v0.1.0
-- **Blueprint:** READY v1.0.0
+- **TR:** VALIDATED v0.1.0 — versão documental atual 2
+- **Blueprint:** READY v1.0.0 — versão documental atual 2
 
 ## Objetivo
 
@@ -37,9 +37,19 @@ Executar a auditoria de UX dos sistemas MeshWave e desenvolver a capacidade de U
 ## Artefatos canônicos
 
 - [MISSION_0027](../governance/missions/0027/README.md)
+- [Solicitação original](../governance/missions/0027/ORIGINAL_REQUEST.md)
 - [TR VALIDATED](../governance/missions/0027/TR-v0.1.0-APPROVED.md)
 - [Blueprint READY](../governance/missions/0027/BLUEPRINT.md)
 - [Avaliação inicial](../governance/missions/0027/INITIAL-ASSESSMENT.md)
 - [Quadro de trabalho](../governance/missions/0027/TASKS.md)
+
+## Catálogo documental SCP
+
+Documentos vinculados à tarefa raiz 33 e disponíveis no visualizador de `/tasks/33`:
+- Solicitação original — versão 1, PUBLISHED.
+- TR — versão 2, VALIDATED.
+- Blueprint — versão 2, READY, derivado da versão 2 do TR.
+
+As versões históricas anteriores foram preservadas; as versões atuais corrigem o tipo de autoria para HUMAN, conforme o contrato do SCP.
 
 Cada WP deve gerar Operational Report (OR) e persistir evidências no diretório da missão.
