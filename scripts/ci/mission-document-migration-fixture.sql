@@ -35,3 +35,12 @@ CREATE TABLE sofia.tasks (
 
 INSERT INTO sofia."taskStatuses" (name)
 VALUES ('STAGED'), ('PROGRESS'), ('PAUSED');
+
+CREATE TABLE sofia.messages (
+  id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  "taskId" integer NOT NULL REFERENCES sofia.tasks(id),
+  "senderId" integer NOT NULL REFERENCES sofia."users"(id),
+  "parentMessageId" integer,
+  "typeId" integer NOT NULL,
+  content text NOT NULL
+);

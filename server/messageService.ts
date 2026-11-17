@@ -95,6 +95,48 @@ export function buildSofiaConversation(task: SofiaTask, messages: StoredMessage[
   ];
 }
 
+export const SOFIA_GENERAL_MESSAGE_TOOLS = [
+  {
+    type: "function" as const,
+    function: {
+      name: "inspect_task_overview",
+      description: "Consulta somente leitura o panorama das missões e tarefas pertencentes à conta autenticada, incluindo quantidades por status. Use para responder perguntas gerais sobre volume, distribuição e situação das missões. Não altera nenhum registro.",
+      parameters: {
+        type: "object",
+        properties: {},
+        additionalProperties: false,
+      },
+    },
+  },
+];
+
+/** Constrói o contexto da conversa geral, sem missão e sem ferramentas operacionais de missão. */
+export function buildSofiaGeneralConversation(messages: StoredMessage[]): Message[] {
+  const recentMessages = messages
+    .filter((message) => message.content.trim())
+    .slice(-30);
+
+  return [
+    {
+      role: "system",
+      content: [
+        "Você é Sofia, interlocutora geral do operador no SofiaControlPanel (SCP).",
+        "Esta conversa não está vinculada a uma missão específica.",
+        "Responda em português do Brasil, de forma objetiva, contextual e útil.",
+        "Você pode responder perguntas gerais sobre o SCP e interpretar solicitações do operador.",
+        "Não invente dados operacionais nem afirme ter consultado o banco se isso não ocorreu.",
+        "Não execute nem alegue executar alterações sistêmicas, criar missões ou encaminhar ordens.",
+        "Quando uma solicitação exigir ação operacional, esclareça o próximo passo necessário e aguarde autorização/fluxo apropriado.",
+        "Diferencie claramente informação, sugestão, decisão e ação efetivamente realizada."
+      ].join("\n"),
+    },
+    ...recentMessages.map((message) => ({
+      role: message.isAssistant ? "assistant" as const : "user" as const,
+      content: message.content,
+    })),
+  ];
+}
+
 /** Aceita resposta textual simples ou blocos de texto retornados pelo provedor LLM. */
 export function extractTextContent(content: unknown) {
   if (typeof content === "string") return content.trim();

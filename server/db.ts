@@ -992,12 +992,55 @@ export async function listArcConfidenceSnapshotsByTask(taskId: number, ownerId: 
 // MESSAGES HELPERS
 // ============================================
 
-export async function createMessage(data: { taskId: number; senderId: number; parentMessageId?: number; typeId: number; content: string; isAssistant?: boolean }) {
+export async function createMessage(data: { taskId?: number | null; senderId: number; parentMessageId?: number; typeId: number; content: string; isAssistant?: boolean }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
   const [message] = await db.insert(messages).values(data).returning();
   return message;
+}
+
+export async function getAllMessageTypes() {
+  const database = await getDb();
+  if (!database) return [];
+  return database.select().from(messageTypes).orderBy(asc(messageTypes.id));
+}
+
+export async function getAllGeneralMessages(limit = 200) {
+  const database = await getDb();
+  if (!database) return [];
+  const rows = await database.select().from(messages)
+    .where(isNull(messages.taskId))
+    .orderBy(desc(messages.createdAt), desc(messages.id))
+    .limit(limit);
+  return rows.reverse();
+}
+
+export async function getMessagesByOwner(ownerId: number, taskId: number | null, limit = 100) {
+  const database = await getDb();
+  if (!database) return [];
+  const contextFilter = taskId === null ? isNull(messages.taskId) : eq(messages.taskId, taskId);
+  const rows = await database.select().from(messages)
+    .where(and(eq(messages.senderId, ownerId), contextFilter))
+    .orderBy(desc(messages.createdAt), desc(messages.id))
+    .limit(limit);
+  return rows.reverse();
+}
+
+export async function getMessagesByParentIdForOwner(parentMessageId: number, ownerId: number) {
+  const database = await getDb();
+  if (!database) return [];
+  return database.select().from(messages)
+    .where(and(eq(messages.parentMessageId, parentMessageId), eq(messages.senderId, ownerId)))
+    .orderBy(asc(messages.createdAt), asc(messages.id));
+}
+
+export async function getMessageByIdForOwner(id: number, ownerId: number) {
+  const database = await getDb();
+  if (!database) return null;
+  const [message] = await database.select().from(messages)
+    .where(and(eq(messages.id, id), eq(messages.senderId, ownerId))).limit(1);
+  return message ?? null;
 }
 
 export async function getMessageTypeById(id: number) {

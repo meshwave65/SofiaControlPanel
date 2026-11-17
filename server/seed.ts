@@ -24,6 +24,10 @@ async function seed() {
     await db.getOrCreateMessageType("Instruction");
     await db.getOrCreateMessageType("Report");
     await db.getOrCreateMessageType("Question");
+    await db.getOrCreateMessageType("Message");
+    await db.getOrCreateMessageType("Order");
+    await db.getOrCreateMessageType("Reply");
+    await db.getOrCreateMessageType("CreateTask");
     
     // Eventos de Atividade
     console.log("Populando tipos de eventos...");

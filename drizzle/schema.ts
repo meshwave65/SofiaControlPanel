@@ -169,7 +169,8 @@ export const messages = sofia.table(
   "messages",
   {
     id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
-    taskId: integer("taskId").notNull(),
+    taskId: integer("taskId"),
+    // Account owner for the whole interaction, including Sofia replies; isAssistant identifies the speaker.
     senderId: integer("senderId").notNull(),
     parentMessageId: integer("parentMessageId"),
     typeId: integer("typeId").notNull(),

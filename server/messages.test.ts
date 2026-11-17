@@ -4,6 +4,12 @@ const dbMock = vi.hoisted(() => ({
   getTaskById: vi.fn(),
   getMessageTypeById: vi.fn(),
   getMessageByIdForTask: vi.fn(),
+  getMessageByIdForOwner: vi.fn(),
+  getAllMessageTypes: vi.fn(),
+  getMessagesByOwner: vi.fn(),
+  getMessagesByParentIdForOwner: vi.fn(),
+  getAllGeneralMessages: vi.fn(),
+  getAllTasks: vi.fn(),
   createMessage: vi.fn(),
   getMessagesByTaskId: vi.fn(),
   hasExecutionReadyMissionDocuments: vi.fn(),
@@ -67,6 +73,13 @@ describe("messages.create — persistência e resposta Sofia", () => {
       manusTaskId: null,
     });
     dbMock.getMessageTypeById.mockResolvedValue({ id: 1, name: "Instruction" });
+    dbMock.getAllMessageTypes.mockResolvedValue([{ id: 2, name: "Reply" }]);
+    dbMock.getMessageByIdForOwner.mockResolvedValue({ id: 50, taskId: 19, senderId: 152, isAssistant: true });
+    dbMock.getMessagesByOwner.mockResolvedValue([
+      { id: 100, taskId: 19, senderId: 152, content: "confirmar canal", isAssistant: false },
+    ]);
+    dbMock.getAllGeneralMessages.mockResolvedValue([]);
+    dbMock.getAllTasks.mockResolvedValue([]);
     dbMock.getMessageByIdForTask.mockResolvedValue({ id: 50, taskId: 19, isAssistant: true });
     dbMock.getMessagesByTaskId.mockResolvedValue([
       { id: 100, taskId: 19, content: "confirmar canal", isAssistant: false },
@@ -669,6 +682,87 @@ describe("messages.create — persistência e resposta Sofia", () => {
       content: expect.stringContaining("Não localizei uma execução externa ativa"),
       isAssistant: true,
     }));
+  });
+
+  it("persiste conversa geral com taskId nulo e vincula a resposta à conta autenticada", async () => {
+    dbMock.createMessage.mockReset();
+    dbMock.getMessageTypeById.mockResolvedValue({ id: 5, name: "Message" });
+    dbMock.getMessagesByOwner.mockResolvedValue([
+      { id: 201, taskId: null, senderId: 152, content: "Quantas missões estão pausadas?", isAssistant: false },
+    ]);
+    dbMock.getAllMessageTypes.mockResolvedValue([{ id: 6, name: "Reply" }]);
+    dbMock.createMessage
+      .mockResolvedValueOnce({ id: 201, taskId: null, senderId: 152, content: "Quantas missões estão pausadas?", isAssistant: false })
+      .mockResolvedValueOnce({ id: 202, taskId: null, senderId: 152, parentMessageId: 201, content: "Há duas missões pausadas.", isAssistant: true });
+    invokeLLMMock.mockResolvedValue({
+      choices: [{ message: { role: "assistant", content: "Há duas missões pausadas." } }],
+    });
+
+    const result = await appRouter.createCaller(context).messages.createGeneral({
+      typeId: 5,
+      content: "Quantas missões estão pausadas?",
+    });
+
+    expect(dbMock.createMessage).toHaveBeenNthCalledWith(1, expect.objectContaining({
+      taskId: null,
+      senderId: 152,
+      typeId: 5,
+      content: "Quantas missões estão pausadas?",
+    }));
+    expect(dbMock.createMessage).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      taskId: null,
+      senderId: 152,
+      parentMessageId: 201,
+      typeId: 6,
+      isAssistant: true,
+    }));
+    expect(result.responseStatus).toBe("replied");
+  });
+
+  it("usa snapshot somente leitura e distingue missões-raiz de tarefas-filhas", async () => {
+    dbMock.createMessage.mockReset();
+    dbMock.getMessageTypeById.mockResolvedValue({ id: 5, name: "Message" });
+    dbMock.getMessagesByOwner.mockResolvedValue([
+      { id: 201, taskId: null, senderId: 152, content: "Quantas missões estão pausadas?", isAssistant: false },
+    ]);
+    dbMock.getAllTasks.mockResolvedValue([
+      { id: 1, title: "Missão pausada", statusId: 3, parentTaskId: null },
+      { id: 2, title: "Etapa pausada", statusId: 3, parentTaskId: 1 },
+      { id: 3, title: "Missão em andamento", statusId: 2, parentTaskId: null },
+    ]);
+    dbMock.getTaskStatusNameById.mockImplementation(async (id: number) => id === 3 ? "PAUSED" : "PROGRESS");
+    dbMock.getAllMessageTypes.mockResolvedValue([{ id: 6, name: "Reply" }]);
+    dbMock.createMessage
+      .mockResolvedValueOnce({ id: 201, taskId: null, senderId: 152, content: "Quantas missões estão pausadas?", isAssistant: false })
+      .mockResolvedValueOnce({ id: 202, taskId: null, senderId: 152, parentMessageId: 201, content: "Uma missão está pausada.", isAssistant: true });
+    invokeLLMMock
+      .mockResolvedValueOnce({
+        choices: [{
+          message: {
+            role: "assistant",
+            content: null,
+            tool_calls: [{
+              id: "call-overview-1",
+              type: "function",
+              function: { name: "inspect_task_overview", arguments: "{}" },
+            }],
+          },
+        }],
+      })
+      .mockResolvedValueOnce({
+        choices: [{ message: { role: "assistant", content: "Uma missão está pausada." } }],
+      });
+
+    await appRouter.createCaller(context).messages.createGeneral({
+      typeId: 5,
+      content: "Quantas missões estão pausadas?",
+    });
+
+    expect(dbMock.getAllTasks).toHaveBeenCalledWith(152, false);
+    const snapshot = invokeLLMMock.mock.calls[1][0].messages[invokeLLMMock.mock.calls[1][0].messages.length - 1].content;
+    expect(snapshot).toContain('"totalMissions":2');
+    expect(snapshot).toContain('"PAUSED":1');
+    expect(snapshot).toContain('"totalTasks":3');
   });
 
   it("recusa mensagem pai de outra missão antes de persistir ou chamar a IA", async () => {
