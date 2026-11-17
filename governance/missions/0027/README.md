@@ -3,6 +3,7 @@
 **Estado:** STAGED — missão registrada no SCP; TR em DRAFT  
 **Prioridade proposta:** ALTA  
 **Solicitação original:** [ORIGINAL_REQUEST.md](./ORIGINAL_REQUEST.md)  
+**Avaliação inicial:** [INITIAL-ASSESSMENT.md](./INITIAL-ASSESSMENT.md)  
 **Termo de Referência:** [TR-v0.1.0-DRAFT.md](./TR-v0.1.0-DRAFT.md)  
 **Blueprint:** [BLUEPRINT.md](./BLUEPRINT.md)  
 **Tarefas:** [TASKS.md](./TASKS.md)  
@@ -12,11 +13,11 @@
 
 Avaliar a experiência de uso das interfaces dos sistemas MeshWave/SOFIA por meio de testes automatizados orientados por personas e evidências de navegação, e determinar a forma mais simples e sustentável de incorporar essa capacidade ao SCP como skill independente de Claude Code.
 
-## Decisão técnica a investigar
+## Conclusão preliminar
 
-A hipótese inicial é reutilizar o projeto original como fonte de metodologia e dados de personas, não como runtime. A automação pode ser desacoplada por meio de um adaptador de navegador baseado em Playwright, com execução em worker controlado pela SOFIA. Para acessibilidade automatizada, avaliar axe-core; para auditorias complementares, Lighthouse/Pa11y.
+A capacidade é tecnicamente viável. O plugin original é MIT e fornece personas, comportamentos, temporização e playbooks reaproveitáveis. A rota preferida é substituir o adaptador Claude Chrome por Playwright e integrar axe-core/Lighthouse como ferramentas especializadas.
 
-Essa é uma hipótese de implementação, ainda não uma decisão aprovada. A missão deve comparar alternativas, dependências, custo operacional, segurança e compatibilidade com os agentes/SCP.
+A integração não é plug-and-play: o SCP atual despacha tarefas para Manus, não possui adaptador Playwright próprio; a SOFIA mantém um catálogo legado de skills em CSV, mas não foi encontrado um carregador operacional de skills no runtime principal. A arquitetura e as lacunas estão detalhadas em [INITIAL-ASSESSMENT.md](./INITIAL-ASSESSMENT.md).
 
 ## Escopo inicial
 
