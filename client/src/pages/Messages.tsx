@@ -464,7 +464,7 @@ export default function Messages() {
                   <div className="space-y-2">
                     {attachments.map((file, index) => (
                       <div key={`side-${file.name}-${index}`} className="flex items-center gap-2 text-xs">
-                        <File className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        <FileIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
                         <span className="min-w-0 flex-1 truncate">{file.name}</span>
                         <button type="button" onClick={() => removeAttachment(index)} aria-label={`Remover ${file.name}`} className="text-muted-foreground hover:text-destructive">
                           <X className="h-3.5 w-3.5" />
