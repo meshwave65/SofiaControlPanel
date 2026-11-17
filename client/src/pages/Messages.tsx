@@ -58,6 +58,7 @@ export default function Messages() {
 
   const messageTypesQuery = trpc.messages.types.useQuery(undefined, {
     enabled: isAuthenticated,
+    refetchInterval: (query) => query.state.data?.length ? false : 3000,
   });
   const generalMessagesQuery = trpc.messages.getGeneral.useQuery(undefined, {
     enabled: isAuthenticated && selectedTaskId === null,
