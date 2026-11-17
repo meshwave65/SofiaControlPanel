@@ -58,7 +58,7 @@ A numeração `MISSION_0001`–`MISSION_0027` é uma série documental distinta 
 | 0024 | DONE — publicada em produção | `governance/missions/0024/README.md`, `BLUEPRINT.md`, `TASKS.md`, `PROGRESS.md` |
 | 0025 | STAGED — aguardando aprovação humana do TR | `governance/missions/0025/README.md`, `TR-v0.1.0-DRAFT.md`, `TASKS.md`, `PROGRESS.md` |
 | 0026 | PROGRESS — TR VALIDATED, Blueprint READY, tarefa operacional SCP-TASK-000027 em prioridade CRÍTICA | `governance/missions/0026/README.md`, `TR-v0.1.0-APPROVED.md`, `BLUEPRINT.md`, `TASKS.md`, `PROGRESS.md` |
-| 0027 | STAGED — TR DRAFT; aguardando validação humana | `governance/missions/0027/README.md`, `TR-v0.1.0-DRAFT.md`, `BLUEPRINT.md`, `TASKS.md`, `PROGRESS.md`, `INITIAL-ASSESSMENT.md` |
+| 0027 | PROGRESS — TR VALIDATED v0.1.0, Blueprint READY v1.0.0, tarefa SCP-TASK-000032 STAGED | `governance/missions/0027/README.md`, `TR-v0.1.0-APPROVED.md`, `BLUEPRINT.md`, `TASKS.md`, `PROGRESS.md`, `INITIAL-ASSESSMENT.md` |
 
 Os arquivos da raiz continuam versionados por compatibilidade histórica. Eles não devem ser apagados nem tratados como novas missões. Quando houver `governance/missions/<ID>/README.md` ou `BLUEPRINT.md`, esses documentos governam a continuidade da missão; os arquivos da raiz são snapshots/legado.
 
