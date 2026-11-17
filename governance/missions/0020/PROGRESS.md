@@ -97,3 +97,12 @@ Ainda não há validação visual/autenticada nem confirmação funcional do Mes
 - **Teste local:** `pnpm test -- server/messages.test.ts` não iniciou porque `node_modules`/Vitest não estão instalados; nenhum pacote foi instalado.
 - **Limites:** sem mudança de código, configuração, banco ou produção; sem mensagem extra, chamada LLM/Manus, deploy ou restart.
 - **Próximo passo:** com acesso autorizado ao Render, verificar SHA/logs e status/resposta do provider naquele minuto; confirmar o contrato atual de aliases da Forge; então escolher correção mínima e adicionar teste de regressão, sem deploy antes de aprovação específica.
+
+
+## Atualização do incidente Messenger — OR-20261117-0002
+
+- **Causa imediata confirmada:** às 05:26:43.290 UTC o Render registrou `OPENAI_API_KEY is not configured` para task 28. O deployment `dep-dbt2s361egvs73f8tid0`, SHA `2311b7096cfc1d63252ea553a62e8ad5f3d1a2fd`, contém a leitura de `BUILT_IN_FORGE_API_KEY` e o guard que lança essa exceção quando a variável está vazia/ausente. O nome no texto da exceção está errado.
+- **Conclusão:** `assertApiKey()` roda antes do `fetch`; essa mensagem não chegou à Manus Forge nem ao Gemini. A hipótese de descontinuação `gemini-2.5-flash` não causa este incidente específico, embora permaneça como assunto de migração distinto.
+- **Confirmação no Supabase:** para `sofia.messages`, `taskId=28`, intervalo de 90 segundos, query limitada a 10 linhas, o registro 16 (operador) e registro 17 (assistant, filho do 16) aparecem às 05:26:43.029 e 05:26:43.314 UTC; conteúdo corresponde ao incidente. Nenhuma identidade de remetente foi consultada.
+- **Estado de remediação:** não foi consultado/alterado qualquer valor secreto ou variável atual. A presença no instante do incidente está confirmada pelo guard; não se sabe se a configuração mudou depois. Cadastrar `BUILT_IN_FORGE_API_KEY` exige a credencial Forge correta e autorização explícita para alterar produção. Sem deploy, restart ou teste real nesta unidade.
+- **Próximo passo:** após remediação autorizada, verificar startup/saúde e, mediante autorização específica, executar uma mensagem controlada. Corrigir em código a mensagem de erro que atualmente cita `OPENAI_API_KEY` e adicionar teste unitário separado.
