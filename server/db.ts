@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
-import { eq, and, asc, desc, isNull, sql } from "drizzle-orm";
+import { eq, and, asc, desc, isNull, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { InsertUser, InsertAgent, users, agents, tasks, messages, activityLogs, contextReports, taskStatuses, taskPriorities, messageTypes, activityEventTypes, arcPolicies, arcAssessments, arcEvidence, arcAccessEvents, arcDeviceProfiles, arcConfidenceSnapshots, missionDocumentTypes, missionDocuments, missionDocumentVersions, missionActionUnits } from "../drizzle/schema";
@@ -829,6 +829,24 @@ export async function claimStagedTaskWithAvailableAgent(
     `) as any;
     return claimed ?? null;
   });
+}
+
+/** Reserves the external dispatch slot exactly once after a local claim. */
+export async function reserveTaskForDispatch(taskId: number) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+
+  const [reserved] = await database
+    .update(tasks)
+    .set({ manusStatus: "dispatching", updatedAt: new Date() })
+    .where(and(
+      eq(tasks.id, taskId),
+      isNull(tasks.manusTaskId),
+      or(isNull(tasks.manusStatus), eq(tasks.manusStatus, "dispatch_retrying")),
+    ))
+    .returning({ id: tasks.id });
+
+  return Boolean(reserved);
 }
 
 /** Atomically reserves a STAGED task by moving it to PROGRESS. Only one caller can win. */
