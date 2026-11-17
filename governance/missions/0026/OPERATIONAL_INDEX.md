@@ -10,7 +10,7 @@
 | WP26.1 — Baseline MeshWave | PARTIAL | [OR-WP26.1](./operational_reports/OR-WP26.1-2026-11-16.md) | Baseline live 80 blocos/80 transações; ledgers reconciliados estruturalmente; inventário global complementar pendente |
 | WP26.2 — Catálogo Ethereum/EVM | DONE | [OR-WP26.2](./operational_reports/OR-WP26.2-2026-11-16.md) | Catálogo técnico inicial com fontes primárias |
 | WP26.3 — PoUW e consenso | DONE | [OR-WP26.3](./operational_reports/OR-WP26.3-2026-11-16.md) | Separação conceitual e análise de ameaças concluídas |
-| WP26.4 — Equivalências e gaps | IN PROGRESS | [OR-WP26.4](./operational_reports/OR-WP26.4-2026-11-16.md); [teste da skill composta](./operational_reports/OR-20261117-0001.md) | Matriz inicial refinada com invariantes UMS/MWN e limites ERC-20/EVM; skill composta testada; critérios de aceite ainda pendentes |
+| WP26.4 — Equivalências e gaps | IN PROGRESS | [OR-WP26.4](./operational_reports/OR-WP26.4-2026-11-16.md); [teste da skill composta](./operational_reports/OR-20261117-0006.md) | Matriz inicial refinada com invariantes UMS/MWN e limites ERC-20/EVM; skill composta testada; critérios de aceite ainda pendentes |
 | WP26.5 — Comparação A–F | BLOCKED | — | Depende da conclusão do WP26.4 |
 | WP26.6 — Arquitetura-alvo | BLOCKED | — | Depende do WP26.5 |
 | WP26.7 — Impactos e riscos | BLOCKED | — | Depende de WP26.1, WP26.5 e WP26.6 |
@@ -20,7 +20,7 @@
 
 - Skill composta `ethereum-meshwave-convergence-audit` 0.1.0-DRAFT criada e registrada no catálogo SCP.
 - Composição: `mission-skill-composer`, `project-blueprint-reconciliation`, `operational-task-lifecycle` e `skill-governance-oracle`.
-- Teste operacional documentado em [OR-20261117-0001](./operational_reports/OR-20261117-0001.md). Nenhum agente foi despachado; integração atual é por arquivos/registro, sem carregamento automático no runtime.
+- Teste operacional documentado em [OR-20261117-0006](./operational_reports/OR-20261117-0006.md). Nenhum agente foi despachado; integração atual é por arquivos/registro, sem carregamento automático no runtime.
 
 ## Bloqueios e observações ativos
 
