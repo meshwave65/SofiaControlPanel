@@ -10,6 +10,7 @@
 | 20.3 | Unidade atribuída a Mateus | PRESERVADA — NÃO ALTERAR | Registro operacional próprio | Fora do escopo desta sequência; não modificar nem assumir. |
 | 20.4 | Auditoria e restauração funcional do SCP | PROGRESS | OR-20261115-0043 a OR-20261115-0046, PR #15 | Evoluir o SCP como gestor soberano de missões; Messenger, ciclo de vida, coordenação pai/filhas, TR e autonomia em incrementos pequenos e verificáveis. |
 | 20.4.1 | Diagnóstico do erro de resposta no Messenger | DIAGNÓSTICO CONCLUÍDO — remediação pendente | OR-20261117-0001, OR-20261117-0002 | Causa confirmada: `BUILT_IN_FORGE_API_KEY` estava vazia/ausente no processo Render; request não chegou à Forge. Remediação exige cadastrar segredo Forge autorizado e teste controlado, sem expor valor. |
+| 20.4.2 | Corrigir o diagnóstico local de configuração Forge no cliente LLM | PROGRESS — Manus (sandbox, 2026-11-17) | Derivada da proposta P20.4.1-C em OR-20261117-0002; branch `fix/mission-0020-forge-key-error-message` | A exceção de chave ausente identifica `BUILT_IN_FORGE_API_KEY`; teste comprova falha antes de qualquer request. Sem alteração de segredo, Render, produção, deploy ou chamada externa. |
 
 ## Regras de execução de 20.4
 
