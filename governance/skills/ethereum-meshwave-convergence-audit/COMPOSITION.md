@@ -7,12 +7,12 @@
 
 ## Source skills and competencies
 
-| Source skill | Version/status in registry | Competency reused | Adaptation |
+| Source skill | Version/status | Pinned source commit | Competency reused | Adaptation |
 |---|---|---|---|
-| `mission-skill-composer` | 0.1.0 / DRAFT | Discovery order, composition, provenance, validation, security boundaries | Bound to MISSION_0026 and WP26.4 |
-| `project-blueprint-reconciliation` | 0.1.0 / DRAFT | Approved scope, source-of-truth reconciliation, facts vs. inference | Applied to TR, Blueprint, ORs, code and live evidence |
-| `operational-task-lifecycle` | 0.2.0 / DRAFT | Task gates, ownership/status preservation, OR lifecycle | Restricted to read-only analysis and no dispatch/status mutation |
-| `skill-governance-oracle` | 1.1.0 / ACTIVE | Registry, versioning, provenance, independent Oracle review | Applied to package registration and OR handoff |
+| `mission-skill-composer` | 0.1.0 / DRAFT | `8e1c0b74b3025df02f76fd12d3c0080931151f96` | Discovery order, composition, provenance, validation, security boundaries | Bound to MISSION_0026 and WP26.4 |
+| `project-blueprint-reconciliation` | 0.1.0 / DRAFT | `0f20ed310649e76d8590b16b2107827fe04abbe0` | Approved scope, source-of-truth reconciliation, facts vs. inference | Applied to TR, Blueprint, ORs, code and live evidence |
+| `operational-task-lifecycle` | 0.2.0 / DRAFT | `9db912fcd31561667441addacfcf73d478b28414` | Task gates, ownership/status preservation, OR lifecycle | Restricted to read-only analysis and no dispatch/status mutation |
+| `skill-governance-oracle` | 1.1.0 / ACTIVE | `35ca3757ae5a6a3e602bcabd754c05f7040c5592` | Registry, versioning, provenance, independent Oracle review | Applied to package registration and OR handoff |
 
 ## Domain coverage
 
