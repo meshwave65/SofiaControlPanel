@@ -1578,6 +1578,74 @@ export const appRouter = router({
   // MESSAGES ROUTER
   // ============================================
   messages: router({
+    types: protectedProcedure.query(async () => db.getAllMessageTypes()),
+
+    getGeneral: protectedProcedure.query(async ({ ctx }) =>
+      db.getMessagesByOwner(ctx.user.id, null, 200)
+    ),
+
+    createGeneral: protectedProcedure
+      .input(z.object({
+        parentMessageId: z.number().int().positive().optional(),
+        typeId: z.number().int().positive(),
+        content: z.string().trim().min(1).max(OPERATOR_MESSAGE_MAX_LENGTH),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const messageType = await db.getMessageTypeById(input.typeId);
+        if (!messageType) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Tipo de interação inválido." });
+        }
+
+        if (input.parentMessageId !== undefined) {
+          const parent = await db.getMessageByIdForOwner(input.parentMessageId, ctx.user.id);
+          if (!parent || parent.taskId !== null) {
+            throw new TRPCError({ code: "BAD_REQUEST", message: "A mensagem original não pertence à conversa geral desta conta." });
+          }
+        }
+
+        const content = normalizeOperatorMessage(input.content);
+        const message = await db.createMessage({
+          taskId: null,
+          senderId: ctx.user.id,
+          parentMessageId: input.parentMessageId,
+          typeId: input.typeId,
+          content,
+        });
+        const previousMessages = await db.getMessagesByOwner(ctx.user.id, null, 30);
+        let assistantContent: string;
+        let responseStatus: "replied" | "failed" = "replied";
+
+        try {
+          const response = await invokeLLM({
+            messages: buildSofiaGeneralConversation(previousMessages),
+            toolChoice: "none",
+            maxTokens: 2500,
+          });
+          assistantContent = extractTextContent(response.choices?.[0]?.message?.content);
+          if (!assistantContent) {
+            assistantContent = "Recebi sua interação, mas não consegui produzir uma resposta textual.";
+            responseStatus = "failed";
+          }
+        } catch (error) {
+          console.error("[Messages] General Sofia response failed:", error);
+          assistantContent = "A interação foi registrada, mas a Sofia não conseguiu responder agora. Tente novamente mais tarde.";
+          responseStatus = "failed";
+        }
+
+        const allTypes = await db.getAllMessageTypes();
+        const replyType = allTypes.find((type) => type.name.toLowerCase() === "reply");
+        const reply = await db.createMessage({
+          taskId: null,
+          senderId: ctx.user.id,
+          parentMessageId: message.id,
+          typeId: replyType?.id ?? input.typeId,
+          content: assistantContent,
+          isAssistant: true,
+        });
+
+        return { message, reply, responseStatus };
+      }),
+
     create: protectedProcedure
       .input(z.object({
         taskId: z.number().int().positive(),
@@ -1856,7 +1924,11 @@ export const appRouter = router({
 
     markAsRead: protectedProcedure
       .input(z.object({ id: z.number() }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
+        const message = await db.getMessageByIdForOwner(input.id, ctx.user.id);
+        if (!message && ctx.user.role !== "admin") {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Mensagem não encontrada ou sem permissão." });
+        }
         return db.markMessageAsRead(input.id);
       }),
   }),
