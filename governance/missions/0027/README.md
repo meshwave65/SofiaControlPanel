@@ -17,7 +17,7 @@ Avaliar a experiência de uso das interfaces dos sistemas MeshWave/SOFIA por mei
 
 A capacidade é tecnicamente viável. O plugin original é MIT e fornece personas, comportamentos, temporização e playbooks reaproveitáveis. A rota preferida é substituir o adaptador Claude Chrome por Playwright e integrar axe-core/Lighthouse como ferramentas especializadas.
 
-A integração não é plug-and-play: o SCP atual despacha tarefas para Manus, não possui adaptador Playwright próprio; a SOFIA mantém um catálogo legado de skills em CSV, mas não foi encontrado um carregador operacional de skills no runtime principal. A arquitetura e as lacunas estão detalhadas em [INITIAL-ASSESSMENT.md](./INITIAL-ASSESSMENT.md).
+A integração não é plug-and-play: o SCP atual despacha tarefas para Manus e não possui adaptador Playwright próprio. Há um catálogo genérico legado em `public.skills` (8 registros) e papéis de agentes em `public.personas` (6 registros), mas essas tabelas não estão integradas ao runtime atual do SCP. A arquitetura e as lacunas estão detalhadas em [INITIAL-ASSESSMENT.md](./INITIAL-ASSESSMENT.md).
 
 ## Escopo inicial
 
