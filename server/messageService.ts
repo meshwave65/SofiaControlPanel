@@ -95,6 +95,21 @@ export function buildSofiaConversation(task: SofiaTask, messages: StoredMessage[
   ];
 }
 
+export const SOFIA_GENERAL_MESSAGE_TOOLS = [
+  {
+    type: "function" as const,
+    function: {
+      name: "inspect_task_overview",
+      description: "Consulta somente leitura o panorama das missões e tarefas pertencentes à conta autenticada, incluindo quantidades por status. Use para responder perguntas gerais sobre volume, distribuição e situação das missões. Não altera nenhum registro.",
+      parameters: {
+        type: "object",
+        properties: {},
+        additionalProperties: false,
+      },
+    },
+  },
+];
+
 /** Constrói o contexto da conversa geral, sem missão e sem ferramentas operacionais de missão. */
 export function buildSofiaGeneralConversation(messages: StoredMessage[]): Message[] {
   const recentMessages = messages
@@ -113,7 +128,7 @@ export function buildSofiaGeneralConversation(messages: StoredMessage[]): Messag
         "Não execute nem alegue executar alterações sistêmicas, criar missões ou encaminhar ordens.",
         "Quando uma solicitação exigir ação operacional, esclareça o próximo passo necessário e aguarde autorização/fluxo apropriado.",
         "Diferencie claramente informação, sugestão, decisão e ação efetivamente realizada."
-      ].join("\\n"),
+      ].join("\n"),
     },
     ...recentMessages.map((message) => ({
       role: message.isAssistant ? "assistant" as const : "user" as const,
