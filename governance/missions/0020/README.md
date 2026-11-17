@@ -32,3 +32,6 @@ Manter visão global do produto e planejar a sequência de forma coerente; imple
 6. [OR-20261115-0050](../../operational_reports/OR-20261115-0050.md) — decisão do operador para integração direta via PR #15 em `main`, publicação incremental no Render Free e documentação operacional persistente.
 7. [OR-20261117-0001](../../operational_reports/OR-20261117-0001.md) — diagnóstico do erro observado no Messenger; catch identificado no código, causa de produção pendente de logs Render autorizados.
 8. [OR-20261117-0002](../../operational_reports/OR-20261117-0002.md) — causa confirmada em runtime: `BUILT_IN_FORGE_API_KEY` ausente/vazia no processo; request não chegou à Manus Forge. Remediação do segredo continua pendente.
+
+
+9. [OR-20261117-0003](../../operational_reports/OR-20261117-0003.md) — continuidade executada no modo de missão; variável Render presente por nome, credencial Forge não disponível para leitura segura; nenhuma missão nova, alteração de produção ou teste real foi realizado.

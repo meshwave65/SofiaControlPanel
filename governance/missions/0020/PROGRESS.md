@@ -106,3 +106,11 @@ Ainda não há validação visual/autenticada nem confirmação funcional do Mes
 - **Confirmação no Supabase:** para `sofia.messages`, `taskId=28`, intervalo de 90 segundos, query limitada a 10 linhas, o registro 16 (operador) e registro 17 (assistant, filho do 16) aparecem às 05:26:43.029 e 05:26:43.314 UTC; conteúdo corresponde ao incidente. Nenhuma identidade de remetente foi consultada.
 - **Estado de remediação:** não foi consultado/alterado qualquer valor secreto ou variável atual. A presença no instante do incidente está confirmada pelo guard; não se sabe se a configuração mudou depois. Cadastrar `BUILT_IN_FORGE_API_KEY` exige a credencial Forge correta e autorização explícita para alterar produção. Sem deploy, restart ou teste real nesta unidade.
 - **Próximo passo:** após remediação autorizada, verificar startup/saúde e, mediante autorização específica, executar uma mensagem controlada. Corrigir em código a mensagem de erro que atualmente cita `OPENAI_API_KEY` e adicionar teste unitário separado.
+
+
+## Continuidade operacional — OR-20261117-0003
+
+- Render MCP confirmou o workspace MeshWave e o serviço `SofiaControlPanel-web` (`srv-db7qpead0e5s73erdepg`), com `autoDeploy=off` e plano Free.
+- A variável `BUILT_IN_FORGE_API_KEY` aparece cadastrada no Environment do Render, mas o valor secreto não foi lido, copiado ou alterado. A credencial `OPENAI_API_KEY` do Sandbox não é tratada como substituta.
+- O SCP foi aberto em modo autenticado e a lista de Missões exibiu 0 registros; nenhuma missão nova foi criada, conforme instrução do operador. A divergência entre a UI e os artefatos/histórico de task 28 permanece bloqueio de persistência pelo próprio SCP.
+- **Estado:** remediação de 20.4.1 bloqueada até a credencial Forge correta estar disponível por canal seguro. Sem alteração Render, deploy, restart, chamada LLM/Manus, dispatch, mensagem controlada ou migration. Ver OR-20261117-0003.

@@ -69,3 +69,11 @@ Primeiro reconciliar a branch da PR #15 com main, identificando e resolvendo con
 - **Arquivos:** `missions/SCP-TASK-000017.md` e `missions/SCP-TASK-000017-TR-v0.1.0-DRAFT.md`.
 - **Próximo gate:** validação/correção explícita do TR; só depois derivar Blueprint mestre e reconciliar a unidade estratégica 24.
 - **Preservação:** pai 17 PAUSED, filhas 22/23 DONE, filha 24 FAIL; nenhum dispatch, consumo de créditos ou alteração de estado nesta etapa.
+
+
+## Continuidade de remediação — OR-20261117-0003
+
+- 20.4.1 permanece **DIAGNÓSTICO CONCLUÍDO — REMEDIAÇÃO PENDENTE**.
+- Render confirma o nome da variável `BUILT_IN_FORGE_API_KEY`, mas a credencial correta da Manus Forge não está disponível para leitura segura nesta sessão. Não usar `OPENAI_API_KEY` do Sandbox por suposição.
+- Nenhuma missão nova foi criada. A UI autenticada do SCP exibiu 0 missões e não permitiu abrir a MISSION_0020 existente; registrar essa divergência como bloqueio, sem duplicar dados.
+- Próximo critério de saída: credencial Forge segura disponível → atualização do segredo no Render → deploy manual autorizado → verificação de saúde → teste Messenger controlado autorizado → OR próprio com evidência.
