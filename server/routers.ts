@@ -1707,6 +1707,9 @@ export const appRouter = router({
         if (!messageType) {
           throw new TRPCError({ code: "BAD_REQUEST", message: "Tipo de mensagem inválido." });
         }
+        if (messageType.name.toLowerCase() === "createtask") {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Solicitações de criação de missão devem ser registradas na conversa geral, sem taskId." });
+        }
         if (messageType.name.toLowerCase() === "reply" && input.parentMessageId === undefined) {
           throw new TRPCError({ code: "BAD_REQUEST", message: "Uma resposta precisa estar vinculada à mensagem original." });
         }
