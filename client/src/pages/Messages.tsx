@@ -40,7 +40,7 @@ const taskStatuses: { value: TaskStatus; label: string }[] = [
 ];
 
 export default function Messages() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
   const [interactionType, setInteractionType] = useState<InteractionType>("message");
   const [selectedParentMessageId, setSelectedParentMessageId] = useState<number | null>(null);
@@ -371,8 +371,8 @@ export default function Messages() {
                     {messages.map((message: any) => (
                       <div key={message.id} className={`rounded-lg border p-3 ${message.isAssistant ? "bg-muted/40" : "bg-background"}`}>
                         <div className="mb-1 flex items-center justify-between gap-2">
-                          <span className="text-[11px] font-semibold">{message.isAssistant ? "SOFIA" : "Operador"} · #{message.id}</span>
-                          <button type="button" onClick={() => { setSelectedParentMessageId(message.id); setInteractionType("reply"); }} className="text-[11px] font-medium text-primary hover:underline">Responder</button>
+                          <span className="text-[11px] font-semibold">{message.isAssistant ? "SOFIA" : "Operador"}{user?.role === "admin" ? ` · Conta #${message.senderId}` : ""} · #{message.id}</span>
+                          <button type="button" disabled={message.senderId !== user?.id} onClick={() => { setSelectedParentMessageId(message.id); setInteractionType("reply"); }} className="text-[11px] font-medium text-primary hover:underline disabled:cursor-not-allowed disabled:opacity-40">Responder</button>
                         </div>
                         <p className="whitespace-pre-wrap text-xs leading-5">{message.content}</p>
                       </div>
