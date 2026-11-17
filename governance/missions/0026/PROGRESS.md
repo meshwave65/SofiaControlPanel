@@ -12,8 +12,8 @@
 - TR aprovado publicado em TR-v0.1.0-APPROVED.md.
 - Blueprint v1.0.0 publicado em BLUEPRINT.md, estado READY, derivado do TR aprovado.
 - Missão de governança MISSION_0026 permanece em PROGRESS no Supabase.
-- A tarefa operacional raiz SCP-TASK-000027 foi criada com prioridade CRÍTICA. Estado atual consultado no banco: PAUSED, sem agente atribuído e com githubSyncStatus=pending. Isso diverge do estado STAGED registrado anteriormente nos documentos. Nenhuma mudança de status foi feita para evitar eventual disparo automático de agente ou consumo de créditos.
-- O arquivo espelho missions/SCP-TASK-000027.md ainda não existe no GitHub.
+- A tarefa operacional raiz SCP-TASK-000027 foi criada com prioridade CRÍTICA. Estado atual consultado anteriormente no banco: PAUSED, sem agente atribuído e com githubSyncStatus=pending. Isso diverge do estado STAGED registrado anteriormente nos documentos. Nenhuma mudança de status foi feita para evitar eventual disparo automático de agente ou consumo de créditos.
+- O arquivo espelho missions/SCP-TASK-000027.md ainda não existe.
 
 ## Segurança — correção RLS
 
@@ -38,8 +38,8 @@ A política restritiva funciona como defesa em profundidade: mesmo que uma polic
 - TR-v0.1.0-APPROVED: VALIDATED.
 - BLUEPRINT v1.0.0: READY.
 - TASKS: atualizado com estados atuais dos work packages.
-- OPERATIONAL_INDEX: criado.
-- OR-WP26.1: revisado com consulta direta read-only ao Supabase MeshWave65; baseline live corrigido (77 blocos/77 transações), ainda parcial pelas pendências de reconciliação funcional e inventário.
+- OPERATIONAL_INDEX: atualizado.
+- OR-WP26.1: revisado novamente com consulta live read-only ao Supabase MeshWave65; baseline corrigido para 80 blocos/80 transações, reconciliação estrutural de ledgers e avaliação funcional do MW-Ex.
 - OR-WP26.2: concluído.
 - OR-WP26.3: concluído.
 - RLS migration: aplicada.
@@ -48,22 +48,23 @@ A política restritiva funciona como defesa em profundidade: mesmo que uma polic
 ## Execução técnica — 2026-11-16
 
 ### WP26.1 — Baseline MeshWave
-- Inspecionados meshwave-blockchain, newsite, Foundation_MeshWave, migrações e fontes relacionadas.
-- Verificado deployment Vercel Hobby do newsite em estado READY, no commit c8973f7701ea056a39477f708fe18590a05fbe32.
-- Evidência live no Supabase MeshWave65 confirma cadeia/ledger piloto de operador único com 77 blocos e 77 transações; a fotografia de dois blocos de 24/10 é histórica e não representa o estado atual.
-- O código local do piloto permite transferência UMS no scaffold; isso não comprova comportamento do banco operacional.
-- A consulta direta read-only ao projeto Supabase MeshWave65 (`ufylccbdjfzydbwhpmpp`) confirmou 77 blocos (0–76), 77 transações confirmadas, 129 lançamentos em `mw_account_ledger`, 29 transações MW-Ex e 34 lançamentos MW-Ex. Metadata declara `network=pilot`, `canonical=false`, `consensus=single-operator`. Sequência e referências `previous_hash` sem divergências estruturais; transações sem bloco ou órfãs: zero. Não foi feita auditoria criptográfica independente.
-- Estado: PARTIAL.
+- Supabase MeshWave65 (ufylccbdjfzydbwhpmpp) consultado diretamente; não foram usados documentos históricos como substitutos do estado live.
+- Estado live: 80 blocos (0–79), 80 transações confirmadas, 135 lançamentos em mw_account_ledger, 29 transações MW-Ex e 34 lançamentos em mwex_ledger_entries.
+- As 80 transações da cadeia têm correspondência por hash no ledger de contas; as 29 transações MW-Ex têm lançamentos correspondentes (24 com uma perna, 5 com duas), sem órfãos.
+- Cadeia classificada como piloto, canonical=false, consenso single-operator; sequência e referências parent-hash sem divergências estruturais. Não foi feita auditoria criptográfica independente.
+- MW-Ex tem funções de ordens, reservas, fills e liquidação; porém matching MANUAL_REVIEW, confirmação fiduciária MANUAL_ADMIN, ordens a mercado desabilitadas e zero ordens/fills live. Portanto, não é exchange operacional comprovada.
+- A ideia de replicação MeshWalker foi reclassificada como requisito futuro opcional de armazenamento/recuperação fora do caminho crítico; localizar documento antigo não bloqueia a missão.
+- Estado: PARTIAL — suficiente para iniciar WP26.4; falta fechar inventário global e reconciliação do status operacional da tarefa.
 
 ### WP26.2 — Catálogo Ethereum/EVM
 - Avaliados EVM, Solidity, ERCs, OpenZeppelin, Hardhat, Foundry, viem, revm, account abstraction, L2/rollups, Besu e Cosmos SDK/CometBFT.
-- Conclusão desta unidade: existe amplo ecossistema reutilizável; EVM é execução determinística e não fornece consenso por si só.
+- Conclusão: existe amplo ecossistema reutilizável; EVM é execução determinística e não fornece consenso por si só.
 - Estado: DONE.
 
 ### WP26.3 — PoUW e consenso
 - Separados consenso, execução EVM, trabalho útil, verificação e recompensa.
 - Revisada literatura de 2025/2026 e documentação de Golem/Akash.
-- Conclusão desta unidade: PoUW MeshWave, conforme a documentação conceitual, é mais amplo que consenso PoUW e deve ser avaliado como camada de reconhecimento/verificação de contribuições e contabilização de UMS.
+- Conclusão: PoUW MeshWave, conforme a documentação conceitual, é mais amplo que consenso PoUW e deve ser avaliado como camada de reconhecimento/verificação de contribuições e contabilização de UMS.
 - Estado: DONE.
 
 ## Limites respeitados
@@ -75,6 +76,6 @@ A política restritiva funciona como defesa em profundidade: mesmo que uma polic
 
 ## Próximos passos
 
-1. Reconciliar eventos da cadeia, ledger de contas e ledger MW-Ex; verificar flags e liquidação MW-Ex; completar inventário de execução/rede e localizar a missão original de replicação MeshWalker.
-2. Reconciliar o estado PAUSED da tarefa SCP com a documentação STAGED e sincronizar o arquivo espelho, sem acionar agente pago.
-3. Liberar WP26.4 somente após o baseline estar suficientemente fechado; então seguir a matriz de equivalências e gaps.
+1. Iniciar WP26.4 — matriz de equivalências e gaps MeshWave × Ethereum/EVM, usando o baseline live revisado.
+2. Completar inventário delimitado de repositórios/deployments e registrar limites da busca.
+3. Reconciliar o estado PAUSED de SCP-TASK-000027 com a documentação STAGED e o arquivo espelho, sem alterar status ou acionar agente pago.
