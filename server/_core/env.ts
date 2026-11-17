@@ -18,6 +18,9 @@ export const ENV = {
   isProduction: process.env.NODE_ENV === "production",
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
+  llmProvider: process.env.LLM_PROVIDER ?? "forge",
+  groqApiKey: process.env.GROQ_API_KEY ?? "",
+  groqModel: process.env.GROQ_MODEL ?? "openai/gpt-oss-120b",
   supabaseUrl: process.env.SUPABASE_URL ?? "",
   supabaseStorageKey:
     process.env.SUPABASE_SECRET_KEY ??

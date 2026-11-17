@@ -209,14 +209,30 @@ const normalizeToolChoice = (
   return toolChoice;
 };
 
-const resolveApiUrl = () =>
-  ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
+type LlmProvider = "forge" | "groq";
+
+const resolveProvider = (): LlmProvider => {
+  const provider = ENV.llmProvider.trim().toLowerCase();
+  if (provider === "forge" || provider === "groq") return provider;
+  throw new Error("LLM_PROVIDER must be either 'forge' or 'groq'");
+};
+
+const resolveApiUrl = (provider: LlmProvider) => {
+  if (provider === "groq") {
+    return "https://api.groq.com/openai/v1/chat/completions";
+  }
+  return ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
     ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
     : "https://forge.manus.im/v1/chat/completions";
+};
 
-const assertApiKey = () => {
-  if (!ENV.forgeApiKey) {
-    throw new Error("OPENAI_API_KEY is not configured");
+const resolveApiKey = (provider: LlmProvider) =>
+  provider === "groq" ? ENV.groqApiKey : ENV.forgeApiKey;
+
+const assertApiKey = (provider: LlmProvider) => {
+  if (!resolveApiKey(provider)) {
+    const keyName = provider === "groq" ? "GROQ_API_KEY" : "BUILT_IN_FORGE_API_KEY";
+    throw new Error(`${keyName} is not configured`);
   }
 };
 
@@ -266,13 +282,17 @@ const normalizeResponseFormat = ({
 };
 
 export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
-  assertApiKey();
+  const provider = resolveProvider();
+  assertApiKey(provider);
+  const isGroq = provider === "groq";
 
   const {
     messages,
     tools,
     toolChoice,
     tool_choice,
+    maxTokens,
+    max_tokens,
     outputSchema,
     output_schema,
     responseFormat,
@@ -280,7 +300,7 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   } = params;
 
   const payload: Record<string, unknown> = {
-    model: "gemini-2.5-flash",
+    model: isGroq ? ENV.groqModel : "gemini-2.5-flash",
     messages: messages.map(normalizeMessage),
   };
 
@@ -296,11 +316,6 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.tool_choice = normalizedToolChoice;
   }
 
-  payload.max_tokens = 32768
-  payload.thinking = {
-    "budget_tokens": 128
-  }
-
   const normalizedResponseFormat = normalizeResponseFormat({
     responseFormat,
     response_format,
@@ -308,15 +323,34 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     output_schema,
   });
 
+  if (isGroq && tools && tools.length > 0 && normalizedResponseFormat) {
+    throw new Error("Groq does not support tool calling and structured outputs in the same request");
+  }
+
   if (normalizedResponseFormat) {
     payload.response_format = normalizedResponseFormat;
   }
 
-  const response = await fetch(resolveApiUrl(), {
+  if (isGroq) {
+    const requestedMaxTokens = maxTokens ?? max_tokens;
+    if (
+      requestedMaxTokens !== undefined &&
+      (!Number.isSafeInteger(requestedMaxTokens) || requestedMaxTokens < 1)
+    ) {
+      throw new Error("Groq maxTokens must be a positive safe integer");
+    }
+    payload.max_completion_tokens = requestedMaxTokens ?? 4096;
+    payload.reasoning_format = "hidden";
+  } else {
+    payload.max_tokens = 32768;
+    payload.thinking = { budget_tokens: 128 };
+  }
+
+  const response = await fetch(resolveApiUrl(provider), {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      authorization: `Bearer ${ENV.forgeApiKey}`,
+      authorization: `Bearer ${resolveApiKey(provider)}`,
     },
     body: JSON.stringify(payload),
   });

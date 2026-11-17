@@ -114,3 +114,26 @@ Ainda não há validação visual/autenticada nem confirmação funcional do Mes
 - A variável `BUILT_IN_FORGE_API_KEY` aparece cadastrada no Environment do Render, mas o valor secreto não foi lido, copiado ou alterado. A credencial `OPENAI_API_KEY` do Sandbox não é tratada como substituta.
 - O SCP foi aberto em modo autenticado e a lista de Missões exibiu 0 registros; nenhuma missão nova foi criada, conforme instrução do operador. A divergência entre a UI e os artefatos/histórico de task 28 permanece bloqueio de persistência pelo próprio SCP.
 - **Estado:** remediação de 20.4.1 bloqueada até a credencial Forge correta estar disponível por canal seguro. Sem alteração Render, deploy, restart, chamada LLM/Manus, dispatch, mensagem controlada ou migration. Ver OR-20261117-0003.
+
+
+## Correção local de diagnóstico Forge — OR-20261117-0004
+
+- Criada a subunidade 20.4.2 antes da edição, separada da remediação operacional 20.4.1, que permanece bloqueada pela indisponibilidade segura da credencial Forge.
+- Teste red-green em `server/_core/llm.test.ts`: antes da correção, esperava `BUILT_IN_FORGE_API_KEY is not configured` e reproduziu `OPENAI_API_KEY is not configured`; depois da correção verifica a mensagem certa e confirma que `fetch` não é chamado quando a chave está vazia.
+- `server/_core/llm.ts` atualizado apenas na mensagem do guard; não houve alteração no endpoint, modelo, fallback ao usuário ou fluxo de produção.
+- Validações locais: `pnpm test` — 11 arquivos/78 testes aprovados; `pnpm check` e `pnpm build` aprovados.
+- Commit `34abb9654170970a18ac9f7b158b0def3f5da897`; branch `fix/mission-0020-forge-key-error-message`; PR #17 aberta para `main`. Os checks remotos de TypeScript/testes/build e PostgreSQL migrations/dispatch boundary concluíram SUCCESS; PR permanece OPEN e CLEAN, sem decisão de revisão ou merge. Não houve deploy.
+- Nenhuma chave/segredo lido ou alterado; nenhuma chamada Forge/LLM/Manus, mensagem, dispatch, escrita DB, restart ou deploy. Próximo passo: CI/revisão da PR e, separadamente, obtenção segura da credencial Forge para retomar 20.4.1.
+- OR: `OR-20261117-0004.md` (SUBMITTED; Oracle PENDING; proposal PROPOSED).
+
+
+## Provider Groq seletivo para o backend do SCP — OR-20261117-0005
+
+O responsável esclareceu que deseja separar esta conversa Manus do runtime da UI do SCP: o provider configurado no repositório afeta somente chamadas servidoras do SofiaControlPanel; não altera o modelo desta conversa. Também relatou que `GROQ_API_KEY` foi criada e salva como segredo no Render. O valor não foi consultado nem verificado.
+
+- Subunidade 20.4.3 foi atribuída antes da edição e publicada nos commits `399893f` (atribuição) e `bbc32cd` (implementação), na branch `fix/mission-0020-forge-key-error-message` / PR #17.
+- Configuração: `LLM_PROVIDER=groq` escolhe o endpoint Groq e usa `GROQ_API_KEY`; `GROQ_MODEL` é opcional, com default `openai/gpt-oss-120b`. Sem `LLM_PROVIDER`, o default continua `forge` e o modelo `gemini-2.5-flash` permanece na rota antiga. Provider desconhecido falha em vez de usar outra credencial.
+- Payload Groq usa `max_completion_tokens` do caller, `reasoning_format=hidden` e não envia o campo `thinking` específico da Forge. Uma chamada que combine tools e Structured Outputs falha localmente antes de rede, conforme limitação documentada pelo provider.
+- Testes mockados do adapter: 6/6; suíte: 11 arquivos/83 testes; `pnpm check`, `pnpm build` e checks remotos da PR no commit `bbc32cd` aprovados.
+- Nenhuma chave real foi lida, nenhuma chamada Groq/LLM feita, nenhuma variável Render alterada e nenhum deploy/merge realizado. Para a UI começar a usar Groq após integração e release autorizados, ainda será preciso configurar `LLM_PROVIDER=groq` no Render; salvar apenas a chave não altera a rota.
+- Não houve validação de qualidade em português, custo/cotas, latência ou retenção de dados. Ver P20.4.3-A no OR-0005; a prova funcional live continua pendente de autorização específica.

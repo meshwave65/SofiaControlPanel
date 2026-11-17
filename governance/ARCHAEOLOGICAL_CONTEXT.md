@@ -192,3 +192,13 @@ Registrar cada nova entrada com data, OR/FOR, missão/etapa, orientação anteri
 - **Documento normativo:** governance/architecture/MISSION_DOCUMENT_CATALOG_SPECIFICATION.md; integração também registrada nos contratos TR/Blueprint e arquitetura SOFIA.
 - **Evidência:** OR-20261114-0028.
 - **Limites:** documentação apenas; sem código funcional, schema/migration, banco, RLS de produção, dispatch, LLM/Manus, créditos, deploy ou restart. Task 20.3/Mateus intocada.
+
+
+### AC-018 — 2026-11-17 — Provedor LLM do SCP separado desta conversa Manus
+
+- **Esclarecimento do responsável:** espera que o uso da UI do SofiaControlPanel possa ser atendido pela Groq, sem alterar o modelo/provedor desta conversa Manus.
+- **Interpretação implementada:** o seletor `LLM_PROVIDER` existe apenas no runtime do SCP (`server/_core/llm.ts`); não controla nem redireciona o cliente/chat Manus externo ao repositório. O default continua `forge`; `LLM_PROVIDER=groq` é necessário para selecionar Groq no SCP.
+- **Credencial:** o responsável relata que `GROQ_API_KEY` foi criada e salva em Render. O valor e a presença efetiva no runtime não foram verificados; não foi consultado nem alterado.
+- **Classificação:** esclarecimento de intenção do responsável e implementação local revisável, não evidência de ativação em produção ou avaliação funcional do modelo.
+- **Evidência:** OR-20261117-0005; commits `399893f` e `bbc32cd`; PR #17; testes mockados e CI concluídos.
+- **Limites:** sem chamada Groq/LLM, mudança Render, merge, deploy, restart, escrita de dados, dispatch ou mensagem real. Ativação futura requer configuração explícita e autorização de release.

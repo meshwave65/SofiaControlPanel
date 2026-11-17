@@ -35,3 +35,7 @@ Manter visão global do produto e planejar a sequência de forma coerente; imple
 
 
 9. [OR-20261117-0003](../../operational_reports/OR-20261117-0003.md) — continuidade executada no modo de missão; variável Render presente por nome, credencial Forge não disponível para leitura segura; nenhuma missão nova, alteração de produção ou teste real foi realizado.
+
+10. [OR-20261117-0004](../../operational_reports/OR-20261117-0004.md) — correção local do nome de variável Forge, teste red-green, CI local aprovado e PR #17 aberta; remediação de produção permanece pendente.
+
+11. [OR-20261117-0005](../../operational_reports/OR-20261117-0005.md) — adapter Groq selecionável apenas no backend do SCP; Forge permanece default até `LLM_PROVIDER=groq`; CI passou, sem chamada real, alteração Render, merge ou deploy.
