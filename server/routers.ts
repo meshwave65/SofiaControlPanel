@@ -1638,16 +1638,19 @@ export const appRouter = router({
               status: await db.getTaskStatusNameById(task.statusId),
               parentTaskId: task.parentTaskId,
             })));
-            const statusCounts = taskSnapshots.reduce((counts: Record<string, number>, task) => {
+            const countByStatus = (items: typeof taskSnapshots) => items.reduce((counts: Record<string, number>, task) => {
               const status = task.status ?? "UNKNOWN";
               counts[status] = (counts[status] ?? 0) + 1;
               return counts;
             }, {});
+            const missionSnapshots = taskSnapshots.filter((task) => task.parentTaskId === null);
             const snapshot = {
               source: "database_read_only_task_overview",
               observedAt: new Date().toISOString(),
+              totalMissions: missionSnapshots.length,
+              missionStatusCounts: countByStatus(missionSnapshots),
               totalTasks: taskSnapshots.length,
-              statusCounts,
+              taskStatusCounts: countByStatus(taskSnapshots),
               tasks: taskSnapshots,
               scope: ctx.user.role === "admin" ? "all accounts" : "authenticated account only",
             };
