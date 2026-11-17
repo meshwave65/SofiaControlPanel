@@ -685,6 +685,7 @@ describe("messages.create — persistência e resposta Sofia", () => {
   });
 
   it("persiste conversa geral com taskId nulo e vincula a resposta à conta autenticada", async () => {
+    dbMock.createMessage.mockReset();
     dbMock.getMessageTypeById.mockResolvedValue({ id: 5, name: "Message" });
     dbMock.getMessagesByOwner.mockResolvedValue([
       { id: 201, taskId: null, senderId: 152, content: "Quantas missões estão pausadas?", isAssistant: false },
@@ -719,6 +720,7 @@ describe("messages.create — persistência e resposta Sofia", () => {
   });
 
   it("usa snapshot somente leitura e distingue missões-raiz de tarefas-filhas", async () => {
+    dbMock.createMessage.mockReset();
     dbMock.getMessageTypeById.mockResolvedValue({ id: 5, name: "Message" });
     dbMock.getMessagesByOwner.mockResolvedValue([
       { id: 201, taskId: null, senderId: 152, content: "Quantas missões estão pausadas?", isAssistant: false },
@@ -757,7 +759,7 @@ describe("messages.create — persistência e resposta Sofia", () => {
     });
 
     expect(dbMock.getAllTasks).toHaveBeenCalledWith(152, false);
-    const snapshot = invokeLLMMock.mock.calls[1][0].messages.at(-1).content;
+    const snapshot = invokeLLMMock.mock.calls[1][0].messages[invokeLLMMock.mock.calls[1][0].messages.length - 1].content;
     expect(snapshot).toContain('"totalMissions":2');
     expect(snapshot).toContain('"PAUSED":1');
     expect(snapshot).toContain('"totalTasks":3');
