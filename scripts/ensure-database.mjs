@@ -76,6 +76,14 @@ try {
     sql.unsafe(activityLogMigration),
   );
 
+  const messageContextMigration = await readFile(
+    new URL("../drizzle/0015_message_general_context.sql", import.meta.url),
+    "utf8",
+  );
+  await runStep("Allow general messages without a mission", () =>
+    sql.unsafe(messageContextMigration),
+  );
+
   console.log("[Database] Execution columns verified successfully");
   console.log("[Database] Automatic task dispatch trigger verified successfully");
 } catch (error) {
