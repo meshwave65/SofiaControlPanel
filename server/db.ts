@@ -1009,20 +1009,22 @@ export async function getAllMessageTypes() {
 export async function getAllGeneralMessages(limit = 200) {
   const database = await getDb();
   if (!database) return [];
-  return database.select().from(messages)
+  const rows = await database.select().from(messages)
     .where(isNull(messages.taskId))
-    .orderBy(asc(messages.createdAt), asc(messages.id))
+    .orderBy(desc(messages.createdAt), desc(messages.id))
     .limit(limit);
+  return rows.reverse();
 }
 
 export async function getMessagesByOwner(ownerId: number, taskId: number | null, limit = 100) {
   const database = await getDb();
   if (!database) return [];
   const contextFilter = taskId === null ? isNull(messages.taskId) : eq(messages.taskId, taskId);
-  return database.select().from(messages)
+  const rows = await database.select().from(messages)
     .where(and(eq(messages.senderId, ownerId), contextFilter))
-    .orderBy(asc(messages.createdAt), asc(messages.id))
+    .orderBy(desc(messages.createdAt), desc(messages.id))
     .limit(limit);
+  return rows.reverse();
 }
 
 export async function getMessagesByParentIdForOwner(parentMessageId: number, ownerId: number) {
