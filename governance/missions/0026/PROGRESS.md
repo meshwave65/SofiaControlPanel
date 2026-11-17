@@ -67,7 +67,7 @@
 - A skill específica foi composta a partir de `project-blueprint-reconciliation`, `operational-task-lifecycle` e `skill-governance-oracle`, além do compositor.
 - Teste aplicado ao WP26.4: confirmou que ERC-20 padrão inclui `transfer`, `approve` e `transferFrom`; EVM é execução, separada do cliente de consenso; controles restritivos de UMS exigiriam desenho explícito para todos os caminhos de transferência, allowances, mint/burn e papéis administrativos.
 - MW-Ex, matching, FIAT, política de ativos e reconciliação de ledger continuam responsabilidades MeshWave; a tokenização MWN não as substitui automaticamente.
-- Relatório: [OR-20261117-0001](./operational_reports/OR-20261117-0001.md). WP26.4 permanece IN PROGRESS; WP26.5 permanece BLOCKED.
+- Relatório: [OR-20261117-0006](./operational_reports/OR-20261117-0006.md). WP26.4 permanece IN PROGRESS; WP26.5 permanece BLOCKED.
 - Integração atual é documental/registry-based; carregamento automático de skills no prompt de dispatch não foi identificado no caminho de execução inspecionado e requer implementação separada.
 - Find Skill mencionado pelo responsável ainda não foi localizado nos repositórios acessíveis; nenhuma cópia externa foi importada.
 
