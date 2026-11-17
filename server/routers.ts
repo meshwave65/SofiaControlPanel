@@ -11,7 +11,7 @@ import { getConsolidatedTaskReport, uploadConsolidatedTaskReport } from "./contr
 import { resumeManusTask, sendManusMessageAndWait, stopManusTask, syncAgentCredits } from "./manusExecutionService";
 import { mirrorTaskToGitHub } from "./githubMissionMirror";
 import { invokeLLM } from "./_core/llm";
-import { buildSofiaConversation, extractTextContent, normalizeOperatorMessage, OPERATOR_MESSAGE_MAX_LENGTH, SOFIA_MESSAGE_TOOLS } from "./messageService";
+import { buildSofiaConversation, buildSofiaGeneralConversation, extractTextContent, normalizeOperatorMessage, OPERATOR_MESSAGE_MAX_LENGTH, SOFIA_MESSAGE_TOOLS, SOFIA_GENERAL_MESSAGE_TOOLS } from "./messageService";
 import { validateMissionBlueprintContent } from "./missionBlueprint";
 import { validateActionPlan, ActionPlanSchema } from "./actionPlan";
 import { evaluateExecutionGate } from "./executionGovernance";
@@ -1618,10 +1618,51 @@ export const appRouter = router({
         try {
           const response = await invokeLLM({
             messages: buildSofiaGeneralConversation(previousMessages),
-            toolChoice: "none",
+            tools: SOFIA_GENERAL_MESSAGE_TOOLS,
+            toolChoice: "auto",
             maxTokens: 2500,
           });
-          assistantContent = extractTextContent(response.choices?.[0]?.message?.content);
+          const assistantTurn = response.choices?.[0]?.message;
+          const overviewCall = assistantTurn?.tool_calls?.find(
+            (call) => call.function.name === "inspect_task_overview"
+          );
+
+          if (overviewCall) {
+            const accountTasks = await db.getAllTasks(ctx.user.id, ctx.user.role === "admin");
+            const taskSnapshots = await Promise.all(accountTasks.map(async (task) => ({
+              id: task.id,
+              title: task.title,
+              status: await db.getTaskStatusNameById(task.statusId),
+              parentTaskId: task.parentTaskId,
+            })));
+            const statusCounts = taskSnapshots.reduce((counts: Record<string, number>, task) => {
+              const status = task.status ?? "UNKNOWN";
+              counts[status] = (counts[status] ?? 0) + 1;
+              return counts;
+            }, {});
+            const snapshot = {
+              source: "database_read_only_task_overview",
+              observedAt: new Date().toISOString(),
+              totalTasks: taskSnapshots.length,
+              statusCounts,
+              tasks: taskSnapshots,
+              scope: ctx.user.role === "admin" ? "all accounts" : "authenticated account only",
+            };
+            const followUp = await invokeLLM({
+              messages: [
+                ...buildSofiaGeneralConversation(previousMessages),
+                {
+                  role: "user",
+                  content: "Resultado da consulta somente leitura inspect_task_overview. Responda usando exclusivamente os dados deste snapshot; não afirme que houve alteração:\\n" + JSON.stringify(snapshot),
+                },
+              ],
+              toolChoice: "none",
+              maxTokens: 2500,
+            });
+            assistantContent = extractTextContent(followUp.choices?.[0]?.message?.content);
+          } else {
+            assistantContent = extractTextContent(assistantTurn?.content);
+          }
           if (!assistantContent) {
             assistantContent = "Recebi sua interação, mas não consegui produzir uma resposta textual.";
             responseStatus = "failed";
@@ -1665,7 +1706,8 @@ export const appRouter = router({
         }
         if (input.parentMessageId !== undefined) {
           const parentMessage = await db.getMessageByIdForTask(input.parentMessageId, input.taskId);
-          if (!parentMessage) {
+          const ownedParent = await db.getMessageByIdForOwner(input.parentMessageId, ctx.user.id);
+          if (!parentMessage || !ownedParent) {
             throw new TRPCError({ code: "BAD_REQUEST", message: "A mensagem pai não pertence à missão selecionada." });
           }
         }
@@ -1678,7 +1720,7 @@ export const appRouter = router({
           typeId: input.typeId,
           content,
         });
-        const previousMessages = await db.getMessagesByTaskId(input.taskId, 30);
+        const previousMessages = await db.getMessagesByOwner(ctx.user.id, input.taskId, 30);
 
         let assistantContent: string;
         let responseStatus: "replied" | "pending" | "failed" = "replied";
@@ -1913,13 +1955,19 @@ export const appRouter = router({
         if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
           throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
         }
-        return db.getMessagesByTaskId(input.taskId);
+        return ctx.user.role === "admin" ? db.getMessagesByTaskId(input.taskId) : db.getMessagesByOwner(ctx.user.id, input.taskId);
       }),
 
-    getByParentId: publicProcedure
+    getByParentId: protectedProcedure
       .input(z.object({ parentMessageId: z.number() }))
-      .query(async ({ input }) => {
-        return db.getMessagesByParentId(input.parentMessageId);
+      .query(async ({ input, ctx }) => {
+        const parent = await db.getMessageByIdForOwner(input.parentMessageId, ctx.user.id);
+        if (!parent && ctx.user.role !== "admin") {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Mensagem não encontrada ou sem permissão." });
+        }
+        return ctx.user.role === "admin"
+          ? db.getMessagesByParentId(input.parentMessageId)
+          : db.getMessagesByParentIdForOwner(input.parentMessageId, ctx.user.id);
       }),
 
     markAsRead: protectedProcedure
