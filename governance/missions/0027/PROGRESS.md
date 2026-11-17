@@ -12,7 +12,7 @@
 - Verificado que o repositório SOFIA contém `engine/backend/skills.csv`, `personas.csv` e `persona_skills.csv` legados, mas não um diretório operacional `engine/skills/` no branch principal consultado.
 - O banco atual contém 8 registros genéricos em `public.skills`, 6 papéis de agentes em `public.personas` e 9 associações em `public.persona_skills`; não correspondem às personas de UX do plugin e não estão mapeados no schema Drizzle nem usados por `server/db.ts` do SCP.
 - As três tabelas públicas estão com RLS desabilitado e permitem SELECT a `anon` e `authenticated`. O conteúdo atual é metadado genérico; revisar a política antes de adicionar instruções ou perfis privados. Nenhuma alteração de RLS/grants foi feita.
-- Interface pública do SofiaControlPanel respondeu e exibiu a página de entrada; navegação autenticada não foi testada.
+- Render confirma `SofiaControlPanel-web` ativo no plano Free e informa sua URL pública; a leitura da página não foi possível pelo navegador web disponível. Interface e fluxo autenticado permanecem sem teste interativo.
 - A tentativa de iniciar automação via TinyFish não foi executada porque o saldo disponível estava negativo. Nenhum crédito foi adicionado nem serviço pago contratado.
 - A tentativa de criar tarefa operacional STAGED foi rejeitada pelo guard do banco: exige TR VALIDATED e Blueprint READY derivado da versão mais recente. Nenhuma tarefa operacional foi criada por essa tentativa.
 - Nenhum agente foi despachado; nenhum crédito Manus foi consumido; nenhum sistema foi alterado.
