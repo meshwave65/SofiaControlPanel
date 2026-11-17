@@ -18,6 +18,7 @@ const dbMock = vi.hoisted(() => ({
   createTask: vi.fn(),
   getOrCreateActivityEventType: vi.fn(),
   createActivityLog: vi.fn(),
+  reserveTaskForDispatch: vi.fn(),
 }));
 
 const manusMock = vi.hoisted(() => ({
@@ -156,6 +157,7 @@ describe("SofiaOrchestrator.startTask", () => {
     dbMock.createActivityLog.mockResolvedValue(undefined);
     dbMock.updateTaskExecution.mockResolvedValue(undefined);
     dbMock.updateTaskStatus.mockResolvedValue(undefined);
+    dbMock.reserveTaskForDispatch.mockResolvedValue(true);
     dbMock.getAgentsByOwnerId.mockResolvedValue([{ id: 6, hasCredential: true, status: "online", creditsUpdatedAt: new Date() }]);
     manusMock.syncAgentCredits.mockResolvedValue(100);
   });
@@ -246,6 +248,17 @@ describe("SofiaOrchestrator.startTask", () => {
     expect(result).toMatchObject({ started: false, executionStarted: false });
     expect(dbMock.updateTaskExecution).not.toHaveBeenCalled();
     expect(manusMock.createManusTask).not.toHaveBeenCalled();
+  });
+
+  it("does not dispatch twice when a concurrent caller loses the dispatch reservation", async () => {
+    dbMock.getTaskById.mockResolvedValueOnce(stagedTask).mockResolvedValueOnce(claimedTask);
+    dbMock.claimStagedTaskWithAvailableAgent.mockResolvedValueOnce(claimedTask);
+    dbMock.reserveTaskForDispatch.mockResolvedValueOnce(false);
+
+    const result = await SofiaOrchestrator.startTask(30);
+
+    expect(manusMock.createManusTask).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ started: false, executionStarted: false, externalTaskIds: [] });
   });
 
   it("keeps the mission staged and records an explicit wait when no agent is eligible", async () => {
