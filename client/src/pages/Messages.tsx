@@ -63,6 +63,7 @@ export default function Messages() {
     enabled: isAuthenticated && selectedTaskId === null,
     refetchInterval: 5000,
   });
+  const utils = trpc.useUtils();
   const taskMessagesQuery = trpc.messages.getByTask.useQuery(
     { taskId: selectedTaskId ?? 0 },
     { enabled: isAuthenticated && selectedTaskId !== null, refetchInterval: 5000 },
@@ -89,8 +90,6 @@ export default function Messages() {
     },
     onError: (error) => toast.error(error.message),
   });
-  const utils = trpc.useUtils();
-
   const tasks = tasksQuery.data || [];
   const messages = selectedTaskId === null
     ? generalMessagesQuery.data || []
