@@ -29,7 +29,7 @@ const interactionTypes: { value: InteractionType; label: string }[] = [
   { value: "order", label: "Ordem" },
   { value: "reply", label: "Resposta" },
   { value: "report", label: "Relatório" },
-  { value: "create-task", label: "Criar tarefa" },
+  { value: "create-task", label: "Criar missão" },
 ];
 
 const taskStatuses: { value: TaskStatus; label: string }[] = [
@@ -325,7 +325,14 @@ export default function Messages() {
               <span className="text-xs font-medium text-muted-foreground">Tipo de interação</span>
               <select
                 value={interactionType}
-                onChange={(event) => setInteractionType(event.target.value as InteractionType)}
+                onChange={(event) => {
+                  const nextType = event.target.value as InteractionType;
+                  setInteractionType(nextType);
+                  if (nextType === "create-task") {
+                    setSelectedTaskId(null);
+                    setSelectedParentMessageId(null);
+                  }
+                }}
                 className="h-10 w-full rounded-md border bg-background px-3 text-sm outline-none focus:border-primary"
               >
                 {interactionTypes.map((type) => (
