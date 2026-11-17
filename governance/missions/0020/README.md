@@ -30,3 +30,4 @@ Manter visão global do produto e planejar a sequência de forma coerente; imple
 ## Continuidade após OR-20261115-0050
 
 6. [OR-20261115-0050](../../operational_reports/OR-20261115-0050.md) — decisão do operador para integração direta via PR #15 em `main`, publicação incremental no Render Free e documentação operacional persistente.
+7. [OR-20261117-0001](../../operational_reports/OR-20261117-0001.md) — diagnóstico do erro observado no Messenger; catch identificado no código, causa de produção pendente de logs Render autorizados.

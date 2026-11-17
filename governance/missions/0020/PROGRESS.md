@@ -85,3 +85,15 @@ Ainda não há validação visual/autenticada nem confirmação funcional do Mes
 - O TR identifica a motivação original como não localizada, separa fatos de interpretação e preserva a filha 24 como FAIL sem resultado estratégico comprovado.
 - O pai continua PAUSED; filhas 22/23 DONE e 24 FAIL. Nenhum status, Agent Task ID, execução Manus ou crédito foi alterado.
 - Próxima etapa: revisão/correção e validação explícita do TR pelo responsável. Não criar Blueprint nem liberar dispatch antes disso.
+
+
+## Incidente Messenger — 2026-11-17 — OR-20261117-0001
+
+- **Relato do operador:** mensagem às 02:26:43 (-03:00) recebeu o fallback “A mensagem foi registrada, mas a Sofia não conseguiu processá-la agora. Verifique a configuração do serviço de IA e tente novamente.”
+- **Código em `main` (`0e1989d`):** `messages.create` persiste a entrada, chama `invokeLLM` e captura várias exceções em um `catch` abrangente que persiste exatamente o fallback com `responseStatus=failed`.
+- **Configuração/diagnóstico:** `server/_core/env.ts` lê `BUILT_IN_FORGE_API_KEY`; a exceção do `llm.ts` por chave vazia cita incorretamente `OPENAI_API_KEY`. A ausência da chave não foi comprovada.
+- **Modelo:** `server/_core/llm.ts` fixa `gemini-2.5-flash`; não há seleção dinâmica nem fallback. A documentação oficial lista aposentadoria em 20/10/2026 para Gemini Enterprise Agent Platform, mas a ficha distingue essa plataforma da Gemini API, cujo cronograma oficial anuncia redirecionamento de chamadas desse modelo para `gemini-3.5-flash-lite` somente a partir de 01/12/2026. O endpoint do SCP é Manus Forge; nenhuma evidência pública consultada confirma que a Forge use o mesmo cronograma/alias. Detalhes e fontes em OR-20261117-0001.
+- **Limite de runtime:** conector Render desabilitado; SHA implantado e logs sanitizados de 05:26–05:27 UTC não foram verificados. A aposentadoria do modelo é uma hipótese relevante, ainda não causa-raiz confirmada.
+- **Teste local:** `pnpm test -- server/messages.test.ts` não iniciou porque `node_modules`/Vitest não estão instalados; nenhum pacote foi instalado.
+- **Limites:** sem mudança de código, configuração, banco ou produção; sem mensagem extra, chamada LLM/Manus, deploy ou restart.
+- **Próximo passo:** com acesso autorizado ao Render, verificar SHA/logs e status/resposta do provider naquele minuto; confirmar o contrato atual de aliases da Forge; então escolher correção mínima e adicionar teste de regressão, sem deploy antes de aprovação específica.

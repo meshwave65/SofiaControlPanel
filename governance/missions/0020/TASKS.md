@@ -9,6 +9,7 @@
 | 20.2 | Integração e execução externa | DONE / histórico parcial | MISSION_0016 e ORs históricos | Integração Manus existente; validação real ponta a ponta depende de autorização e ambiente de teste. |
 | 20.3 | Unidade atribuída a Mateus | PRESERVADA — NÃO ALTERAR | Registro operacional próprio | Fora do escopo desta sequência; não modificar nem assumir. |
 | 20.4 | Auditoria e restauração funcional do SCP | PROGRESS | OR-20261115-0043 a OR-20261115-0046, PR #15 | Evoluir o SCP como gestor soberano de missões; Messenger, ciclo de vida, coordenação pai/filhas, TR e autonomia em incrementos pequenos e verificáveis. |
+| 20.4.1 | Diagnóstico do erro de resposta no Messenger | BLOCKED — evidência de produção pendente | OR-20261117-0001 | Correlacionar SHA implantado e logs sanitizados do Render em 2026-11-17 05:26–05:27 UTC; verificar hipótese `gemini-2.5-flash`/roteamento Forge antes de alterar modelo, configuração ou código. |
 
 ## Regras de execução de 20.4
 
