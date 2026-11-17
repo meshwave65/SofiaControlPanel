@@ -3,7 +3,7 @@
 **Estado:** PROGRESS  
 **Prioridade:** CRÍTICA — nível máximo  
 **Criada em:** 2026-11-16  
-**Última atualização:** 2026-11-16  
+**Última atualização:** 2026-11-17  
 **Índice operacional:** [OPERATIONAL_INDEX.md](./OPERATIONAL_INDEX.md)
 
 ## Aprovação e governança
@@ -60,6 +60,16 @@
 - Criada matriz inicial comparando produção de blocos, execução, integridade, ledger, UMS, MWN, MW-Ex, carteiras, PoUW, dados off-chain, RPC/indexação, governança e replicação.
 - Conclusão preliminar: Ethereum pode substituir a responsabilidade de consenso/produção de blocos se for escolhida como rede canônica; não substitui automaticamente regras econômicas, MW-Ex, PoUW, FIAT, identidade ou armazenamento privado.
 - Estado: IN PROGRESS.
+
+## Integração e teste de skills — 2026-11-17
+
+- Criadas e registradas no SCP as skills `mission-skill-composer` e `ethereum-meshwave-convergence-audit`; ambas permanecem DRAFT.
+- A skill específica foi composta a partir de `project-blueprint-reconciliation`, `operational-task-lifecycle` e `skill-governance-oracle`, além do compositor.
+- Teste aplicado ao WP26.4: confirmou que ERC-20 padrão inclui `transfer`, `approve` e `transferFrom`; EVM é execução, separada do cliente de consenso; controles restritivos de UMS exigiriam desenho explícito para todos os caminhos de transferência, allowances, mint/burn e papéis administrativos.
+- MW-Ex, matching, FIAT, política de ativos e reconciliação de ledger continuam responsabilidades MeshWave; a tokenização MWN não as substitui automaticamente.
+- Relatório: [OR-20261117-0001](./operational_reports/OR-20261117-0001.md). WP26.4 permanece IN PROGRESS; WP26.5 permanece BLOCKED.
+- Integração atual é documental/registry-based; carregamento automático de skills no prompt de dispatch não foi identificado no caminho de execução inspecionado e requer implementação separada.
+- Find Skill mencionado pelo responsável ainda não foi localizado nos repositórios acessíveis; nenhuma cópia externa foi importada.
 
 ## Limites respeitados
 
