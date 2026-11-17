@@ -1016,6 +1016,14 @@ export async function getMessagesByOwner(ownerId: number, taskId: number | null,
     .limit(limit);
 }
 
+export async function getMessagesByParentIdForOwner(parentMessageId: number, ownerId: number) {
+  const database = await getDb();
+  if (!database) return [];
+  return database.select().from(messages)
+    .where(and(eq(messages.parentMessageId, parentMessageId), eq(messages.senderId, ownerId)))
+    .orderBy(asc(messages.createdAt), asc(messages.id));
+}
+
 export async function getMessageByIdForOwner(id: number, ownerId: number) {
   const database = await getDb();
   if (!database) return null;
