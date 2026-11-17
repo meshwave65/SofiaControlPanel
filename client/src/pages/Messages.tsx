@@ -43,6 +43,7 @@ export default function Messages() {
   const { isAuthenticated } = useAuth();
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
   const [interactionType, setInteractionType] = useState<InteractionType>("message");
+  const [selectedParentMessageId, setSelectedParentMessageId] = useState<number | null>(null);
   const [taskStatus, setTaskStatus] = useState<TaskStatus>("open");
   const [messageContent, setMessageContent] = useState("");
   const [search, setSearch] = useState("");
@@ -55,7 +56,47 @@ export default function Messages() {
     refetchInterval: 15000,
   });
 
+  const messageTypesQuery = trpc.messages.types.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const generalMessagesQuery = trpc.messages.getGeneral.useQuery(undefined, {
+    enabled: isAuthenticated && selectedTaskId === null,
+    refetchInterval: 5000,
+  });
+  const taskMessagesQuery = trpc.messages.getByTask.useQuery(
+    { taskId: selectedTaskId ?? 0 },
+    { enabled: isAuthenticated && selectedTaskId !== null, refetchInterval: 5000 },
+  );
+
+  const createMissionMessage = trpc.messages.create.useMutation({
+    onSuccess: async (result) => {
+      await utils.tasks.list.invalidate();
+      if (selectedTaskId !== null) await taskMessagesQuery.refetch();
+      setMessageContent("");
+      setSelectedParentMessageId(null);
+      setAttachments([]);
+      toast.success(result.responseStatus === "replied" ? "Interação registrada e respondida pela SOFIA." : "Interação registrada; resposta da SOFIA pendente.");
+    },
+    onError: (error) => toast.error(error.message),
+  });
+  const createGeneralMessage = trpc.messages.createGeneral.useMutation({
+    onSuccess: async (result) => {
+      await generalMessagesQuery.refetch();
+      setMessageContent("");
+      setSelectedParentMessageId(null);
+      setAttachments([]);
+      toast.success(result.responseStatus === "replied" ? "Interação geral registrada e respondida pela SOFIA." : "Interação registrada; resposta da SOFIA pendente.");
+    },
+    onError: (error) => toast.error(error.message),
+  });
+  const utils = trpc.useUtils();
+
   const tasks = tasksQuery.data || [];
+  const messages = selectedTaskId === null
+    ? generalMessagesQuery.data || []
+    : taskMessagesQuery.data || [];
+  const selectedParentMessage = messages.find((message: any) => message.id === selectedParentMessageId);
+
   const selectedTask = tasks.find((task: any) => task.id === selectedTaskId);
   const filteredTasks = useMemo(() => {
     const term = search.trim().toLocaleLowerCase();
@@ -70,6 +111,7 @@ export default function Messages() {
     setMessageContent("");
     setAttachments([]);
     setInteractionType("message");
+    setSelectedParentMessageId(null);
     setTaskStatus("open");
     setEditorMode("create");
   };
@@ -99,7 +141,38 @@ export default function Messages() {
       toast.error("Digite o conteúdo da interação.");
       return;
     }
-    toast.info("Interface pronta. A persistência e o envio serão conectados na etapa funcional.");
+    if (interactionType === "reply" && selectedParentMessageId === null) {
+      toast.error("Selecione a mensagem original que receberá esta resposta.");
+      return;
+    }
+
+    const names: Record<InteractionType, string[]> = {
+      message: ["message", "question"],
+      order: ["order", "instruction"],
+      reply: ["reply"],
+      report: ["report"],
+      "create-task": ["createtask", "create_task", "create task"],
+    };
+    const accepted = names[interactionType];
+    const messageType = (messageTypesQuery.data || []).find((item: any) =>
+      accepted.includes(String(item.name).toLowerCase().replace(/\\s+/g, " ").trim())
+      || accepted.includes(String(item.name).toLowerCase().replace(/[\\s_-]/g, ""))
+    );
+    if (!messageType) {
+      toast.error("O tipo de interação ainda não está cadastrado. Atualize a página e tente novamente.");
+      return;
+    }
+
+    const payload = {
+      typeId: messageType.id,
+      content: messageContent.trim(),
+      ...(selectedParentMessageId !== null ? { parentMessageId: selectedParentMessageId } : {}),
+    };
+    if (selectedTaskId === null) {
+      createGeneralMessage.mutate(payload);
+    } else {
+      createMissionMessage.mutate({ ...payload, taskId: selectedTaskId });
+    }
   };
 
   if (!isAuthenticated) {
@@ -272,17 +345,34 @@ export default function Messages() {
                 </div>
               </div>
 
-              <div className="min-h-[105px] border-b bg-muted/10 px-5 py-4">
-                <div className="flex h-full items-center gap-3 text-sm text-muted-foreground">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border bg-background">
-                    <MessageSquare className="h-4 w-4" />
+              <div className="max-h-[260px] min-h-[105px] overflow-y-auto border-b bg-muted/10 px-5 py-4">
+                {selectedParentMessage ? (
+                  <div className="mb-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
+                    <div className="mb-1 flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-semibold text-primary">Mensagem selecionada para resposta</span>
+                      <button type="button" onClick={() => setSelectedParentMessageId(null)} className="text-[11px] text-muted-foreground hover:text-foreground">Desvincular</button>
+                    </div>
+                    <p className="whitespace-pre-wrap text-sm">{selectedParentMessage.content}</p>
                   </div>
-                  <p>
-                    {interactionType === "reply"
-                      ? "Selecione a interação original à qual esta resposta será vinculada."
-                      : "O conteúdo de referência será exibido aqui quando uma interação existente for selecionada."}
-                  </p>
-                </div>
+                ) : null}
+                {messages.length === 0 ? (
+                  <div className="flex h-full items-center gap-3 text-sm text-muted-foreground">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border bg-background"><MessageSquare className="h-4 w-4" /></div>
+                    <p>{generalMessagesQuery.isLoading || taskMessagesQuery.isLoading ? "Carregando interações..." : "Ainda não há interações neste contexto."}</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {messages.map((message: any) => (
+                      <div key={message.id} className={`rounded-lg border p-3 ${message.isAssistant ? "bg-muted/40" : "bg-background"}`}>
+                        <div className="mb-1 flex items-center justify-between gap-2">
+                          <span className="text-[11px] font-semibold">{message.isAssistant ? "SOFIA" : "Operador"} · #{message.id}</span>
+                          <button type="button" onClick={() => { setSelectedParentMessageId(message.id); setInteractionType("reply"); }} className="text-[11px] font-medium text-primary hover:underline">Responder</button>
+                        </div>
+                        <p className="whitespace-pre-wrap text-xs leading-5">{message.content}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex min-h-0 flex-1 flex-col p-5">
@@ -321,8 +411,8 @@ export default function Messages() {
                     {attachments.length ? `${attachments.length} arquivo(s) selecionado(s)` : "Nenhum arquivo anexado"}
                   </span>
                 </div>
-                <Button type="button" onClick={handlePrepare} disabled={!messageContent.trim()}>
-                  <Send className="mr-2 h-4 w-4" /> Preparar interação
+                <Button type="button" onClick={handlePrepare} disabled={!messageContent.trim() || createGeneralMessage.isPending || createMissionMessage.isPending}>
+                  <Send className="mr-2 h-4 w-4" /> {createGeneralMessage.isPending || createMissionMessage.isPending ? "Enviando..." : "Enviar interação"}
                 </Button>
               </div>
 
@@ -390,7 +480,7 @@ export default function Messages() {
                   Etapa de interface
                 </div>
                 <p className="text-[11px] leading-5 text-muted-foreground">
-                  Esta versão organiza a experiência visual. Envio, persistência dos blocos, respostas da SOFIA e atualização de status ainda não estão conectados.
+                  Mensagens e respostas já são persistidas por conta e contexto. Anexos, edição e atualização de status serão conectados em etapas próprias.
                 </p>
               </div>
             </aside>
