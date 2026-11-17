@@ -154,8 +154,8 @@ export default function Messages() {
     };
     const accepted = names[interactionType];
     const messageType = (messageTypesQuery.data || []).find((item: any) =>
-      accepted.includes(String(item.name).toLowerCase().replace(/\\s+/g, " ").trim())
-      || accepted.includes(String(item.name).toLowerCase().replace(/[\\s_-]/g, ""))
+      accepted.includes(String(item.name).toLowerCase().replace(/\s+/g, " ").trim())
+      || accepted.includes(String(item.name).toLowerCase().replace(/[\s_-]/g, ""))
     );
     if (!messageType) {
       toast.error("O tipo de interação ainda não está cadastrado. Atualize a página e tente novamente.");
