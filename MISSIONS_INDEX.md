@@ -6,14 +6,14 @@ Este repositório contém duas séries diferentes de registros, além de artefat
 
 | Camada | Fonte de verdade | Local no GitHub | Quantidade atual | O que representa |
 | --- | --- | --- | ---: | --- |
-| Missões operacionais do painel | Supabase `sofia.tasks` | `missions/SCP-TASK-XXXXXX.md` | 26 registros, IDs 2–27 | Tarefas/missões operacionais do SofiaControlPanel, incluindo relações pai-filho. |
-| Missões de governança | Documentação versionada | `governance/missions/<ID>/` | 26 IDs, 0001–0026 | Programas de trabalho, blueprints, gates, checkpoints e continuidade. |
+| Missões operacionais do painel | Supabase `sofia.tasks` | `missions/SCP-TASK-XXXXXX.md` | 29 registros, maior ID 31 | Tarefas/missões operacionais do SofiaControlPanel, incluindo relações pai-filho. |
+| Missões de governança | Documentação versionada | `governance/missions/<ID>/` | 27 IDs, 0001–0027 | Programas de trabalho, blueprints, gates, checkpoints e continuidade. |
 | Snapshots legados de governança | Histórico Git | raiz, `MISSION_*.md` | 47 arquivos | Cópias/status históricos mantidos por compatibilidade e rastreabilidade; não são missões novas. |
-| Artefatos de missão | Git | dentro de `governance/missions/<ID>/` | 108 arquivos | Blueprints, progresso, tarefas, checkpoints, evidências e relatórios. Não são missões adicionais. |
+| Artefatos de missão | Git | dentro de `governance/missions/<ID>/` | 114 arquivos | Blueprints, progresso, tarefas, checkpoints, evidências e relatórios. Não são missões adicionais. |
 
 ## 2. Missões operacionais do Supabase
 
-A série `SCP-TASK-*` é o espelho executável do painel. O Supabase é a fonte operacional; o GitHub registra contexto, proveniência e estado espelhado. A hierarquia é:
+A série `SCP-TASK-*` é o espelho executável do painel. O Supabase é a fonte operacional; o GitHub registra contexto, proveniência e estado espelhado. A hierarquia documentada inclui:
 
 - Raízes: `2`, `3`, `7`, `12`, `16`, `17`, `18`, `25` e `27`.
 - Filhas de `3`: `4`, `5` e `6`.
@@ -24,11 +24,11 @@ A série `SCP-TASK-*` é o espelho executável do painel. O Supabase é a fonte 
 - Filhas de `17`: `22`, `23` e `24`.
 - Filha de `25`: `26`.
 
-Os registros 2–27 totalizam 26 tarefas operacionais. Alguns registros históricos ainda possuem sincronização pendente ou caminho GitHub ausente; não declarar sincronização integral sem reconciliação. Consulte [`missions/README.md`](missions/README.md) para o contrato operacional.
+Os dados atuais do banco registram 29 tarefas operacionais e maior ID 31. Alguns registros ainda possuem sincronização pendente ou caminho GitHub ausente; não declarar sincronização integral sem reconciliação. Consulte [`missions/README.md`](missions/README.md) para o contrato operacional.
 
 ## 3. Missões de governança
 
-A numeração `MISSION_0001`–`MISSION_0026` é uma série documental distinta da numeração `SCP-TASK-*`. A localização canônica atual é:
+A numeração `MISSION_0001`–`MISSION_0027` é uma série documental distinta da numeração `SCP-TASK-*`. A localização canônica atual é:
 
 | ID | Estado/documento canônico | Local principal |
 | ---: | --- | --- |
@@ -58,6 +58,7 @@ A numeração `MISSION_0001`–`MISSION_0026` é uma série documental distinta 
 | 0024 | DONE — publicada em produção | `governance/missions/0024/README.md`, `BLUEPRINT.md`, `TASKS.md`, `PROGRESS.md` |
 | 0025 | STAGED — aguardando aprovação humana do TR | `governance/missions/0025/README.md`, `TR-v0.1.0-DRAFT.md`, `TASKS.md`, `PROGRESS.md` |
 | 0026 | PROGRESS — TR VALIDATED, Blueprint READY, tarefa operacional SCP-TASK-000027 em prioridade CRÍTICA | `governance/missions/0026/README.md`, `TR-v0.1.0-APPROVED.md`, `BLUEPRINT.md`, `TASKS.md`, `PROGRESS.md` |
+| 0027 | STAGED — TR DRAFT; aguardando validação humana | `governance/missions/0027/README.md`, `TR-v0.1.0-DRAFT.md`, `BLUEPRINT.md`, `TASKS.md`, `PROGRESS.md` |
 
 Os arquivos da raiz continuam versionados por compatibilidade histórica. Eles não devem ser apagados nem tratados como novas missões. Quando houver `governance/missions/<ID>/README.md` ou `BLUEPRINT.md`, esses documentos governam a continuidade da missão; os arquivos da raiz são snapshots/legado.
 
