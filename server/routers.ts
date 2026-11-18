@@ -126,29 +126,39 @@ async function createMissionFromGeneralMessage(input: {
     throw new Error("A missão e seus documentos iniciais não puderam ser persistidos. Nenhuma missão parcial foi criada.");
   }
 
-  const mirror = await mirrorTaskToGitHub({
-    ...created,
-    createdBy: input.operator.id,
-    creatorType: "user",
-    creatorName: input.operator.name ?? null,
-    creatorEmail: input.operator.email ?? null,
-  });
-  await db.updateTaskGitHubSync(created.id, {
-    missionKey: mirror.missionKey,
-    githubPath: mirror.path,
-    githubSha: mirror.sha,
-    githubSyncStatus: mirror.status,
-    githubSyncError: mirror.error ?? null,
-  });
-
-  return {
-    ...created,
-    missionKey: mirror.missionKey,
-    githubPath: mirror.path,
-    githubSyncStatus: mirror.status,
-    trState,
-    trGenerationError,
-  };
+  try {
+    const mirror = await mirrorTaskToGitHub({
+      ...created,
+      createdBy: input.operator.id,
+      creatorType: "user",
+      creatorName: input.operator.name ?? null,
+      creatorEmail: input.operator.email ?? null,
+    });
+    await db.updateTaskGitHubSync(created.id, {
+      missionKey: mirror.missionKey,
+      githubPath: mirror.path,
+      githubSha: mirror.sha,
+      githubSyncStatus: mirror.status,
+      githubSyncError: mirror.error ?? null,
+    });
+    return {
+      ...created,
+      missionKey: mirror.missionKey,
+      githubPath: mirror.path,
+      githubSyncStatus: mirror.status,
+      trState,
+      trGenerationError,
+    };
+  } catch (error) {
+    console.error("[Messages] Mission created but GitHub mirror failed:", error);
+    return {
+      ...created,
+      trState,
+      trGenerationError,
+      githubSyncStatus: "pending",
+      githubSyncError: error instanceof Error ? error.message : "Falha na sincronização com GitHub.",
+    };
+  }
 }
 
 async function generateLegacyMissionTR(input: {
