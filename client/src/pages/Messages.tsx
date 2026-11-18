@@ -14,7 +14,6 @@ import {
   Inbox,
   MessageSquare,
   Paperclip,
-  Plus,
   Search,
   Send,
   SquarePen,
@@ -120,11 +119,6 @@ export default function Messages() {
     setEditorMode("create");
   };
 
-  const startNewInteraction = () => {
-    resetComposer();
-    setEditorMode("create");
-  };
-
   const handleCancel = () => {
     resetComposer();
     toast.info("Edição cancelada.");
@@ -208,9 +202,6 @@ export default function Messages() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button size="sm" onClick={startNewInteraction}>
-            <Plus className="mr-1.5 h-4 w-4" /> Criar
-          </Button>
           <Button size="sm" variant="outline" onClick={() => setEditorMode("edit")}>
             <SquarePen className="mr-1.5 h-4 w-4" /> Editar
           </Button>
@@ -427,7 +418,9 @@ export default function Messages() {
                   </span>
                 </div>
                 <Button type="button" onClick={handlePrepare} disabled={!messageContent.trim() || createGeneralMessage.isPending || createMissionMessage.isPending}>
-                  <Send className="mr-2 h-4 w-4" /> {createGeneralMessage.isPending || createMissionMessage.isPending ? "Enviando..." : "Enviar interação"}
+                  <Send className="mr-2 h-4 w-4" /> {createGeneralMessage.isPending || createMissionMessage.isPending
+                    ? (interactionType === "create-task" ? "Criando missão..." : "Enviando...")
+                    : (interactionType === "create-task" ? "Criar missão" : "Criar mensagem")}
                 </Button>
               </div>
 
