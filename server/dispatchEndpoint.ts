@@ -12,6 +12,16 @@ function hasValidDispatchSecret(provided: string, expected: string) {
 }
 
 /**
+ * A missing or JSON null idempotency key means a regular mission dispatch.
+ * ACTION_PLAN unit dispatch remains protected by the persisted-key check in
+ * SofiaOrchestrator.startTask().
+ */
+export function isValidOptionalIdempotencyKey(value: unknown): value is string | null | undefined {
+  return value == null
+    || (typeof value === "string" && value.length >= 16 && value.length <= 128);
+}
+
+/**
  * POST /api/internal/task-dispatch
  * Called asynchronously by the Supabase trigger when an assigned task enters STAGED.
  * The orchestrator atomically claims the task before contacting the execution provider.
@@ -30,14 +40,15 @@ router.post("/task-dispatch", async (req, res) => {
   }
 
   const taskId = req.body?.taskId;
-  const idempotencyKey = req.body?.idempotencyKey;
+  const rawIdempotencyKey = req.body?.idempotencyKey;
   if (!Number.isSafeInteger(taskId) || taskId <= 0) {
     return res.status(400).json({ success: false, error: "invalid_task_id" });
   }
-  if (idempotencyKey !== undefined
-    && (typeof idempotencyKey !== "string" || idempotencyKey.length < 16 || idempotencyKey.length > 128)) {
+  if (!isValidOptionalIdempotencyKey(rawIdempotencyKey)) {
     return res.status(400).json({ success: false, error: "invalid_idempotency_key" });
   }
+
+  const idempotencyKey = rawIdempotencyKey ?? undefined;
 
   try {
     const result = await SofiaOrchestrator.startTask(taskId, idempotencyKey);
