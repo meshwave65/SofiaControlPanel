@@ -148,6 +148,7 @@ async function createMissionFromGeneralMessage(input: {
       githubSyncStatus: mirror.status,
       trState,
       trGenerationError,
+      priorityName: defaultPriority.name,
     };
   } catch (error) {
     console.error("[Messages] Mission created but GitHub mirror failed:", error);
@@ -157,6 +158,7 @@ async function createMissionFromGeneralMessage(input: {
       trGenerationError,
       githubSyncStatus: "pending",
       githubSyncError: error instanceof Error ? error.message : "Falha na sincronização com GitHub.",
+      priorityName: defaultPriority.name,
     };
   }
 }
@@ -1751,7 +1753,7 @@ export const appRouter = router({
               "ID: #" + createdMission.id,
               "Chave: " + (createdMission.missionKey ?? "pendente"),
               "Estado inicial: PAUSED — aguardando validação do TR.",
-              "Prioridade inicial: Baixa.",
+              "Prioridade inicial: " + createdMission.priorityName + ".",
               createdMission.trGenerationError
                 ? "A geração do TR ficou pendente: " + createdMission.trGenerationError
                 : "O TR inicial foi gerado e aguarda sua validação.",
