@@ -202,8 +202,8 @@ export default function Messages() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" onClick={() => setEditorMode("edit")}>
-            <SquarePen className="mr-1.5 h-4 w-4" /> Editar
+          <Button size="sm" variant="outline" onClick={resetComposer}>
+            <FilePlus2 className="mr-1.5 h-4 w-4" /> Nova interação
           </Button>
           <Button size="sm" variant="ghost" onClick={handleCancel}>
             <X className="mr-1.5 h-4 w-4" /> Cancelar
@@ -417,10 +417,10 @@ export default function Messages() {
                     {attachments.length ? `${attachments.length} arquivo(s) selecionado(s)` : "Nenhum arquivo anexado"}
                   </span>
                 </div>
-                <Button type="button" onClick={handlePrepare} disabled={!messageContent.trim() || createGeneralMessage.isPending || createMissionMessage.isPending}>
+                <Button type="button" onClick={handlePrepare} disabled={createGeneralMessage.isPending || createMissionMessage.isPending}>
                   <Send className="mr-2 h-4 w-4" /> {createGeneralMessage.isPending || createMissionMessage.isPending
                     ? (interactionType === "create-task" ? "Criando missão..." : "Enviando...")
-                    : (interactionType === "create-task" ? "Criar missão" : "Criar mensagem")}
+                    : "Criar mensagem"}
                 </Button>
               </div>
 
