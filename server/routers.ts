@@ -44,12 +44,12 @@ async function createMissionFromGeneralMessage(input: {
   content: string;
   operator: { id: number; name?: string | null; email?: string | null };
 }) {
-  const lines = input.content.split(/\\r?\\n/).map((line) => line.trim()).filter(Boolean);
+  const lines = input.content.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
   const firstLine = lines[0] ?? input.content.trim();
-  const strippedFirstLine = firstLine.replace(/^(?:criar\\s+miss[aã]o|t[ií]tulo|miss[aã]o)\\s*[:\\-]\\s*/i, "").trim();
-  const titleCandidate = strippedFirstLine && !/^(?:criar\\s+miss[aã]o|nova\\s+miss[aã]o)$/i.test(strippedFirstLine)
+  const strippedFirstLine = firstLine.replace(/^(?:criar\s+miss[aã]o|t[ií]tulo|miss[aã]o)\s*[:\-]\s*/i, "").trim();
+  const titleCandidate = strippedFirstLine && !/^(?:criar\s+miss[aã]o|nova\s+miss[aã]o)$/i.test(strippedFirstLine)
     ? strippedFirstLine
-    : (lines[1] ?? input.content.trim().split(/[.!?]\\s/)[0]);
+    : (lines[1] ?? input.content.trim().split(/[.!?]\s/)[0]);
   const title = (titleCandidate || "Nova missão").slice(0, 255);
   const description = input.content.trim();
 
@@ -83,7 +83,7 @@ async function createMissionFromGeneralMessage(input: {
       "- Descrição declarada: " + description, "",
       "## Limite de conhecimento",
       "A interpretação da SOFIA não foi concluída. Nenhuma motivação, decisão, escopo adicional ou resultado foi presumido."
-    ].join("\\n");
+    ].join("\n");
   }
 
   const originalContent = [
@@ -91,7 +91,7 @@ async function createMissionFromGeneralMessage(input: {
     "**Origem:** operador humano (usuário #" + input.operator.id + ")",
     "**Registrada em:** " + new Date().toISOString(), "",
     "## Descrição original", description
-  ].join("\\n");
+  ].join("\n");
 
   let created: Awaited<ReturnType<typeof db.createMissionWithInitialDocuments>>;
   try {
