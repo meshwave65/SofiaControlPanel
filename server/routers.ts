@@ -1728,7 +1728,7 @@ export const appRouter = router({
         let assistantContent: string;
         let responseStatus: "replied" | "failed" = "replied";
         let createdMission: Awaited<ReturnType<typeof createMissionFromGeneralMessage>> | null = null;
-        const normalizedTypeName = messageType.name.toLowerCase().replace(/[\\s_-]/g, "");
+        const normalizedTypeName = messageType.name.toLowerCase().replace(/[\s_-]/g, "");
 
         if (normalizedTypeName === "createtask") {
           try {
@@ -1746,7 +1746,7 @@ export const appRouter = router({
                 ? "A geração do TR ficou pendente: " + createdMission.trGenerationError
                 : "O TR inicial foi gerado e aguarda sua validação.",
               "A solicitação original permanece preservada nesta conversa geral.",
-            ].join("\\n");
+            ].join("\n");
           } catch (error) {
             console.error("[Messages] Mission creation from general conversation failed:", error);
             assistantContent = "A solicitação foi registrada na conversa geral, mas a missão não foi criada. " +
