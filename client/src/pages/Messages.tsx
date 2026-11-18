@@ -186,7 +186,7 @@ export default function Messages() {
   }
 
   return (
-    <div className="mx-auto flex h-full min-h-[680px] w-full max-w-[1600px] flex-col gap-4 pb-4">
+    <div className="mx-auto flex h-auto min-h-0 w-full max-w-[1600px] flex-col gap-4 pb-4 md:h-full md:min-h-[680px]">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b pb-4">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -211,7 +211,7 @@ export default function Messages() {
         </div>
       </header>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 xl:grid-cols-[270px_minmax(0,1fr)]">
+      <div className="grid min-h-0 flex-none grid-cols-1 gap-4 md:flex-1 xl:grid-cols-[270px_minmax(0,1fr)]">
         <aside className="flex min-h-[220px] flex-col overflow-hidden rounded-xl border bg-card xl:min-h-0">
           <div className="border-b p-3">
             <div className="mb-3 flex items-center justify-between">
@@ -288,7 +288,7 @@ export default function Messages() {
           </div>
         </aside>
 
-        <section className="flex min-h-[620px] min-w-0 flex-col overflow-hidden rounded-xl border bg-card xl:min-h-0">
+        <section className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-xl border bg-card md:min-h-[620px] xl:min-h-0">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-4">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
@@ -342,7 +342,7 @@ export default function Messages() {
             </label>
           </div>
 
-          <div className="grid min-h-0 flex-1 grid-cols-1 gap-0 lg:grid-cols-[minmax(0,1fr)_250px]">
+          <div className="grid min-h-0 flex-none grid-cols-1 gap-0 md:flex-1 lg:grid-cols-[minmax(0,1fr)_250px]">
             <div className="flex min-h-[380px] min-w-0 flex-col border-b lg:border-b-0 lg:border-r">
               <div className="border-b px-5 py-3">
                 <div className="flex items-center justify-between gap-2">
