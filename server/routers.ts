@@ -40,6 +40,117 @@ async function generateInitialMissionTR(title: string, description?: string | nu
 }
 
 
+async function createMissionFromGeneralMessage(input: {
+  content: string;
+  operator: { id: number; name?: string | null; email?: string | null };
+}) {
+  const lines = input.content.split(/\\r?\\n/).map((line) => line.trim()).filter(Boolean);
+  const firstLine = lines[0] ?? input.content.trim();
+  const strippedFirstLine = firstLine.replace(/^(?:criar\\s+miss[aã]o|t[ií]tulo|miss[aã]o)\\s*[:\\-]\\s*/i, "").trim();
+  const titleCandidate = strippedFirstLine && !/^(?:criar\\s+miss[aã]o|nova\\s+miss[aã]o)$/i.test(strippedFirstLine)
+    ? strippedFirstLine
+    : (lines[1] ?? input.content.trim().split(/[.!?]\\s/)[0]);
+  const title = (titleCandidate || "Nova missão").slice(0, 255);
+  const description = input.content.trim();
+
+  const documentTypes = await db.getMissionDocumentTypes();
+  const activeTypeKeys = new Set(documentTypes.map((documentType) => documentType.typeKey));
+  const missingRequiredTypes = ["ORIGINAL_REQUEST", "TR", "BLUEPRINT"].filter((typeKey) => !activeTypeKeys.has(typeKey));
+  if (missingRequiredTypes.length > 0) {
+    throw new Error("Tipos documentais obrigatórios inativos ou ausentes: " + missingRequiredTypes.join(", "));
+  }
+
+  const pausedStatusId = await db.getTaskStatusIdByName("PAUSED");
+  const lookups = await db.getLookups();
+  const defaultPriority = lookups.priorities.find((priority) => priority.name.toLowerCase() === "baixa")
+    ?? [...lookups.priorities].sort((a, b) => a.level - b.level)[0];
+  if (!defaultPriority) throw new Error("Nenhuma prioridade está configurada para a nova missão.");
+
+  let trGenerationError: string | null = null;
+  let trContent: string;
+  let trState = "AWAITING_HUMAN_VALIDATION";
+  try {
+    trContent = await generateInitialMissionTR(title, description);
+  } catch (error) {
+    trGenerationError = error instanceof Error ? error.message : "Falha ao gerar o TR inicial.";
+    trState = "DRAFT";
+    trContent = [
+      "# TR inicial — " + title, "",
+      "**Estado:** DRAFT — geração cognitiva pendente; validação indisponível.",
+      "**Origem:** solicitação humana registrada no documento Solicitação original.", "",
+      "## Informações disponíveis",
+      "- Título declarado: " + title,
+      "- Descrição declarada: " + description, "",
+      "## Limite de conhecimento",
+      "A interpretação da SOFIA não foi concluída. Nenhuma motivação, decisão, escopo adicional ou resultado foi presumido."
+    ].join("\\n");
+  }
+
+  const originalContent = [
+    "# Solicitação original — " + title, "",
+    "**Origem:** operador humano (usuário #" + input.operator.id + ")",
+    "**Registrada em:** " + new Date().toISOString(), "",
+    "## Descrição original", description
+  ].join("\\n");
+
+  let created: Awaited<ReturnType<typeof db.createMissionWithInitialDocuments>>;
+  try {
+    created = await db.createMissionWithInitialDocuments({
+      task: {
+        createdBy: input.operator.id,
+        title,
+        description,
+        statusId: pausedStatusId,
+        priorityId: defaultPriority.id,
+        manusStatus: "awaiting_tr_validation",
+      },
+      originalRequest: {
+        content: originalContent,
+        state: "PUBLISHED",
+        authorType: "HUMAN",
+        authorUserId: input.operator.id,
+        provenance: { origin: "HUMAN", source: "messages.createGeneral", originalMessageType: "CreateTask" },
+        changeSummary: "Solicitação original preservada a partir da conversa geral",
+      },
+      tr: {
+        content: trContent,
+        state: trState,
+        authorType: "SOFIA",
+        provenance: { origin: "HUMAN", source: "messages.createGeneral", originalMessageType: "CreateTask" },
+        changeSummary: "Primeira compreensão da missão pela SOFIA; aguardando validação humana",
+        publishedAt: trState === "AWAITING_HUMAN_VALIDATION" ? new Date() : null,
+      },
+    });
+  } catch (error) {
+    console.error("[Messages] Atomic mission/document creation failed:", error);
+    throw new Error("A missão e seus documentos iniciais não puderam ser persistidos. Nenhuma missão parcial foi criada.");
+  }
+
+  const mirror = await mirrorTaskToGitHub({
+    ...created,
+    createdBy: input.operator.id,
+    creatorType: "user",
+    creatorName: input.operator.name ?? null,
+    creatorEmail: input.operator.email ?? null,
+  });
+  await db.updateTaskGitHubSync(created.id, {
+    missionKey: mirror.missionKey,
+    githubPath: mirror.path,
+    githubSha: mirror.sha,
+    githubSyncStatus: mirror.status,
+    githubSyncError: mirror.error ?? null,
+  });
+
+  return {
+    ...created,
+    missionKey: mirror.missionKey,
+    githubPath: mirror.path,
+    githubSyncStatus: mirror.status,
+    trState,
+    trGenerationError,
+  };
+}
+
 async function generateLegacyMissionTR(input: {
   title: string;
   description: string | null;
@@ -1614,11 +1725,37 @@ export const appRouter = router({
           typeId: input.typeId,
           content,
         });
-        const previousMessages = await db.getMessagesByOwner(ctx.user.id, null, 30);
         let assistantContent: string;
         let responseStatus: "replied" | "failed" = "replied";
+        let createdMission: Awaited<ReturnType<typeof createMissionFromGeneralMessage>> | null = null;
+        const normalizedTypeName = messageType.name.toLowerCase().replace(/[\\s_-]/g, "");
 
-        try {
+        if (normalizedTypeName === "createtask") {
+          try {
+            createdMission = await createMissionFromGeneralMessage({
+              content,
+              operator: { id: ctx.user.id, name: ctx.user.name, email: ctx.user.email },
+            });
+            assistantContent = [
+              "Missão criada e registrada com sucesso.",
+              "ID: #" + createdMission.id,
+              "Chave: " + (createdMission.missionKey ?? "pendente"),
+              "Estado inicial: PAUSED — aguardando validação do TR.",
+              "Prioridade inicial: Baixa.",
+              createdMission.trGenerationError
+                ? "A geração do TR ficou pendente: " + createdMission.trGenerationError
+                : "O TR inicial foi gerado e aguarda sua validação.",
+              "A solicitação original permanece preservada nesta conversa geral.",
+            ].join("\\n");
+          } catch (error) {
+            console.error("[Messages] Mission creation from general conversation failed:", error);
+            assistantContent = "A solicitação foi registrada na conversa geral, mas a missão não foi criada. " +
+              (error instanceof Error ? error.message : "Ocorreu um erro inesperado.");
+            responseStatus = "failed";
+          }
+        } else {
+          const previousMessages = await db.getMessagesByOwner(ctx.user.id, null, 30);
+          try {
           const response = await invokeLLM({
             messages: buildSofiaGeneralConversation(previousMessages),
             tools: SOFIA_GENERAL_MESSAGE_TOOLS,
@@ -1677,6 +1814,7 @@ export const appRouter = router({
           console.error("[Messages] General Sofia response failed:", error);
           assistantContent = "A interação foi registrada, mas a Sofia não conseguiu responder agora. Tente novamente mais tarde.";
           responseStatus = "failed";
+          }
         }
 
         const allTypes = await db.getAllMessageTypes();
@@ -1690,7 +1828,7 @@ export const appRouter = router({
           isAssistant: true,
         });
 
-        return { message, reply, responseStatus };
+        return { message, reply, responseStatus, createdMission };
       }),
 
     create: protectedProcedure
