@@ -145,6 +145,10 @@ export default function Messages() {
       toast.error("Digite o conteúdo da interação.");
       return;
     }
+    if (interactionType === "create-task" && selectedTaskId !== null) {
+      toast.error("Solicitações de criação de missão devem ser enviadas pela Conversa geral.");
+      return;
+    }
     if (interactionType === "reply" && selectedParentMessageId === null) {
       toast.error("Selecione a mensagem original que receberá esta resposta.");
       return;
