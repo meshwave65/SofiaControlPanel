@@ -186,7 +186,7 @@ export default function Messages() {
   }
 
   return (
-    <div className="mx-auto flex h-auto min-h-0 w-full max-w-[1600px] flex-col gap-4 pb-4 md:h-full md:min-h-[680px]">
+    <div className="mx-auto flex h-full min-h-0 w-full max-w-[1600px] flex-col gap-4 overflow-hidden pb-4">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b pb-4">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -211,7 +211,7 @@ export default function Messages() {
         </div>
       </header>
 
-      <div className="grid min-h-0 flex-none grid-cols-1 gap-4 md:flex-1 xl:grid-cols-[270px_minmax(0,1fr)]">
+      <div className="grid min-h-0 min-w-0 flex-1 grid-cols-1 gap-4 overflow-hidden xl:grid-cols-[270px_minmax(0,1fr)]">
         <aside className="flex min-h-[220px] flex-col overflow-hidden rounded-xl border bg-card xl:min-h-0">
           <div className="border-b p-3">
             <div className="mb-3 flex items-center justify-between">
@@ -288,7 +288,7 @@ export default function Messages() {
           </div>
         </aside>
 
-        <section className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-xl border bg-card md:min-h-[620px] xl:min-h-0">
+        <section className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-xl border bg-card">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-4">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
@@ -342,8 +342,8 @@ export default function Messages() {
             </label>
           </div>
 
-          <div className="grid min-h-0 flex-none grid-cols-1 gap-0 md:flex-1 lg:grid-cols-[minmax(0,1fr)_250px]">
-            <div className="flex min-h-[380px] min-w-0 flex-col border-b lg:border-b-0 lg:border-r">
+          <div className="grid min-h-0 min-w-0 flex-1 grid-cols-1 gap-0 overflow-hidden lg:grid-cols-[minmax(0,1fr)_250px]">
+            <div className="flex min-h-0 min-w-0 flex-col overflow-hidden border-b lg:border-b-0 lg:border-r">
               <div className="border-b px-5 py-3">
                 <div className="flex items-center justify-between gap-2">
                   <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Mensagem original / contexto</h3>
@@ -351,7 +351,7 @@ export default function Messages() {
                 </div>
               </div>
 
-              <div className="max-h-[260px] min-h-[105px] overflow-y-auto border-b bg-muted/10 px-5 py-4">
+              <div className="min-h-0 flex-1 overflow-y-auto border-b bg-muted/10 px-5 py-4">
                 {selectedParentMessage ? (
                   <div className="mb-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
                     <div className="mb-1 flex items-center justify-between gap-2">
@@ -381,7 +381,7 @@ export default function Messages() {
                 )}
               </div>
 
-              <div className="flex min-h-0 flex-1 flex-col p-5">
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-5">
                 <div className="mb-3 flex items-center justify-between">
                   <div>
                     <h3 className="text-sm font-semibold">Nova interação</h3>
@@ -393,7 +393,7 @@ export default function Messages() {
                   value={messageContent}
                   onChange={(event) => setMessageContent(event.target.value)}
                   placeholder="Digite sua mensagem, pergunta, orientação ou informação..."
-                  className="min-h-[180px] flex-1 resize-y bg-background text-sm leading-6"
+                  className="min-h-[120px] flex-1 resize-none overflow-y-auto bg-background text-sm leading-6"
                 />
                 <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
                   <span>Uma interação = pergunta / informação + resposta</span>
