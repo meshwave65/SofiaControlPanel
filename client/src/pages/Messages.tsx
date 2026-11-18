@@ -83,11 +83,15 @@ export default function Messages() {
   });
   const createGeneralMessage = trpc.messages.createGeneral.useMutation({
     onSuccess: async (result) => {
-      await generalMessagesQuery.refetch();
+      await Promise.all([generalMessagesQuery.refetch(), utils.tasks.list.invalidate()]);
       setMessageContent("");
       setSelectedParentMessageId(null);
       setAttachments([]);
-      toast.success(result.responseStatus === "replied" ? "Interação geral registrada e respondida pela SOFIA." : "Interação registrada; resposta da SOFIA pendente.");
+      if (result.createdMission) {
+        toast.success(`Missão #${result.createdMission.id} criada em PAUSED. A solicitação original permanece na conversa geral.`);
+      } else {
+        toast.success(result.responseStatus === "replied" ? "Interação geral registrada e respondida pela SOFIA." : "Interação registrada; resposta da SOFIA pendente.");
+      }
     },
     onError: (error) => toast.error(error.message),
   });
@@ -139,6 +143,10 @@ export default function Messages() {
   const handlePrepare = () => {
     if (!messageContent.trim()) {
       toast.error("Digite o conteúdo da interação.");
+      return;
+    }
+    if (interactionType === "create-task" && selectedTaskId !== null) {
+      toast.error("Solicitações de criação de missão devem ser enviadas pela Conversa geral.");
       return;
     }
     if (interactionType === "reply" && selectedParentMessageId === null) {
