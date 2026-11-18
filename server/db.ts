@@ -243,15 +243,15 @@ export async function updateAgentCredits(id: number, creditsRemaining: number) {
 }
 
 /**
- * Records a failed balance refresh without changing the last known balance
- * or its successful-update timestamp.
+ * Records a stable diagnostic code for a failed balance refresh without
+ * changing the last known balance or its successful-update timestamp.
  */
-export async function recordAgentCreditSyncError(id: number, message: string) {
+export async function recordAgentCreditSyncError(id: number, errorCode: string) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
   return db.update(agents).set({
-    connectionError: message,
+    connectionError: errorCode,
     updatedAt: new Date(),
   }).where(eq(agents.id, id));
 }

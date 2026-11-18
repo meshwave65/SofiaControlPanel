@@ -1,4 +1,5 @@
 import * as db from "./db";
+import { CreditSyncError, getCreditSyncErrorCode, getCreditSyncHttpStatus } from "./creditSyncError";
 
 const MANUS_API_BASE = "https://api.manus.ai/v2";
 const REQUEST_TIMEOUT_MS = 30_000;
@@ -18,9 +19,16 @@ type LocalTask = Awaited<ReturnType<typeof db.getTaskById>>;
 type ManusMessageEvent = { type?: string; assistant_message?: { content?: string } };
 type ManusMessagesResponse = ManusTaskResponse & { messages?: ManusMessageEvent[] };
 
+class ManusApiError extends Error {
+  constructor(message: string, readonly httpStatus: number) {
+    super(message);
+    this.name = "ManusApiError";
+  }
+}
+
 function apiError(response: Response, payload: ManusTaskResponse) {
   const message = payload.error?.message || `Manus API retornou HTTP ${response.status}`;
-  return new Error(message);
+  return new ManusApiError(message, response.status);
 }
 
 async function manusRequest<T extends ManusTaskResponse>(token: string, path: string, init?: RequestInit): Promise<T> {
@@ -103,17 +111,23 @@ export async function getManusCheckpoint(task: NonNullable<LocalTask>) {
 export async function syncAgentCredits(agentId: number) {
   const credentials = await db.getManusCredentialsForAgent(agentId);
   if (!credentials?.manusToken) {
-    throw new Error("O agente não possui uma API key Manus configurada.");
+    throw new CreditSyncError("credentials_missing");
   }
 
-  const response = await manusRequest<ManusTaskResponse & { data?: { total_credits?: number } }>(
-    credentials.manusToken,
-    "/usage.availableCredits",
-    { method: "GET" },
-  );
+  let response: ManusTaskResponse & { data?: { total_credits?: number } };
+  try {
+    response = await manusRequest<ManusTaskResponse & { data?: { total_credits?: number } }>(
+      credentials.manusToken,
+      "/usage.availableCredits",
+      { method: "GET" },
+    );
+  } catch (error) {
+    const httpStatus = error instanceof ManusApiError ? error.httpStatus : undefined;
+    throw new CreditSyncError("request_failed", httpStatus);
+  }
   const credits = response.data?.total_credits;
   if (typeof credits !== "number" || !Number.isFinite(credits)) {
-    throw new Error("A API Manus não retornou total_credits válido.");
+    throw new CreditSyncError("response_invalid");
   }
 
   await db.updateAgentCredits(agentId, credits);
@@ -129,9 +143,14 @@ export async function syncAllAgentCredits() {
       const creditsRemaining = await syncAgentCredits(agent.id);
       results.push({ agentId: agent.id, ok: true, creditsRemaining });
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      results.push({ agentId: agent.id, ok: false, error: message });
-      console.warn(`[Manus] Não foi possível atualizar créditos do agente ${agent.id}: ${message}`);
+      const errorCode = getCreditSyncErrorCode(error);
+      results.push({ agentId: agent.id, ok: false, error: errorCode });
+      console.error(JSON.stringify({
+        event: "manus_credit_sync_failed",
+        agentId: agent.id,
+        errorCode,
+        httpStatus: getCreditSyncHttpStatus(error),
+      }));
     }
   }
 

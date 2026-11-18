@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const dbMock = vi.hoisted(() => ({
   getTaskById: vi.fn(),
@@ -24,6 +24,10 @@ vi.mock("./db", () => dbMock);
 vi.mock("./manusExecutionService", () => manusMock);
 
 import { SofiaOrchestrator } from "./sofiaOrchestrator";
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 describe("SofiaOrchestrator.processTask", () => {
   beforeEach(() => {
@@ -170,7 +174,7 @@ describe("SofiaOrchestrator.startTask", () => {
   });
 
   it("keeps a staged mission waiting when credit sync fails before agent allocation", async () => {
-    const creditError = "A API Manus não retornou total_credits válido.";
+    const creditError = "provider response contained untrusted text";
     const staleAgent = {
       id: 6,
       hasCredential: true,
@@ -181,16 +185,23 @@ describe("SofiaOrchestrator.startTask", () => {
       .mockResolvedValueOnce(stagedTask)
       .mockResolvedValueOnce(stagedTask);
     dbMock.getAgentsByOwnerId.mockResolvedValueOnce([staleAgent]);
-    manusMock.syncAgentCredits.mockRejectedValueOnce(new Error(creditError));
+    manusMock.syncAgentCredits.mockRejectedValueOnce(
+      Object.assign(new Error(creditError), { code: "response_invalid" }),
+    );
     dbMock.claimStagedTaskWithAvailableAgent.mockResolvedValueOnce(null);
+    const errorLog = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
     const result = await SofiaOrchestrator.startTask(30);
 
     expect(manusMock.syncAgentCredits).toHaveBeenCalledWith(6);
     expect(dbMock.recordAgentCreditSyncError).toHaveBeenCalledWith(
       6,
-      creditError
+      "response_invalid"
     );
+    expect(errorLog).toHaveBeenCalledWith(
+      JSON.stringify({ event: "agent_credit_sync_failed_before_claim", agentId: 6, errorCode: "response_invalid" }),
+    );
+    expect(String(errorLog.mock.calls[0]?.[0])).not.toContain(creditError);
     expect(dbMock.claimStagedTaskWithAvailableAgent).toHaveBeenCalledWith(
       30,
       1,

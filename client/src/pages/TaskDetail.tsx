@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import DashboardLayout from "@/components/DashboardLayout";
 import { trpc } from "@/lib/trpc";
+import { getTaskStartFeedback } from "@/lib/taskStartFeedback";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Loader2, ChevronLeft, Zap, FileText, AlertCircle, Download, ShieldCheck, RefreshCw, Info, Play } from "lucide-react";
 import { toast } from "sonner";
@@ -112,11 +113,9 @@ export default function TaskDetail() {
     try {
       const result = await startTaskMutation.mutateAsync({ taskId });
       await Promise.all([taskQuery.refetch(), messagesQuery.refetch(), consolidatedReportQuery.refetch()]);
-      if (result?.started) {
-        toast.success(result.factorized ? "Missão iniciada e fatorada em subtarefas." : "Missão iniciada.");
-      } else {
-        toast.info("A missão já não está em STAGED; nenhum reinício foi necessário.");
-      }
+      const feedback = getTaskStartFeedback(result);
+      if (feedback.kind === "success") toast.success(feedback.message);
+      else toast.info(feedback.message);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Não foi possível iniciar a missão.");
     } finally {

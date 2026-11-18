@@ -91,7 +91,7 @@ describe("tRPC tasks.start execution path", () => {
     });
     expect(dbMock.recordAgentCreditSyncError).toHaveBeenCalledWith(
       6,
-      "A API Manus não retornou total_credits válido."
+      "response_invalid"
     );
     expect(dbMock.claimStagedTaskWithAvailableAgent).toHaveBeenCalledWith(
       30,

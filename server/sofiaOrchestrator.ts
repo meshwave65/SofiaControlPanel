@@ -1,6 +1,7 @@
 import * as db from "./db";
 import { Task } from "../drizzle/schema";
 import { createManusTask, getManusCheckpoint, sendManusMessage, syncAgentCredits } from "./manusExecutionService";
+import { getCreditSyncErrorCode, getCreditSyncHttpStatus } from "./creditSyncError";
 
 /**
  * Sofia Orchestrator v1.0
@@ -211,13 +212,18 @@ export class SofiaOrchestrator {
       try {
         await syncAgentCredits(agent.id);
       } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
+        const errorCode = getCreditSyncErrorCode(error);
         try {
-          await db.recordAgentCreditSyncError(agent.id, message);
-        } catch (recordError) {
-          console.error(`[Orchestrator] Não foi possível registrar a falha de consulta do agente ${agent.id}:`, recordError);
+          await db.recordAgentCreditSyncError(agent.id, errorCode);
+        } catch {
+          console.error(JSON.stringify({ event: "agent_credit_sync_error_record_failed", agentId: agent.id }));
         }
-        console.warn(`[Orchestrator] Não foi possível atualizar créditos do agente ${agent.id} antes da alocação:`, message);
+        console.error(JSON.stringify({
+          event: "agent_credit_sync_failed_before_claim",
+          agentId: agent.id,
+          errorCode,
+          httpStatus: getCreditSyncHttpStatus(error),
+        }));
       }
     }));
 
