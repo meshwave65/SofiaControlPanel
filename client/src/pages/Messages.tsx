@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from "react";
+import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,7 @@ const taskStatuses: { value: TaskStatus; label: string }[] = [
 
 export default function Messages() {
   const { isAuthenticated, user } = useAuth();
+  const [, navigate] = useLocation();
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
   const [interactionType, setInteractionType] = useState<InteractionType>("message");
   const [selectedParentMessageId, setSelectedParentMessageId] = useState<number | null>(null);
@@ -301,6 +303,11 @@ export default function Messages() {
                 {selectedTask ? "Interação vinculada à missão selecionada" : "Interação independente de missão ou tarefa"}
               </p>
             </div>
+            {selectedTask && (
+              <Button type="button" size="sm" variant="outline" onClick={() => navigate("/tasks/" + selectedTask.id)}>
+                <FileIcon className="mr-2 h-4 w-4" /> Abrir missão / TR
+              </Button>
+            )}
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <span className="h-2 w-2 rounded-full bg-emerald-500" />
               {tasksQuery.isFetching ? "Atualizando missões" : "Pronto"}
@@ -401,7 +408,7 @@ export default function Messages() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-3 border-t bg-muted/20 px-5 py-4">
+              <div className="sticky bottom-0 z-10 flex shrink-0 flex-wrap items-center justify-between gap-3 border-t bg-background px-5 py-4 shadow-[0_-6px_16px_rgba(0,0,0,0.06)]">
                 <div className="flex flex-wrap items-center gap-2">
                   <input
                     ref={fileInputRef}
@@ -420,7 +427,7 @@ export default function Messages() {
                 <Button type="button" onClick={handlePrepare} disabled={createGeneralMessage.isPending || createMissionMessage.isPending}>
                   <Send className="mr-2 h-4 w-4" /> {createGeneralMessage.isPending || createMissionMessage.isPending
                     ? (interactionType === "create-task" ? "Criando missão..." : "Enviando...")
-                    : "Criar mensagem"}
+                    : interactionType === "create-task" ? "Criar missão" : "Enviar mensagem"}
                 </Button>
               </div>
 
