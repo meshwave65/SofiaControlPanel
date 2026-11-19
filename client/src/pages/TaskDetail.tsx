@@ -537,7 +537,7 @@ export default function TaskDetail() {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <CardTitle className="text-xl">
-                    {selectedDocument?.typeKey === "TR" ? "Entendimento da missão — TR" : "Documentos da missão"}
+                    {selectedDocument?.typeKey === "TR" ? "TR — Termo de Referência" : "Documentos da missão"}
                   </CardTitle>
                   <CardDescription className="mt-1">
                     {selectedDocument?.typeKey === "TR"
@@ -830,7 +830,7 @@ export default function TaskDetail() {
                   )}
                   {selectedDocument.typeKey === "TR" && selectedDocument.latestVersion?.state === "DRAFT" && (
                     <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-amber-500/30 bg-amber-500/5 p-3">
-                      <p className="text-sm text-amber-600">A geração cognitiva do TR está pendente. A execução continua bloqueada.</p>
+                      <p className="text-sm text-amber-600">A interpretação da SOFIA ainda não foi gerada. Este registro provisório não está pronto para aprovação. Gere o TR para habilitar a revisão e a aprovação do operador.</p>
                       <Button
                         variant="outline"
                         onClick={() => regenerateInitialTRMutation.mutate({ taskId })}
@@ -871,7 +871,7 @@ export default function TaskDetail() {
                           disabled={selectedDocument.latestVersion?.state !== "AWAITING_HUMAN_VALIDATION" || validateTRMutation.isPending}
                         >
                           {validateTRMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                          Validar TR e gerar Blueprint
+                          Aprovar TR e gerar Blueprint
                         </Button>
                       </div>
                     </div>
