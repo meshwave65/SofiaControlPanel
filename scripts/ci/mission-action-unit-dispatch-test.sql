@@ -81,6 +81,12 @@ BEGIN
   VALUES (regular_blueprint_document_id, 1, 'READY', 'Blueprint fixture', 'SOFIA', regular_tr_version_id)
   RETURNING id INTO regular_blueprint_version_id;
 
+  RAISE NOTICE 'Regular fixture TR state=%, TR version=%, Blueprint state=%, Blueprint source=%',
+    (SELECT state FROM sofia."missionDocumentVersions" WHERE id = regular_tr_version_id),
+    regular_tr_version_id,
+    (SELECT state FROM sofia."missionDocumentVersions" WHERE id = regular_blueprint_version_id),
+    (SELECT "sourceDocumentVersionId" FROM sofia."missionDocumentVersions" WHERE id = regular_blueprint_version_id);
+
   UPDATE sofia.tasks
      SET "statusId" = (SELECT id FROM sofia."taskStatuses" WHERE name = 'STAGED')
    WHERE id = regular_task_id;
