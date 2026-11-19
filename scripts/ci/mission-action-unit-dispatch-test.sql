@@ -17,6 +17,10 @@ DECLARE
   child_id integer;
   unauthorized_child_id integer;
   regular_task_id integer;
+  regular_tr_document_id integer;
+  regular_tr_version_id integer;
+  regular_blueprint_document_id integer;
+  regular_blueprint_version_id integer;
   tr_document_id integer;
   blueprint_document_id integer;
   action_plan_document_id integer;
@@ -62,6 +66,20 @@ BEGIN
   INSERT INTO sofia.tasks ("statusId", "createdBy", title)
   VALUES ((SELECT id FROM sofia."taskStatuses" WHERE name = 'PAUSED'), owner_id, 'Regular mission dispatch retry fixture')
   RETURNING id INTO regular_task_id;
+
+  INSERT INTO sofia."missionDocuments" ("taskId", "documentTypeId", "documentKey", title)
+  VALUES (regular_task_id, (SELECT id FROM sofia."missionDocumentTypes" WHERE "typeKey" = 'TR'), 'TR', 'TR')
+  RETURNING id INTO regular_tr_document_id;
+  INSERT INTO sofia."missionDocumentVersions" ("documentId", version, state, content, "authorType")
+  VALUES (regular_tr_document_id, 1, 'VALIDATED', 'TR fixture', 'HUMAN')
+  RETURNING id INTO regular_tr_version_id;
+
+  INSERT INTO sofia."missionDocuments" ("taskId", "documentTypeId", "documentKey", title)
+  VALUES (regular_task_id, (SELECT id FROM sofia."missionDocumentTypes" WHERE "typeKey" = 'BLUEPRINT'), 'BLUEPRINT', 'Blueprint')
+  RETURNING id INTO regular_blueprint_document_id;
+  INSERT INTO sofia."missionDocumentVersions" ("documentId", version, state, content, "authorType", "sourceDocumentVersionId")
+  VALUES (regular_blueprint_document_id, 1, 'READY', 'Blueprint fixture', 'SOFIA', regular_tr_version_id)
+  RETURNING id INTO regular_blueprint_version_id;
 
   UPDATE sofia.tasks
      SET "statusId" = (SELECT id FROM sofia."taskStatuses" WHERE name = 'STAGED')
