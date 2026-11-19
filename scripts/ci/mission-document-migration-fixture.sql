@@ -30,7 +30,8 @@ CREATE TABLE sofia.tasks (
   "parentTaskId" integer REFERENCES sofia.tasks(id),
   "createdBy" integer NOT NULL REFERENCES sofia."users"(id),
   title varchar(255) NOT NULL DEFAULT 'Fixture task',
-  "manusTaskId" varchar(128)
+  "manusTaskId" varchar(128),
+  "manusStatus" varchar(32)
 );
 
 INSERT INTO sofia."taskStatuses" (name)
