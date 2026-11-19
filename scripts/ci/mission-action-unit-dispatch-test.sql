@@ -173,6 +173,10 @@ BEGIN
      SET "statusId" = (SELECT id FROM sofia."taskStatuses" WHERE name = 'STAGED')
    WHERE id = child_id;
 
+  IF (SELECT "manusStatus" FROM sofia.tasks WHERE id = child_id) <> 'dispatch_pending' THEN
+    RAISE EXCEPTION 'TEST FAILURE: authorized ACTION_PLAN unit did not persist dispatch_pending';
+  END IF;
+
   INSERT INTO sofia.tasks ("statusId", "createdBy", "parentTaskId", title)
   VALUES ((SELECT id FROM sofia."taskStatuses" WHERE name = 'PAUSED'), owner_id, root_id, 'Unmapped child')
   RETURNING id INTO unauthorized_child_id;

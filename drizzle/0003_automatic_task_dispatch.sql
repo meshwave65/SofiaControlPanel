@@ -135,6 +135,16 @@ BEGIN
     END IF;
   END IF;
 
+  -- Persist dispatch intent before the asynchronous HTTP call. If the callback
+  -- is rejected, times out, or Vault/network is temporarily unavailable, the
+  -- heartbeat worker can safely retry. startTask() claims atomically.
+  UPDATE sofia.tasks
+     SET "manusStatus" = 'dispatch_pending',
+         "updatedAt" = NOW()
+   WHERE id = NEW.id
+     AND "statusId" = staged_status_id
+     AND "manusStatus" IS DISTINCT FROM 'dispatch_pending';
+
   SELECT decrypted_secret
     INTO dispatch_url
     FROM vault.decrypted_secrets

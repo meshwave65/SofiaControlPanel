@@ -93,12 +93,23 @@ async function checkAgentStatus() {
  * Verifica se há missões pendentes aguardando um agente livre ou saldo.
  * Não reabre tarefas STAGED antigas: somente as que já foram marcadas como aguardando.
  */
+/**
+ * A STAGED task marked dispatch_pending has not yet been claimed by the
+ * orchestrator. Waiting states are retried when agent availability/credits
+ * change. The atomic claim inside startTask() makes duplicate callbacks safe.
+ */
+export function isDispatchRetryCandidate(manusStatus: string | null | undefined): boolean {
+  return manusStatus === "dispatch_pending"
+    || manusStatus === "waiting_for_available_agent"
+    || manusStatus === "waiting_for_pinned_agent";
+}
+
 async function dispatchWaitingTasks() {
   try {
     const stagedStatusId = await db.getTaskStatusIdByName("STAGED");
     const tasks = (await db.getAllTasksGlobal()).filter((task) =>
       task.statusId === stagedStatusId
-      && (task.manusStatus === "waiting_for_available_agent" || task.manusStatus === "waiting_for_pinned_agent")
+      && isDispatchRetryCandidate(task.manusStatus)
     );
 
     for (const task of tasks) {
