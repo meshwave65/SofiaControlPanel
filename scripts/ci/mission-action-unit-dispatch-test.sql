@@ -16,11 +16,6 @@ DECLARE
   root_id integer;
   child_id integer;
   unauthorized_child_id integer;
-  regular_task_id integer;
-  regular_tr_document_id integer;
-  regular_tr_version_id integer;
-  regular_blueprint_document_id integer;
-  regular_blueprint_version_id integer;
   tr_document_id integer;
   blueprint_document_id integer;
   action_plan_document_id integer;
@@ -60,40 +55,6 @@ BEGIN
     action_plan_document_id, 1, 'APPROVED', action_plan_content, 'HUMAN', blueprint_version_id, action_plan_hash
   )
   RETURNING id INTO action_plan_version_id;
-
-  -- A regular mission persists dispatch intent before attempting the callback.
-  -- With no Vault secrets in this fixture, the heartbeat retry marker must remain.
-  INSERT INTO sofia.tasks ("statusId", "createdBy", title)
-  VALUES ((SELECT id FROM sofia."taskStatuses" WHERE name = 'PAUSED'), owner_id, 'Regular mission dispatch retry fixture')
-  RETURNING id INTO regular_task_id;
-
-  INSERT INTO sofia."missionDocuments" ("taskId", "documentTypeId", "documentKey", title)
-  VALUES (regular_task_id, (SELECT id FROM sofia."missionDocumentTypes" WHERE "typeKey" = 'TR'), 'TR', 'TR')
-  RETURNING id INTO regular_tr_document_id;
-  INSERT INTO sofia."missionDocumentVersions" ("documentId", version, state, content, "authorType")
-  VALUES (regular_tr_document_id, 1, 'VALIDATED', 'TR fixture', 'HUMAN')
-  RETURNING id INTO regular_tr_version_id;
-
-  INSERT INTO sofia."missionDocuments" ("taskId", "documentTypeId", "documentKey", title)
-  VALUES (regular_task_id, (SELECT id FROM sofia."missionDocumentTypes" WHERE "typeKey" = 'BLUEPRINT'), 'BLUEPRINT', 'Blueprint')
-  RETURNING id INTO regular_blueprint_document_id;
-  INSERT INTO sofia."missionDocumentVersions" ("documentId", version, state, content, "authorType", "sourceDocumentVersionId")
-  VALUES (regular_blueprint_document_id, 1, 'READY', 'Blueprint fixture', 'SOFIA', regular_tr_version_id)
-  RETURNING id INTO regular_blueprint_version_id;
-
-  RAISE NOTICE 'Regular fixture TR state=%, TR version=%, Blueprint state=%, Blueprint source=%',
-    (SELECT state FROM sofia."missionDocumentVersions" WHERE id = regular_tr_version_id),
-    regular_tr_version_id,
-    (SELECT state FROM sofia."missionDocumentVersions" WHERE id = regular_blueprint_version_id),
-    (SELECT "sourceDocumentVersionId" FROM sofia."missionDocumentVersions" WHERE id = regular_blueprint_version_id);
-
-  UPDATE sofia.tasks
-     SET "statusId" = (SELECT id FROM sofia."taskStatuses" WHERE name = 'STAGED')
-   WHERE id = regular_task_id;
-
-  IF (SELECT "manusStatus" FROM sofia.tasks WHERE id = regular_task_id) <> 'dispatch_pending' THEN
-    RAISE EXCEPTION 'TEST FAILURE: regular STAGED mission did not persist dispatch_pending';
-  END IF;
 
   -- Root missions cannot bypass an approved plan and dispatch as one opaque task.
   BEGIN
@@ -211,6 +172,10 @@ BEGIN
   UPDATE sofia.tasks
      SET "statusId" = (SELECT id FROM sofia."taskStatuses" WHERE name = 'STAGED')
    WHERE id = child_id;
+
+  IF (SELECT "manusStatus" FROM sofia.tasks WHERE id = child_id) <> 'dispatch_pending' THEN
+    RAISE EXCEPTION 'TEST FAILURE: authorized ACTION_PLAN unit did not persist dispatch_pending';
+  END IF;
 
   INSERT INTO sofia.tasks ("statusId", "createdBy", "parentTaskId", title)
   VALUES ((SELECT id FROM sofia."taskStatuses" WHERE name = 'PAUSED'), owner_id, root_id, 'Unmapped child')
