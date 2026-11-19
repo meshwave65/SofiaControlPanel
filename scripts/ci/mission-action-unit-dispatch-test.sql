@@ -16,6 +16,7 @@ DECLARE
   root_id integer;
   child_id integer;
   unauthorized_child_id integer;
+  regular_task_id integer;
   tr_document_id integer;
   blueprint_document_id integer;
   action_plan_document_id integer;
@@ -55,6 +56,20 @@ BEGIN
     action_plan_document_id, 1, 'APPROVED', action_plan_content, 'HUMAN', blueprint_version_id, action_plan_hash
   )
   RETURNING id INTO action_plan_version_id;
+
+  -- A regular mission persists dispatch intent before attempting the callback.
+  -- With no Vault secrets in this fixture, the heartbeat retry marker must remain.
+  INSERT INTO sofia.tasks ("statusId", "createdBy", title)
+  VALUES ((SELECT id FROM sofia."taskStatuses" WHERE name = 'PAUSED'), owner_id, 'Regular mission dispatch retry fixture')
+  RETURNING id INTO regular_task_id;
+
+  UPDATE sofia.tasks
+     SET "statusId" = (SELECT id FROM sofia."taskStatuses" WHERE name = 'STAGED')
+   WHERE id = regular_task_id;
+
+  IF (SELECT "manusStatus" FROM sofia.tasks WHERE id = regular_task_id) <> 'dispatch_pending' THEN
+    RAISE EXCEPTION 'TEST FAILURE: regular STAGED mission did not persist dispatch_pending';
+  END IF;
 
   -- Root missions cannot bypass an approved plan and dispatch as one opaque task.
   BEGIN
