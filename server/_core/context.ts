@@ -94,12 +94,12 @@ async function authenticateSupabaseToken(
 
   try {
     await db.upsertUser({
-    openId: identity.id,
-    name: displayName,
-    email: identity.email ?? null,
-    loginMethod: "supabase",
-    lastSignedIn: new Date(),
-  });
+      openId: identity.id,
+      name: displayName,
+      email: identity.email ?? null,
+      loginMethod: "supabase",
+      lastSignedIn: new Date(),
+    });
 
     const user = await db.getUserByOpenId(identity.id);
     if (!user) {
