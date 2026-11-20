@@ -39,11 +39,42 @@ function getSupabaseAuthClient() {
   return supabaseAuthClient;
 }
 
-async function authenticateSupabaseToken(accessToken: string): Promise<User> {
+function safeAuthDiagnosticError(error: unknown) {
+  if (!error || typeof error !== "object") {
+    return { name: "UnknownError", message: "Unknown authentication error" };
+  }
+  const item = error as { name?: unknown; message?: unknown; status?: unknown; code?: unknown };
+  return {
+    name: typeof item.name === "string" ? item.name.slice(0, 80) : "AuthError",
+    status: typeof item.status === "number" ? item.status : null,
+    code: typeof item.code === "string" ? item.code.slice(0, 100) : null,
+  };
+}
+
+async function authenticateSupabaseToken(
+  accessToken: string,
+  correlationId: string | null
+): Promise<User> {
   const { data, error } =
     await getSupabaseAuthClient().auth.getUser(accessToken);
   if (error || !data.user) {
+    if (correlationId) {
+      console.warn("[AuthDiagnostic]", JSON.stringify({
+        stage: "supabase.getUser.rejected",
+        correlationId,
+        error: error ? safeAuthDiagnosticError(error) : { message: "Supabase returned no user" },
+        timestamp: new Date().toISOString(),
+      }));
+    }
     throw new Error("Invalid Supabase access token");
+  }
+
+  if (correlationId) {
+    console.info("[AuthDiagnostic]", JSON.stringify({
+      stage: "supabase.getUser.accepted",
+      correlationId,
+      timestamp: new Date().toISOString(),
+    }));
   }
 
   const identity = data.user;
@@ -54,48 +85,82 @@ async function authenticateSupabaseToken(accessToken: string): Promise<User> {
     identity.email ||
     null;
 
-  await db.upsertUser({
-    openId: identity.id,
-    name: displayName,
-    email: identity.email ?? null,
-    loginMethod: "supabase",
-    lastSignedIn: new Date(),
-  });
+  try {
+    await db.upsertUser({
+      openId: identity.id,
+      name: displayName,
+      email: identity.email ?? null,
+      loginMethod: "supabase",
+      lastSignedIn: new Date(),
+    });
 
-  const user = await db.getUserByOpenId(identity.id);
-  if (!user) {
-    throw new Error(
-      "Authenticated Supabase user could not be loaded from the database"
-    );
+    const user = await db.getUserByOpenId(identity.id);
+    if (!user) {
+      if (correlationId) {
+        console.error("[AuthDiagnostic]", JSON.stringify({
+          stage: "database.user_not_found",
+          correlationId,
+          timestamp: new Date().toISOString(),
+        }));
+      }
+      throw new Error(
+        "Authenticated Supabase user could not be loaded from the database"
+      );
+    }
+    const normalizedEmail = user.email?.trim().toLowerCase();
+    const isMasterAdmin = Boolean(normalizedEmail && ENV.masterAdminEmails.includes(normalizedEmail));
+    if (correlationId) {
+      console.info("[AuthDiagnostic]", JSON.stringify({
+        stage: "database.user_resolved",
+        correlationId,
+        timestamp: new Date().toISOString(),
+      }));
+    }
+    return isMasterAdmin ? { ...user, role: "admin" } : user;
+  } catch (dbError) {
+    if (correlationId) {
+      console.error("[AuthDiagnostic]", JSON.stringify({
+        stage: "database.user_resolution_failed",
+        correlationId,
+        error: safeAuthDiagnosticError(dbError),
+        timestamp: new Date().toISOString(),
+      }));
+    }
+    throw dbError;
   }
-  const normalizedEmail = user.email?.trim().toLowerCase();
-  const isMasterAdmin = Boolean(normalizedEmail && ENV.masterAdminEmails.includes(normalizedEmail));
-  return isMasterAdmin ? { ...user, role: "admin" } : user;
 }
 
 export async function createContext(
   opts: CreateExpressContextOptions
 ): Promise<TrpcContext> {
   let user: User | null = null;
+  const rawCorrelationId = opts.req.headers["x-scp-auth-diagnostic"];
+  const correlationId = typeof rawCorrelationId === "string" && /^[a-zA-Z0-9-]{1,80}$/.test(rawCorrelationId)
+    ? rawCorrelationId
+    : null;
 
   try {
     const authorization = opts.req.headers.authorization;
     if (authorization) {
       const match = authorization.match(/^Bearer\s+(.+)$/i);
       if (!match) throw new Error("Malformed Authorization header");
-      user = await authenticateSupabaseToken(match[1]);
+      user = await authenticateSupabaseToken(match[1], correlationId);
     } else {
       const cookies = parseCookieHeader(opts.req.headers.cookie ?? "");
       if (cookies[COOKIE_NAME]) {
         user = await sdk.authenticateRequest(opts.req);
+      } else if (correlationId) {
+        console.warn("[AuthDiagnostic]", JSON.stringify({
+          stage: "request.no_auth_credential",
+          correlationId,
+          timestamp: new Date().toISOString(),
+        }));
       }
     }
   } catch (error) {
     // Public procedures remain available, but protected procedures fail closed.
-    console.warn(
-      "[Auth] Request authentication failed:",
-      error instanceof Error ? error.message : error
-    );
+    // Do not persist arbitrary provider/database error messages in backend logs.
+    console.warn("[Auth] Request authentication failed");
     user = null;
   }
 

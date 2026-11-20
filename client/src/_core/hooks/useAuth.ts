@@ -1,5 +1,6 @@
 import { trpc } from "@/lib/trpc";
 import { supabase } from "@/lib/supabase";
+import { recordAuthDiagnostic } from "@/lib/authDiagnostics";
 import { useCallback, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -25,12 +26,19 @@ export function useAuth() {
     let mounted = true;
     let authEventReceived = false;
 
+    recordAuthDiagnostic("auth.bootstrap.started", { path: window.location.pathname, online: navigator.onLine });
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (!mounted) return;
 
       authEventReceived = true;
+      recordAuthDiagnostic("supabase.auth.state_change", {
+        event,
+        sessionPresent: Boolean(session?.access_token),
+        expiresAtPresent: Boolean(session?.expires_at),
+        userIdPresent: Boolean(session?.user?.id),
+      });
       setBootstrapError(null);
       setHasSession(Boolean(session?.access_token));
       setSessionReady(true);
@@ -51,8 +59,18 @@ export function useAuth() {
     // Explicitly resolve the persisted session as a fallback to INITIAL_SESSION.
     // This prevents the dashboard from remaining on its skeleton if the auth
     // event is delayed or missed during browser startup.
+    recordAuthDiagnostic("supabase.getSession.started");
     void supabase.auth.getSession().then(({ data, error }) => {
-      if (!mounted || authEventReceived) return;
+      if (!mounted) return;
+      recordAuthDiagnostic("supabase.getSession.completed", {
+        authEventAlreadyReceived: authEventReceived,
+        sessionPresent: Boolean(data.session?.access_token),
+        sessionExpired: data.session?.expires_at ? data.session.expires_at * 1000 <= Date.now() : null,
+        errorName: error?.name ?? null,
+        errorStatus: (error as { status?: number } | null)?.status ?? null,
+        errorCode: (error as { code?: string } | null)?.code ?? null,
+      });
+      if (authEventReceived) return;
 
       if (error) {
         setBootstrapError(error);
@@ -61,7 +79,11 @@ export function useAuth() {
       }
       setSessionReady(true);
     }).catch((error: unknown) => {
-      if (!mounted || authEventReceived) return;
+      if (!mounted) return;
+      recordAuthDiagnostic("supabase.getSession.rejected", {
+        errorName: error instanceof Error ? error.name : "UnknownError",
+      });
+      if (authEventReceived) return;
       setBootstrapError(
         error instanceof Error
           ? error
@@ -76,6 +98,17 @@ export function useAuth() {
     };
   }, [queryClient, utils]);
 
+  useEffect(() => {
+    if (backendAuth.isSuccess) {
+      recordAuthDiagnostic("backend.auth.me.resolved", { userPresent: Boolean(backendAuth.data) });
+    } else if (backendAuth.isError) {
+      recordAuthDiagnostic("backend.auth.me.failed", {
+        errorCode: (backendAuth.error as { data?: { code?: string } }).data?.code ?? null,
+        errorName: "TRPCClientError",
+      });
+    }
+  }, [backendAuth.isSuccess, backendAuth.isError, backendAuth.data, backendAuth.error]);
+
   const logout = useCallback(async () => {
     await supabase.auth.signOut();
     setHasSession(false);
@@ -84,7 +117,14 @@ export function useAuth() {
   }, [utils]);
 
   const refresh = useCallback(async () => {
+    recordAuthDiagnostic("supabase.refreshSession.started");
     const result = await supabase.auth.refreshSession();
+    recordAuthDiagnostic("supabase.refreshSession.completed", {
+      sessionPresent: Boolean(result.data.session?.access_token),
+      errorName: result.error?.name ?? null,
+      errorStatus: (result.error as { status?: number } | null)?.status ?? null,
+      errorCode: (result.error as { code?: string } | null)?.code ?? null,
+    });
     setHasSession(Boolean(result.data.session?.access_token));
     await utils.auth.me.invalidate();
     return result;
@@ -98,10 +138,14 @@ export function useAuth() {
       return;
     }
 
-    const timeout = window.setTimeout(
-      () => setLoadingTimedOut(true),
-      AUTH_LOADING_TIMEOUT_MS
-    );
+    const timeout = window.setTimeout(() => {
+      setLoadingTimedOut(true);
+      recordAuthDiagnostic("auth.bootstrap.timeout", {
+        sessionReady,
+        hasSession,
+        backendLoading: backendAuth.isLoading,
+      });
+    }, AUTH_LOADING_TIMEOUT_MS);
     return () => window.clearTimeout(timeout);
   }, [authLoading]);
 

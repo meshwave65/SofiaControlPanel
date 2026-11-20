@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { startGoogleLogin } from "@/lib/auth";
+import { recordAuthDiagnostic } from "@/lib/authDiagnostics";
 
 export default function AuthCallback() {
   const [message, setMessage] = useState("Concluindo autenticação…");
@@ -10,10 +11,12 @@ export default function AuthCallback() {
   const retryLogin = async () => {
     setHasError(false);
     setMessage("Abrindo a seleção de conta…");
+    recordAuthDiagnostic("oauth.retry.started");
     await supabase.auth.signOut().catch(() => undefined);
     try {
       await startGoogleLogin();
     } catch (error) {
+      recordAuthDiagnostic("oauth.retry.failed", { errorName: error instanceof Error ? error.name : "UnknownError" });
       setHasError(true);
       setMessage(error instanceof Error ? `Não foi possível iniciar o login: ${error.message}` : "Não foi possível iniciar o login.");
     }
@@ -26,6 +29,11 @@ export default function AuthCallback() {
       const params = new URLSearchParams(window.location.search);
       const error = params.get("error_description") || params.get("error");
       const code = params.get("code");
+      recordAuthDiagnostic("oauth.callback.started", {
+        codePresent: Boolean(code),
+        providerErrorPresent: Boolean(error),
+        hashPresent: Boolean(window.location.hash),
+      });
 
       if (error) {
         if (active) {
@@ -38,8 +46,15 @@ export default function AuthCallback() {
       let session: Session | null = null;
 
       if (code) {
+        recordAuthDiagnostic("oauth.exchange.started");
         const { data, error: exchangeError } =
           await supabase.auth.exchangeCodeForSession(code);
+        recordAuthDiagnostic("oauth.exchange.completed", {
+          sessionPresent: Boolean(data.session?.access_token),
+          errorName: exchangeError?.name ?? null,
+          errorStatus: (exchangeError as { status?: number } | null)?.status ?? null,
+          errorCode: (exchangeError as { code?: string } | null)?.code ?? null,
+        });
         if (exchangeError) {
           if (active) {
             setHasError(true);
@@ -51,7 +66,14 @@ export default function AuthCallback() {
         }
         session = data.session;
       } else {
+        recordAuthDiagnostic("oauth.getSession.started");
         const { data, error: sessionError } = await supabase.auth.getSession();
+        recordAuthDiagnostic("oauth.getSession.completed", {
+          sessionPresent: Boolean(data.session?.access_token),
+          errorName: sessionError?.name ?? null,
+          errorStatus: (sessionError as { status?: number } | null)?.status ?? null,
+          errorCode: (sessionError as { code?: string } | null)?.code ?? null,
+        });
         if (sessionError) {
           if (active) {
             setHasError(true);
@@ -65,6 +87,7 @@ export default function AuthCallback() {
       }
 
       if (!session) {
+        recordAuthDiagnostic("oauth.callback.no_session");
         if (active) {
           setHasError(true);
           setMessage(
@@ -74,10 +97,17 @@ export default function AuthCallback() {
         return;
       }
 
+      recordAuthDiagnostic("oauth.callback.success", {
+        expiresAtPresent: Boolean(session.expires_at),
+        userIdPresent: Boolean(session.user?.id),
+      });
       window.location.replace("/");
     }
 
     completeOAuth().catch(callbackError => {
+      recordAuthDiagnostic("oauth.callback.unhandled_error", {
+        errorName: callbackError instanceof Error ? callbackError.name : "UnknownError",
+      });
       if (active) {
         setHasError(true);
         setMessage(

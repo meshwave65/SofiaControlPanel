@@ -4,6 +4,7 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import DashboardLayout from "./components/DashboardLayout";
+import AuthDiagnosticPanel from "./components/AuthDiagnosticPanel";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import Home from "./pages/Home";
@@ -55,6 +56,7 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <Router />
+          <AuthDiagnosticPanel />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>

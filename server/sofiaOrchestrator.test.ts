@@ -88,7 +88,9 @@ describe("SofiaOrchestrator.processTask", () => {
     const startedTask = { ...stagedTask, statusId: 2 };
     dbMock.getTaskById
       .mockResolvedValueOnce(stagedTask)
-      .mockResolvedValueOnce(startedTask);
+      // Factorization mirrors three child tasks, then the parent; the final read
+      // returns the updated parent task. Keep subsequent reads deterministic.
+      .mockResolvedValue(startedTask);
     dbMock.createTask
       .mockResolvedValueOnce([{ id: 11 }])
       .mockResolvedValueOnce([{ id: 12 }])
