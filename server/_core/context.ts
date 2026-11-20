@@ -46,8 +46,8 @@ function safeAuthDiagnosticError(error: unknown) {
   const item = error as { name?: unknown; message?: unknown; status?: unknown; code?: unknown };
   const message = typeof item.message === "string"
     ? item.message
-        .replace(/Bearer\\s+[^\\s]+/gi, "Bearer [redacted]")
-        .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/gi, "[redacted-email]")
+        .replace(/Bearer\s+[^\s]+/gi, "Bearer [redacted]")
+        .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[redacted-email]")
         .slice(0, 300)
     : "Authentication failed";
   return {
