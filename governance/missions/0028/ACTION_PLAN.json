@@ -1,0 +1,20 @@
+{
+  "schema":"sofia.mission.action-plan.v1",
+  "missionKey":"MISSION_0028",
+  "missionTaskId":51,
+  "title":"ACTION_PLAN — MISSION_0028",
+  "state":"DRAFT",
+  "authorization":{"tr":"SCP-TASK-000051/v1","trState":"VALIDATED","scope":"execução autônoma dentro dos limites do TR","individualUnitApprovalRequired":true},
+  "executionPolicy":{"noDispatchUntilPlanApproved":true,"noUnitDispatchWithoutOwnerApproval":true,"noCredentialOrPersonalDataExposure":true,"noManualLedgerOrBalanceChanges":true,"noBlindRetries":true,"preserveHistory":true,"supabaseAndGithubMirrorRequired":true},
+  "tasks":[
+    {"id":"T01","title":"Revalidar baseline operacional","workPackage":"WP28.1","priority":"P0","dependsOn":[],"deliverable":"Baseline atual de Supabase, GitHub, Render e logs com timestamps; validar IDs e estados.","acceptance":"Fontes atuais consultadas e divergências entre baseline histórica e estado atual identificadas.","risk":"Somente leitura."},
+    {"id":"T02","title":"Rastrear e corrigir autenticação do runtime","workPackage":"WP28.2","priority":"P0","dependsOn":["T01"],"deliverable":"Causa raiz comprovada para invalid api key e correção mínima testada.","acceptance":"Atualização de créditos testada no caminho afetado; logs sem segredos; nenhum saldo alterado manualmente.","risk":"Não rotacionar nem substituir credenciais sem fluxo seguro e autorização própria."},
+    {"id":"T03","title":"Auditar e corrigir exposição de dados na MW-Ex","workPackage":"WP28.3","priority":"P0","dependsOn":["T01"],"deliverable":"Matriz de RLS, grants, policies, views e funções; correção de menor privilégio quando o modelo de acesso estiver comprovado.","acceptance":"Testes anon, authenticated e owner; isolamento de dados pessoais demonstrado.","risk":"Não exportar, divulgar ou alterar dados pessoais; se propriedade não for demonstrável, registrar bloqueio e conter apenas pelo mecanismo seguro comprovado."},
+    {"id":"T04","title":"Conciliar governança documental","workPackage":"WP28.4","priority":"P1","dependsOn":["T01"],"deliverable":"Matriz banco/documentos para MISSION_0002, MISSION_0010 e MISSION_0026, com proveniência.","acceptance":"Cada divergência classificada como atual, histórica ou snapshot; correções rastreáveis e espelho confirmado.","risk":"Não apagar histórico nem reabrir trabalho concluído sem evidência."},
+    {"id":"T05","title":"Diagnosticar tarefas em FAIL","workPackage":"WP28.5","priority":"P1","dependsOn":["T01"],"deliverable":"Diagnóstico individual de SCP-TASK-000024 e 000029, com logs, tentativas, dependências e decisão de recuperação.","acceptance":"Causa/evidência e decisão documentadas; recuperação apenas com idempotência comprovada.","risk":"Proibida repetição cega."},
+    {"id":"T06","title":"Revisar PRs e rollouts pendentes","workPackage":"WP28.6","priority":"P2","dependsOn":["T01","T02","T03"],"deliverable":"Revisão dos diffs, CI, migrations, PR #15/#17 e PR #24; plano de integração/deploy.","acceptance":"Integração/deploy somente quando pré-condições, testes e revisão forem aprovados; caso contrário, bloqueio justificado.","risk":"Não fazer merge nem deploy sem revisão técnica e elegibilidade comprovada."},
+    {"id":"T07","title":"Revisar fila STAGED e PAUSED","workPackage":"WP28.7","priority":"P2","dependsOn":["T04","T05"],"deliverable":"Fila priorizada com dependências, aprovações e motivos de bloqueio.","acceptance":"Estados classificados sem alterar estados legítimos ou contornar gates."},
+    {"id":"T08","title":"Verificação integrada e relatório FOR","workPackage":"WP28.8","priority":"Final","dependsOn":["T02","T03","T04","T05","T06","T07"],"deliverable":"Testes integrados, evidências, pendências e FOR consolidado.","acceptance":"FOR publicado e espelhado; missão só encerrada quando critérios do TR forem comprovados."}
+  ],
+  "notes":["Plano inicial em DRAFT. TR validado não equivale à aprovação individual das unidades.","As unidades só podem ser materializadas contra uma versão ACTION_PLAN APPROVED, conforme trigger do banco.","A criação deste documento não altera o status da tarefa-raiz nem dispara execução."]
+}
