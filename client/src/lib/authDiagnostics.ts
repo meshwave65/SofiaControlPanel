@@ -1,6 +1,16 @@
 const STORAGE_KEY = "scp.authDiagnostics.events";
 const CORRELATION_KEY = "scp.authDiagnostics.correlationId";
 const MAX_EVENTS = 150;
+const DEBUG_FLAG = "scp.authDiagnostics.enabled";
+
+export function isAuthDiagnosticEnabled() {
+  if (typeof window === "undefined") return false;
+  try {
+    return new URLSearchParams(window.location.search).get("authDebug") === "1" || window.sessionStorage.getItem(DEBUG_FLAG) === "1";
+  } catch {
+    return new URLSearchParams(window.location.search).get("authDebug") === "1";
+  }
+}
 
 export type AuthDiagnosticEvent = {
   timestamp: string;
@@ -47,7 +57,7 @@ function getCorrelationId() {
 }
 
 export function recordAuthDiagnostic(event: string, details?: Record<string, unknown>) {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || !isAuthDiagnosticEnabled()) return;
   try {
     const entry: AuthDiagnosticEvent = {
       timestamp: new Date().toISOString(),
