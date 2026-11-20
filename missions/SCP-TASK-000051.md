@@ -12,10 +12,12 @@
 | source | SofiaControlPanel interface |
 | creator | user:1425 |
 | creatorType | user |
-| status | STAGED — TR validado e Blueprint READY; despacho automático solicitado |
+| status | PAUSED — TR validado, Blueprint READY e ACTION_PLAN DRAFT; despacho ainda não elegível |
 | priority | Crítica |
 | parentTaskId | — |
 | githubPath | missions/SCP-TASK-000051.md |
+| actionPlan | governance/missions/0028/ACTION_PLAN.json |
+| actionPlanVersion | 1 — DRAFT |
 
 ## Description
 
@@ -25,5 +27,6 @@ Transformar a auditoria operacional do SCP de 20/11/2026 em correções verific�
 
 - Supabase task ID: `51`
 - GitHub path: `missions/SCP-TASK-000051.md`
+- ACTION_PLAN: `governance/missions/0028/ACTION_PLAN.json` (versão 1, DRAFT)
 - Alterações de execução e status devem ser persistidas no Supabase e espelhadas neste arquivo.
 - Alterações manuais neste arquivo não executam a missão automaticamente.
