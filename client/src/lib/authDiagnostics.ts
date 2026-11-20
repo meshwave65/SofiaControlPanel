@@ -23,7 +23,7 @@ function safeDetails(details?: Record<string, unknown>) {
   if (!details) return undefined;
   const output: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(details)) {
-    if (/token|password|secret|authorization|cookie|email|name|profile|session$/i.test(key)) {
+    if (/^(accessToken|refreshToken|password|secret|authorization|cookie|email|name|profile|session)$/i.test(key)) {
       output[key] = "[redacted]";
     } else if (value instanceof Error) {
       output[key] = { name: value.name };
