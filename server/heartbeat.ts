@@ -3,6 +3,7 @@ import { notifyOwner } from "./_core/notification";
 import { invokeLLM } from "./_core/llm";
 import { syncAllAgentCredits, syncRunningManusTasks } from "./manusExecutionService";
 import { SofiaOrchestrator } from "./sofiaOrchestrator";
+import { mirrorTaskToGitHub } from "./githubMissionMirror";
 
 /**
  * Sistema de Heartbeat e Monitoramento
@@ -12,6 +13,29 @@ import { SofiaOrchestrator } from "./sofiaOrchestrator";
  * 2. Gerar relatórios de contexto periodicamente
  * 3. Sincronizar com GitHub via PAT quando necessário
  */
+
+const GITHUB_MIRROR_RETRY_COOLDOWN_MS = 60_000;
+const GITHUB_MIRROR_RETRY_BATCH_SIZE = 10;
+
+type GitHubMirrorRetryTask = {
+  id: number;
+  missionKey?: string | null;
+  githubPath?: string | null;
+  githubSha?: string | null;
+  githubSyncStatus?: string | null;
+  updatedAt?: Date | null;
+};
+
+export function isGitHubMirrorRetryCandidate(
+  task: GitHubMirrorRetryTask,
+  nowMs = Date.now(),
+  hasGitHubPat = Boolean(process.env.GITHUB_PAT),
+): boolean {
+  if (!hasGitHubPat || (!task.missionKey && !task.githubPath)) return false;
+  if (task.githubSyncStatus === "synced" && task.githubPath && task.githubSha) return false;
+  const lastUpdate = task.updatedAt ? new Date(task.updatedAt).getTime() : 0;
+  return !lastUpdate || nowMs - lastUpdate >= GITHUB_MIRROR_RETRY_COOLDOWN_MS;
+}
 
 let heartbeatInterval: NodeJS.Timeout | null = null;
 let creditCheckInterval: NodeJS.Timeout | null = null;
@@ -28,6 +52,7 @@ export async function startHeartbeatSystem() {
     try {
       await checkAgentStatus();
       await dispatchWaitingTasks();
+      await reconcileGitHubMissionMirrors();
     } catch (error) {
       console.error("[Heartbeat] Erro ao verificar status:", error);
     }
@@ -102,6 +127,34 @@ export function isDispatchRetryCandidate(manusStatus: string | null | undefined)
   return manusStatus === "dispatch_pending"
     || manusStatus === "waiting_for_available_agent"
     || manusStatus === "waiting_for_pinned_agent";
+}
+
+async function reconcileGitHubMissionMirrors() {
+  if (!process.env.GITHUB_PAT) return;
+
+  try {
+    const tasks = await db.getAllTasksGlobal();
+    const candidates = tasks
+      .filter((task) => isGitHubMirrorRetryCandidate(task))
+      .slice(0, GITHUB_MIRROR_RETRY_BATCH_SIZE);
+
+    for (const task of candidates) {
+      try {
+        const mirror = await mirrorTaskToGitHub(task);
+        await db.updateTaskGitHubSync(task.id, {
+          missionKey: mirror.missionKey,
+          githubPath: mirror.path,
+          githubSha: mirror.sha,
+          githubSyncStatus: mirror.status,
+          githubSyncError: mirror.error ?? null,
+        });
+      } catch (error) {
+        console.error(`[Heartbeat] Falha ao reconciliar espelho GitHub da tarefa ${task.id}:`, error);
+      }
+    }
+  } catch (error) {
+    console.error("[Heartbeat] Erro ao reconciliar espelhos GitHub:", error);
+  }
 }
 
 async function dispatchWaitingTasks() {
