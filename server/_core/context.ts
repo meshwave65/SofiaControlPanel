@@ -44,17 +44,10 @@ function safeAuthDiagnosticError(error: unknown) {
     return { name: "UnknownError", message: "Unknown authentication error" };
   }
   const item = error as { name?: unknown; message?: unknown; status?: unknown; code?: unknown };
-  const message = typeof item.message === "string"
-    ? item.message
-        .replace(/Bearer\s+[^\s]+/gi, "Bearer [redacted]")
-        .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[redacted-email]")
-        .slice(0, 300)
-    : "Authentication failed";
   return {
     name: typeof item.name === "string" ? item.name.slice(0, 80) : "AuthError",
     status: typeof item.status === "number" ? item.status : null,
     code: typeof item.code === "string" ? item.code.slice(0, 100) : null,
-    message,
   };
 }
 
@@ -166,10 +159,8 @@ export async function createContext(
     }
   } catch (error) {
     // Public procedures remain available, but protected procedures fail closed.
-    console.warn(
-      "[Auth] Request authentication failed:",
-      error instanceof Error ? error.message : error
-    );
+    // Do not persist arbitrary provider/database error messages in backend logs.
+    console.warn("[Auth] Request authentication failed");
     user = null;
   }
 
