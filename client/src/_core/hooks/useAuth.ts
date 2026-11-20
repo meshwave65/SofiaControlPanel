@@ -104,7 +104,7 @@ export function useAuth() {
     } else if (backendAuth.isError) {
       recordAuthDiagnostic("backend.auth.me.failed", {
         errorCode: (backendAuth.error as { data?: { code?: string } }).data?.code ?? null,
-        errorName: backendAuth.error.name,
+        errorName: "TRPCClientError",
       });
     }
   }, [backendAuth.isSuccess, backendAuth.isError, backendAuth.data, backendAuth.error]);
