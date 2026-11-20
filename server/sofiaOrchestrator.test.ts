@@ -88,9 +88,9 @@ describe("SofiaOrchestrator.processTask", () => {
     const startedTask = { ...stagedTask, statusId: 2 };
     dbMock.getTaskById
       .mockResolvedValueOnce(stagedTask)
-      // syncTaskMirror reads the task after the status update, before the final result read.
-      .mockResolvedValueOnce(startedTask)
-      .mockResolvedValueOnce(startedTask);
+      // Factorization mirrors three child tasks, then the parent; the final read
+      // returns the updated parent task. Keep subsequent reads deterministic.
+      .mockResolvedValue(startedTask);
     dbMock.createTask
       .mockResolvedValueOnce([{ id: 11 }])
       .mockResolvedValueOnce([{ id: 12 }])
