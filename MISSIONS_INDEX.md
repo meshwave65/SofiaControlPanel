@@ -6,7 +6,7 @@ Este repositório contém duas séries diferentes de registros, além de artefat
 
 | Camada | Fonte de verdade | Local no GitHub | Quantidade atual | O que representa |
 | --- | --- | --- | ---: | --- |
-| Missões operacionais do painel | Supabase `sofia.tasks` | `missions/SCP-TASK-XXXXXX.md` | 29 registros, maior ID 31 | Tarefas/missões operacionais do SofiaControlPanel, incluindo relações pai-filho. |
+| Missões operacionais do painel | Supabase `sofia.tasks` | `missions/SCP-TASK-XXXXXX.md` | 43 registros, maior ID 48 | Tarefas/missões operacionais do SofiaControlPanel, incluindo relações pai-filho. |
 | Missões de governança | Documentação versionada | `governance/missions/<ID>/` | 27 IDs, 0001–0027 | Programas de trabalho, blueprints, gates, checkpoints e continuidade. |
 | Snapshots legados de governança | Histórico Git | raiz, `MISSION_*.md` | 47 arquivos | Cópias/status históricos mantidos por compatibilidade e rastreabilidade; não são missões novas. |
 | Artefatos de missão | Git | dentro de `governance/missions/<ID>/` | 115 arquivos | Blueprints, progresso, tarefas, checkpoints, evidências e relatórios. Não são missões adicionais. |
@@ -15,16 +15,12 @@ Este repositório contém duas séries diferentes de registros, além de artefat
 
 A série `SCP-TASK-*` é o espelho executável do painel. O Supabase é a fonte operacional; o GitHub registra contexto, proveniência e estado espelhado. A hierarquia documentada inclui:
 
-- Raízes: `2`, `3`, `7`, `12`, `16`, `17`, `18`, `25` e `27`.
-- Filhas de `3`: `4`, `5` e `6`.
-- Filha de `7`: `8`.
-- Filhas de `6`: `9`, `10` e `11`.
-- Filhas de `12`: `13`, `14` e `15`.
-- Filhas de `18`: `19`, `20` e `21`.
-- Filhas de `17`: `22`, `23` e `24`.
-- Filha de `25`: `26`.
+- Raízes: `2`, `3`, `7`, `12`, `16`, `17`, `18`, `25`, `27`, `32`, `36`, `37`, `38`, `39`, `43`, `44`, `45` e `46`.
+- Filhas de `3`: `4`, `5` e `6`; filha de `7`: `8`; filhas de `6`: `9`, `10` e `11`; filhas de `12`: `13`, `14` e `15`.
+- Filhas de `18`: `19`, `20` e `21`; filhas de `17`: `22`, `23` e `24`; filha de `25`: `26`.
+- Filhas de `27`: `29`, `30` e `31`; filhas de `37`: `40`, `41` e `42`; filhas de `46`: `47` e `48`.
 
-Os dados atuais do banco registram 29 tarefas operacionais e maior ID 31. Alguns registros ainda possuem sincronização pendente ou caminho GitHub ausente; não declarar sincronização integral sem reconciliação. Consulte [`missions/README.md`](missions/README.md) para o contrato operacional.
+A conciliação de 2026-11-20 vincula os 43 registros de `sofia.tasks` a 43 arquivos em `missions/`. O Supabase mantém `githubPath`, `githubSha`, `githubSyncStatus` e `githubSyncedAt` para rastrear cada espelho. Consulte [`missions/README.md`](missions/README.md) para o contrato operacional.
 
 ## 3. Missões de governança
 

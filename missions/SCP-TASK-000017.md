@@ -10,12 +10,12 @@
 | taskId | 17 |
 | source | SofiaControlPanel interface |
 | creatorType | user |
-| status | PAUSED |
-| statusId | 3 |
+| status | DONE |
+| statusId | 4 |
 | priority | Média |
 | parentTaskId | — |
 | githubPath | missions/SCP-TASK-000017.md |
-| githubSyncStatus | not_configured (registro não atualizado pela integração automática) |
+| githubSyncStatus | synced (reconciliado em 2026-11-20) |
 | Manus Task ID histórico | jBRYfAekVEyv269TeLJa8i |
 | Manus status histórico | stopped |
 | Créditos históricos | 179 |
@@ -36,7 +36,7 @@ A missão não cria uma base paralela de pessoas. Cada contato conserva seu mast
 
 | ID | Unidade | Estado atual | Execução externa histórica | Créditos históricos | Referência |
 |---:|---|---|---|---:|---|
-| 17 | Missão-pai | PAUSED | jBRYfAekVEyv269TeLJa8i (stopped) | 179 | OR-20261115-0051 |
+| 17 | Missão-pai | DONE | jBRYfAekVEyv269TeLJa8i (stopped) | 179 | OR-20261115-0051 |
 | 22 | Análise estrutural | DONE | 4au9cD8MgDrbgYKw89XWDb (stopped) | 98 | OR-20261113-0003 |
 | 23 | Análise operacional | DONE | YXHehMXwLV2M6AfjVCdmgj (stopped) | 52 | OR-20261114-0001 |
 | 24 | Análise estratégica | FAIL | 2PxVMeo3St9sCMrxGcpMDM (error) | 26 | OR-20261115-0051 |
@@ -49,6 +49,10 @@ A missão não cria uma base paralela de pessoas. Cada contato conserva seu mast
 - O TR retrospectivo v0.1.0 está aguardando validação humana; o Blueprint mestre ainda não foi derivado.
 - Não houve dispatch, chamada Manus, consumo adicional de créditos ou ação externa.
 
+## Snapshot de status reconciliado — 2026-11-20
+
+O registro atual em `sofia.tasks` informa `DONE` (statusId 4, concluído em 2026-11-16 10:34:41 UTC), substituindo o snapshot anterior `PAUSED`. O histórico da intervenção de 15/11 e do evento de retomada pendente de 16/11 permanece preservado em `sofia.activityLogs`. O TR retrospectivo continua em `AWAITING_HUMAN_VALIDATION`; o estado operacional DONE não é evidência de aprovação humana do TR.
+
 ## Documents
 
 - TR v0.1.0 DRAFT: missions/SCP-TASK-000017-TR-v0.1.0-DRAFT.md
@@ -59,7 +63,7 @@ A missão não cria uma base paralela de pessoas. Cada contato conserva seu mast
 
 ## Synchronization note
 
-O registro Supabase informa githubSyncStatus=not_configured e erro histórico de ausência de GITHUB_PAT no Render. Este espelho foi publicado diretamente no repositório para preservar a continuidade documental; não foi alterado o estado de sincronização no banco nem alegada sincronização automática.
+A ausência histórica de GITHUB_PAT no Render permanece registrada como causa da falha automática original. Este arquivo foi reconciliado com o estado atual do Supabase; o registro operacional passa a apontar para o SHA vigente do arquivo e para githubSyncStatus=synced.
 
 ## Governance decisions captured during lifecycle diagnosis — 2026-11-16
 

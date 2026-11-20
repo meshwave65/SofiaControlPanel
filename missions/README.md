@@ -1,13 +1,23 @@
 # `missions/` — espelho operacional do Supabase
 
-Este diretório contém somente os espelhos das tarefas/missões operacionais registradas em `sofia.tasks` no Supabase do projeto `ufylccbdjfzydbwhpmpp`.
+Este diretório contém os espelhos das tarefas/missões operacionais registradas em `sofia.tasks` no projeto Supabase `ufylccbdjfzydbwhpmpp`.
 
-No snapshot de 2026-11-14 existem 21 arquivos operacionais, entre os IDs 2 e 26; as lacunas são 17, 20, 21 e 24. Os espelhos `SCP-TASK-000022.md` e `SCP-TASK-000023.md` foram acrescentados em 13 e 14/11, respectivamente. Esses arquivos correspondem a registros operacionais do Supabase, não à série documental `MISSION_0001`–`MISSION_00023`; a presença ou ausência de um espelho não altera a fonte executável.
+**Snapshot de conciliação — 2026-11-20:** 43 registros operacionais no Supabase, com chaves até `SCP-TASK-000048`, e 43 arquivos de espelho neste diretório. O Supabase continua sendo a fonte executável; cada arquivo preserva proveniência, contexto e referência cruzada por `missionKey` e `githubPath`.
 
 ## Hierarquia atual
 
-As tarefas-raiz documentadas são 2, 3, 7, 12 e 16. As tarefas 4, 5 e 6 são filhas de 3; 8 é filha de 7; 9, 10 e 11 são filhas de 6; 13, 14 e 15 são filhas de 12; as tarefas 22 e 23 são filhas de 17 (cujo espelho permanece uma lacuna histórica).
+Raízes: 2, 3, 7, 12, 16, 17, 18, 25, 27, 32, 36, 37, 38, 39, 43, 44, 45 e 46.
 
-O Supabase é a fonte executável. Cada arquivo deve preservar `taskId`, `missionKey`, `parentTaskId`, status, prioridade, descrição e o caminho GitHub. Alterações de execução devem ser feitas no painel/Supabase e então espelhadas no arquivo. Editar Markdown manualmente não executa uma missão.
+- Filhas de 3: 4, 5 e 6; filha de 7: 8; filhas de 6: 9, 10 e 11; filhas de 12: 13, 14 e 15.
+- Filhas de 18: 19, 20 e 21; filhas de 17: 22, 23 e 24; filha de 25: 26.
+- Filhas de 27: 29, 30 e 31; filhas de 37: 40, 41 e 42; filhas de 46: 47 e 48.
 
-Missões de governança, blueprints, checkpoints, progresso e relatórios não devem ser colocados aqui. Eles ficam em `governance/missions/`. Consulte [`../MISSIONS_INDEX.md`](../MISSIONS_INDEX.md) para a visão completa e a distinção entre os namespaces.
+## Contrato de sincronização
+
+- Cada tarefa deve ter um arquivo `missions/SCP-TASK-XXXXXX.md`.
+- O Supabase registra `missionKey`, `githubPath`, `githubSha`, `githubSyncStatus` e `githubSyncedAt`.
+- Criação, fatoração e mudanças de estado devem atualizar o registro Supabase e o espelho GitHub.
+- O espelhamento automático do serviço Render depende de `GITHUB_PAT`; sem essa variável, o estado deve permanecer explicitamente `not_configured`, nunca ser apresentado como sincronizado.
+- Alterações manuais no Markdown não executam nem alteram o estado operacional da missão.
+
+Missões de governança, Blueprints, checkpoints e relatórios ficam em `governance/missions/`; não devem ser confundidos com a série operacional `SCP-TASK-*`. Consulte [`../MISSIONS_INDEX.md`](../MISSIONS_INDEX.md).

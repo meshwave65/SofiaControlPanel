@@ -1,6 +1,7 @@
 import * as db from "./db";
 import { Task } from "../drizzle/schema";
 import { createManusTask, getManusCheckpoint, sendManusMessage, syncAgentCredits } from "./manusExecutionService";
+import { mirrorTaskToGitHub } from "./githubMissionMirror";
 
 /**
  * Sofia Orchestrator v1.0
@@ -11,6 +12,24 @@ import { createManusTask, getManusCheckpoint, sendManusMessage, syncAgentCredits
 const STATUS_STAGED = "STAGED";
 const STATUS_PROGRESS = "PROGRESS";
 const STATUS_DONE = "DONE";
+
+async function syncTaskMirror(taskId: number) {
+  try {
+    const task = await db.getTaskById(taskId);
+    if (!task) return;
+    const mirror = await mirrorTaskToGitHub(task);
+    await db.updateTaskGitHubSync(taskId, {
+      missionKey: mirror.missionKey,
+      githubPath: mirror.path,
+      githubSha: mirror.sha,
+      githubSyncStatus: mirror.status,
+      githubSyncError: mirror.error ?? null,
+    });
+  } catch (error) {
+    console.error(`[Orchestrator] GitHub mirror failed for task ${taskId}:`, error);
+  }
+}
+
 
 export class SofiaOrchestrator {
   static async resumeCreditBlockedTasks() {
@@ -36,6 +55,7 @@ export class SofiaOrchestrator {
         await sendManusMessage(task, "Os créditos foram restaurados. Continue a missão a partir do último checkpoint, sem repetir o trabalho concluído.");
         await db.updateTaskExecution(task.id, { manusStatus: "running", completedAt: null });
         await db.updateTaskStatus(task.id, progressStatusId);
+        await syncTaskMirror(task.id);
         results.push({ taskId: task.id, action: task.agentPinned ? "resumed_pinned_agent" : "resumed_agent", agentId: current.id });
         continue;
       }
@@ -50,6 +70,7 @@ export class SofiaOrchestrator {
       await db.reassignTaskAgent(task.id, replacement.id);
       await createManusTask({ ...task, agentId: replacement.id }, checkpoint);
       await db.updateTaskStatus(task.id, progressStatusId);
+        await syncTaskMirror(task.id);
       results.push({ taskId: task.id, action: "transferred_after_credit_exhaustion", agentId: replacement.id });
     }
     return results;
@@ -137,6 +158,7 @@ export class SofiaOrchestrator {
 
       const insertId = (result as any)[0]?.id;
       if (insertId) {
+        await syncTaskMirror(insertId);
         subtaskIds.push(insertId);
         const eventType = await db.getOrCreateActivityEventType("task_factorization");
         await db.createActivityLog({
@@ -210,6 +232,7 @@ export class SofiaOrchestrator {
     }
 
     await db.updateTaskStatus(taskId, await db.getTaskStatusIdByName(STATUS_PROGRESS));
+    await syncTaskMirror(taskId);
     const updatedTask = await db.getTaskById(taskId);
 
     return {
@@ -275,6 +298,7 @@ export class SofiaOrchestrator {
     }));
 
     const claimedTask = await db.claimStagedTaskWithAvailableAgent(taskId, stagedStatusId, progressStatusId);
+    if (claimedTask) await syncTaskMirror(taskId);
 
     if (!claimedTask) {
       // The atomic claim returns null both when no agent is eligible and when
@@ -360,6 +384,7 @@ export class SofiaOrchestrator {
           completedAt: new Date(),
         });
         await db.updateTaskStatus(taskId, await db.getTaskStatusIdByName("FAIL"));
+        await syncTaskMirror(taskId);
         const eventType = await db.getOrCreateActivityEventType("task_execution_failed");
         await db.createActivityLog({
           agentId: task.agentId ?? null,

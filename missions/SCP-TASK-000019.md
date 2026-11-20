@@ -11,8 +11,8 @@
 | source | SofiaControlPanel interface |
 | creator | info@meshwave.com.br |
 | creatorType | user |
-| status | PROGRESS |
-| statusId | 2 |
+| status | DONE |
+| statusId | 4 |
 | priority | Crítica |
 | priorityId | 4 |
 | parentTaskId |  |
@@ -43,6 +43,10 @@ Corrigir estruturalmente o SofiaControlPanel para que mensagens enviadas pelo op
 - GitHub path: `missions/SCP-TASK-000019.md`
 - Alterações de execução e status devem ser persistidas no Supabase e espelhadas neste arquivo.
 - Alterações manuais neste arquivo não executam a missão automaticamente.
+
+## Status reconciliation — 2026-11-20
+
+O registro operacional atual em `sofia.tasks` informa `DONE` (statusId 4). O status `PROGRESS` deste espelho era um snapshot anterior e foi atualizado; as evidências históricas de implementação e testes abaixo foram preservadas sem alteração.
 
 ## Execution evidence
 
