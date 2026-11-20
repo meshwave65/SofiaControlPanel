@@ -49,7 +49,7 @@ const trpcClient = trpc.createClient({
           if (session?.access_token) {
             headers.set("Authorization", `Bearer ${session.access_token}`);
           }
-          if (isAuthDiagnosticEnabled()) {
+          if (isAuthMe && isAuthDiagnosticEnabled()) {
             headers.set("X-SCP-Auth-Diagnostic", getAuthDiagnosticCorrelationId());
           }
           const response = await globalThis.fetch(input, {
