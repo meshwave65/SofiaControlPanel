@@ -12,14 +12,14 @@
 | source | SofiaControlPanel interface |
 | creator | user:1425 |
 | creatorType | user |
-| status | PAUSED (gênese documental concluída; aguardando despacho) |
+| status | STAGED — TR validado e Blueprint READY; despacho automático solicitado |
 | priority | Crítica |
 | parentTaskId | — |
 | githubPath | missions/SCP-TASK-000051.md |
 
 ## Description
 
-Transformar a auditoria operacional do SCP de 20/11/2026 em correções verificáveis: diagnosticar/corrigir falha `invalid api key` no runtime; revalidar e corrigir RLS/exposição de dados pessoais na MW-Ex; conciliar banco e documentação; diagnosticar SCP-TASK-000024 e 000029 em FAIL; revisar PRs/rollouts MISSION_0020 e 0023; revisar fila STAGED/PAUSED; executar testes integrados e publicar FOR. TR v1 VALIDATED e Blueprint READY. Execução autônoma autorizada dentro dos limites de segurança, privacidade, integridade financeira e gates humanos preservados.
+Transformar a auditoria operacional do SCP de 20/11/2026 em correções verificáveis: diagnosticar/corrigir falha `invalid api key` no runtime; revalidar e corrigir RLS/exposição de dados pessoais na MW-Ex; conciliar banco e documentação; diagnosticar SCP-TASK-000024 e 000029 em FAIL; revisar PRs/rollouts MISSION_0020 e 0023; revisar fila STAGED/PAUSED; executar testes integrados e publicar FOR. TR v1 VALIDATED e Blueprint READY, com vínculo explícito à versão 49 do TR. Execução autônoma autorizada dentro dos limites de segurança, privacidade, integridade financeira e gates humanos preservados.
 
 ## Synchronization contract
 
