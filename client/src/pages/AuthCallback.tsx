@@ -43,8 +43,6 @@ export default function AuthCallback() {
         return;
       }
 
-      if (error) recordAuthDiagnostic("oauth.callback.provider_error");
-
       let session: Session | null = null;
 
       if (code) {
