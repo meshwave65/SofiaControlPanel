@@ -1701,7 +1701,12 @@ export const appRouter = router({
   // MESSAGES ROUTER
   // ============================================
   messages: router({
-    types: protectedProcedure.query(async () => db.getAllMessageTypes()),
+    types: protectedProcedure
+      .input(z.object({
+        context: z.enum(["general", "mission"]),
+        hasParent: z.boolean().default(false),
+      }))
+      .query(async ({ input }) => db.getMessageTypesByContext(input.context, input.hasParent)),
 
     getGeneral: protectedProcedure.query(async ({ ctx }) =>
       ctx.user.role === "admin" ? db.getAllGeneralMessages(500) : db.getMessagesByOwner(ctx.user.id, null, 200)
@@ -1717,6 +1722,9 @@ export const appRouter = router({
         const messageType = await db.getMessageTypeById(input.typeId);
         if (!messageType) {
           throw new TRPCError({ code: "BAD_REQUEST", message: "Tipo de interação inválido." });
+        }
+        if (!messageType.isUserSelectable || !messageType.contexts.includes("general")) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Este tipo de interação não está disponível na conversa geral." });
         }
         if (messageType.name.toLowerCase() === "reply" && input.parentMessageId === undefined) {
           throw new TRPCError({ code: "BAD_REQUEST", message: "Uma resposta precisa estar vinculada à mensagem original." });
@@ -1859,6 +1867,9 @@ export const appRouter = router({
         const messageType = await db.getMessageTypeById(input.typeId);
         if (!messageType) {
           throw new TRPCError({ code: "BAD_REQUEST", message: "Tipo de mensagem inválido." });
+        }
+        if (!messageType.isUserSelectable || !messageType.contexts.includes("mission")) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Este tipo de mensagem não está disponível no contexto de missão." });
         }
         if (messageType.name.toLowerCase() === "createtask") {
           throw new TRPCError({ code: "BAD_REQUEST", message: "Solicitações de criação de missão devem ser registradas na conversa geral, sem taskId." });
