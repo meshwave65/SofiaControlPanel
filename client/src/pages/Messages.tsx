@@ -21,16 +21,7 @@ import {
   X,
 } from "lucide-react";
 
-type InteractionType = "message" | "order" | "reply" | "report" | "create-task";
 type TaskStatus = "open" | "in_progress" | "on_hold" | "done";
-
-const interactionTypes: { value: InteractionType; label: string }[] = [
-  { value: "message", label: "Mensagem" },
-  { value: "order", label: "Ordem" },
-  { value: "reply", label: "Resposta" },
-  { value: "report", label: "Relatório" },
-  { value: "create-task", label: "Criar missão" },
-];
 
 const taskStatuses: { value: TaskStatus; label: string }[] = [
   { value: "open", label: "Open" },
@@ -43,7 +34,7 @@ export default function Messages() {
   const { isAuthenticated, user } = useAuth();
   const [, navigate] = useLocation();
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
-  const [interactionType, setInteractionType] = useState<InteractionType>("message");
+  const [selectedMessageTypeId, setSelectedMessageTypeId] = useState<number | null>(null);
   const [selectedParentMessageId, setSelectedParentMessageId] = useState<number | null>(null);
   const [taskStatus, setTaskStatus] = useState<TaskStatus>("open");
   const [messageContent, setMessageContent] = useState("");
@@ -57,7 +48,11 @@ export default function Messages() {
     refetchInterval: 15000,
   });
 
-  const messageTypesQuery = trpc.messages.types.useQuery(undefined, {
+  const messageContext = selectedTaskId === null ? "general" : "mission";
+  const messageTypesQuery = trpc.messages.types.useQuery({
+    context: messageContext,
+    hasParent: selectedParentMessageId !== null,
+  }, {
     enabled: isAuthenticated,
     refetchInterval: (query) => query.state.data?.length ? false : 3000,
   });
@@ -101,6 +96,13 @@ export default function Messages() {
     ? generalMessagesQuery.data || []
     : taskMessagesQuery.data || [];
   const selectedParentMessage = messages.find((message: any) => message.id === selectedParentMessageId);
+  const availableMessageTypes = messageTypesQuery.data || [];
+  const selectedMessageType = availableMessageTypes.find((type: any) => type.id === selectedMessageTypeId)
+    ?? (selectedParentMessageId !== null
+      ? availableMessageTypes.find((type: any) => String(type.name).toLowerCase() === "reply")
+      : undefined)
+    ?? availableMessageTypes.find((type: any) => String(type.name).toLowerCase() === "message")
+    ?? availableMessageTypes[0];
 
   const selectedTask = tasks.find((task: any) => task.id === selectedTaskId);
   const filteredTasks = useMemo(() => {
@@ -115,7 +117,7 @@ export default function Messages() {
   const resetComposer = () => {
     setMessageContent("");
     setAttachments([]);
-    setInteractionType("message");
+    setSelectedMessageTypeId(null);
     setSelectedParentMessageId(null);
     setTaskStatus("open");
     setEditorMode("create");
@@ -141,34 +143,23 @@ export default function Messages() {
       toast.error("Digite o conteúdo da interação.");
       return;
     }
-    if (interactionType === "create-task" && selectedTaskId !== null) {
+    if (!selectedMessageType) {
+      toast.error("Não há tipos de interação disponíveis neste contexto.");
+      return;
+    }
+
+    const normalizedTypeName = String(selectedMessageType.name).toLowerCase().replace(/[\\s_-]/g, "");
+    if (normalizedTypeName === "createtask" && selectedTaskId !== null) {
       toast.error("Solicitações de criação de missão devem ser enviadas pela Conversa geral.");
       return;
     }
-    if (interactionType === "reply" && selectedParentMessageId === null) {
+    if (normalizedTypeName === "reply" && selectedParentMessageId === null) {
       toast.error("Selecione a mensagem original que receberá esta resposta.");
       return;
     }
 
-    const names: Record<InteractionType, string[]> = {
-      message: ["message", "question"],
-      order: ["order", "instruction"],
-      reply: ["reply"],
-      report: ["report"],
-      "create-task": ["createtask", "create_task", "create task"],
-    };
-    const accepted = names[interactionType];
-    const messageType = (messageTypesQuery.data || []).find((item: any) =>
-      accepted.includes(String(item.name).toLowerCase().replace(/\s+/g, " ").trim())
-      || accepted.includes(String(item.name).toLowerCase().replace(/[\s_-]/g, ""))
-    );
-    if (!messageType) {
-      toast.error("O tipo de interação ainda não está cadastrado. Atualize a página e tente novamente.");
-      return;
-    }
-
     const payload = {
-      typeId: messageType.id,
+      typeId: selectedMessageType.id,
       content: messageContent.trim(),
       ...(selectedParentMessageId !== null ? { parentMessageId: selectedParentMessageId } : {}),
     };
@@ -331,19 +322,20 @@ export default function Messages() {
             <label className="flex flex-col gap-1.5">
               <span className="text-xs font-medium text-muted-foreground">Tipo de interação</span>
               <select
-                value={interactionType}
+                value={selectedMessageType ? String(selectedMessageType.id) : ""}
                 onChange={(event) => {
-                  const nextType = event.target.value as InteractionType;
-                  setInteractionType(nextType);
-                  if (nextType === "create-task") {
+                  const nextType = availableMessageTypes.find((type: any) => type.id === Number(event.target.value));
+                  setSelectedMessageTypeId(nextType?.id ?? null);
+                  if (String(nextType?.name).toLowerCase().replace(/[\\s_-]/g, "") === "createtask") {
                     setSelectedTaskId(null);
                     setSelectedParentMessageId(null);
                   }
                 }}
-                className="h-10 w-full rounded-md border bg-background px-3 text-sm outline-none focus:border-primary"
+                disabled={messageTypesQuery.isLoading || availableMessageTypes.length === 0}
+                className="h-10 w-full rounded-md border bg-background px-3 text-sm outline-none focus:border-primary disabled:opacity-50"
               >
-                {interactionTypes.map((type) => (
-                  <option key={type.value} value={type.value}>{type.label}</option>
+                {availableMessageTypes.map((type: any) => (
+                  <option key={type.id} value={type.id}>{type.uiLabel || type.name}</option>
                 ))}
               </select>
             </label>
@@ -379,7 +371,7 @@ export default function Messages() {
                       <div key={message.id} className={`rounded-lg border p-3 ${message.isAssistant ? "bg-muted/40" : "bg-background"}`}>
                         <div className="mb-1 flex items-center justify-between gap-2">
                           <span className="text-[11px] font-semibold">{message.isAssistant ? "SOFIA" : "Operador"}{user?.role === "admin" ? ` · Conta #${message.senderId}` : ""} · #{message.id}</span>
-                          <button type="button" disabled={message.senderId !== user?.id} onClick={() => { setSelectedParentMessageId(message.id); setInteractionType("reply"); }} className="text-[11px] font-medium text-primary hover:underline disabled:cursor-not-allowed disabled:opacity-40">Responder</button>
+                          <button type="button" disabled={message.senderId !== user?.id} onClick={() => { setSelectedParentMessageId(message.id); setSelectedMessageTypeId(null); }} className="text-[11px] font-medium text-primary hover:underline disabled:cursor-not-allowed disabled:opacity-40">Responder</button>
                         </div>
                         <p className="whitespace-pre-wrap text-xs leading-5">{message.content}</p>
                       </div>
@@ -426,8 +418,8 @@ export default function Messages() {
                 </div>
                 <Button type="button" onClick={handlePrepare} disabled={createGeneralMessage.isPending || createMissionMessage.isPending}>
                   <Send className="mr-2 h-4 w-4" /> {createGeneralMessage.isPending || createMissionMessage.isPending
-                    ? (interactionType === "create-task" ? "Criando missão..." : "Enviando...")
-                    : interactionType === "create-task" ? "Criar missão" : "Enviar mensagem"}
+                    ? (String(selectedMessageType?.name).toLowerCase().replace(/[\\s_-]/g, "") === "createtask" ? "Criando missão..." : "Enviando...")
+                    : String(selectedMessageType?.name).toLowerCase().replace(/[\\s_-]/g, "") === "createtask" ? "Criar missão" : "Enviar mensagem"}
                 </Button>
               </div>
 
