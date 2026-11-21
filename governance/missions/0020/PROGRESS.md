@@ -148,4 +148,5 @@ O responsável esclareceu que deseja separar esta conversa Manus do runtime da U
 - Backend filtra e valida tipos por contexto; UI consulta o catálogo correspondente e atualiza as opções quando o operador muda de conversa geral para missão ou seleciona uma mensagem para resposta.
 - O bootstrap `ensure-database.mjs` executa a migration de forma idempotente; CI inclui fixture e verificação PostgreSQL específica.
 - **Limite:** não foi criado endpoint público de ingestão externa. O campo `origin=external` pode ser atribuído por um adaptador interno confiável; integração externa autenticada continua sendo etapa separada.
-- **Validação pendente:** workflow da PR #33 ainda em execução/aguardando resultado. Sem merge, deploy, alteração Render ou teste visual autenticado.
+- **Validação CI:** run 44914924408 concluído SUCCESS; TypeScript, testes unitários, build de produção, migration 0016, assertions PostgreSQL de contexto/origem e testes existentes de dispatch aprovados.
+- **Estado de release:** PR #33 permanece OPEN. Sem merge, deploy, alteração Render ou teste visual autenticado.
