@@ -6,6 +6,7 @@ const dbMock = vi.hoisted(() => ({
   getMessageByIdForTask: vi.fn(),
   getMessageByIdForOwner: vi.fn(),
   getAllMessageTypes: vi.fn(),
+  getMessageTypesByContext: vi.fn(),
   getMessagesByOwner: vi.fn(),
   getMessagesByParentIdForOwner: vi.fn(),
   getAllGeneralMessages: vi.fn(),
@@ -72,8 +73,8 @@ describe("messages.create — persistência e resposta Sofia", () => {
       agentId: null,
       manusTaskId: null,
     });
-    dbMock.getMessageTypeById.mockResolvedValue({ id: 1, name: "Instruction" });
-    dbMock.getAllMessageTypes.mockResolvedValue([{ id: 2, name: "Reply" }]);
+    dbMock.getMessageTypeById.mockResolvedValue({ id: 1, name: "Order", contexts: ["mission"], isUserSelectable: true });
+    dbMock.getAllMessageTypes.mockResolvedValue([{ id: 2, name: "Reply", contexts: ["general", "mission"], isUserSelectable: true }]);
     dbMock.getMessageByIdForOwner.mockResolvedValue({ id: 50, taskId: 19, senderId: 152, isAssistant: true });
     dbMock.getMessagesByOwner.mockResolvedValue([
       { id: 100, taskId: 19, senderId: 152, content: "confirmar canal", isAssistant: false },
@@ -90,6 +91,36 @@ describe("messages.create — persistência e resposta Sofia", () => {
     invokeLLMMock.mockResolvedValue({
       choices: [{ message: { role: "assistant", content: "Canal confirmado." } }],
     });
+  });
+
+  it("retorna apenas os tipos permitidos para o contexto solicitado", async () => {
+    const allowedTypes = [{ id: 5, name: "Order", uiLabel: "Ordem", contexts: ["mission"], isUserSelectable: true }];
+    dbMock.getMessageTypesByContext.mockResolvedValue(allowedTypes);
+
+    const result = await appRouter.createCaller(context).messages.types({
+      context: "mission",
+      hasParent: false,
+    });
+
+    expect(dbMock.getMessageTypesByContext).toHaveBeenCalledWith("mission", false);
+    expect(result).toEqual(allowedTypes);
+  });
+
+  it("rejeita na conversa geral um tipo reservado ao contexto de missão", async () => {
+    dbMock.getMessageTypeById.mockResolvedValue({
+      id: 5,
+      name: "Order",
+      contexts: ["mission"],
+      isUserSelectable: true,
+    });
+
+    await expect(appRouter.createCaller(context).messages.createGeneral({
+      typeId: 5,
+      content: "Ordem fora do contexto de missão",
+    })).rejects.toMatchObject({ code: "BAD_REQUEST" });
+
+    expect(dbMock.createMessage).not.toHaveBeenCalled();
+    expect(invokeLLMMock).not.toHaveBeenCalled();
   });
 
   it("pausa a tarefa local somente após confirmação externa sem jobs em background", async () => {
@@ -686,11 +717,11 @@ describe("messages.create — persistência e resposta Sofia", () => {
 
   it("persiste conversa geral com taskId nulo e vincula a resposta à conta autenticada", async () => {
     dbMock.createMessage.mockReset();
-    dbMock.getMessageTypeById.mockResolvedValue({ id: 5, name: "Message" });
+    dbMock.getMessageTypeById.mockResolvedValue({ id: 5, name: "Message", contexts: ["general", "mission"], isUserSelectable: true });
     dbMock.getMessagesByOwner.mockResolvedValue([
       { id: 201, taskId: null, senderId: 152, content: "Quantas missões estão pausadas?", isAssistant: false },
     ]);
-    dbMock.getAllMessageTypes.mockResolvedValue([{ id: 6, name: "Reply" }]);
+    dbMock.getAllMessageTypes.mockResolvedValue([{ id: 6, name: "Reply", contexts: ["general", "mission"], isUserSelectable: true }]);
     dbMock.createMessage
       .mockResolvedValueOnce({ id: 201, taskId: null, senderId: 152, content: "Quantas missões estão pausadas?", isAssistant: false })
       .mockResolvedValueOnce({ id: 202, taskId: null, senderId: 152, parentMessageId: 201, content: "Há duas missões pausadas.", isAssistant: true });
@@ -721,7 +752,7 @@ describe("messages.create — persistência e resposta Sofia", () => {
 
   it("usa snapshot somente leitura e distingue missões-raiz de tarefas-filhas", async () => {
     dbMock.createMessage.mockReset();
-    dbMock.getMessageTypeById.mockResolvedValue({ id: 5, name: "Message" });
+    dbMock.getMessageTypeById.mockResolvedValue({ id: 5, name: "Message", contexts: ["general", "mission"], isUserSelectable: true });
     dbMock.getMessagesByOwner.mockResolvedValue([
       { id: 201, taskId: null, senderId: 152, content: "Quantas missões estão pausadas?", isAssistant: false },
     ]);
@@ -731,7 +762,7 @@ describe("messages.create — persistência e resposta Sofia", () => {
       { id: 3, title: "Missão em andamento", statusId: 2, parentTaskId: null },
     ]);
     dbMock.getTaskStatusNameById.mockImplementation(async (id: number) => id === 3 ? "PAUSED" : "PROGRESS");
-    dbMock.getAllMessageTypes.mockResolvedValue([{ id: 6, name: "Reply" }]);
+    dbMock.getAllMessageTypes.mockResolvedValue([{ id: 6, name: "Reply", contexts: ["general", "mission"], isUserSelectable: true }]);
     dbMock.createMessage
       .mockResolvedValueOnce({ id: 201, taskId: null, senderId: 152, content: "Quantas missões estão pausadas?", isAssistant: false })
       .mockResolvedValueOnce({ id: 202, taskId: null, senderId: 152, parentMessageId: 201, content: "Uma missão está pausada.", isAssistant: true });

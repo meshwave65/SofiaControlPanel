@@ -84,6 +84,14 @@ try {
     sql.unsafe(messageContextMigration),
   );
 
+  const messageTypeContextMigration = await readFile(
+    new URL("../drizzle/0016_message_type_context_and_origin.sql", import.meta.url),
+    "utf8",
+  );
+  await runStep("Configure message types by context and message origin", () =>
+    sql.unsafe(messageTypeContextMigration),
+  );
+
   console.log("[Database] Execution columns verified successfully");
   console.log("[Database] Automatic task dispatch trigger verified successfully");
 } catch (error) {

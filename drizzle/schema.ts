@@ -158,6 +158,9 @@ export type InsertTask = typeof tasks.$inferInsert;
 export const messageTypes = sofia.table("messageTypes", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
   name: varchar("name", { length: 64 }).notNull().unique(),
+  uiLabel: varchar("uiLabel", { length: 80 }),
+  contexts: varchar("contexts", { length: 16 }).array().notNull().default(["general", "mission"]),
+  isUserSelectable: boolean("isUserSelectable").default(true).notNull(),
   description: text("description"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
@@ -174,6 +177,7 @@ export const messages = sofia.table(
     senderId: integer("senderId").notNull(),
     parentMessageId: integer("parentMessageId"),
     typeId: integer("typeId").notNull(),
+    origin: varchar("origin", { length: 16 }).default("internal").notNull(),
     content: text("content").notNull(),
     isAssistant: boolean("isAssistant").default(false).notNull(),
     isRead: boolean("isRead").default(false).notNull(),

@@ -38,7 +38,7 @@ jobs:
         run: pnpm build
 
   migration:
-    name: PostgreSQL migrations 0010–0015 and dispatch boundary
+    name: PostgreSQL migrations 0010–0016 and dispatch boundary
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -82,6 +82,14 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: psql -h localhost -U postgres -d sofia_migration_test -v ON_ERROR_STOP=1 -f drizzle/0015_message_general_context.sql
+      - name: Apply migration 0016 to disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d sofia_migration_test -v ON_ERROR_STOP=1 -f drizzle/0016_message_type_context_and_origin.sql
+      - name: Verify context-aware message types and external origin
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d sofia_migration_test -v ON_ERROR_STOP=1 -f scripts/ci/message-type-context-test.sql
       - name: Verify general messages allow NULL taskId
         env:
           PGPASSWORD: postgres

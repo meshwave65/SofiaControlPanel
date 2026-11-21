@@ -38,6 +38,16 @@ CREATE TABLE sofia.tasks (
 INSERT INTO sofia."taskStatuses" (name)
 VALUES ('STAGED'), ('PROGRESS'), ('PAUSED');
 
+CREATE TABLE sofia."messageTypes" (
+  id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  name varchar(64) NOT NULL UNIQUE,
+  description text,
+  "createdAt" timestamp NOT NULL DEFAULT now()
+);
+
+INSERT INTO sofia."messageTypes" (name)
+VALUES ('Instruction'), ('Report'), ('Question'), ('Message'), ('Order'), ('Reply'), ('CreateTask');
+
 CREATE TABLE sofia.messages (
   id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   "taskId" integer NOT NULL REFERENCES sofia.tasks(id),
