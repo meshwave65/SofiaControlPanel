@@ -992,7 +992,7 @@ export async function listArcConfidenceSnapshotsByTask(taskId: number, ownerId: 
 // MESSAGES HELPERS
 // ============================================
 
-export async function createMessage(data: { taskId?: number | null; senderId: number; parentMessageId?: number; typeId: number; content: string; isAssistant?: boolean }) {
+export async function createMessage(data: { taskId?: number | null; senderId: number; parentMessageId?: number; typeId: number; content: string; isAssistant?: boolean; origin?: "internal" | "external" }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
@@ -1004,6 +1004,15 @@ export async function getAllMessageTypes() {
   const database = await getDb();
   if (!database) return [];
   return database.select().from(messageTypes).orderBy(asc(messageTypes.id));
+}
+
+export async function getMessageTypesByContext(context: "general" | "mission", hasParent = false) {
+  const types = await getAllMessageTypes();
+  return types.filter((type) =>
+    type.isUserSelectable
+    && type.contexts.includes(context)
+    && (hasParent || type.name.toLowerCase() !== "reply")
+  );
 }
 
 export async function getAllGeneralMessages(limit = 200) {
@@ -1228,8 +1237,26 @@ export async function getOrCreateMessageType(name: string) {
   const existing = await db.select().from(messageTypes).where(eq(messageTypes.name, name)).limit(1);
   if (existing.length > 0) return existing[0];
 
-  const result = await db.insert(messageTypes).values({ name }).returning({ id: messageTypes.id });
-  return { id: result[0].id, name };
+  const definitions: Record<string, {
+    uiLabel: string;
+    contexts: ("general" | "mission")[];
+    isUserSelectable: boolean;
+  }> = {
+    Instruction: { uiLabel: "Instrução", contexts: ["mission"], isUserSelectable: false },
+    Report: { uiLabel: "Relatório", contexts: ["mission"], isUserSelectable: true },
+    Question: { uiLabel: "Pergunta", contexts: ["general", "mission"], isUserSelectable: true },
+    Message: { uiLabel: "Mensagem", contexts: ["general", "mission"], isUserSelectable: true },
+    Order: { uiLabel: "Ordem", contexts: ["mission"], isUserSelectable: true },
+    Reply: { uiLabel: "Resposta", contexts: ["general", "mission"], isUserSelectable: true },
+    CreateTask: { uiLabel: "Criar missão", contexts: ["general"], isUserSelectable: true },
+  };
+  const definition = definitions[name] ?? {
+    uiLabel: name,
+    contexts: ["general", "mission"] as ("general" | "mission")[],
+    isUserSelectable: true,
+  };
+  const result = await db.insert(messageTypes).values({ name, ...definition }).returning({ id: messageTypes.id });
+  return { id: result[0].id, name, ...definition };
 }
 
 export async function getOrCreateActivityEventType(name: string) {
