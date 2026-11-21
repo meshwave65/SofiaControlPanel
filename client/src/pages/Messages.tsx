@@ -148,7 +148,7 @@ export default function Messages() {
       return;
     }
 
-    const normalizedTypeName = String(selectedMessageType.name).toLowerCase().replace(/[\\s_-]/g, "");
+    const normalizedTypeName = String(selectedMessageType.name).toLowerCase().replace(/[\s_-]/g, "");
     if (normalizedTypeName === "createtask" && selectedTaskId !== null) {
       toast.error("Solicitações de criação de missão devem ser enviadas pela Conversa geral.");
       return;
@@ -226,7 +226,11 @@ export default function Messages() {
             <div className="space-y-1 p-2">
               <button
                 type="button"
-                onClick={() => setSelectedTaskId(null)}
+                onClick={() => {
+                  setSelectedTaskId(null);
+                  setSelectedParentMessageId(null);
+                  setSelectedMessageTypeId(null);
+                }}
                 className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition-colors ${selectedTaskId === null ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"}`}
               >
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
@@ -310,7 +314,11 @@ export default function Messages() {
               <span className="text-xs font-medium text-muted-foreground">Missão / tarefa (opcional)</span>
               <select
                 value={selectedTaskId === null ? "" : String(selectedTaskId)}
-                onChange={(event) => setSelectedTaskId(event.target.value ? Number(event.target.value) : null)}
+                onChange={(event) => {
+                  setSelectedTaskId(event.target.value ? Number(event.target.value) : null);
+                  setSelectedParentMessageId(null);
+                  setSelectedMessageTypeId(null);
+                }}
                 className="h-10 w-full rounded-md border bg-background px-3 text-sm outline-none focus:border-primary"
               >
                 <option value="">Conversa geral — sem vínculo</option>
@@ -326,7 +334,7 @@ export default function Messages() {
                 onChange={(event) => {
                   const nextType = availableMessageTypes.find((type: any) => type.id === Number(event.target.value));
                   setSelectedMessageTypeId(nextType?.id ?? null);
-                  if (String(nextType?.name).toLowerCase().replace(/[\\s_-]/g, "") === "createtask") {
+                  if (String(nextType?.name).toLowerCase().replace(/[\s_-]/g, "") === "createtask") {
                     setSelectedTaskId(null);
                     setSelectedParentMessageId(null);
                   }
@@ -418,8 +426,8 @@ export default function Messages() {
                 </div>
                 <Button type="button" onClick={handlePrepare} disabled={createGeneralMessage.isPending || createMissionMessage.isPending}>
                   <Send className="mr-2 h-4 w-4" /> {createGeneralMessage.isPending || createMissionMessage.isPending
-                    ? (String(selectedMessageType?.name).toLowerCase().replace(/[\\s_-]/g, "") === "createtask" ? "Criando missão..." : "Enviando...")
-                    : String(selectedMessageType?.name).toLowerCase().replace(/[\\s_-]/g, "") === "createtask" ? "Criar missão" : "Enviar mensagem"}
+                    ? (String(selectedMessageType?.name).toLowerCase().replace(/[\s_-]/g, "") === "createtask" ? "Criando missão..." : "Enviando...")
+                    : String(selectedMessageType?.name).toLowerCase().replace(/[\s_-]/g, "") === "createtask" ? "Criar missão" : "Enviar mensagem"}
                 </Button>
               </div>
 
