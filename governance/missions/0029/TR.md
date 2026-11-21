@@ -2,7 +2,7 @@
 ## Identidade, autenticação e autorização segura do SCP
 
 **Estado:** DRAFT — abertura e escopo inicial autorizados; arquitetura ainda não aprovada.
-**Tarefa-raiz:** SCP-TASK-000052.
+**Tarefa-raiz:** SCP-TASK-000053.
 **Data:** 21/11/2026.
 **Relação:** dependência potencial da MISSION_0020 / Unidade 20.4.5; escopos independentes.
 
