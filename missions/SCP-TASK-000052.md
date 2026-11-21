@@ -12,7 +12,7 @@
 | source | SOFIA conversation — explicit human authorization |
 | creator | user:152 |
 | creatorType | user |
-| status | STAGED |
+| status | PAUSED — aguardando TR VALIDATED e Blueprint READY para elegibilidade de despacho |
 | priority | Crítica |
 | parentTaskId | — |
 | githubPath | missions/SCP-TASK-000052.md |
