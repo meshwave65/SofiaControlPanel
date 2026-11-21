@@ -137,3 +137,15 @@ O responsável esclareceu que deseja separar esta conversa Manus do runtime da U
 - Testes mockados do adapter: 6/6; suíte: 11 arquivos/83 testes; `pnpm check`, `pnpm build` e checks remotos da PR no commit `bbc32cd` aprovados.
 - Nenhuma chave real foi lida, nenhuma chamada Groq/LLM feita, nenhuma variável Render alterada e nenhum deploy/merge realizado. Para a UI começar a usar Groq após integração e release autorizados, ainda será preciso configurar `LLM_PROVIDER=groq` no Render; salvar apenas a chave não altera a rota.
 - Não houve validação de qualidade em português, custo/cotas, latência ou retenção de dados. Ver P20.4.3-A no OR-0005; a prova funcional live continua pendente de autorização específica.
+
+## Incremento 20.4.4 — Tipos de mensagem por contexto e origem externa
+
+- O operador autorizou adequar o catálogo do Messenger ao contexto da conversa, mantendo opções internas fora do dropdown, e distinguir origem externa da natureza semântica da mensagem.
+- Implementação na branch `feat/message-context-and-origin`, PR #33: https://github.com/meshwave65/SofiaControlPanel/pull/33.
+- `sofia.messageTypes` recebeu `uiLabel`, `contexts` e `isUserSelectable`; catálogo atual configurado com Mensagem/Pergunta nos dois contextos, Criar missão apenas na conversa geral, Ordem/Relatório apenas em missão, Resposta nos dois contextos quando há mensagem-pai, e Instrução mantida como tipo interno não selecionável.
+- `sofia.messages` recebeu `origin` com default `internal` e valores aceitos `internal/external`. A origem não é informada pelo dropdown nem aceita nas rotas protegidas comuns.
+- A migration `0016_message_type_context_and_origin.sql` foi aplicada ao projeto Supabase MeshWave65 e a consulta posterior confirmou as sete classificações e as quatro colunas novas.
+- Backend filtra e valida tipos por contexto; UI consulta o catálogo correspondente e atualiza as opções quando o operador muda de conversa geral para missão ou seleciona uma mensagem para resposta.
+- O bootstrap `ensure-database.mjs` executa a migration de forma idempotente; CI inclui fixture e verificação PostgreSQL específica.
+- **Limite:** não foi criado endpoint público de ingestão externa. O campo `origin=external` pode ser atribuído por um adaptador interno confiável; integração externa autenticada continua sendo etapa separada.
+- **Validação pendente:** workflow da PR #33 ainda em execução/aguardando resultado. Sem merge, deploy, alteração Render ou teste visual autenticado.
