@@ -100,6 +100,7 @@ export const tasks = sofia.table(
     agentId: integer("agentId"),
     agentPinned: boolean("agentPinned").default(false).notNull(),
     createdBy: integer("createdBy").notNull(),
+    ownerUserId: integer("ownerUserId"),
     creatorType: varchar("creatorType", { length: 16 }).default("user").notNull(),
     missionKey: varchar("missionKey", { length: 64 }).unique(),
     githubPath: varchar("githubPath", { length: 512 }),
@@ -125,6 +126,11 @@ export const tasks = sofia.table(
     agentIdIdx: index("tasks_agentId_idx").on(table.agentId),
     statusIdIdx: index("tasks_statusId_idx").on(table.statusId),
     createdByIdx: index("tasks_createdBy_idx").on(table.createdBy),
+    ownerUserIdIdx: index("tasks_ownerUserId_idx").on(table.ownerUserId),
+    ownerUserIdFk: foreignKey({
+      columns: [table.ownerUserId],
+      foreignColumns: [users.id],
+    }).onDelete("restrict"),
     agentIdFk: foreignKey({
       columns: [table.agentId],
       foreignColumns: [agents.id],
@@ -486,6 +492,7 @@ export type InsertArcConfidenceSnapshot = typeof arcConfidenceSnapshots.$inferIn
 export const usersRelations = relations(users, ({ many }) => ({
   agents: many(agents),
   tasksCreated: many(tasks, { relationName: "createdBy" }),
+  tasksOwned: many(tasks, { relationName: "ownerUserId" }),
   messages: many(messages),
   contextReports: many(contextReports),
   activityLogs: many(activityLogs),
@@ -518,6 +525,11 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
     fields: [tasks.createdBy],
     references: [users.id],
     relationName: "createdBy",
+  }),
+  owner: one(users, {
+    fields: [tasks.ownerUserId],
+    references: [users.id],
+    relationName: "ownerUserId",
   }),
   status: one(taskStatuses, {
     fields: [tasks.statusId],
