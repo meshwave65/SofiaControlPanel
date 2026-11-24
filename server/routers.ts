@@ -562,7 +562,7 @@ export const appRouter = router({
     documents: router({
       list: protectedProcedure.input(z.object({ taskId: z.number().int().positive() })).query(async ({ input, ctx }) => {
         const task = await db.getTaskById(input.taskId);
-        if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+        if (!task || (task.createdBy !== ctx.user.id && task.creatorType !== "system" && ctx.user.role !== "admin")) throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
         const missionRootId = await db.getMissionRootTaskId(input.taskId);
         if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
         return db.getMissionDocumentsForTask(missionRootId, ctx.user.id, ctx.user.role === "admin");
@@ -755,7 +755,7 @@ export const appRouter = router({
       getVersion: protectedProcedure.input(z.object({ taskId: z.number().int().positive(), documentId: z.number().int().positive(), version: z.number().int().positive() }))
         .query(async ({ input, ctx }) => {
           const task = await db.getTaskById(input.taskId);
-          if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+          if (!task || (task.createdBy !== ctx.user.id && task.creatorType !== "system" && ctx.user.role !== "admin")) throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
           const missionRootId = await db.getMissionRootTaskId(input.taskId);
           if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
           const result = await db.getMissionDocumentVersionForTask(missionRootId, input.documentId, input.version, ctx.user.id, ctx.user.role === "admin");
@@ -765,7 +765,7 @@ export const appRouter = router({
       history: protectedProcedure.input(z.object({ taskId: z.number().int().positive(), documentId: z.number().int().positive() }))
         .query(async ({ input, ctx }) => {
           const task = await db.getTaskById(input.taskId);
-          if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+          if (!task || (task.createdBy !== ctx.user.id && task.creatorType !== "system" && ctx.user.role !== "admin")) throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
           const missionRootId = await db.getMissionRootTaskId(input.taskId);
           if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
           return db.listMissionDocumentVersionsForTask(missionRootId, input.documentId, ctx.user.id, ctx.user.role === "admin");
@@ -1029,11 +1029,11 @@ export const appRouter = router({
           const missionRootId = await db.getMissionRootTaskId(input.taskId);
           if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
           const mission = await db.getTaskById(missionRootId);
-          if (!mission || mission.createdBy !== ctx.user.id) {
-            throw new TRPCError({ code: "FORBIDDEN", message: "Somente o proprietário da missão pode propor seu plano de ação." });
+          if (!mission || (mission.createdBy !== ctx.user.id && mission.creatorType !== "system" && ctx.user.role !== "admin")) {
+            throw new TRPCError({ code: "FORBIDDEN", message: "Somente o proprietário da missão, um operador autorizado para missões da SOFIA ou um administrador pode propor seu plano de ação." });
           }
 
-          const documents = await db.getMissionDocumentsForTask(missionRootId, ctx.user.id, false);
+          const documents = await db.getMissionDocumentsForTask(missionRootId, mission.createdBy, true);
           const tr = documents.find((document) => document.typeKey === "TR" && document.documentKey === "TR");
           const blueprint = documents.find((document) => document.typeKey === "BLUEPRINT" && document.documentKey === "BLUEPRINT");
           if (!tr?.latestVersion || !["VALIDATED", "ACTIVE", "REORIENTED"].includes(tr.latestVersion.state)
@@ -1046,10 +1046,10 @@ export const appRouter = router({
           }
 
           const trRecord = await db.getMissionDocumentVersionForTask(
-            missionRootId, tr.id, tr.latestVersion.version, ctx.user.id, false,
+            missionRootId, tr.id, tr.latestVersion.version, mission.createdBy, true,
           );
           const blueprintRecord = await db.getMissionDocumentVersionForTask(
-            missionRootId, blueprint.id, blueprint.latestVersion.version, ctx.user.id, false,
+            missionRootId, blueprint.id, blueprint.latestVersion.version, mission.createdBy, true,
           );
           if (!trRecord || !blueprintRecord) {
             throw new TRPCError({ code: "NOT_FOUND", message: "Versão-fonte do TR ou Blueprint não encontrada." });
@@ -1134,8 +1134,8 @@ export const appRouter = router({
             const createdVersion = await db.createMissionDocumentRevision({
               taskId: missionRootId,
               documentId: existing.id,
-              ownerId: ctx.user.id,
-              canViewAll: false,
+              ownerId: mission.createdBy,
+              canViewAll: true,
               version,
             });
             return { documentId: existing.id, version: createdVersion };
@@ -1143,8 +1143,8 @@ export const appRouter = router({
 
           const created = await db.createMissionDocumentWithVersion({
             taskId: missionRootId,
-            ownerId: ctx.user.id,
-            canViewAll: false,
+            ownerId: mission.createdBy,
+            canViewAll: true,
             typeKey: "ACTION_PLAN",
             documentKey: "ACTION_PLAN",
             title: "Plano de ação — " + mission.title,
@@ -1474,7 +1474,7 @@ export const appRouter = router({
       .input(z.object({ id: z.number().int().positive() }))
       .query(async ({ input, ctx }) => {
         const task = await db.getTaskById(input.id);
-        if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
+        if (!task || (task.createdBy !== ctx.user.id && task.creatorType !== "system" && ctx.user.role !== "admin")) {
           throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
         }
         return task;
@@ -1490,7 +1490,7 @@ export const appRouter = router({
       .input(z.object({ taskId: z.number().int().positive() }))
       .query(async ({ input, ctx }) => {
         const parent = await db.getTaskById(input.taskId);
-        if (!parent || (parent.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
+        if (!parent || (parent.createdBy !== ctx.user.id && parent.creatorType !== "system" && ctx.user.role !== "admin")) {
           throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
         }
         return db.getTasksByParentId(input.taskId);
