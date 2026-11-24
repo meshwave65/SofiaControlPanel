@@ -1429,11 +1429,12 @@ async function validateMissionDocumentAuthor(
   transaction: any,
   taskOwnerId: number,
   author: Pick<MissionDocumentVersionInput, "authorType" | "authorUserId" | "authorAgentId">,
+  allowDifferentHumanAuthor = false,
 ) {
   if (author.authorType === "HUMAN" && !author.authorUserId) {
     throw new Error("HUMAN document versions require authorUserId");
   }
-  if (author.authorType === "HUMAN" && author.authorUserId !== taskOwnerId) {
+  if (author.authorType === "HUMAN" && author.authorUserId !== taskOwnerId && !allowDifferentHumanAuthor) {
     throw new Error("Human document authorship must match the mission owner");
   }
   if (author.authorType === "AGENT" && !author.authorAgentId) {
@@ -1640,6 +1641,7 @@ export async function createMissionDocumentRevision(input: {
   documentId: number;
   ownerId: number;
   canViewAll?: boolean;
+  allowDifferentHumanAuthor?: boolean;
   version: MissionDocumentVersionInput;
 }) {
   const database = await getDb();
@@ -1670,7 +1672,7 @@ export async function createMissionDocumentRevision(input: {
       throw new Error("The original mission request is immutable and cannot be revised");
     }
 
-    await validateMissionDocumentAuthor(transaction, document.taskOwnerId, input.version);
+    await validateMissionDocumentAuthor(transaction, document.taskOwnerId, input.version, input.allowDifferentHumanAuthor ?? false);
     await validateMissionDocumentSource(transaction, document.taskId, document.typeKey, input.version.sourceDocumentVersionId);
 
     const [latest] = await transaction
@@ -1961,6 +1963,7 @@ export async function hasExecutionReadyMissionDocuments(taskId: number): Promise
 export async function registerMissionActionPlanUnits(input: {
   missionTaskId: number;
   ownerId: number;
+  canViewAll?: boolean;
   documentId: number;
   expectedVersion: number;
   expectedContentHash: string;
@@ -1971,8 +1974,8 @@ export async function registerMissionActionPlanUnits(input: {
   return database.transaction(async (tx) => {
     const [mission] = await tx.select({ createdBy: tasks.createdBy, parentTaskId: tasks.parentTaskId })
       .from(tasks).where(eq(tasks.id, input.missionTaskId)).for("update").limit(1);
-    if (!mission || mission.parentTaskId !== null || mission.createdBy !== input.ownerId) {
-      throw new Error("Somente o proprietário da missão principal pode registrar suas unidades.");
+    if (!mission || mission.parentTaskId !== null || (!input.canViewAll && mission.createdBy !== input.ownerId)) {
+      throw new Error("Somente o proprietário da missão ou um administrador pode registrar suas unidades.");
     }
 
     const [plan] = await tx.select({
@@ -2060,6 +2063,10 @@ export async function registerMissionActionPlanUnits(input: {
 export async function approveMissionActionPlanUnit(input: {
   missionTaskId: number;
   ownerId: number;
+  approverId?: number;
+  approverRole?: string;
+  approvalAuthority?: string;
+  canApproveAny?: boolean;
   unitId: string;
   expectedVersion: number;
   expectedContentHash: string;
@@ -2070,8 +2077,8 @@ export async function approveMissionActionPlanUnit(input: {
   return database.transaction(async (tx) => {
     const [mission] = await tx.select({ createdBy: tasks.createdBy, parentTaskId: tasks.parentTaskId })
       .from(tasks).where(eq(tasks.id, input.missionTaskId)).for("update").limit(1);
-    if (!mission || mission.parentTaskId !== null || mission.createdBy !== input.ownerId) {
-      throw new Error("Somente o proprietário da missão principal pode aprovar esta unidade.");
+    if (!mission || mission.parentTaskId !== null || (!input.canApproveAny && mission.createdBy !== input.ownerId)) {
+      throw new Error("Somente o proprietário da missão ou um administrador pode aprovar esta unidade.");
     }
 
     const [planDocument] = await tx.select({ id: missionDocuments.id })
@@ -2119,7 +2126,9 @@ export async function approveMissionActionPlanUnit(input: {
       ...(unit.governanceEvidence as Record<string, unknown> ?? {}),
       individualApproval: {
         approvedAt: approvedAt.toISOString(),
-        approvalUserId: input.ownerId,
+        approvalUserId: input.approverId ?? input.ownerId,
+        approverRole: input.approverRole ?? "operator",
+        authority: input.approvalAuthority ?? (input.canApproveAny ? "administrator_override" : "mission_owner"),
         actionPlanVersion: latest.version,
         actionPlanContentHash: actualHash,
         scope: "unit_intent_only_no_execution_authorization",
@@ -2127,7 +2136,7 @@ export async function approveMissionActionPlanUnit(input: {
     };
     const [updated] = await tx.update(missionActionUnits).set({
       state: "APPROVED",
-      approvalUserId: input.ownerId,
+      approvalUserId: input.approverId ?? input.ownerId,
       approvedAt,
       governanceEvidence: evidence,
       updatedAt: approvedAt,
@@ -2152,6 +2161,7 @@ export async function approveMissionActionPlanUnit(input: {
 export async function materializeApprovedMissionActionPlanUnits(input: {
   missionTaskId: number;
   ownerId: number;
+  canViewAll?: boolean;
 }) {
   const database = await getDb();
   if (!database) throw new Error("Database not available");
@@ -2169,8 +2179,8 @@ export async function materializeApprovedMissionActionPlanUnits(input: {
       .for("update")
       .limit(1);
 
-    if (!mission || mission.parentTaskId !== null || mission.createdBy !== input.ownerId) {
-      throw new Error("Somente o proprietário da missão principal pode materializar suas unidades.");
+    if (!mission || mission.parentTaskId !== null || (!input.canViewAll && mission.createdBy !== input.ownerId)) {
+      throw new Error("Somente o proprietário da missão ou um administrador pode materializar suas unidades.");
     }
 
     const [planDocument] = await tx.select({ id: missionDocuments.id })
@@ -2350,12 +2360,12 @@ export async function materializeApprovedMissionActionPlanUnits(input: {
 }
 
 /** Lists persisted unit governance state for the owner of the root mission. */
-export async function listMissionActionPlanUnits(missionTaskId: number, ownerId: number) {
+export async function listMissionActionPlanUnits(missionTaskId: number, ownerId: number, canViewAll = false) {
   const database = await getDb();
   if (!database) throw new Error("Database not available");
   const [mission] = await database.select({ createdBy: tasks.createdBy, parentTaskId: tasks.parentTaskId })
     .from(tasks).where(eq(tasks.id, missionTaskId)).limit(1);
-  if (!mission || mission.parentTaskId !== null || mission.createdBy !== ownerId) {
+  if (!mission || mission.parentTaskId !== null || (!canViewAll && mission.createdBy !== ownerId)) {
     throw new Error("Missão não encontrada ou sem permissão de acesso.");
   }
   const [planDocument] = await database.select({ id: missionDocuments.id })
@@ -2564,6 +2574,10 @@ export async function approveMissionActionPlanVersion(input: {
   taskId: number;
   documentId: number;
   ownerId: number;
+  approverId?: number;
+  approverRole?: string;
+  approvalAuthority?: string;
+  canApproveAny?: boolean;
   expectedVersion: number;
   expectedContentHash: string;
 }) {
@@ -2584,7 +2598,7 @@ export async function approveMissionActionPlanVersion(input: {
       .where(and(
         eq(missionDocuments.id, input.documentId),
         eq(missionDocuments.taskId, input.taskId),
-        eq(tasks.createdBy, input.ownerId),
+        ...(input.canApproveAny ? [] : [eq(tasks.createdBy, input.ownerId)]),
       ))
       .limit(1)
       .for("update");
@@ -2660,10 +2674,11 @@ export async function approveMissionActionPlanVersion(input: {
       throw new Error("The action plan is stale: its exact source Blueprint/TR is no longer current and execution-ready");
     }
 
+    const approverId = input.approverId ?? input.ownerId;
     await validateMissionDocumentAuthor(transaction, document.ownerId, {
       authorType: "HUMAN",
-      authorUserId: input.ownerId,
-    });
+      authorUserId: approverId,
+    }, true);
 
     const [approvedVersion] = await transaction
       .insert(missionDocumentVersions)
@@ -2673,15 +2688,18 @@ export async function approveMissionActionPlanVersion(input: {
         state: "APPROVED",
         content: latest.content,
         authorType: "HUMAN",
-        authorUserId: input.ownerId,
+        authorUserId: approverId,
         sourceDocumentVersionId: latest.sourceDocumentVersionId,
         provenance: {
           action: "explicit_human_approval",
+          approvalActorUserId: approverId,
+          approvalActorRole: input.approverRole ?? "operator",
+          approvalAuthority: input.approvalAuthority ?? (input.canApproveAny ? "administrator_override" : "mission_owner"),
           approvedProposalVersionId: latest.id,
           approvedProposalVersion: latest.version,
           approvedProposalContentHash: latest.contentHash,
         },
-        changeSummary: "Aprovação humana explícita da proposta v" + latest.version,
+        changeSummary: "Aprovação humana explícita da proposta v" + latest.version + " por usuário " + approverId,
         contentHash: latest.contentHash,
         publishedAt: new Date(),
       })
