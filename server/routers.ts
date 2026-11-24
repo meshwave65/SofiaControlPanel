@@ -774,12 +774,14 @@ export const appRouter = router({
         .input(z.object({ taskId: z.number().int().positive() }))
         .query(async ({ input, ctx }) => {
           const requestedTask = await db.getTaskById(input.taskId);
-          if (!requestedTask || requestedTask.createdBy !== ctx.user.id) {
+          if (!requestedTask || (requestedTask.createdBy !== ctx.user.id && requestedTask.creatorType !== "system" && ctx.user.role !== "admin")) {
             throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
           }
           const missionRootId = await db.getMissionRootTaskId(input.taskId);
           if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
-          return db.listMissionActionPlanUnits(missionRootId, ctx.user.id);
+          const missionRoot = await db.getTaskById(missionRootId);
+          if (!missionRoot) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
+          return db.listMissionActionPlanUnits(missionRootId, missionRoot.createdBy, true);
         }),
       registerActionPlanUnits: protectedProcedure
         .input(z.object({
@@ -790,15 +792,18 @@ export const appRouter = router({
         }))
         .mutation(async ({ input, ctx }) => {
           const requestedTask = await db.getTaskById(input.taskId);
-          if (!requestedTask || requestedTask.createdBy !== ctx.user.id) {
+          if (!requestedTask || (requestedTask.createdBy !== ctx.user.id && requestedTask.creatorType !== "system" && ctx.user.role !== "admin")) {
             throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
           }
           const missionRootId = await db.getMissionRootTaskId(input.taskId);
           if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
+          const missionRoot = await db.getTaskById(missionRootId);
+          if (!missionRoot) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
           try {
             return await db.registerMissionActionPlanUnits({
               missionTaskId: missionRootId,
-              ownerId: ctx.user.id,
+              ownerId: missionRoot.createdBy,
+              canViewAll: true,
               documentId: input.documentId,
               expectedVersion: input.expectedVersion,
               expectedContentHash: input.expectedContentHash,
@@ -820,15 +825,21 @@ export const appRouter = router({
         }))
         .mutation(async ({ input, ctx }) => {
           const requestedTask = await db.getTaskById(input.taskId);
-          if (!requestedTask || requestedTask.createdBy !== ctx.user.id) {
+          if (!requestedTask || (requestedTask.createdBy !== ctx.user.id && requestedTask.creatorType !== "system" && ctx.user.role !== "admin")) {
             throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
           }
           const missionRootId = await db.getMissionRootTaskId(input.taskId);
           if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
+          const missionRoot = await db.getTaskById(missionRootId);
+          if (!missionRoot) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
           try {
             return await db.approveMissionActionPlanUnit({
               missionTaskId: missionRootId,
-              ownerId: ctx.user.id,
+              ownerId: missionRoot.createdBy,
+              approverId: ctx.user.id,
+              approverRole: ctx.user.role,
+              approvalAuthority: ctx.user.role === "admin" ? "administrator_override" : requestedTask.creatorType === "system" ? "system_mission_human_approver" : "mission_owner",
+              canApproveAny: ctx.user.role === "admin",
               unitId: input.unitId,
               expectedVersion: input.expectedVersion,
               expectedContentHash: input.expectedContentHash,
@@ -845,15 +856,18 @@ export const appRouter = router({
         .input(z.object({ taskId: z.number().int().positive() }))
         .mutation(async ({ input, ctx }) => {
           const requestedTask = await db.getTaskById(input.taskId);
-          if (!requestedTask || requestedTask.createdBy !== ctx.user.id) {
+          if (!requestedTask || (requestedTask.createdBy !== ctx.user.id && requestedTask.creatorType !== "system" && ctx.user.role !== "admin")) {
             throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
           }
           const missionRootId = await db.getMissionRootTaskId(input.taskId);
           if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
+          const missionRoot = await db.getTaskById(missionRootId);
+          if (!missionRoot) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
           try {
             return await db.materializeApprovedMissionActionPlanUnits({
               missionTaskId: missionRootId,
-              ownerId: ctx.user.id,
+              ownerId: missionRoot.createdBy,
+              canViewAll: true,
             });
           } catch (error) {
             throw new TRPCError({
@@ -1147,16 +1161,22 @@ export const appRouter = router({
         }))
         .mutation(async ({ input, ctx }) => {
           const task = await db.getTaskById(input.taskId);
-          if (!task || task.createdBy !== ctx.user.id) {
-            throw new TRPCError({ code: "NOT_FOUND", message: "Somente o proprietário da missão pode aprovar o plano." });
+          if (!task || (task.createdBy !== ctx.user.id && task.creatorType !== "system" && ctx.user.role !== "admin")) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Somente o criador da missão, um operador autorizado para missões da SOFIA ou um administrador pode aprovar o plano." });
           }
           const missionRootId = await db.getMissionRootTaskId(input.taskId);
           if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
+          const missionRoot = await db.getTaskById(missionRootId);
+          if (!missionRoot) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
           try {
             return await db.approveMissionActionPlanVersion({
               taskId: missionRootId,
               documentId: input.documentId,
-              ownerId: ctx.user.id,
+              ownerId: missionRoot.createdBy,
+              approverId: ctx.user.id,
+              approverRole: ctx.user.role,
+              approvalAuthority: ctx.user.role === "admin" ? "administrator_override" : task.creatorType === "system" ? "system_mission_human_approver" : "mission_owner",
+              canApproveAny: ctx.user.role === "admin",
               expectedVersion: input.expectedVersion,
               expectedContentHash: input.expectedContentHash,
             });
@@ -1227,30 +1247,41 @@ export const appRouter = router({
       }),
       validateTR: protectedProcedure.input(z.object({ taskId: z.number().int().positive() })).mutation(async ({ input, ctx }) => {
         const task = await db.getTaskById(input.taskId);
-        if (!task || task.createdBy !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND", message: "Somente o operador que criou a missão pode corrigir ou validar seu TR." });
+        if (!task || (task.createdBy !== ctx.user.id && task.creatorType !== "system" && ctx.user.role !== "admin")) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Somente o criador da missão, um operador autorizado para missões da SOFIA ou um administrador pode validar o TR." });
+        }
+        const canApproveMission = true;
         const pausedStatusId = await db.getTaskStatusIdByName("PAUSED");
         const stagedStatusId = await db.getTaskStatusIdByName("STAGED");
         if (![pausedStatusId, stagedStatusId].includes(task.statusId) || task.manusTaskId) {
           throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A validação do TR exige missão PAUSED ou STAGED ainda sem execução externa." });
         }
         if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR pertence à missão principal; tarefas-filhas não podem alterá-lo." });
-        const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, false);
+        const docs = await db.getMissionDocumentsForTask(input.taskId, task.createdBy, canApproveMission);
         const tr = docs.find((document) => document.typeKey === "TR" && document.documentKey === "TR");
         if (!tr?.latestVersion || tr.latestVersion.state !== "AWAITING_HUMAN_VALIDATION") throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Não existe uma versão do TR aguardando validação." });
-        const current = await db.getMissionDocumentVersionForTask(input.taskId, tr.id, tr.latestVersion.version, ctx.user.id, false);
+        const current = await db.getMissionDocumentVersionForTask(input.taskId, tr.id, tr.latestVersion.version, task.createdBy, canApproveMission);
         if (!current) throw new TRPCError({ code: "NOT_FOUND", message: "Conteúdo do TR não encontrado." });
         const validated = await db.createMissionDocumentRevision({
-          taskId: input.taskId, documentId: tr.id, ownerId: ctx.user.id, canViewAll: false,
+          taskId: input.taskId, documentId: tr.id, ownerId: task.createdBy, canViewAll: canApproveMission, allowDifferentHumanAuthor: true,
           version: {
             content: current.version.content, state: "VALIDATED", authorType: "HUMAN", authorUserId: ctx.user.id,
-            provenance: { origin: "HUMAN", action: "explicit_tr_validation", validatedVersion: tr.latestVersion.version },
-            changeSummary: "Validação explícita pelo operador da versão " + tr.latestVersion.version,
+            provenance: {
+              origin: "HUMAN",
+              action: "explicit_tr_validation",
+              validatedVersion: tr.latestVersion.version,
+              approvalActorUserId: ctx.user.id,
+              approvalActorRole: ctx.user.role,
+              approvalAuthority: ctx.user.role === "admin" ? "administrator_override" : task.creatorType === "system" ? "system_mission_human_approver" : "mission_owner",
+              approvedAt: new Date().toISOString(),
+            },
+            changeSummary: "Validação explícita do TR v" + tr.latestVersion.version + " por usuário " + ctx.user.id,
             publishedAt: new Date(),
           },
         });
         try {
           await persistMissionBlueprint({
-            taskId: input.taskId, ownerId: ctx.user.id, canViewAll: false,
+            taskId: input.taskId, ownerId: task.createdBy, canViewAll: canApproveMission,
             title: task.title, trVersionId: validated.id, trVersionNumber: validated.version,
             trContent: current.version.content,
           });
@@ -1269,22 +1300,25 @@ export const appRouter = router({
       }),
       generateBlueprint: protectedProcedure.input(z.object({ taskId: z.number().int().positive() })).mutation(async ({ input, ctx }) => {
         const task = await db.getTaskById(input.taskId);
-        if (!task || task.createdBy !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND", message: "Somente o operador que criou a missão pode liberar seu plano de trabalho." });
+        if (!task || (task.createdBy !== ctx.user.id && task.creatorType !== "system" && ctx.user.role !== "admin")) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Somente o criador da missão, um operador autorizado para missões da SOFIA ou um administrador pode gerar o Blueprint." });
+        }
+        const canManageMission = true;
         const pausedStatusId = await db.getTaskStatusIdByName("PAUSED");
         const stagedStatusId = await db.getTaskStatusIdByName("STAGED");
         if (![pausedStatusId, stagedStatusId].includes(task.statusId) || task.manusTaskId) {
           throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A geração/retenção do Blueprint exige missão PAUSED ou STAGED ainda sem execução externa." });
         }
         if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O Blueprint pertence à missão principal." });
-        const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, false);
+        const docs = await db.getMissionDocumentsForTask(input.taskId, task.createdBy, canManageMission);
         const tr = docs.find((document) => document.typeKey === "TR" && document.documentKey === "TR");
         if (!tr?.latestVersion || !["VALIDATED", "ACTIVE", "REORIENTED"].includes(tr.latestVersion.state)) {
           throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR precisa estar validado antes da geração do Blueprint." });
         }
-        const current = await db.getMissionDocumentVersionForTask(input.taskId, tr.id, tr.latestVersion.version, ctx.user.id, false);
+        const current = await db.getMissionDocumentVersionForTask(input.taskId, tr.id, tr.latestVersion.version, task.createdBy, canManageMission);
         if (!current) throw new TRPCError({ code: "NOT_FOUND", message: "Conteúdo do TR validado não encontrado." });
         const blueprint = await persistMissionBlueprint({
-          taskId: input.taskId, ownerId: ctx.user.id, canViewAll: false,
+          taskId: input.taskId, ownerId: task.createdBy, canViewAll: canManageMission,
           title: task.title, trVersionId: current.version.id, trVersionNumber: current.version.version,
           trContent: current.version.content,
         });
