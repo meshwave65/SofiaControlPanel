@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
-import { eq, and, asc, desc, isNull, sql } from "drizzle-orm";
+import { eq, and, asc, desc, isNull, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { InsertUser, InsertAgent, users, agents, tasks, messages, activityLogs, contextReports, taskStatuses, taskPriorities, messageTypes, activityEventTypes, arcPolicies, arcAssessments, arcEvidence, arcAccessEvents, arcDeviceProfiles, arcConfidenceSnapshots, missionDocumentTypes, missionDocuments, missionDocumentVersions, missionActionUnits } from "../drizzle/schema";
@@ -1160,7 +1160,7 @@ export async function getAllTasks(ownerId: number, canViewAll = false) {
     .leftJoin(users, eq(tasks.createdBy, users.id));
   const rows = canViewAll
     ? await query.orderBy(desc(tasks.createdAt))
-    : await query.where(eq(tasks.createdBy, ownerId)).orderBy(desc(tasks.createdAt));
+    : await query.where(or(eq(tasks.createdBy, ownerId), eq(tasks.creatorType, "system"))).orderBy(desc(tasks.createdAt));
 
   return rows.map((task) => ({
     ...task,
