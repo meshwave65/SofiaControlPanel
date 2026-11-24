@@ -565,7 +565,7 @@ export const appRouter = router({
         if (!task || (task.createdBy !== ctx.user.id && task.creatorType !== "system" && ctx.user.role !== "admin")) throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
         const missionRootId = await db.getMissionRootTaskId(input.taskId);
         if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
-        return db.getMissionDocumentsForTask(missionRootId, ctx.user.id, ctx.user.role === "admin");
+        return db.getMissionDocumentsForTask(missionRootId, task.createdBy, task.creatorType === "system" || ctx.user.role === "admin");
       }),
       initializeLegacyTR: protectedProcedure.input(z.object({ taskId: z.number().int().positive() }))
         .mutation(async ({ input, ctx }) => {
@@ -758,7 +758,7 @@ export const appRouter = router({
           if (!task || (task.createdBy !== ctx.user.id && task.creatorType !== "system" && ctx.user.role !== "admin")) throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
           const missionRootId = await db.getMissionRootTaskId(input.taskId);
           if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
-          const result = await db.getMissionDocumentVersionForTask(missionRootId, input.documentId, input.version, ctx.user.id, ctx.user.role === "admin");
+          const result = await db.getMissionDocumentVersionForTask(missionRootId, input.documentId, input.version, task.createdBy, task.creatorType === "system" || ctx.user.role === "admin");
           if (!result) throw new TRPCError({ code: "NOT_FOUND", message: "Versão documental não encontrada." });
           return result;
         }),
@@ -768,7 +768,7 @@ export const appRouter = router({
           if (!task || (task.createdBy !== ctx.user.id && task.creatorType !== "system" && ctx.user.role !== "admin")) throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
           const missionRootId = await db.getMissionRootTaskId(input.taskId);
           if (missionRootId == null) throw new TRPCError({ code: "NOT_FOUND", message: "Missão principal não encontrada." });
-          return db.listMissionDocumentVersionsForTask(missionRootId, input.documentId, ctx.user.id, ctx.user.role === "admin");
+          return db.listMissionDocumentVersionsForTask(missionRootId, input.documentId, task.createdBy, task.creatorType === "system" || ctx.user.role === "admin");
         }),
       listActionPlanUnits: protectedProcedure
         .input(z.object({ taskId: z.number().int().positive() }))
