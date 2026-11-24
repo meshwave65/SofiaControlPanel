@@ -64,14 +64,18 @@ export function validateMissionBlueprintContent(content: string): string {
   const declaresNoScopeBlockers = blockerLines.some(
     (line) => line.toLocaleUpperCase() === NO_SCOPE_BLOCKERS_DECLARATION
   );
-  const contradictoryBlockerLines = lines.filter((line) =>
+
+  // Only the dedicated blockers section determines whether unresolved
+  // scope blockers exist. References to pending gates, risks, or dependencies
+  // in other sections are descriptive and must not invalidate the Blueprint.
+  const contradictoryBlockerLines = blockerLines.filter((line) =>
     line.length > 0
     && line.toLocaleUpperCase() !== NO_SCOPE_BLOCKERS_DECLARATION
-    && normalizeHeading(line) !== "bloqueios e gates pendentes"
     && /(^|[^A-ZÀ-ÖØ-Þ])(?:BLOQUEIOS?|PENDÊNCIAS?|PENDENTES?|NÃO RESOLVIDOS?)(?=$|[^A-ZÀ-ÖØ-Þ])/i.test(line)
   );
+
   if (!declaresNoScopeBlockers || contradictoryBlockerLines.length > 0) {
-    throw new Error("Blueprint contém bloqueios não resolvidos ou não declarou explicitamente a ausência deles em linha própria; execução permanece bloqueada.");
+    throw new Error("Blueprint contém bloqueios de escopo não resolvidos ou não declarou explicitamente a ausência deles na seção própria; execução permanece bloqueada.");
   }
 
   return normalizedContent;
