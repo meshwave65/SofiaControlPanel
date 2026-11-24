@@ -225,7 +225,7 @@ These definitions must not be collapsed into one document type.
 
 ### 9.3 Existing documentation conflict
 
-The current repository's TR specification labels TR “Transactional Report”, while the operator defines TR differently; the initial document catalog does not include FR. These documents require a coordinated revision after this draft is approved.
+**Historical naming clarification:** TR was originally named “Transactional Report”. It was subsequently renamed **Termo de Referência** at the assistant's suggestion, and the operator accepted and adopted that denomination as canonical. “Transactional Report” is historical provenance of the acronym, not a current alternative definition. Any remaining occurrence must be corrected to “Termo de Referência” while preserving this explanation where useful. Separately, the initial document catalog does not include FR; that catalog gap requires coordinated revision.
 
 ## 10. Remake and monotonic lifecycle
 
