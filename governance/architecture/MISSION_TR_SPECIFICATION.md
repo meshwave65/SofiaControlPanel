@@ -1,12 +1,12 @@
-# TR — Transactional Report (Relatório Transacional da Missão)
+# TR — Termo de Referência
 
 **Identificador:** TR  
-**Denominação oficial:** Transactional Report  
+**Denominação oficial:** Termo de Referência  
 **Status:** contrato aprovado; implementação parcial na PR #15, com atualização contínua e origem autônoma ainda pendentes  
 **Missão de referência:** MISSION_0020 / tarefa 20.4  
 **Branch:** feat/sofia-cognitive-control-plane
 
-> TR significa Transactional Report. “Narrativo” descreve uma característica de leitura do documento, não uma segunda denominação ou um artefato diferente.
+> **Nota histórica sobre a sigla:** TR foi originalmente criado com a denominação *Transactional Report*. Posteriormente, por sugestão do assistente, sua denominação foi alterada para **Termo de Referência**, mudança aceita pelo operador e adotada como definição canônica. A denominação anterior é apenas a origem histórica da sigla; não representa um significado alternativo vigente. Toda referência documental, técnica ou de interface deve utilizar **Termo de Referência**.
 
 ## 1. Finalidade
 
