@@ -1,10 +1,12 @@
 # MISSION_0033 — Espelhamento estrutural seguro do SCP no Sandbox
 
-**Estado:** PROGRESS — missão de sistema em execução autônoma  
+**Estado:** PROGRESS — execução autônoma de missão de sistema  
 **TR:** [TR-v1.0.0-VALIDATED.md](./TR-v1.0.0-VALIDATED.md)  
-**Blueprint:** [BLUEPRINT-v1.0.0.md](./BLUEPRINT-v1.0.0.md)  
+**Blueprint:** [BLUEPRINT-v1.0.0.md](./BLUEPRINT-v1.0.0.md) · revisão arquitetural [BLUEPRINT-v1.1.0.md](./BLUEPRINT-v1.1.0.md)  
 **Solicitação original:** [ORIGINAL_REQUEST.md](./ORIGINAL_REQUEST.md)  
 **Inventário:** [INVENTORY.md](./INVENTORY.md)  
+**Matriz de escopo:** [SCOPE-MATRIX.md](./SCOPE-MATRIX.md)  
+**Ciclo de vida das sessões:** [SANDBOX-SESSION-LIFECYCLE.md](./SANDBOX-SESSION-LIFECYCLE.md)  
 **Quadro de trabalho:** [TASKS.md](./TASKS.md)  
 **Progresso:** [PROGRESS.md](./PROGRESS.md)  
 **Checkpoint inicial:** [CHECKPOINT-0001.md](./CHECKPOINT-0001.md)  
@@ -14,24 +16,26 @@
 
 ## Objetivo
 
-Estabelecer no projeto Supabase Sandbox uma réplica estrutural controlada e independente do SCP, preservando compatibilidade de schema e disponibilizando o catálogo de agentes de forma dinâmica, sem copiar dados operacionais privados nem revelar credenciais.
+Estabelecer no projeto Supabase Sandbox uma réplica estrutural controlada e independente do SCP, com identidade/autorização central, agentes experimentais efêmeros e expurgo automático de toda sessão encerrada ou expirada.
 
 ## Sistemas envolvidos
 
-- **Origem SCP:** projeto Supabase `ufylccbdjfzydbwhpmpp`, conexão MeshWave65.
-- **Destino Sandbox:** projeto Supabase `detstgxofjnnggxluqtl`, conexão Primary.
-- **Repositório canônico:** `meshwave65/SofiaControlPanel`.
+- **Origem SCP:** MeshWave65, projeto Supabase `ufylccbdjfzydbwhpmpp`, conexão MeshWave65.
+- **Destino Sandbox:** projeto Supabase `detstgxofjnnggxluqtl`, nome `sandbox`, região `us-west-2`, conexão Primary.
+- **Repositório canônico:** `meshwave65/SofiaControlPanel`, branch `main`.
 
-## Regra central
+**Correção de roteamento:** `rqvjsjfypuojuaetxkig` é outro projeto (“meshwave65's Project”, conexão MWN) e não é o destino desta missão. Consultas anteriores feitas nele não representam o estado do Sandbox e não devem ser usadas como evidência desta missão. O projeto correto `detstgxofjnnggxluqtl` foi confirmado; o inventário retornou zero tabelas nos schemas `sandbox` e `public`.
 
-O Sandbox reproduz a estrutura necessária do SCP, não os dados operacionais do SCP. Catálogo e metadados autorizados de agentes podem ser sincronizados; segredos, dados pessoais, missões reais e conteúdo privado não podem ser copiados.
+## Regras centrais
 
-## Modo de execução
+- Reproduzir a estrutura SCP classificada para Sandbox, sem copiar registros operacionais.
+- A identidade humana é central; metadados de identidade determinam privilégios e ambientes acessíveis.
+- Usuários sandbox-only não acessam SCP. Usuários normais podem acessar SCP e, quando autorizados, Sandbox.
+- Agentes originários do SCP podem fornecer catálogo/metadados unidirecionais; instâncias executáveis criadas no Sandbox pertencem à sessão e são efêmeras.
+- Encerramento manual ou expiração por tempo máximo dispara expurgo integral dos dados e arquivos da sessão.
+- O expurgo preserva identidade, permissões, catálogo, templates e configurações compartilhadas.
+- A origem SCP permanece somente leitura.
 
-Missão de sistema autorizada para execução autônoma, sem gate de aprovação humana para produzir e validar seus próprios artefatos e executar etapas dentro do escopo. Qualquer risco de exposição de segredos, acesso indevido, perda de dados ou efeito fora do Sandbox exige bloqueio técnico e registro, não uma aprovação humana presumida.
+## Execução autônoma
 
-## Estado do levantamento
-
-O inventário de catálogo registra 138 tabelas em 10 schemas com tabelas, além de views, funções, triggers, policies, constraints, índices e enums. A distribuição e a lista de tabelas estão em INVENTORY.md. O levantamento identificou a view `sofia.agent_catalog_public` como possível base para sincronização segura de agentes, ainda sujeita a teste de RLS e desenho de acesso.
-
-Nenhuma alteração de schema ou cópia de dados foi realizada até este checkpoint.
+A missão está autorizada como missão de sistema. Não solicitar confirmação intermediária para decisões técnicas dentro do escopo. Bloquear apenas riscos técnicos reais, como exposição de segredos, alteração da origem, perda de dados não experimentais ou acesso indevido. Cada etapa deve deixar evidência no Supabase e no GitHub.
