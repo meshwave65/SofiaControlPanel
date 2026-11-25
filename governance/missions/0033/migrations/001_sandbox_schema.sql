@@ -774,3 +774,10 @@ GRANT USAGE ON SCHEMA sandbox TO postgres;
 ALTER DEFAULT PRIVILEGES IN SCHEMA sandbox REVOKE ALL ON TABLES FROM PUBLIC, anon, authenticated;
 
 ALTER DEFAULT PRIVILEGES IN SCHEMA sandbox REVOKE ALL ON SEQUENCES FROM PUBLIC, anon, authenticated;
+
+-- Safe, non-secret projection of the agent catalog. It does not expose credential columns.
+CREATE OR REPLACE VIEW sandbox.agent_catalog_public WITH (security_invoker = true) AS
+SELECT id, name, description, status, version, "connectionStatus", "lastHeartbeat", "createdAt", "updatedAt"
+FROM sandbox.agents;
+
+REVOKE ALL ON sandbox.agent_catalog_public FROM PUBLIC, anon, authenticated;
