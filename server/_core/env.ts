@@ -57,5 +57,5 @@ export const ENV = {
 
   // Backward-compatible alias for older server modules.
   supabaseUrl: storageUrl,
-  appEnvironment,
+  appEnvironment: appEnvironment as "sandbox" | "scp",
 };
