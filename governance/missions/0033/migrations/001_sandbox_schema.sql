@@ -355,224 +355,224 @@ CREATE TABLE sandbox."users" (
   "lastSignedIn" timestamp without time zone DEFAULT now() NOT NULL
 );
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ALTER TABLE sandbox."activityEventTypes" ADD CONSTRAINT "activityEventTypes_name_key" UNIQUE (name);
-
 ALTER TABLE sandbox."activityEventTypes" ADD CONSTRAINT "activityEventTypes_pkey" PRIMARY KEY (id);
-
-ALTER TABLE sandbox."activityLogs" ADD CONSTRAINT "activityLogs_agentId_fkey" FOREIGN KEY ("agentId") REFERENCES sandbox.agents(id) ON DELETE CASCADE;
-
-ALTER TABLE sandbox."activityLogs" ADD CONSTRAINT "activityLogs_eventTypeId_fkey" FOREIGN KEY ("eventTypeId") REFERENCES sandbox."activityEventTypes"(id) ON DELETE RESTRICT;
-
 ALTER TABLE sandbox."activityLogs" ADD CONSTRAINT "activityLogs_pkey" PRIMARY KEY (id);
-
-ALTER TABLE sandbox."activityLogs" ADD CONSTRAINT "activityLogs_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES sandbox.tasks(id) ON DELETE SET NULL;
-
-ALTER TABLE sandbox."agents" ADD CONSTRAINT "agents_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES sandbox.users(id) ON DELETE CASCADE;
-
 ALTER TABLE sandbox."agents" ADD CONSTRAINT "agents_pkey" PRIMARY KEY (id);
-
-ALTER TABLE sandbox."arcAccessEvents" ADD CONSTRAINT "arcAccessEvents_agentId_fkey" FOREIGN KEY ("agentId") REFERENCES sandbox.agents(id) ON DELETE SET NULL;
-
 ALTER TABLE sandbox."arcAccessEvents" ADD CONSTRAINT "arcAccessEvents_pkey" PRIMARY KEY (id);
-
-ALTER TABLE sandbox."arcAccessEvents" ADD CONSTRAINT "arcAccessEvents_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES sandbox.tasks(id) ON DELETE SET NULL;
-
-ALTER TABLE sandbox."arcAccessEvents" ADD CONSTRAINT "arcAccessEvents_userId_fkey" FOREIGN KEY ("userId") REFERENCES sandbox.users(id) ON DELETE CASCADE;
-
-ALTER TABLE sandbox."arcAssessments" ADD CONSTRAINT "arcAssessments_agentId_agents_id_fk" FOREIGN KEY ("agentId") REFERENCES sandbox.agents(id) ON DELETE SET NULL;
-
 ALTER TABLE sandbox."arcAssessments" ADD CONSTRAINT "arcAssessments_pkey" PRIMARY KEY (id);
-
-ALTER TABLE sandbox."arcAssessments" ADD CONSTRAINT "arcAssessments_policyId_arcPolicies_id_fk" FOREIGN KEY ("policyId") REFERENCES sandbox."arcPolicies"(id) ON DELETE RESTRICT;
-
-ALTER TABLE sandbox."arcAssessments" ADD CONSTRAINT "arcAssessments_taskId_tasks_id_fk" FOREIGN KEY ("taskId") REFERENCES sandbox.tasks(id) ON DELETE RESTRICT;
-
-ALTER TABLE sandbox."arcConfidenceSnapshots" ADD CONSTRAINT "arcConfidenceSnapshots_accessEventId_fkey" FOREIGN KEY ("accessEventId") REFERENCES sandbox."arcAccessEvents"(id) ON DELETE SET NULL;
-
-ALTER TABLE sandbox."arcConfidenceSnapshots" ADD CONSTRAINT "arcConfidenceSnapshots_agentId_fkey" FOREIGN KEY ("agentId") REFERENCES sandbox.agents(id) ON DELETE SET NULL;
-
-ALTER TABLE sandbox."arcConfidenceSnapshots" ADD CONSTRAINT "arcConfidenceSnapshots_assessmentId_fkey" FOREIGN KEY ("assessmentId") REFERENCES sandbox."arcAssessments"(id) ON DELETE SET NULL;
-
 ALTER TABLE sandbox."arcConfidenceSnapshots" ADD CONSTRAINT "arcConfidenceSnapshots_pkey" PRIMARY KEY (id);
-
-ALTER TABLE sandbox."arcConfidenceSnapshots" ADD CONSTRAINT "arcConfidenceSnapshots_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES sandbox.tasks(id) ON DELETE SET NULL;
-
-ALTER TABLE sandbox."arcConfidenceSnapshots" ADD CONSTRAINT "arcConfidenceSnapshots_userId_fkey" FOREIGN KEY ("userId") REFERENCES sandbox.users(id) ON DELETE CASCADE;
-
-ALTER TABLE sandbox."arcDeviceProfiles" ADD CONSTRAINT "arcDeviceProfiles_agentId_fkey" FOREIGN KEY ("agentId") REFERENCES sandbox.agents(id) ON DELETE CASCADE;
-
 ALTER TABLE sandbox."arcDeviceProfiles" ADD CONSTRAINT "arcDeviceProfiles_agentId_unique" UNIQUE ("agentId");
-
-ALTER TABLE sandbox."arcDeviceProfiles" ADD CONSTRAINT "arcDeviceProfiles_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES sandbox.users(id) ON DELETE CASCADE;
-
 ALTER TABLE sandbox."arcDeviceProfiles" ADD CONSTRAINT "arcDeviceProfiles_pkey" PRIMARY KEY (id);
-
-ALTER TABLE sandbox."arcEvidence" ADD CONSTRAINT "arcEvidence_assessmentId_arcAssessments_id_fk" FOREIGN KEY ("assessmentId") REFERENCES sandbox."arcAssessments"(id) ON DELETE CASCADE;
-
 ALTER TABLE sandbox."arcEvidence" ADD CONSTRAINT "arcEvidence_pkey" PRIMARY KEY (id);
-
 ALTER TABLE sandbox."arcPolicies" ADD CONSTRAINT "arcPolicies_name_unique" UNIQUE (name);
-
 ALTER TABLE sandbox."arcPolicies" ADD CONSTRAINT "arcPolicies_pkey" PRIMARY KEY (id);
-
-ALTER TABLE sandbox."contextReports" ADD CONSTRAINT "contextReports_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES sandbox.users(id) ON DELETE CASCADE;
-
 ALTER TABLE sandbox."contextReports" ADD CONSTRAINT "contextReports_pkey" PRIMARY KEY (id);
-
 ALTER TABLE sandbox."governanceMissions" ADD CONSTRAINT "governanceMissions_missionKey_key" UNIQUE ("missionKey");
-
 ALTER TABLE sandbox."governanceMissions" ADD CONSTRAINT "governanceMissions_pkey" PRIMARY KEY (id);
-
-ALTER TABLE sandbox."messageTypes" ADD CONSTRAINT "messageTypes_contexts_allowed_check" CHECK ((contexts <@ ARRAY['general'::character varying(16), 'mission'::character varying(16)]));
-
-ALTER TABLE sandbox."messageTypes" ADD CONSTRAINT "messageTypes_name_key" UNIQUE (name);
-
-ALTER TABLE sandbox."messageTypes" ADD CONSTRAINT "messageTypes_pkey" PRIMARY KEY (id);
-
 ALTER TABLE sandbox."messages" ADD CONSTRAINT "messages_origin_allowed_check" CHECK (((origin)::text = ANY ((ARRAY['internal'::character varying, 'external'::character varying])::text[])));
-
-ALTER TABLE sandbox."messages" ADD CONSTRAINT "messages_parentMessageId_fkey" FOREIGN KEY ("parentMessageId") REFERENCES sandbox.messages(id) ON DELETE CASCADE;
-
 ALTER TABLE sandbox."messages" ADD CONSTRAINT "messages_pkey" PRIMARY KEY (id);
-
-ALTER TABLE sandbox."messages" ADD CONSTRAINT "messages_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES sandbox.users(id) ON DELETE CASCADE;
-
-ALTER TABLE sandbox."messages" ADD CONSTRAINT "messages_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES sandbox.tasks(id) ON DELETE CASCADE;
-
-ALTER TABLE sandbox."messages" ADD CONSTRAINT "messages_typeId_fkey" FOREIGN KEY ("typeId") REFERENCES sandbox."messageTypes"(id) ON DELETE RESTRICT;
-
-ALTER TABLE sandbox."missionActionUnitGateEvidence" ADD CONSTRAINT "missionActionUnitGateEvidence_actionPlanDocumentId_fkey" FOREIGN KEY ("actionPlanDocumentId") REFERENCES sandbox."missionDocuments"(id) ON DELETE RESTRICT;
-
-ALTER TABLE sandbox."missionActionUnitGateEvidence" ADD CONSTRAINT "missionActionUnitGateEvidence_actionPlanVersionId_fkey" FOREIGN KEY ("actionPlanVersionId") REFERENCES sandbox."missionDocumentVersions"(id) ON DELETE RESTRICT;
-
-ALTER TABLE sandbox."missionActionUnitGateEvidence" ADD CONSTRAINT "missionActionUnitGateEvidence_actionUnitId_fkey" FOREIGN KEY ("actionUnitId") REFERENCES sandbox."missionActionUnits"(id) ON DELETE RESTRICT;
-
-ALTER TABLE sandbox."missionActionUnitGateEvidence" ADD CONSTRAINT "missionActionUnitGateEvidence_actorUserId_fkey" FOREIGN KEY ("actorUserId") REFERENCES sandbox.users(id) ON DELETE RESTRICT;
-
+ALTER TABLE sandbox."messageTypes" ADD CONSTRAINT "messageTypes_contexts_allowed_check" CHECK ((contexts <@ ARRAY['general'::character varying(16), 'mission'::character varying(16)]));
+ALTER TABLE sandbox."messageTypes" ADD CONSTRAINT "messageTypes_name_key" UNIQUE (name);
+ALTER TABLE sandbox."messageTypes" ADD CONSTRAINT "messageTypes_pkey" PRIMARY KEY (id);
 ALTER TABLE sandbox."missionActionUnitGateEvidence" ADD CONSTRAINT "missionActionUnitGateEvidence_actor_pair_check" CHECK ((((("actorType")::text = 'OWNER'::text) AND ("actorUserId" IS NOT NULL)) OR ((("actorType")::text = 'SYSTEM'::text) AND ("actorUserId" IS NULL))));
-
 ALTER TABLE sandbox."missionActionUnitGateEvidence" ADD CONSTRAINT "missionActionUnitGateEvidence_actor_type_check" CHECK ((("actorType")::text = ANY ((ARRAY['SYSTEM'::character varying, 'OWNER'::character varying])::text[])));
-
 ALTER TABLE sandbox."missionActionUnitGateEvidence" ADD CONSTRAINT "missionActionUnitGateEvidence_decision_check" CHECK (((decision)::text = ANY ((ARRAY['VERIFIED'::character varying, 'BLOCKED'::character varying, 'UNKNOWN'::character varying])::text[])));
-
 ALTER TABLE sandbox."missionActionUnitGateEvidence" ADD CONSTRAINT "missionActionUnitGateEvidence_evidence_object" CHECK ((jsonb_typeof(evidence) = 'object'::text));
-
 ALTER TABLE sandbox."missionActionUnitGateEvidence" ADD CONSTRAINT "missionActionUnitGateEvidence_gate_key_check" CHECK ((("gateKey")::text = ANY ((ARRAY['DEPENDENCY'::character varying, 'RISK_POLICY'::character varying, 'BUDGET_AUTHORIZATION'::character varying, 'UNIT_PERMISSION'::character varying, 'EXECUTOR_ELIGIBILITY'::character varying, 'ADAPTER_CAPABILITY'::character varying])::text[])));
-
 ALTER TABLE sandbox."missionActionUnitGateEvidence" ADD CONSTRAINT "missionActionUnitGateEvidence_hash_format" CHECK ((("actionPlanContentHash")::text ~ '^[a-f0-9]{64}$'::text));
-
-ALTER TABLE sandbox."missionActionUnitGateEvidence" ADD CONSTRAINT "missionActionUnitGateEvidence_missionTaskId_fkey" FOREIGN KEY ("missionTaskId") REFERENCES sandbox.tasks(id) ON DELETE RESTRICT;
-
 ALTER TABLE sandbox."missionActionUnitGateEvidence" ADD CONSTRAINT "missionActionUnitGateEvidence_pkey" PRIMARY KEY (id);
-
 ALTER TABLE sandbox."missionActionUnitGateEvidence" ADD CONSTRAINT "missionActionUnitGateEvidence_source_nonempty" CHECK ((length(TRIM(BOTH FROM source)) > 0));
-
 ALTER TABLE sandbox."missionActionUnitGateEvidence" ADD CONSTRAINT "missionActionUnitGateEvidence_unit_id_format" CHECK ((("unitId")::text ~ '^T[0-9]{2}$'::text));
-
 ALTER TABLE sandbox."missionActionUnitGateEvidence" ADD CONSTRAINT "missionActionUnitGateEvidence_validity_check" CHECK ((("validUntil" IS NULL) OR ("validUntil" > "observedAt")));
-
 ALTER TABLE sandbox."missionActionUnitGateEvidence" ADD CONSTRAINT "missionActionUnitGateEvidence_version_positive" CHECK (("actionPlanVersionNumber" > 0));
-
-ALTER TABLE sandbox."missionActionUnits" ADD CONSTRAINT "missionActionUnits_actionPlanDocumentId_fkey" FOREIGN KEY ("actionPlanDocumentId") REFERENCES sandbox."missionDocuments"(id) ON DELETE RESTRICT;
-
-ALTER TABLE sandbox."missionActionUnits" ADD CONSTRAINT "missionActionUnits_actionPlanVersionId_fkey" FOREIGN KEY ("actionPlanVersionId") REFERENCES sandbox."missionDocumentVersions"(id) ON DELETE RESTRICT;
-
-ALTER TABLE sandbox."missionActionUnits" ADD CONSTRAINT "missionActionUnits_approvalUserId_fkey" FOREIGN KEY ("approvalUserId") REFERENCES sandbox.users(id) ON DELETE RESTRICT;
-
 ALTER TABLE sandbox."missionActionUnits" ADD CONSTRAINT "missionActionUnits_approval_pair_check" CHECK ((("approvalUserId" IS NULL) = ("approvedAt" IS NULL)));
-
 ALTER TABLE sandbox."missionActionUnits" ADD CONSTRAINT "missionActionUnits_dispatch_attempts_check" CHECK (("dispatchAttempts" >= 0));
-
 ALTER TABLE sandbox."missionActionUnits" ADD CONSTRAINT "missionActionUnits_hash_format" CHECK ((("actionPlanContentHash")::text ~ '^[a-f0-9]{64}$'::text));
-
-ALTER TABLE sandbox."missionActionUnits" ADD CONSTRAINT "missionActionUnits_idempotencyKey_key" UNIQUE ("idempotencyKey");
-
 ALTER TABLE sandbox."missionActionUnits" ADD CONSTRAINT "missionActionUnits_idempotency_length" CHECK (((char_length(("idempotencyKey")::text) >= 16) AND (char_length(("idempotencyKey")::text) <= 128)));
-
-ALTER TABLE sandbox."missionActionUnits" ADD CONSTRAINT "missionActionUnits_missionTaskId_fkey" FOREIGN KEY ("missionTaskId") REFERENCES sandbox.tasks(id) ON DELETE RESTRICT;
-
+ALTER TABLE sandbox."missionActionUnits" ADD CONSTRAINT "missionActionUnits_idempotencyKey_key" UNIQUE ("idempotencyKey");
 ALTER TABLE sandbox."missionActionUnits" ADD CONSTRAINT "missionActionUnits_mission_version_unit_unique" UNIQUE ("missionTaskId", "actionPlanVersionId", "unitId");
-
-ALTER TABLE sandbox."missionActionUnits" ADD CONSTRAINT "missionActionUnits_operationalTaskId_fkey" FOREIGN KEY ("operationalTaskId") REFERENCES sandbox.tasks(id) ON DELETE RESTRICT;
-
 ALTER TABLE sandbox."missionActionUnits" ADD CONSTRAINT "missionActionUnits_operationalTaskId_key" UNIQUE ("operationalTaskId");
-
 ALTER TABLE sandbox."missionActionUnits" ADD CONSTRAINT "missionActionUnits_pkey" PRIMARY KEY (id);
-
 ALTER TABLE sandbox."missionActionUnits" ADD CONSTRAINT "missionActionUnits_state_check" CHECK (((state)::text = ANY ((ARRAY['REGISTERED'::character varying, 'AWAITING_APPROVAL'::character varying, 'APPROVED'::character varying, 'READY_FOR_DISPATCH'::character varying, 'DISPATCHED'::character varying, 'BLOCKED'::character varying, 'CANCELLED'::character varying])::text[])));
-
 ALTER TABLE sandbox."missionActionUnits" ADD CONSTRAINT "missionActionUnits_title_nonempty" CHECK ((length(TRIM(BOTH FROM "unitTitle")) > 0));
-
 ALTER TABLE sandbox."missionActionUnits" ADD CONSTRAINT "missionActionUnits_unit_id_format" CHECK ((("unitId")::text ~ '^T[0-9]{2}$'::text));
-
-ALTER TABLE sandbox."missionDocumentTypes" ADD CONSTRAINT "missionDocumentTypes_pkey" PRIMARY KEY (id);
-
-ALTER TABLE sandbox."missionDocumentTypes" ADD CONSTRAINT "missionDocumentTypes_typeKey_key" UNIQUE ("typeKey");
-
-ALTER TABLE sandbox."missionDocumentVersions" ADD CONSTRAINT "missionDocumentVersions_authorAgentId_fkey" FOREIGN KEY ("authorAgentId") REFERENCES sandbox.agents(id) ON DELETE RESTRICT;
-
-ALTER TABLE sandbox."missionDocumentVersions" ADD CONSTRAINT "missionDocumentVersions_authorUserId_fkey" FOREIGN KEY ("authorUserId") REFERENCES sandbox.users(id) ON DELETE RESTRICT;
-
-ALTER TABLE sandbox."missionDocumentVersions" ADD CONSTRAINT "missionDocumentVersions_documentId_fkey" FOREIGN KEY ("documentId") REFERENCES sandbox."missionDocuments"(id) ON DELETE RESTRICT;
-
-ALTER TABLE sandbox."missionDocumentVersions" ADD CONSTRAINT "missionDocumentVersions_document_version_unique" UNIQUE ("documentId", version);
-
-ALTER TABLE sandbox."missionDocumentVersions" ADD CONSTRAINT "missionDocumentVersions_pkey" PRIMARY KEY (id);
-
-ALTER TABLE sandbox."missionDocumentVersions" ADD CONSTRAINT "missionDocumentVersions_sourceDocumentVersionId_fkey" FOREIGN KEY ("sourceDocumentVersionId") REFERENCES sandbox."missionDocumentVersions"(id) ON DELETE RESTRICT;
-
-ALTER TABLE sandbox."missionDocuments" ADD CONSTRAINT "missionDocuments_documentTypeId_fkey" FOREIGN KEY ("documentTypeId") REFERENCES sandbox."missionDocumentTypes"(id) ON DELETE RESTRICT;
-
 ALTER TABLE sandbox."missionDocuments" ADD CONSTRAINT "missionDocuments_pkey" PRIMARY KEY (id);
-
-ALTER TABLE sandbox."missionDocuments" ADD CONSTRAINT "missionDocuments_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES sandbox.tasks(id) ON DELETE RESTRICT;
-
 ALTER TABLE sandbox."missionDocuments" ADD CONSTRAINT "missionDocuments_task_documentKey_unique" UNIQUE ("taskId", "documentKey");
-
-ALTER TABLE sandbox."missionParameterOptions" ADD CONSTRAINT "missionParameterOptions_parameterId_fkey" FOREIGN KEY ("parameterId") REFERENCES sandbox."missionParameters"(id) ON DELETE CASCADE;
-
+ALTER TABLE sandbox."missionDocumentTypes" ADD CONSTRAINT "missionDocumentTypes_pkey" PRIMARY KEY (id);
+ALTER TABLE sandbox."missionDocumentTypes" ADD CONSTRAINT "missionDocumentTypes_typeKey_key" UNIQUE ("typeKey");
+ALTER TABLE sandbox."missionDocumentVersions" ADD CONSTRAINT "missionDocumentVersions_document_version_unique" UNIQUE ("documentId", version);
+ALTER TABLE sandbox."missionDocumentVersions" ADD CONSTRAINT "missionDocumentVersions_pkey" PRIMARY KEY (id);
 ALTER TABLE sandbox."missionParameterOptions" ADD CONSTRAINT "missionParameterOptions_parameterId_value_key" UNIQUE ("parameterId", value);
-
 ALTER TABLE sandbox."missionParameterOptions" ADD CONSTRAINT "missionParameterOptions_pkey" PRIMARY KEY (id);
-
-ALTER TABLE sandbox."missionParameters" ADD CONSTRAINT "missionParameters_missionKey_fkey" FOREIGN KEY ("missionKey") REFERENCES sandbox."governanceMissions"("missionKey");
-
 ALTER TABLE sandbox."missionParameters" ADD CONSTRAINT "missionParameters_missionKey_parameterKey_key" UNIQUE ("missionKey", "parameterKey");
-
 ALTER TABLE sandbox."missionParameters" ADD CONSTRAINT "missionParameters_pkey" PRIMARY KEY (id);
-
 ALTER TABLE sandbox."missionParameters" ADD CONSTRAINT "missionParameters_validation_check" CHECK ((jsonb_typeof(validation) = 'object'::text));
-
 ALTER TABLE sandbox."missionParameters" ADD CONSTRAINT "missionParameters_valueType_check" CHECK ((("valueType")::text = ANY ((ARRAY['enum'::character varying, 'boolean'::character varying, 'decimal'::character varying, 'integer'::character varying, 'datetime'::character varying, 'text'::character varying])::text[])));
-
 ALTER TABLE sandbox."scheduledTasks" ADD CONSTRAINT "scheduledTasks_pkey" PRIMARY KEY (id);
-
 ALTER TABLE sandbox."taskPriorities" ADD CONSTRAINT "taskPriorities_name_key" UNIQUE (name);
-
 ALTER TABLE sandbox."taskPriorities" ADD CONSTRAINT "taskPriorities_pkey" PRIMARY KEY (id);
-
-ALTER TABLE sandbox."taskStatuses" ADD CONSTRAINT "taskStatuses_name_key" UNIQUE (name);
-
-ALTER TABLE sandbox."taskStatuses" ADD CONSTRAINT "taskStatuses_pkey" PRIMARY KEY (id);
-
-ALTER TABLE sandbox."tasks" ADD CONSTRAINT "tasks_agentId_fkey" FOREIGN KEY ("agentId") REFERENCES sandbox.agents(id) ON DELETE SET NULL;
-
-ALTER TABLE sandbox."tasks" ADD CONSTRAINT "tasks_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES sandbox.users(id) ON DELETE RESTRICT;
-
-ALTER TABLE sandbox."tasks" ADD CONSTRAINT "tasks_owneruserid_fkey" FOREIGN KEY ("ownerUserId") REFERENCES sandbox.users(id) ON DELETE RESTRICT;
-
-ALTER TABLE sandbox."tasks" ADD CONSTRAINT "tasks_parentTaskId_fkey" FOREIGN KEY ("parentTaskId") REFERENCES sandbox.tasks(id) ON DELETE CASCADE;
-
 ALTER TABLE sandbox."tasks" ADD CONSTRAINT "tasks_pkey" PRIMARY KEY (id);
-
-ALTER TABLE sandbox."tasks" ADD CONSTRAINT "tasks_priorityId_fkey" FOREIGN KEY ("priorityId") REFERENCES sandbox."taskPriorities"(id) ON DELETE RESTRICT;
-
-ALTER TABLE sandbox."tasks" ADD CONSTRAINT "tasks_statusId_fkey" FOREIGN KEY ("statusId") REFERENCES sandbox."taskStatuses"(id) ON DELETE RESTRICT;
-
+ALTER TABLE sandbox."taskStatuses" ADD CONSTRAINT "taskStatuses_name_key" UNIQUE (name);
+ALTER TABLE sandbox."taskStatuses" ADD CONSTRAINT "taskStatuses_pkey" PRIMARY KEY (id);
 ALTER TABLE sandbox."users" ADD CONSTRAINT "users_openId_key" UNIQUE ("openId");
-
 ALTER TABLE sandbox."users" ADD CONSTRAINT "users_pkey" PRIMARY KEY (id);
-
+ALTER TABLE sandbox."activityLogs" ADD CONSTRAINT "activityLogs_agentId_fkey" FOREIGN KEY ("agentId") REFERENCES sandbox.agents(id) ON DELETE CASCADE;
+ALTER TABLE sandbox."activityLogs" ADD CONSTRAINT "activityLogs_eventTypeId_fkey" FOREIGN KEY ("eventTypeId") REFERENCES sandbox."activityEventTypes"(id) ON DELETE RESTRICT;
+ALTER TABLE sandbox."activityLogs" ADD CONSTRAINT "activityLogs_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES sandbox.tasks(id) ON DELETE SET NULL;
+ALTER TABLE sandbox."agents" ADD CONSTRAINT "agents_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES sandbox.users(id) ON DELETE CASCADE;
+ALTER TABLE sandbox."arcAccessEvents" ADD CONSTRAINT "arcAccessEvents_agentId_fkey" FOREIGN KEY ("agentId") REFERENCES sandbox.agents(id) ON DELETE SET NULL;
+ALTER TABLE sandbox."arcAccessEvents" ADD CONSTRAINT "arcAccessEvents_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES sandbox.tasks(id) ON DELETE SET NULL;
+ALTER TABLE sandbox."arcAccessEvents" ADD CONSTRAINT "arcAccessEvents_userId_fkey" FOREIGN KEY ("userId") REFERENCES sandbox.users(id) ON DELETE CASCADE;
+ALTER TABLE sandbox."arcAssessments" ADD CONSTRAINT "arcAssessments_agentId_agents_id_fk" FOREIGN KEY ("agentId") REFERENCES sandbox.agents(id) ON DELETE SET NULL;
+ALTER TABLE sandbox."arcAssessments" ADD CONSTRAINT "arcAssessments_policyId_arcPolicies_id_fk" FOREIGN KEY ("policyId") REFERENCES sandbox."arcPolicies"(id) ON DELETE RESTRICT;
+ALTER TABLE sandbox."arcAssessments" ADD CONSTRAINT "arcAssessments_taskId_tasks_id_fk" FOREIGN KEY ("taskId") REFERENCES sandbox.tasks(id) ON DELETE RESTRICT;
+ALTER TABLE sandbox."arcConfidenceSnapshots" ADD CONSTRAINT "arcConfidenceSnapshots_accessEventId_fkey" FOREIGN KEY ("accessEventId") REFERENCES sandbox."arcAccessEvents"(id) ON DELETE SET NULL;
+ALTER TABLE sandbox."arcConfidenceSnapshots" ADD CONSTRAINT "arcConfidenceSnapshots_agentId_fkey" FOREIGN KEY ("agentId") REFERENCES sandbox.agents(id) ON DELETE SET NULL;
+ALTER TABLE sandbox."arcConfidenceSnapshots" ADD CONSTRAINT "arcConfidenceSnapshots_assessmentId_fkey" FOREIGN KEY ("assessmentId") REFERENCES sandbox."arcAssessments"(id) ON DELETE SET NULL;
+ALTER TABLE sandbox."arcConfidenceSnapshots" ADD CONSTRAINT "arcConfidenceSnapshots_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES sandbox.tasks(id) ON DELETE SET NULL;
+ALTER TABLE sandbox."arcConfidenceSnapshots" ADD CONSTRAINT "arcConfidenceSnapshots_userId_fkey" FOREIGN KEY ("userId") REFERENCES sandbox.users(id) ON DELETE CASCADE;
+ALTER TABLE sandbox."arcDeviceProfiles" ADD CONSTRAINT "arcDeviceProfiles_agentId_fkey" FOREIGN KEY ("agentId") REFERENCES sandbox.agents(id) ON DELETE CASCADE;
+ALTER TABLE sandbox."arcDeviceProfiles" ADD CONSTRAINT "arcDeviceProfiles_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES sandbox.users(id) ON DELETE CASCADE;
+ALTER TABLE sandbox."arcEvidence" ADD CONSTRAINT "arcEvidence_assessmentId_arcAssessments_id_fk" FOREIGN KEY ("assessmentId") REFERENCES sandbox."arcAssessments"(id) ON DELETE CASCADE;
+ALTER TABLE sandbox."contextReports" ADD CONSTRAINT "contextReports_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES sandbox.users(id) ON DELETE CASCADE;
+ALTER TABLE sandbox."messages" ADD CONSTRAINT "messages_parentMessageId_fkey" FOREIGN KEY ("parentMessageId") REFERENCES sandbox.messages(id) ON DELETE CASCADE;
+ALTER TABLE sandbox."messages" ADD CONSTRAINT "messages_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES sandbox.users(id) ON DELETE CASCADE;
+ALTER TABLE sandbox."messages" ADD CONSTRAINT "messages_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES sandbox.tasks(id) ON DELETE CASCADE;
+ALTER TABLE sandbox."messages" ADD CONSTRAINT "messages_typeId_fkey" FOREIGN KEY ("typeId") REFERENCES sandbox."messageTypes"(id) ON DELETE RESTRICT;
+ALTER TABLE sandbox."missionActionUnitGateEvidence" ADD CONSTRAINT "missionActionUnitGateEvidence_actionPlanDocumentId_fkey" FOREIGN KEY ("actionPlanDocumentId") REFERENCES sandbox."missionDocuments"(id) ON DELETE RESTRICT;
+ALTER TABLE sandbox."missionActionUnitGateEvidence" ADD CONSTRAINT "missionActionUnitGateEvidence_actionPlanVersionId_fkey" FOREIGN KEY ("actionPlanVersionId") REFERENCES sandbox."missionDocumentVersions"(id) ON DELETE RESTRICT;
+ALTER TABLE sandbox."missionActionUnitGateEvidence" ADD CONSTRAINT "missionActionUnitGateEvidence_actionUnitId_fkey" FOREIGN KEY ("actionUnitId") REFERENCES sandbox."missionActionUnits"(id) ON DELETE RESTRICT;
+ALTER TABLE sandbox."missionActionUnitGateEvidence" ADD CONSTRAINT "missionActionUnitGateEvidence_actorUserId_fkey" FOREIGN KEY ("actorUserId") REFERENCES sandbox.users(id) ON DELETE RESTRICT;
+ALTER TABLE sandbox."missionActionUnitGateEvidence" ADD CONSTRAINT "missionActionUnitGateEvidence_missionTaskId_fkey" FOREIGN KEY ("missionTaskId") REFERENCES sandbox.tasks(id) ON DELETE RESTRICT;
+ALTER TABLE sandbox."missionActionUnits" ADD CONSTRAINT "missionActionUnits_actionPlanDocumentId_fkey" FOREIGN KEY ("actionPlanDocumentId") REFERENCES sandbox."missionDocuments"(id) ON DELETE RESTRICT;
+ALTER TABLE sandbox."missionActionUnits" ADD CONSTRAINT "missionActionUnits_actionPlanVersionId_fkey" FOREIGN KEY ("actionPlanVersionId") REFERENCES sandbox."missionDocumentVersions"(id) ON DELETE RESTRICT;
+ALTER TABLE sandbox."missionActionUnits" ADD CONSTRAINT "missionActionUnits_approvalUserId_fkey" FOREIGN KEY ("approvalUserId") REFERENCES sandbox.users(id) ON DELETE RESTRICT;
+ALTER TABLE sandbox."missionActionUnits" ADD CONSTRAINT "missionActionUnits_missionTaskId_fkey" FOREIGN KEY ("missionTaskId") REFERENCES sandbox.tasks(id) ON DELETE RESTRICT;
+ALTER TABLE sandbox."missionActionUnits" ADD CONSTRAINT "missionActionUnits_operationalTaskId_fkey" FOREIGN KEY ("operationalTaskId") REFERENCES sandbox.tasks(id) ON DELETE RESTRICT;
+ALTER TABLE sandbox."missionDocuments" ADD CONSTRAINT "missionDocuments_documentTypeId_fkey" FOREIGN KEY ("documentTypeId") REFERENCES sandbox."missionDocumentTypes"(id) ON DELETE RESTRICT;
+ALTER TABLE sandbox."missionDocuments" ADD CONSTRAINT "missionDocuments_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES sandbox.tasks(id) ON DELETE RESTRICT;
+ALTER TABLE sandbox."missionDocumentVersions" ADD CONSTRAINT "missionDocumentVersions_authorAgentId_fkey" FOREIGN KEY ("authorAgentId") REFERENCES sandbox.agents(id) ON DELETE RESTRICT;
+ALTER TABLE sandbox."missionDocumentVersions" ADD CONSTRAINT "missionDocumentVersions_authorUserId_fkey" FOREIGN KEY ("authorUserId") REFERENCES sandbox.users(id) ON DELETE RESTRICT;
+ALTER TABLE sandbox."missionDocumentVersions" ADD CONSTRAINT "missionDocumentVersions_documentId_fkey" FOREIGN KEY ("documentId") REFERENCES sandbox."missionDocuments"(id) ON DELETE RESTRICT;
+ALTER TABLE sandbox."missionDocumentVersions" ADD CONSTRAINT "missionDocumentVersions_sourceDocumentVersionId_fkey" FOREIGN KEY ("sourceDocumentVersionId") REFERENCES sandbox."missionDocumentVersions"(id) ON DELETE RESTRICT;
+ALTER TABLE sandbox."missionParameterOptions" ADD CONSTRAINT "missionParameterOptions_parameterId_fkey" FOREIGN KEY ("parameterId") REFERENCES sandbox."missionParameters"(id) ON DELETE CASCADE;
+ALTER TABLE sandbox."missionParameters" ADD CONSTRAINT "missionParameters_missionKey_fkey" FOREIGN KEY ("missionKey") REFERENCES sandbox."governanceMissions"("missionKey");
+ALTER TABLE sandbox."tasks" ADD CONSTRAINT "tasks_agentId_fkey" FOREIGN KEY ("agentId") REFERENCES sandbox.agents(id) ON DELETE SET NULL;
+ALTER TABLE sandbox."tasks" ADD CONSTRAINT "tasks_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES sandbox.users(id) ON DELETE RESTRICT;
+ALTER TABLE sandbox."tasks" ADD CONSTRAINT "tasks_owneruserid_fkey" FOREIGN KEY ("ownerUserId") REFERENCES sandbox.users(id) ON DELETE RESTRICT;
+ALTER TABLE sandbox."tasks" ADD CONSTRAINT "tasks_parentTaskId_fkey" FOREIGN KEY ("parentTaskId") REFERENCES sandbox.tasks(id) ON DELETE CASCADE;
+ALTER TABLE sandbox."tasks" ADD CONSTRAINT "tasks_priorityId_fkey" FOREIGN KEY ("priorityId") REFERENCES sandbox."taskPriorities"(id) ON DELETE RESTRICT;
+ALTER TABLE sandbox."tasks" ADD CONSTRAINT "tasks_statusId_fkey" FOREIGN KEY ("statusId") REFERENCES sandbox."taskStatuses"(id) ON DELETE RESTRICT;
 CREATE INDEX "activityLogs_agentId_idx" ON sandbox."activityLogs" USING btree ("agentId");
 
 CREATE INDEX "activityLogs_createdAt_idx" ON sandbox."activityLogs" USING btree ("createdAt");
