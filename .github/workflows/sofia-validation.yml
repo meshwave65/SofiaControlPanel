@@ -94,3 +94,17 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: psql -h localhost -U postgres -d sofia_migration_test -v ON_ERROR_STOP=1 -f scripts/ci/mission-action-unit-dispatch-test.sql
+
+      - name: Prepare Sandbox schema roles
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d sofia_migration_test -v ON_ERROR_STOP=1 -c "DO \$\$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN CREATE ROLE anon NOLOGIN; END IF; IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN CREATE ROLE authenticated NOLOGIN; END IF; END \$\$;"
+      - name: Apply schema-only Sandbox baseline
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d sofia_migration_test -v ON_ERROR_STOP=1 -f governance/missions/0033/migrations/001_sandbox_schema.sql
+      - name: Verify 25 tables, RLS and empty data state
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d sofia_migration_test -v ON_ERROR_STOP=1 -f scripts/ci/sandbox-schema-test.sql
