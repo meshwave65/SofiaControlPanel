@@ -17,6 +17,7 @@
 - O despacho automático criou três tarefas filhas: `SCP-TASK-000060` (FILIPE — estrutural), `SCP-TASK-000061` (MATEUS — operacional) e `SCP-TASK-000062` (DINECY — estratégica).
 - TR versão 1 (document version id 82) está VALIDATED; Blueprint versão 2 (document version id 84) está READY e referencia explicitamente o TR 82, atendendo ao gate documental do SCP.
 - Espelhos das quatro tarefas e documentos da missão foram publicados no GitHub e registrados no Supabase.
+- OR canônico OR-20261125-0001 submetido ao Oracle (oracle_status=PENDING), indexado em governance/operational_reports/INDEX.csv e persistido também como versão documental no Supabase.
 - Nenhuma migration aplicada. Nenhum dado operacional copiado. Nenhuma alteração realizada na origem ou no Sandbox.
 
 ## Próxima execução
