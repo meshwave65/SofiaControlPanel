@@ -29,6 +29,9 @@ BEGIN
   IF policy_count <> 0 THEN
     RAISE EXCEPTION 'Expected no client policies (deny-by-default), found %', policy_count;
   END IF;
+  IF to_regclass('sandbox.agent_catalog_public') IS NULL THEN
+    RAISE EXCEPTION 'Safe agent catalog view is missing';
+  END IF;
   IF row_count <> 0 THEN
     RAISE EXCEPTION 'Expected zero copied application rows, estimated %', row_count;
   END IF;
