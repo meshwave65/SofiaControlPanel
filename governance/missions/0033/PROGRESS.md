@@ -10,8 +10,13 @@
 - Schema `sofia`: 25 tabelas, RLS habilitado em todas, 22 políticas e 12 eventos de trigger.
 - Schema `public`: 30 tabelas com RLS desabilitado identificadas no levantamento de segurança; não replicar permissões sem revisão.
 - Catálogo `sofia.agents` contém campos de credenciais (`manusAccount`, `manusPassword`, `manusToken`); esses valores são proibidos no Sandbox.
+- Criados e persistidos ORIGINAL_REQUEST, TR v1.0.0, Blueprint v1.0.0, checkpoint inicial e OR-0001.
+- Tarefa raiz `SCP-TASK-000059` ativada e atribuída pelo mecanismo do SCP a DINELSON.
+- O despacho automático criou três tarefas filhas: `SCP-TASK-000060` (FILIPE — estrutural), `SCP-TASK-000061` (MATEUS — operacional) e `SCP-TASK-000062` (DINECY — estratégica).
+- TR versão 1 (document version id 82) está VALIDATED; Blueprint versão 2 (document version id 84) está READY e referencia explicitamente o TR 82, atendendo ao gate documental do SCP.
+- Artefatos iniciais e espelhos das quatro tarefas foram gravados no GitHub e conciliados no Supabase.
 - Nenhuma migration aplicada. Nenhum dado operacional copiado. Nenhuma alteração realizada na origem.
 
 ## Próxima execução
 
-Concluir WP33.1 com inventário de objetos e dependências; em seguida produzir matriz de escopo WP33.2.
+Concluir WP33.1 com inventário de objetos e dependências; em seguida produzir matriz de escopo WP33.2. Consolidar as análises estrutural, operacional e estratégica das tarefas filhas antes de fechar a classificação.
