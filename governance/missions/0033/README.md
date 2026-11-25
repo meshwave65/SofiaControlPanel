@@ -1,7 +1,7 @@
 # MISSION_0033 — Espelhamento estrutural seguro do SCP no Sandbox
 
 **Estado:** PROGRESS — execução autônoma de missão de sistema  
-**TR:** [TR-v1.0.0-VALIDATED.md](./TR-v1.0.0-VALIDATED.md)  
+**TR:** [TR-v1.1.0-VALIDATED.md](./TR-v1.1.0-VALIDATED.md) · [histórico v1.0.0](./TR-v1.0.0-VALIDATED.md)  
 **Blueprint:** [BLUEPRINT-v1.0.0.md](./BLUEPRINT-v1.0.0.md) · revisão arquitetural [BLUEPRINT-v1.1.0.md](./BLUEPRINT-v1.1.0.md)  
 **Solicitação original:** [ORIGINAL_REQUEST.md](./ORIGINAL_REQUEST.md)  
 **Inventário:** [INVENTORY.md](./INVENTORY.md)  
