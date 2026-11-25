@@ -2,7 +2,7 @@
 
 **Versão:** 1.1.0  
 **Estado:** READY — revisão arquitetural incorporada à missão de sistema  
-**TR base:** TR-v1.0.0-VALIDATED.md  
+**TR base:** [TR-v1.1.0-VALIDATED.md](./TR-v1.1.0-VALIDATED.md), versão validada nesta missão  
 **Revisão:** decisões complementares do operador em 2026-11-25, registradas em SCOPE-MATRIX.md e SANDBOX-SESSION-LIFECYCLE.md.
 
 ## Alvo confirmado
