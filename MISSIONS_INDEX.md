@@ -61,7 +61,7 @@ A numeração `MISSION_0001`–`MISSION_0033` é uma série documental distinta 
 | 0030 | STAGED — registro presente no Supabase; artefatos no Supabase; pasta GitHub a reconciliar | `governance/missions/0030/` |
 | 0031 | STAGED — registro presente no Supabase; artefatos no Supabase; pasta GitHub a reconciliar | `governance/missions/0031/` |
 | 0032 | STAGED — registro presente no Supabase; artefatos no Supabase; pasta GitHub a reconciliar | `governance/missions/0032/` |
-| 0033 | PROGRESS — missão de sistema autônoma; TR VALIDATED, Blueprint READY, OR-0001 e checkpoint inicial | `governance/missions/0033/README.md`, `TR-v1.0.0-VALIDATED.md`, `BLUEPRINT-v1.0.0.md`, `TASKS.md`, `PROGRESS.md`, `OR-0001.md` |
+| 0033 | PROGRESS — missão de sistema autônoma; TR VALIDATED, Blueprint READY, INVENTORY, OR-0001/0002 e checkpoint | `governance/missions/0033/README.md`, `TR-v1.0.0-VALIDATED.md`, `BLUEPRINT-v1.0.0.md`, `INVENTORY.md`, `TASKS.md`, `PROGRESS.md`, `OR-0001.md`, `OR-0002.md` |
 
 Os registros 0028–0032 foram confirmados no Supabase em 2026-11-25, mas sua presença e integridade no GitHub ainda precisam ser conciliadas. Os arquivos da raiz continuam versionados por compatibilidade histórica; não devem ser apagados nem tratados como novas missões.
 
