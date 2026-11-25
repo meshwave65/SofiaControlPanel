@@ -8,9 +8,9 @@
 **Quadro de trabalho:** [TASKS.md](./TASKS.md)  
 **Progresso:** [PROGRESS.md](./PROGRESS.md)  
 **Checkpoint inicial:** [CHECKPOINT-0001.md](./CHECKPOINT-0001.md)  
-**Relatórios operacionais:** [OR-0001.md](./OR-0001.md) · [OR-0002.md](./OR-0002.md) · [OR-20261125-0001](../../governance/operational_reports/OR-20261125-0001.md)  
-**Tarefa operacional raiz:** [SCP-TASK-000059](../../missions/SCP-TASK-000059.md)  
-**Análises filhas:** [000060](../../missions/SCP-TASK-000060.md) · [000061](../../missions/SCP-TASK-000061.md) · [000062](../../missions/SCP-TASK-000062.md)
+**Relatórios operacionais:** [OR-0001.md](./OR-0001.md) · [OR-0002.md](./OR-0002.md) · [OR-20261125-0001](../../operational_reports/OR-20261125-0001.md)  
+**Tarefa operacional raiz:** [SCP-TASK-000059](../../../missions/SCP-TASK-000059.md)  
+**Análises filhas:** [000060](../../../missions/SCP-TASK-000060.md) · [000061](../../../missions/SCP-TASK-000061.md) · [000062](../../../missions/SCP-TASK-000062.md)
 
 ## Objetivo
 
