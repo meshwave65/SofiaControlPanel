@@ -8,14 +8,14 @@ const REPORT_FILE_NAME = "consolidated-report.md";
 let storageClient: SupabaseClient | undefined;
 
 function hasStorageCredentials() {
-  return Boolean(ENV.supabaseUrl.trim() && ENV.supabaseStorageKey.trim());
+  return Boolean(ENV.supabaseStorageUrl.trim() && ENV.supabaseStorageKey.trim());
 }
 
 function getStorage() {
-  const rawUrl = ENV.supabaseUrl.trim();
+  const rawUrl = ENV.supabaseStorageUrl.trim();
   const key = ENV.supabaseStorageKey.trim();
   if (!rawUrl || !key) {
-    throw new Error("Configure SUPABASE_URL e uma chave server-side do Supabase no ambiente do ControlPanel.");
+    throw new Error("Configure SUPABASE_STORAGE_URL e SUPABASE_STORAGE_SECRET_KEY no ambiente do ControlPanel.");
   }
 
   // O conector REST pode fornecer a URL terminada em /rest/v1; o SDK Storage requer a raiz do projeto.
