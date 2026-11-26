@@ -1,8 +1,20 @@
 -- MISSION_0033: session ownership, TTL, automatic database purge and Storage dispatch.
 -- Requires Supabase pg_net, pg_cron, pgcrypto and Vault extensions (enabled by the deployment step).
 
-CREATE EXTENSION IF NOT EXISTS pg_net WITH SCHEMA extensions;
-CREATE EXTENSION IF NOT EXISTS pg_cron;
+DO $ BEGIN
+  IF to_regprocedure('net.http_post(text,jsonb,jsonb,jsonb,integer)') IS NULL THEN
+    RAISE EXCEPTION 'pg_net extension must be enabled before Sandbox session migration';
+  END IF;
+  IF to_regprocedure('cron.schedule(text,text,text)') IS NULL THEN
+    RAISE EXCEPTION 'pg_cron extension must be enabled before Sandbox session migration';
+  END IF;
+END; $;
+
+CREATE OR REPLACE VIEW sandbox.agent_catalog_public WITH (security_invoker = true) AS
+SELECT id, name, description, status, version, "connectionStatus", "lastHeartbeat", "createdAt", "updatedAt"
+FROM sandbox.agents a;
+
+REVOKE ALL ON sandbox.agent_catalog_public FROM PUBLIC, anon, authenticated;
 
 CREATE TABLE sandbox.sessions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
