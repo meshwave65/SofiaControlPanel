@@ -367,6 +367,19 @@ export class SofiaOrchestrator {
         };
       }
 
+      const reserved = await db.reserveTaskForDispatch(taskId);
+      if (!reserved) {
+        const latestTask = await db.getTaskById(taskId);
+        return {
+          task: latestTask,
+          started: false,
+          factorized: false,
+          subtaskIds: [],
+          executionStarted: Boolean(latestTask?.manusTaskId),
+          externalTaskIds: latestTask?.manusTaskId ? [latestTask.manusTaskId] : [],
+        };
+      }
+
       const execution = await createManusTask(claimedTask);
       return {
         task: claimedTask,
