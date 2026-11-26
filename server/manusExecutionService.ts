@@ -412,6 +412,60 @@ async function syncRunningTask(task: NonNullable<LocalTask>) {
   return { taskId: task.id, manusStatus: waitingForCredits ? "waiting_credit" : normalizedStatus, creditsUsed: externalTask.credit_usage ?? null };
 }
 
+/**
+ * Recupera o relatório final de execuções Manus já concluídas que ainda não
+ * tiveram sua resposta persistida no Messenger do SCP. A operação é idempotente:
+ * uma tarefa com mensagem do tipo Report não é importada novamente.
+ */
+export async function syncCompletedManusTaskReports(limit = 20) {
+  const doneStatusId = await db.getTaskStatusIdByName("DONE");
+  const reportType = await db.getOrCreateMessageType("Report");
+  const candidates = (await db.getAllTasksGlobal())
+    .filter((task) =>
+      task.statusId === doneStatusId
+      && Boolean(task.manusTaskId)
+      && task.manusStatus === "stopped"
+    )
+    .slice(0, limit);
+
+  const results: Array<{ taskId: number; persisted: boolean; reason?: string }> = [];
+  for (const task of candidates) {
+    try {
+      const localMessages = await db.getMessagesByTaskId(task.id);
+      if (localMessages.some((message) => message.isAssistant && message.typeId === reportType.id)) {
+        results.push({ taskId: task.id, persisted: false, reason: "report_already_persisted" });
+        continue;
+      }
+
+      const externalMessages = await listManusMessages(task);
+      const finalReport = externalMessages.find((message) =>
+        message.type === "assistant_message" && assistantText(message).length > 0
+      );
+      const content = finalReport ? assistantText(finalReport) : "";
+      if (!content) {
+        results.push({ taskId: task.id, persisted: false, reason: "manus_report_not_available" });
+        continue;
+      }
+
+      await db.createMessage({
+        taskId: task.id,
+        senderId: task.createdBy,
+        typeId: reportType.id,
+        content,
+        isAssistant: true,
+      });
+      results.push({ taskId: task.id, persisted: true });
+      console.log(`[Manus] Relatório final recuperado e persistido para tarefa SCP #${task.id}.`);
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error);
+      results.push({ taskId: task.id, persisted: false, reason });
+      console.warn(`[Manus] Não foi possível recuperar o relatório da tarefa SCP #${task.id}:`, reason);
+    }
+  }
+
+  return results;
+}
+
 export async function syncRunningManusTasks() {
   const tasks = (await db.getAllTasksGlobal()).filter((task) => task.manusTaskId && task.manusStatus !== "stopped" && task.manusStatus !== "error");
   const results = [];
