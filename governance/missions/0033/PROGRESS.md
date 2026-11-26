@@ -110,3 +110,4 @@
 - Identidades centrais sem claim não são projetadas em `sandbox.users`, não recebem sessão e recebem estado explícito de acesso negado na UI.
 - `SANDBOX_DATABASE_URL` é a conexão runtime; `SANDBOX_MIGRATION_DATABASE_URL` é separado para operações explícitas de Drizzle. O antigo `DATABASE_URL` não é fallback.
 - OR-20261126-0004 recebeu addenda e versões 2/3 foram persistidas em `missionDocumentVersions`.
+- Privilégio `admin` no Sandbox agora deriva exclusivamente de `app_metadata.meshwave_user_type='admin'`; elevação por email e configurações legadas de owner/admin foram removidas. `user_metadata` não concede privilégios.
