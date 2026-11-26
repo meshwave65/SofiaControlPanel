@@ -824,21 +824,9 @@ BEGIN
 END;
 $function$;
 
-CREATE TRIGGER tasks_require_validated_tr
-BEFORE INSERT OR UPDATE OF "statusId", "agentId" ON sandbox.tasks
-FOR EACH ROW EXECUTE FUNCTION sandbox.enforce_execution_documents_before_staged();
 
-CREATE TRIGGER mission_action_units_validate
-BEFORE INSERT OR UPDATE ON sandbox."missionActionUnits"
-FOR EACH ROW EXECUTE FUNCTION sandbox.validate_mission_action_unit();
 
-CREATE TRIGGER mission_action_unit_gate_evidence_validate
-BEFORE INSERT OR DELETE OR UPDATE ON sandbox."missionActionUnitGateEvidence"
-FOR EACH ROW EXECUTE FUNCTION sandbox.validate_mission_action_unit_gate_evidence();
 
-CREATE TRIGGER mission_document_versions_immutable
-BEFORE DELETE OR UPDATE ON sandbox."missionDocumentVersions"
-FOR EACH ROW EXECUTE FUNCTION sandbox.reject_mission_document_version_mutation();
 
 -- Service-role-only RPCs used by the purge Edge Function.
 CREATE OR REPLACE FUNCTION public.verify_sandbox_session_purge_token(p_token text)
