@@ -683,35 +683,6 @@ BEGIN
 END;
 $function$;
 
-CREATE OR REPLACE FUNCTION sandbox.get_mission_parameters(p_mission_key text)
- RETURNS TABLE(parameter_key text, label text, description text, value_type text, validation jsonb, is_required boolean, sort_order integer, options jsonb)
- LANGUAGE sql
- SECURITY DEFINER
- SET search_path TO 'sofia', 'public', 'pg_temp'
-AS $function$
-SELECT p."parameterKey",p.label,p.description,p."valueType",p.validation,p."isRequired",p."sortOrder",coalesce(jsonb_agg(jsonb_build_object('value',o.value,'label',o.label,'description',o.description,'sort_order',o."sortOrder") ORDER BY o."sortOrder",o.id) FILTER (WHERE o.id IS NOT NULL),'[]'::jsonb) FROM sandbox."missionParameters" p LEFT JOIN sandbox."missionParameterOptions" o ON o."parameterId"=p.id AND o."isActive"=true WHERE p."missionKey"=p_mission_key AND p."isActive"=true GROUP BY p.id,p."parameterKey",p.label,p.description,p."valueType",p.validation,p."isRequired",p."sortOrder" ORDER BY p."sortOrder",p.id;
-$function$;
-
-CREATE OR REPLACE FUNCTION sandbox.validate_mission_parameters(p_mission_key text, p_payload jsonb DEFAULT '{}'::jsonb)
- RETURNS jsonb
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO 'sofia', 'public', 'pg_temp'
-AS $function$
-DECLARE v_param record; v_value jsonb; v_errors jsonb:='[]'::jsonb; v_found boolean:=false;
-BEGIN
-IF p_payload IS NULL OR jsonb_typeof(p_payload)<>'object' THEN RETURN jsonb_build_object('valid',false,'errors',jsonb_build_array(jsonb_build_object('code','INVALID_PAYLOAD','message','Payload must be a JSON object'))); END IF;
-FOR v_param IN SELECT "parameterKey" AS key,"valueType" AS value_type,"isRequired" AS is_required FROM sandbox."missionParameters" WHERE "missionKey"=p_mission_key AND "isActive"=true ORDER BY "sortOrder" LOOP
- v_value:=p_payload->v_param.key;
- IF v_value IS NULL OR v_value='null'::jsonb THEN IF v_param.is_required THEN v_errors:=v_errors||jsonb_build_array(jsonb_build_object('code','REQUIRED','parameter',v_param.key,'message','Required parameter is missing')); END IF; CONTINUE; END IF;
- IF v_param.value_type='enum' AND NOT EXISTS (SELECT 1 FROM sandbox."missionParameters" p JOIN sandbox."missionParameterOptions" o ON o."parameterId"=p.id WHERE p."missionKey"=p_mission_key AND p."parameterKey"=v_param.key AND o.value=v_value#>>'{}' AND o."isActive"=true) THEN v_errors:=v_errors||jsonb_build_array(jsonb_build_object('code','INVALID_ENUM','parameter',v_param.key,'message','Value is not present in the active catalog')); ELSIF v_param.value_type='boolean' AND jsonb_typeof(v_value)<>'boolean' THEN v_errors:=v_errors||jsonb_build_array(jsonb_build_object('code','INVALID_TYPE','parameter',v_param.key,'message','Boolean value expected')); ELSIF v_param.value_type IN ('decimal','integer') AND jsonb_typeof(v_value)<>'number' THEN v_errors:=v_errors||jsonb_build_array(jsonb_build_object('code','INVALID_TYPE','parameter',v_param.key,'message','Numeric value expected')); END IF;
-END LOOP;
-SELECT true INTO v_found FROM sandbox."missionParameters" WHERE "missionKey"=p_mission_key AND "isActive"=true LIMIT 1;
-IF NOT v_found THEN v_errors:=v_errors||jsonb_build_array(jsonb_build_object('code','UNKNOWN_MISSION','message','Mission parameter catalog not found')); END IF;
-RETURN jsonb_build_object('valid',jsonb_array_length(v_errors)=0,'errors',v_errors,'mission_key',p_mission_key);
-END;
-$function$;
-
 CREATE OR REPLACE FUNCTION sandbox.validate_mission_action_unit()
  RETURNS trigger
  LANGUAGE plpgsql
