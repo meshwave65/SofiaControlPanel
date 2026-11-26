@@ -58,6 +58,18 @@ ALTER TABLE sandbox.agents
   ADD COLUMN "agentOrigin" varchar(24) NOT NULL DEFAULT 'SANDBOX_SESSION',
   ADD CONSTRAINT agents_origin_check CHECK ("agentOrigin" IN ('SCP_CATALOG','SANDBOX_SESSION'));
 
+-- Catalog agents are shared metadata projections, not user-owned session instances.
+ALTER TABLE sandbox.agents ALTER COLUMN "ownerId" DROP NOT NULL;
+ALTER TABLE sandbox.agents
+  ADD CONSTRAINT agents_catalog_or_session_owner_check
+  CHECK ("agentOrigin" = 'SCP_CATALOG' OR "ownerId" IS NOT NULL);
+
+CREATE OR REPLACE VIEW sandbox.agent_catalog_public WITH (security_invoker = true) AS
+SELECT id, name, description, status, version, "connectionStatus", "lastHeartbeat", "createdAt", "updatedAt"
+FROM sandbox.agents a
+WHERE a."agentOrigin" = 'SCP_CATALOG';
+REVOKE ALL ON sandbox.agent_catalog_public FROM PUBLIC, anon, authenticated;
+
 DO $$
 DECLARE
   table_name text;
@@ -454,7 +466,7 @@ BEGIN
      WHERE id = v_session.id;
 
     PERFORM net.http_post(
-      url := 'https://rqvjsjfypuojuaetxkig.supabase.co/functions/v1/sandbox-session-purge',
+      url := 'https://detstgxofjnnggxluqtl.supabase.co/functions/v1/sandbox-session-purge',
       body := jsonb_build_object('session_id', v_session.id),
       headers := jsonb_build_object(
         'Content-Type', 'application/json',
@@ -827,6 +839,56 @@ $function$;
 
 
 
+
+CREATE OR REPLACE FUNCTION sandbox.get_mission_parameters(p_mission_key text)
+ RETURNS TABLE(parameter_key text, label text, description text, value_type text, validation jsonb, is_required boolean, sort_order integer, options jsonb)
+ LANGUAGE sql
+ SECURITY DEFINER
+ SET search_path TO 'sandbox', 'public', 'pg_temp'
+AS $function$
+SELECT p."parameterKey",p.label,p.description,p."valueType",p.validation,p."isRequired",p."sortOrder",coalesce(jsonb_agg(jsonb_build_object('value',o.value,'label',o.label,'description',o.description,'sort_order',o."sortOrder") ORDER BY o."sortOrder",o.id) FILTER (WHERE o.id IS NOT NULL),'[]'::jsonb) FROM sandbox."missionParameters" p LEFT JOIN sandbox."missionParameterOptions" o ON o."parameterId"=p.id AND o."isActive"=true WHERE p."missionKey"=p_mission_key AND p."isActive"=true GROUP BY p.id,p."parameterKey",p.label,p.description,p."valueType",p.validation,p."isRequired",p."sortOrder" ORDER BY p."sortOrder",p.id;
+$function$;
+
+CREATE OR REPLACE FUNCTION sandbox.validate_mission_parameters(p_mission_key text, p_payload jsonb DEFAULT '{}'::jsonb)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'sandbox', 'public', 'pg_temp'
+AS $function$
+DECLARE v_param record; v_value jsonb; v_errors jsonb:='[]'::jsonb; v_found boolean:=false;
+BEGIN
+IF p_payload IS NULL OR jsonb_typeof(p_payload)<>'object' THEN RETURN jsonb_build_object('valid',false,'errors',jsonb_build_array(jsonb_build_object('code','INVALID_PAYLOAD','message','Payload must be a JSON object'))); END IF;
+FOR v_param IN SELECT "parameterKey" AS key,"valueType" AS value_type,"isRequired" AS is_required FROM sandbox."missionParameters" WHERE "missionKey"=p_mission_key AND "isActive"=true ORDER BY "sortOrder" LOOP
+ v_value:=p_payload->v_param.key;
+ IF v_value IS NULL OR v_value='null'::jsonb THEN IF v_param.is_required THEN v_errors:=v_errors||jsonb_build_array(jsonb_build_object('code','REQUIRED','parameter',v_param.key,'message','Required parameter is missing')); END IF; CONTINUE; END IF;
+ IF v_param.value_type='enum' AND NOT EXISTS (SELECT 1 FROM sandbox."missionParameters" p JOIN sandbox."missionParameterOptions" o ON o."parameterId"=p.id WHERE p."missionKey"=p_mission_key AND p."parameterKey"=v_param.key AND o.value=v_value#>>'{}' AND o."isActive"=true) THEN v_errors:=v_errors||jsonb_build_array(jsonb_build_object('code','INVALID_ENUM','parameter',v_param.key,'message','Value is not present in the active catalog')); ELSIF v_param.value_type='boolean' AND jsonb_typeof(v_value)<>'boolean' THEN v_errors:=v_errors||jsonb_build_array(jsonb_build_object('code','INVALID_TYPE','parameter',v_param.key,'message','Boolean value expected')); ELSIF v_param.value_type IN ('decimal','integer') AND jsonb_typeof(v_value)<>'number' THEN v_errors:=v_errors||jsonb_build_array(jsonb_build_object('code','INVALID_TYPE','parameter',v_param.key,'message','Numeric value expected')); END IF;
+END LOOP;
+SELECT true INTO v_found FROM sandbox."missionParameters" WHERE "missionKey"=p_mission_key AND "isActive"=true LIMIT 1;
+IF NOT v_found THEN v_errors:=v_errors||jsonb_build_array(jsonb_build_object('code','UNKNOWN_MISSION','message','Mission parameter catalog not found')); END IF;
+RETURN jsonb_build_object('valid',jsonb_array_length(v_errors)=0,'errors',v_errors,'mission_key',p_mission_key);
+END;
+$function$;
+
+REVOKE ALL ON FUNCTION sandbox.get_mission_parameters(text) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION sandbox.validate_mission_parameters(text,jsonb) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION sandbox.get_mission_parameters(text) TO postgres;
+GRANT EXECUTE ON FUNCTION sandbox.validate_mission_parameters(text,jsonb) TO postgres;
+
+CREATE TRIGGER tasks_require_validated_tr
+BEFORE INSERT OR UPDATE OF "statusId", "agentId" ON sandbox.tasks
+FOR EACH ROW EXECUTE FUNCTION sandbox.enforce_execution_documents_before_staged();
+
+CREATE TRIGGER mission_action_units_validate
+BEFORE INSERT OR UPDATE ON sandbox."missionActionUnits"
+FOR EACH ROW EXECUTE FUNCTION sandbox.validate_mission_action_unit();
+
+CREATE TRIGGER mission_action_unit_gate_evidence_validate
+BEFORE INSERT OR DELETE OR UPDATE ON sandbox."missionActionUnitGateEvidence"
+FOR EACH ROW EXECUTE FUNCTION sandbox.validate_mission_action_unit_gate_evidence();
+
+CREATE TRIGGER mission_document_versions_immutable
+BEFORE DELETE OR UPDATE ON sandbox."missionDocumentVersions"
+FOR EACH ROW EXECUTE FUNCTION sandbox.reject_mission_document_version_mutation();
 
 -- Service-role-only RPCs used by the purge Edge Function.
 CREATE OR REPLACE FUNCTION public.verify_sandbox_session_purge_token(p_token text)
