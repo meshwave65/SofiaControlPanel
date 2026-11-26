@@ -15,6 +15,7 @@ import TaskCreate from "./pages/TaskCreate";
 import Messages from "./pages/Messages";
 import LegalPage from "./pages/LegalPage";
 import AuthCallback from "./pages/AuthCallback";
+import RecoverPassword from "./pages/RecoverPassword";
 
 function HomeRoute() {
   const { user, loading } = useAuth();
@@ -35,6 +36,7 @@ function Router() {
     <Switch>
       <Route path={"/"} component={HomeRoute} />
       <Route path={"/auth/callback"} component={AuthCallback} />
+      <Route path={"/recover-password"} component={RecoverPassword} />
       <Route path={"/privacity"} component={() => <LegalPage kind="privacy" />} />
       <Route path={"/privacy"} component={() => <LegalPage kind="privacy" />} />
       <Route path={"/terms"} component={() => <LegalPage kind="terms" />} />
