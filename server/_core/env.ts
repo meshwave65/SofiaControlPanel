@@ -2,10 +2,32 @@ const appEnvironment = process.env.SCP_ENVIRONMENT?.trim().toLowerCase() === "sa
   ? "sandbox"
   : "scp";
 
-const storageUrl =
-  process.env.SUPABASE_STORAGE_URL ??
-  process.env.SUPABASE_URL ??
-  "";
+const storageUrl = appEnvironment === "sandbox"
+  ? (process.env.SUPABASE_STORAGE_URL ?? "")
+  : (process.env.SUPABASE_STORAGE_URL ?? process.env.SUPABASE_URL ?? "");
+
+const storageKey = appEnvironment === "sandbox"
+  ? (process.env.SUPABASE_STORAGE_SECRET_KEY ?? "")
+  : (process.env.SUPABASE_STORAGE_SECRET_KEY ??
+     process.env.SUPABASE_SECRET_KEY ??
+     process.env.SUPABASE_SERVICE_ROLE_KEY ??
+     process.env.SUPABASE_KEY ??
+     "");
+
+const authUrl = appEnvironment === "sandbox"
+  ? (process.env.SUPABASE_AUTH_URL ?? process.env.VITE_SUPABASE_URL ?? "")
+  : (process.env.SUPABASE_AUTH_URL ??
+     process.env.SUPABASE_URL ??
+     process.env.VITE_SUPABASE_URL ??
+     "");
+
+const authAnonKey = appEnvironment === "sandbox"
+  ? (process.env.SUPABASE_AUTH_ANON_KEY ?? process.env.VITE_SUPABASE_ANON_KEY ?? "")
+  : (process.env.SUPABASE_AUTH_ANON_KEY ??
+     process.env.SUPABASE_ANON_KEY ??
+     process.env.VITE_SUPABASE_ANON_KEY ??
+     process.env.SUPABASE_API_KEY ??
+     "");
 
 export const ENV = {
   appId: process.env.VITE_APP_ID ?? "",
@@ -34,26 +56,12 @@ export const ENV = {
   groqModel: process.env.GROQ_MODEL ?? "openai/gpt-oss-120b",
 
   // Central identity provider. In Sandbox this points to the SCP Auth project.
-  supabaseAuthUrl:
-    process.env.SUPABASE_AUTH_URL ??
-    process.env.SUPABASE_URL ??
-    process.env.VITE_SUPABASE_URL ??
-    "",
-  supabaseAuthAnonKey:
-    process.env.SUPABASE_AUTH_ANON_KEY ??
-    process.env.SUPABASE_ANON_KEY ??
-    process.env.VITE_SUPABASE_ANON_KEY ??
-    process.env.SUPABASE_API_KEY ??
-    "",
+  supabaseAuthUrl: authUrl,
+  supabaseAuthAnonKey: authAnonKey,
 
   // Environment-local Storage. Sandbox must point this to the Sandbox project.
   supabaseStorageUrl: storageUrl,
-  supabaseStorageKey:
-    process.env.SUPABASE_STORAGE_SECRET_KEY ??
-    process.env.SUPABASE_SECRET_KEY ??
-    process.env.SUPABASE_SERVICE_ROLE_KEY ??
-    process.env.SUPABASE_KEY ??
-    "",
+  supabaseStorageKey: storageKey,
 
   // Backward-compatible alias for older server modules.
   supabaseUrl: storageUrl,
