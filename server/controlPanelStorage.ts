@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { ENV } from "./_core/env";
 
-const BUCKET_NAME = "sofia-controlpanel-artifacts";
+const BUCKET_NAME = "sandbox-session-artifacts";
 const SIGNED_URL_TTL_SECONDS = 15 * 60;
 const REPORT_FILE_NAME = "consolidated-report.md";
 
