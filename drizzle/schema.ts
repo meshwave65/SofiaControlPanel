@@ -1,7 +1,7 @@
 import { integer, pgEnum, pgTable, pgSchema, text, timestamp, varchar, boolean, numeric, jsonb, index, uniqueIndex, foreignKey } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
-const sofia = pgSchema("sofia");
+const sofia = pgSchema("sandbox");
 
 export const roleEnum = sofia.enum("role", ["user", "admin"]);
 export const agentStatusEnum = sofia.enum("agent_status", ["online", "offline", "idle", "paused"]);
