@@ -312,7 +312,7 @@ RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path TO 'pg_catalog', 'sandbox'
-AS $function$
+AS $function$;
 BEGIN
   IF NEW."missionKey" IS NOT NULL AND NEW."sandboxSessionId" IS NOT NULL THEN
     UPDATE sandbox."governanceMissions"
@@ -388,7 +388,7 @@ CREATE OR REPLACE FUNCTION sandbox.enforce_session_ttl()
 RETURNS trigger
 LANGUAGE plpgsql
 SET search_path TO 'pg_catalog', 'sandbox'
-AS $function$
+AS $function$;
 BEGIN
   IF NEW."expiresAt" <= NEW."startedAt"
      OR NEW."expiresAt" > NEW."startedAt" + interval '24 hours' THEN
@@ -474,7 +474,7 @@ RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path TO 'pg_catalog', 'sandbox'
-AS $function$
+AS $function$;
 BEGIN
   PERFORM sandbox.dispatch_pending_session_purges();
   RETURN NEW;
@@ -517,7 +517,7 @@ RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path TO 'pg_catalog', 'sandbox'
-AS $function$
+AS $function$;
 BEGIN
   UPDATE sandbox.sessions
      SET status = 'CLOSING',
@@ -546,7 +546,7 @@ BEGIN
   END IF;
   RAISE EXCEPTION 'Mission document versions are immutable; create a new version instead';
 END;
-$function$
+$function$;
 
 CREATE OR REPLACE FUNCTION sandbox.validate_mission_action_unit_gate_evidence()
  RETURNS trigger
@@ -596,7 +596,7 @@ BEGIN
 
   RETURN NEW;
 END;
-$function$
+$function$;
 
 -- Copy the non-dispatch governance functions with the schema rebound to Sandbox.
 CREATE OR REPLACE FUNCTION sandbox.enforce_execution_documents_before_staged()
@@ -681,7 +681,7 @@ BEGIN
   END IF;
   RETURN NEW;
 END;
-$function$
+$function$;
 
 CREATE OR REPLACE FUNCTION sandbox.get_mission_parameters(p_mission_key text)
  RETURNS TABLE(parameter_key text, label text, description text, value_type text, validation jsonb, is_required boolean, sort_order integer, options jsonb)
@@ -690,7 +690,7 @@ CREATE OR REPLACE FUNCTION sandbox.get_mission_parameters(p_mission_key text)
  SET search_path TO 'sofia', 'public', 'pg_temp'
 AS $function$
 SELECT p."parameterKey",p.label,p.description,p."valueType",p.validation,p."isRequired",p."sortOrder",coalesce(jsonb_agg(jsonb_build_object('value',o.value,'label',o.label,'description',o.description,'sort_order',o."sortOrder") ORDER BY o."sortOrder",o.id) FILTER (WHERE o.id IS NOT NULL),'[]'::jsonb) FROM sandbox."missionParameters" p LEFT JOIN sandbox."missionParameterOptions" o ON o."parameterId"=p.id AND o."isActive"=true WHERE p."missionKey"=p_mission_key AND p."isActive"=true GROUP BY p.id,p."parameterKey",p.label,p.description,p."valueType",p.validation,p."isRequired",p."sortOrder" ORDER BY p."sortOrder",p.id;
-$function$
+$function$;
 
 CREATE OR REPLACE FUNCTION sandbox.validate_mission_parameters(p_mission_key text, p_payload jsonb DEFAULT '{}'::jsonb)
  RETURNS jsonb
@@ -710,7 +710,7 @@ SELECT true INTO v_found FROM sandbox."missionParameters" WHERE "missionKey"=p_m
 IF NOT v_found THEN v_errors:=v_errors||jsonb_build_array(jsonb_build_object('code','UNKNOWN_MISSION','message','Mission parameter catalog not found')); END IF;
 RETURN jsonb_build_object('valid',jsonb_array_length(v_errors)=0,'errors',v_errors,'mission_key',p_mission_key);
 END;
-$function$
+$function$;
 
 CREATE OR REPLACE FUNCTION sandbox.validate_mission_action_unit()
  RETURNS trigger
@@ -851,7 +851,7 @@ BEGIN
   NEW."updatedAt" := now();
   RETURN NEW;
 END;
-$function$
+$function$;
 
 CREATE TRIGGER tasks_require_validated_tr
 BEFORE INSERT OR UPDATE OF "statusId", "agentId" ON sandbox.tasks
@@ -888,7 +888,7 @@ RETURNS boolean
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path TO 'pg_catalog', 'sandbox'
-AS $function$
+AS $function$;
 DECLARE
   v_claimed boolean := false;
 BEGIN
@@ -1016,7 +1016,7 @@ RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path TO 'pg_catalog', 'sandbox'
-AS $function$
+AS $function$;
 BEGIN
   UPDATE sandbox.sessions
      SET status = 'PURGED',
