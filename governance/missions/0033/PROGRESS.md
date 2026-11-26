@@ -65,3 +65,14 @@
 - Teste transacional sintético de atribuição de sessão em tasks/messages/activityLogs/contextReports passou sem erro e foi revertido; não deixou fixtures. Testes anteriores de fechamento manual/TTL permanecem aprovados.
 - Bloqueios: nenhuma das 83 identidades centrais auditadas tem claims de ambiente; nenhuma conta foi classificada. Teste ponta a ponta com usuário real e fixture Storage ainda pendentes. A missão continua PROGRESS.
 - OR-20261126-0003 publicado no GitHub; persistência Supabase correspondente em andamento.
+
+
+## 2026-11-26 — Auditoria estrutural completa e bloqueio de conexão Render
+- DDL origem `ufylccbdjfzydbwhpmpp.sofia` vs destino `detstgxofjnnggxluqtl.sandbox` comparado por catálogos PostgreSQL.
+- Paridade: 25/25 tabelas e 272/272 colunas de origem; destino acrescenta `sessions` e 36 campos de sessão/origem. 109 constraints e 88 índices de origem preservados; destino adiciona 25 constraints e 22 índices de sessão. Enums 6/6 idênticos; 25 sequências e ownership preservados.
+- Diferenças intencionais documentadas: RLS 26/26 sem policies no destino (backend-only); triggers de dispatch externo ausentes; funções de purge ajustadas; view `agent_catalog_public` filtrada; `agents.ownerId` nullable para catálogo.
+- Catálogo: 19/19 mapeados por `sourceAgentId`, campos operacionais coincidentes, descrições de conta/email sanitizadas e nenhuma credencial copiada (0 account/password/token no Sandbox).
+- Incidente crítico: Render `srv-dc1itplg1s2s73dgk9i0` estava conectado ao projectRef `rqvjsjfypuojuaetxkig` via pooler `aws-1-us-east-1.pooler.supabase.com`, não ao destino canônico. O script antigo executou verificações/DDL idempotentes e migrations 0008/0015 nesse endpoint; logs não permitem dizer quais alterações eram novas. Nenhum dado de negócio ou catálogo foi copiado para esse projeto.
+- Correção: backend exige `SANDBOX_DATABASE_URL`, valida projectRef `detstgxofjnnggxluqtl`; startup script agora é somente leitura e valida 26 tabelas, 19 agentes, RLS, policies e triggers. Não há mais fallback para `DATABASE_URL` nem DDL no startup.
+- O destino possui role `sandbox_app` com LOGIN/BYPASSRLS e grants de aplicação. Render ainda não tem connection string válida para esse role/projeto; deploy está falhando fechado até configurar a variável. A versão antiga live ainda aponta ao projeto errado, mas sem claims as rotas protegidas negam acesso.
+- OR-20261126-0004 e DDL-STRUCTURAL-AUDIT-20261126.md persistidos no GitHub; persistência Supabase correspondente em andamento. MISSION_0033 permanece PROGRESS.
