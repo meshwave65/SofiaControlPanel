@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isDispatchRetryCandidate, isGitHubMirrorRetryCandidate } from "./heartbeat";
+import { isDispatchRetryCandidate, isGitHubMirrorRetryCandidate, isProgressAgentWaitRecoveryCandidate } from "./heartbeat";
 
 describe("dispatch retry eligibility", () => {
   it("retries a persisted dispatch_pending marker", () => {
@@ -19,6 +19,44 @@ describe("dispatch retry eligibility", () => {
   });
 });
 
+
+describe("recovery of orphaned tasks waiting for an agent", () => {
+  const progressStatusId = 2;
+
+  it("recovers PROGRESS tasks waiting for an agent when no Manus ID exists", () => {
+    expect(isProgressAgentWaitRecoveryCandidate({
+      statusId: progressStatusId,
+      manusTaskId: null,
+      manusStatus: "waiting_for_available_agent",
+    }, progressStatusId)).toBe(true);
+    expect(isProgressAgentWaitRecoveryCandidate({
+      statusId: progressStatusId,
+      manusTaskId: null,
+      manusStatus: "waiting_for_pinned_agent",
+    }, progressStatusId)).toBe(true);
+  });
+
+  it("does not recover dispatch_pending tasks because the external request may have an ambiguous outcome", () => {
+    expect(isProgressAgentWaitRecoveryCandidate({
+      statusId: progressStatusId,
+      manusTaskId: null,
+      manusStatus: "dispatch_pending",
+    }, progressStatusId)).toBe(false);
+  });
+
+  it("does not recover tasks with a Manus ID or a non-PROGRESS status", () => {
+    expect(isProgressAgentWaitRecoveryCandidate({
+      statusId: progressStatusId,
+      manusTaskId: "existing-manus-task",
+      manusStatus: "waiting_for_available_agent",
+    }, progressStatusId)).toBe(false);
+    expect(isProgressAgentWaitRecoveryCandidate({
+      statusId: 1,
+      manusTaskId: null,
+      manusStatus: "waiting_for_available_agent",
+    }, progressStatusId)).toBe(false);
+  });
+});
 
 describe("GitHub mission mirror retry eligibility", () => {
   const now = new Date("2026-11-20T03:00:00.000Z").getTime();
