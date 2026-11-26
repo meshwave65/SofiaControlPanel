@@ -1,17 +1,17 @@
 import { integer, pgEnum, pgTable, pgSchema, text, timestamp, varchar, boolean, numeric, jsonb, index, uniqueIndex, foreignKey } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
-const sofia = pgSchema("sofia");
+const appSchema = pgSchema(process.env.SCP_ENVIRONMENT?.trim().toLowerCase() === "sandbox" ? "sandbox" : "sofia");
 
-export const roleEnum = sofia.enum("role", ["user", "admin"]);
-export const agentStatusEnum = sofia.enum("agent_status", ["online", "offline", "idle", "paused"]);
+export const roleEnum = appSchema.enum("role", ["user", "admin"]);
+export const agentStatusEnum = appSchema.enum("agent_status", ["online", "offline", "idle", "paused"]);
 
 /**
  * Core user table backing auth flow.
  * Extend this file with additional tables as your product grows.
  * Columns use camelCase to match both database fields and generated types.
  */
-export const users = sofia.table("users", {
+export const users = appSchema.table("users", {
   /**
    * Surrogate primary key. Auto-incremented numeric value managed by the database.
    * Use this for relations between tables.
@@ -35,7 +35,7 @@ export type InsertUser = typeof users.$inferInsert;
 // AGENT MANAGEMENT TABLES
 // ============================================
 
-export const agents = sofia.table(
+export const agents = appSchema.table(
   "agents",
   {
     id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
@@ -72,7 +72,7 @@ export type InsertAgent = typeof agents.$inferInsert;
 // TASK MANAGEMENT TABLES
 // ============================================
 
-export const taskStatuses = sofia.table("taskStatuses", {
+export const taskStatuses = appSchema.table("taskStatuses", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
   name: varchar("name", { length: 64 }).notNull().unique(),
   description: text("description"),
@@ -82,7 +82,7 @@ export const taskStatuses = sofia.table("taskStatuses", {
 export type TaskStatus = typeof taskStatuses.$inferSelect;
 export type InsertTaskStatus = typeof taskStatuses.$inferInsert;
 
-export const taskPriorities = sofia.table("taskPriorities", {
+export const taskPriorities = appSchema.table("taskPriorities", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
   name: varchar("name", { length: 64 }).notNull().unique(),
   level: integer("level").notNull(),
@@ -93,7 +93,7 @@ export const taskPriorities = sofia.table("taskPriorities", {
 export type TaskPriority = typeof taskPriorities.$inferSelect;
 export type InsertTaskPriority = typeof taskPriorities.$inferInsert;
 
-export const tasks = sofia.table(
+export const tasks = appSchema.table(
   "tasks",
   {
     id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
@@ -161,7 +161,7 @@ export type InsertTask = typeof tasks.$inferInsert;
 // MESSAGE SYSTEM TABLES
 // ============================================
 
-export const messageTypes = sofia.table("messageTypes", {
+export const messageTypes = appSchema.table("messageTypes", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
   name: varchar("name", { length: 64 }).notNull().unique(),
   description: text("description"),
@@ -171,7 +171,7 @@ export const messageTypes = sofia.table("messageTypes", {
 export type MessageType = typeof messageTypes.$inferSelect;
 export type InsertMessageType = typeof messageTypes.$inferInsert;
 
-export const messages = sofia.table(
+export const messages = appSchema.table(
   "messages",
   {
     id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
@@ -215,7 +215,7 @@ export type InsertMessage = typeof messages.$inferInsert;
 // ACTIVITY LOGGING TABLES
 // ============================================
 
-export const activityEventTypes = sofia.table("activityEventTypes", {
+export const activityEventTypes = appSchema.table("activityEventTypes", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
   name: varchar("name", { length: 64 }).notNull().unique(),
   description: text("description"),
@@ -225,7 +225,7 @@ export const activityEventTypes = sofia.table("activityEventTypes", {
 export type ActivityEventType = typeof activityEventTypes.$inferSelect;
 export type InsertActivityEventType = typeof activityEventTypes.$inferInsert;
 
-export const activityLogs = sofia.table(
+export const activityLogs = appSchema.table(
   "activityLogs",
   {
     id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
@@ -262,7 +262,7 @@ export type InsertActivityLog = typeof activityLogs.$inferInsert;
 // CONTEXT REPORT TABLES
 // ============================================
 
-export const contextReports = sofia.table(
+export const contextReports = appSchema.table(
   "contextReports",
   {
     id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
@@ -290,7 +290,7 @@ export type InsertContextReport = typeof contextReports.$inferInsert;
 // SCHEDULED TASKS TABLE
 // ============================================
 
-export const scheduledTasks = sofia.table(
+export const scheduledTasks = appSchema.table(
   "scheduledTasks",
   {
     id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
@@ -316,7 +316,7 @@ export type InsertScheduledTask = typeof scheduledTasks.$inferInsert;
 // ARC / PGC ASSESSMENT TABLES
 // ============================================
 
-export const arcPolicies = sofia.table(
+export const arcPolicies = appSchema.table(
   "arcPolicies",
   {
     id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
@@ -337,7 +337,7 @@ export const arcPolicies = sofia.table(
 export type ArcPolicy = typeof arcPolicies.$inferSelect;
 export type InsertArcPolicy = typeof arcPolicies.$inferInsert;
 
-export const arcAssessments = sofia.table(
+export const arcAssessments = appSchema.table(
   "arcAssessments",
   {
     id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
@@ -374,7 +374,7 @@ export const arcAssessments = sofia.table(
 export type ArcAssessment = typeof arcAssessments.$inferSelect;
 export type InsertArcAssessment = typeof arcAssessments.$inferInsert;
 
-export const arcEvidence = sofia.table(
+export const arcEvidence = appSchema.table(
   "arcEvidence",
   {
     id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
@@ -405,7 +405,7 @@ export type InsertArcEvidence = typeof arcEvidence.$inferInsert;
 // ARC / PGC TELEMETRY AND CONFIDENCE TABLES
 // ============================================
 
-export const arcAccessEvents = sofia.table("arcAccessEvents", {
+export const arcAccessEvents = appSchema.table("arcAccessEvents", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
   userId: integer("userId").notNull(),
   agentId: integer("agentId"),
@@ -434,7 +434,7 @@ export const arcAccessEvents = sofia.table("arcAccessEvents", {
 export type ArcAccessEvent = typeof arcAccessEvents.$inferSelect;
 export type InsertArcAccessEvent = typeof arcAccessEvents.$inferInsert;
 
-export const arcDeviceProfiles = sofia.table("arcDeviceProfiles", {
+export const arcDeviceProfiles = appSchema.table("arcDeviceProfiles", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
   ownerId: integer("ownerId").notNull(),
   agentId: integer("agentId").notNull(),
@@ -456,7 +456,7 @@ export const arcDeviceProfiles = sofia.table("arcDeviceProfiles", {
 export type ArcDeviceProfile = typeof arcDeviceProfiles.$inferSelect;
 export type InsertArcDeviceProfile = typeof arcDeviceProfiles.$inferInsert;
 
-export const arcConfidenceSnapshots = sofia.table("arcConfidenceSnapshots", {
+export const arcConfidenceSnapshots = appSchema.table("arcConfidenceSnapshots", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
   userId: integer("userId").notNull(),
   agentId: integer("agentId"),
@@ -630,7 +630,7 @@ export const contextReportsRelations = relations(contextReports, ({ one }) => ({
 // MISSION DOCUMENT CATALOG AND VERSIONED INSTANCES
 // ============================================
 
-export const missionDocumentTypes = sofia.table("missionDocumentTypes", {
+export const missionDocumentTypes = appSchema.table("missionDocumentTypes", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
   typeKey: varchar("typeKey", { length: 64 }).notNull().unique(),
   label: varchar("label", { length: 128 }).notNull(),
@@ -651,7 +651,7 @@ export const missionDocumentTypes = sofia.table("missionDocumentTypes", {
 export type MissionDocumentType = typeof missionDocumentTypes.$inferSelect;
 export type InsertMissionDocumentType = typeof missionDocumentTypes.$inferInsert;
 
-export const missionDocuments = sofia.table("missionDocuments", {
+export const missionDocuments = appSchema.table("missionDocuments", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
   taskId: integer("taskId").notNull(),
   documentTypeId: integer("documentTypeId").notNull(),
@@ -670,7 +670,7 @@ export const missionDocuments = sofia.table("missionDocuments", {
 export type MissionDocument = typeof missionDocuments.$inferSelect;
 export type InsertMissionDocument = typeof missionDocuments.$inferInsert;
 
-export const missionDocumentVersions = sofia.table("missionDocumentVersions", {
+export const missionDocumentVersions = appSchema.table("missionDocumentVersions", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
   documentId: integer("documentId").notNull(),
   version: integer("version").notNull(),
@@ -698,7 +698,7 @@ export const missionDocumentVersions = sofia.table("missionDocumentVersions", {
 export type MissionDocumentVersion = typeof missionDocumentVersions.$inferSelect;
 export type InsertMissionDocumentVersion = typeof missionDocumentVersions.$inferInsert;
 
-export const missionActionUnits = sofia.table("missionActionUnits", {
+export const missionActionUnits = appSchema.table("missionActionUnits", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
   missionTaskId: integer("missionTaskId").notNull(),
   actionPlanDocumentId: integer("actionPlanDocumentId").notNull(),
@@ -731,7 +731,7 @@ export const missionActionUnits = sofia.table("missionActionUnits", {
   approvalUserFk: foreignKey({ columns: [table.approvalUserId], foreignColumns: [users.id] }).onDelete("restrict"),
 }));
 
-export const missionActionUnitGateEvidence = sofia.table("missionActionUnitGateEvidence", {
+export const missionActionUnitGateEvidence = appSchema.table("missionActionUnitGateEvidence", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
   actionUnitId: integer("actionUnitId").notNull(),
   missionTaskId: integer("missionTaskId").notNull(),
