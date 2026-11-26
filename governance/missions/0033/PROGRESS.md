@@ -118,3 +118,16 @@
 - A única informação de conexão ainda ausente é o hostname/porta exatos do Session Pooler no diálogo Connect do projeto `detstgxofjnnggxluqtl`. Não compor hostname por suposição.
 - Connection string esperada no Render: `SANDBOX_DATABASE_URL`, usuário pooler `sandbox_app.detstgxofjnnggxluqtl`, host/porta copiados do Connect e senha referenciada pelo Vault `sandbox_app_db_password`.
 - O deploy permanece fail-closed até essa variável ser configurada. O serviço não deve usar o `DATABASE_URL` herdado do projeto `rqvjsjfypuojuaetxkig`.
+
+
+## 2026-11-26 12:06 BRT — Revalidação Render e bloqueio de endpoint
+- Supabase destino `detstgxofjnnggxluqtl` revalidado como `ACTIVE_HEALTHY`.
+- Render service `srv-dc1itplg1s2s73dgk9i0`: commit `7539a45653bdf07c79c50a8a9b335805c5542141` buildou com sucesso, mas o deploy falhou no prestart porque `SANDBOX_DATABASE_URL` continua ausente; o script recusou corretamente usar `DATABASE_URL`.
+- Logs da instância antiga durante a janela de deploy confirmam conexão ao projeto errado `rqvjsjfypuojuaetxkig` via `aws-1-us-east-1.pooler.supabase.com`, usuário `postgres.rqvjsjfypuojuaetxkig`; catálogo retornou zero agentes e havia duas projeções de usuários. Não realizar testes nem considerar o serviço operacional até substituir essa instância por deploy canônico.
+- Nenhuma alteração foi feita no projeto `rqvjsjfypuojuaetxkig`.
+- Vault no destino contém `sandbox_app_db_password`; role `sandbox_app` tem LOGIN/BYPASSRLS e senha configurada. Nenhum segredo foi exposto.
+- Documentação oficial confirma que o índice do hostname compartilhado do Session Pooler não pode ser inferido da região e deve ser copiado do Connect; Render é IPv4-only, então a conexão direta IPv6 não é alternativa válida sem IPv4 add-on.
+- Browser Use não pôde abrir o dashboard por insuficiência de créditos; não houve alteração de variáveis Render.
+- Bloqueio único de configuração imediato: hostname exato do Session Pooler (porta 5432) para gravar `SANDBOX_DATABASE_URL` no Render, usuário `sandbox_app.detstgxofjnnggxluqtl`, senha já guardada no Vault.
+- `OAUTH_SERVER_URL` ausente é variável legada Manus e não causou o fail-fast atual.
+- MISSION_0033 permanece PROGRESS; testes reais de login, sessão, agentes e Storage e o guard recíproco SCP produção ainda não foram concluídos.
