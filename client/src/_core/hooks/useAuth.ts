@@ -9,6 +9,7 @@ const AUTH_LOADING_TIMEOUT_MS = 15000;
 export function useAuth() {
   const utils = trpc.useUtils();
   const queryClient = useQueryClient();
+  const closeSandboxSession = trpc.sandboxSession.close.useMutation();
   const [sessionReady, setSessionReady] = useState(false);
   const [hasSession, setHasSession] = useState(false);
   const [bootstrapError, setBootstrapError] = useState<Error | null>(null);
@@ -110,11 +111,20 @@ export function useAuth() {
   }, [backendAuth.isSuccess, backendAuth.isError, backendAuth.data, backendAuth.error]);
 
   const logout = useCallback(async () => {
+    if (hasSession) {
+      try {
+        await closeSandboxSession.mutateAsync();
+      } catch (error) {
+        recordAuthDiagnostic("sandbox.session.close.failed", {
+          errorName: error instanceof Error ? error.name : "UnknownError",
+        });
+      }
+    }
     await supabase.auth.signOut();
     setHasSession(false);
     await utils.auth.me.invalidate();
     window.location.replace("/");
-  }, [utils]);
+  }, [utils, hasSession, closeSandboxSession.mutateAsync]);
 
   const refresh = useCallback(async () => {
     recordAuthDiagnostic("supabase.refreshSession.started");

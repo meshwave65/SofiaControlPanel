@@ -16,6 +16,8 @@ import { validateMissionBlueprintContent } from "./missionBlueprint";
 import { validateActionPlan, ActionPlanSchema } from "./actionPlan";
 import { evaluateExecutionGate } from "./executionGovernance";
 import { refreshActionUnitDependencyEvidence } from "./actionUnitGateEvidence";
+import { ENV } from "./_core/env";
+import { closeSandboxSession } from "./sandboxSession";
 
 async function generateInitialMissionTR(title: string, description?: string | null): Promise<string> {
   const response = await invokeLLM({
@@ -318,6 +320,16 @@ async function persistMissionBlueprint(input: {
 
 export const appRouter = router({
   system: systemRouter,
+  sandboxSession: router({
+    close: protectedProcedure.mutation(async ({ ctx }) => {
+      if (ENV.appEnvironment !== "sandbox" || !ctx.sandboxSessionId) {
+        return { closed: false };
+      }
+      await closeSandboxSession(ctx.sandboxSessionId, ctx.user.id);
+      return { closed: true };
+    }),
+  }),
+
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
@@ -708,7 +720,7 @@ export const appRouter = router({
             .map((message) => ({ createdAt: message.createdAt, senderId: message.senderId, isAssistant: message.isAssistant, content: message.content }));
           let consolidatedReport: string | null = null;
           try {
-            const report = await getConsolidatedTaskReport(missionRootId);
+            const report = await getConsolidatedTaskReport(missionRootId, ctx.sandboxSessionId);
             consolidatedReport = typeof report === "string" ? report : report == null ? null : JSON.stringify(report);
           } catch {
             consolidatedReport = null;
@@ -1683,7 +1695,7 @@ export const appRouter = router({
         }
 
         const report = await SofiaOrchestrator.consolidateResults(input.taskId);
-        return uploadConsolidatedTaskReport(input.taskId, report);
+        return uploadConsolidatedTaskReport(input.taskId, report, ctx.sandboxSessionId);
       }),
 
     getConsolidatedReport: protectedProcedure
@@ -1693,7 +1705,7 @@ export const appRouter = router({
         if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
           throw new TRPCError({ code: "NOT_FOUND", message: "Tarefa não encontrada." });
         }
-        return getConsolidatedTaskReport(input.taskId);
+        return getConsolidatedTaskReport(input.taskId, ctx.sandboxSessionId);
       }),
   }),
 

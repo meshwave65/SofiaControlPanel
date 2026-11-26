@@ -6,11 +6,14 @@ import type { User } from "../../drizzle/schema";
 import * as db from "../db";
 import { sdk } from "./sdk";
 import { ENV } from "./env";
+import { isCentralAdmin, isEnvironmentAuthorized } from "./environmentAccess";
+import { ensureSandboxSession } from "../sandboxSession";
 
 export type TrpcContext = {
   req: CreateExpressContextOptions["req"];
   res: CreateExpressContextOptions["res"];
   user: User | null;
+  sandboxSessionId: string | null;
 };
 
 let supabaseAuthClient: ReturnType<typeof createClient> | null = null;
@@ -18,14 +21,11 @@ let supabaseAuthClient: ReturnType<typeof createClient> | null = null;
 function getSupabaseAuthClient() {
   if (supabaseAuthClient) return supabaseAuthClient;
 
-  const url = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL;
-  const apiKey =
-    process.env.SUPABASE_ANON_KEY ??
-    process.env.VITE_SUPABASE_ANON_KEY ??
-    process.env.SUPABASE_API_KEY;
+  const url = ENV.supabaseAuthUrl;
+  const apiKey = ENV.supabaseAuthAnonKey;
   if (!url || !apiKey) {
     throw new Error(
-      "SUPABASE_URL and SUPABASE_ANON_KEY must be configured to validate Supabase sessions"
+      "SUPABASE_AUTH_URL and SUPABASE_AUTH_ANON_KEY must be configured to validate central Supabase sessions",
     );
   }
 
@@ -53,10 +53,9 @@ function safeAuthDiagnosticError(error: unknown) {
 
 async function authenticateSupabaseToken(
   accessToken: string,
-  correlationId: string | null
+  correlationId: string | null,
 ): Promise<User> {
-  const { data, error } =
-    await getSupabaseAuthClient().auth.getUser(accessToken);
+  const { data, error } = await getSupabaseAuthClient().auth.getUser(accessToken);
   if (error || !data.user) {
     if (correlationId) {
       console.warn("[AuthDiagnostic]", JSON.stringify({
@@ -66,31 +65,48 @@ async function authenticateSupabaseToken(
         timestamp: new Date().toISOString(),
       }));
     }
-    throw new Error("Invalid Supabase access token");
+    throw new Error("Invalid central Supabase access token");
+  }
+
+  const identity = data.user;
+  if (!isEnvironmentAuthorized(identity.app_metadata, ENV.appEnvironment)) {
+    if (correlationId) {
+      console.warn("[AuthDiagnostic]", JSON.stringify({
+        stage: "environment_access.denied",
+        correlationId,
+        environment: ENV.appEnvironment,
+        timestamp: new Date().toISOString(),
+      }));
+    }
+    throw new Error("Identity is not authorized for this environment");
   }
 
   if (correlationId) {
     console.info("[AuthDiagnostic]", JSON.stringify({
       stage: "supabase.getUser.accepted",
       correlationId,
+      environment: ENV.appEnvironment,
       timestamp: new Date().toISOString(),
     }));
   }
 
-  const identity = data.user;
   const metadata = identity.user_metadata ?? {};
   const displayName =
     (typeof metadata.full_name === "string" && metadata.full_name) ||
     (typeof metadata.name === "string" && metadata.name) ||
     identity.email ||
     null;
+  const centralAdmin = isCentralAdmin(identity.app_metadata);
 
   try {
     await db.upsertUser({
       openId: identity.id,
       name: displayName,
-      email: identity.email ?? null,
+      // Email is not an authorization key; do not project it into Sandbox.
+      // This also prevents the legacy email allowlist from granting Sandbox admin.
+      email: ENV.appEnvironment === "sandbox" ? null : (identity.email ?? null),
       loginMethod: "supabase",
+      role: centralAdmin ? "admin" : "user",
       lastSignedIn: new Date(),
     });
 
@@ -103,12 +119,13 @@ async function authenticateSupabaseToken(
           timestamp: new Date().toISOString(),
         }));
       }
-      throw new Error(
-        "Authenticated Supabase user could not be loaded from the database"
-      );
+      throw new Error("Authenticated central identity could not be loaded from the environment database");
     }
+
     const normalizedEmail = user.email?.trim().toLowerCase();
-    const isMasterAdmin = Boolean(normalizedEmail && ENV.masterAdminEmails.includes(normalizedEmail));
+    const legacyMasterAdmin =
+      ENV.appEnvironment === "scp" &&
+      Boolean(normalizedEmail && ENV.masterAdminEmails.includes(normalizedEmail));
     if (correlationId) {
       console.info("[AuthDiagnostic]", JSON.stringify({
         stage: "database.user_resolved",
@@ -116,7 +133,7 @@ async function authenticateSupabaseToken(
         timestamp: new Date().toISOString(),
       }));
     }
-    return isMasterAdmin ? { ...user, role: "admin" } : user;
+    return centralAdmin || legacyMasterAdmin ? { ...user, role: "admin" } : user;
   } catch (dbError) {
     if (correlationId) {
       console.error("[AuthDiagnostic]", JSON.stringify({
@@ -131,13 +148,15 @@ async function authenticateSupabaseToken(
 }
 
 export async function createContext(
-  opts: CreateExpressContextOptions
+  opts: CreateExpressContextOptions,
 ): Promise<TrpcContext> {
   let user: User | null = null;
+  let sandboxSessionId: string | null = null;
   const rawCorrelationId = opts.req.headers["x-scp-auth-diagnostic"];
-  const correlationId = typeof rawCorrelationId === "string" && /^[a-zA-Z0-9-]{1,80}$/.test(rawCorrelationId)
-    ? rawCorrelationId
-    : null;
+  const correlationId =
+    typeof rawCorrelationId === "string" && /^[a-zA-Z0-9-]{1,80}$/.test(rawCorrelationId)
+      ? rawCorrelationId
+      : null;
 
   try {
     const authorization = opts.req.headers.authorization;
@@ -145,10 +164,21 @@ export async function createContext(
       const match = authorization.match(/^Bearer\s+(.+)$/i);
       if (!match) throw new Error("Malformed Authorization header");
       user = await authenticateSupabaseToken(match[1], correlationId);
+      if (user && ENV.appEnvironment === "sandbox") {
+        sandboxSessionId = await ensureSandboxSession(user.id, user.openId);
+      }
     } else {
       const cookies = parseCookieHeader(opts.req.headers.cookie ?? "");
-      if (cookies[COOKIE_NAME]) {
+      if (cookies[COOKIE_NAME] && ENV.appEnvironment === "scp") {
+        // Legacy Manus cookie remains SCP-only; Sandbox accepts central Auth Bearer tokens only.
         user = await sdk.authenticateRequest(opts.req);
+      } else if (cookies[COOKIE_NAME] && correlationId) {
+        console.warn("[AuthDiagnostic]", JSON.stringify({
+          stage: "legacy_cookie.rejected_for_environment",
+          correlationId,
+          environment: ENV.appEnvironment,
+          timestamp: new Date().toISOString(),
+        }));
       } else if (correlationId) {
         console.warn("[AuthDiagnostic]", JSON.stringify({
           stage: "request.no_auth_credential",
@@ -158,8 +188,6 @@ export async function createContext(
       }
     }
   } catch (error) {
-    // Public procedures remain available, but protected procedures fail closed.
-    // Do not persist arbitrary provider/database error messages in backend logs.
     console.warn("[Auth] Request authentication failed");
     user = null;
   }
@@ -168,5 +196,6 @@ export async function createContext(
     req: opts.req,
     res: opts.res,
     user,
+    sandboxSessionId,
   };
 }
