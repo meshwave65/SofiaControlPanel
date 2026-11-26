@@ -39,3 +39,9 @@ Estabelecer no projeto Supabase Sandbox uma réplica estrutural controlada e ind
 ## Execução autônoma
 
 A missão está autorizada como missão de sistema. Não solicitar confirmação intermediária para decisões técnicas dentro do escopo. Bloquear apenas riscos técnicos reais, como exposição de segredos, alteração da origem, perda de dados não experimentais ou acesso indevido. Cada etapa deve deixar evidência no Supabase e no GitHub.
+
+
+## Relatórios operacionais recentes
+
+- [OR-20261126-0004](../../operational_reports/OR-20261126-0004.md)
+- [OR-20261126-0005](../../operational_reports/OR-20261126-0005.md)
