@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { ENV } from "./_core/env";
 
-const BUCKET_NAME = "sofia-controlpanel-artifacts";
+const BUCKET_NAME = ENV.appEnvironment === "sandbox" ? "sandbox-session-artifacts" : "sofia-controlpanel-artifacts";
 const SIGNED_URL_TTL_SECONDS = 15 * 60;
 const REPORT_FILE_NAME = "consolidated-report.md";
 
@@ -28,9 +28,13 @@ function getStorage() {
   return storageClient.storage.from(BUCKET_NAME);
 }
 
-function reportPath(taskId: number) {
+function reportPath(taskId: number, sessionId?: string | null) {
   if (!Number.isSafeInteger(taskId) || taskId <= 0) {
     throw new Error("ID de tarefa inválido para armazenamento do relatório.");
+  }
+  if (ENV.appEnvironment === "sandbox") {
+    if (!sessionId) throw new Error("Sessão Sandbox ausente para armazenar o relatório.");
+    return `${sessionId}/tasks/${taskId}/${REPORT_FILE_NAME}`;
   }
   return `tasks/${taskId}/${REPORT_FILE_NAME}`;
 }
@@ -43,8 +47,8 @@ async function createDownloadUrl(storage: ReturnType<typeof getStorage>, path: s
   return data.signedUrl;
 }
 
-export async function uploadConsolidatedTaskReport(taskId: number, content: string) {
-  const path = reportPath(taskId);
+export async function uploadConsolidatedTaskReport(taskId: number, content: string, sessionId?: string | null) {
+  const path = reportPath(taskId, sessionId);
   const storage = getStorage();
   const { error } = await storage.upload(path, Buffer.from(content, "utf8"), {
     contentType: "text/markdown",
@@ -61,10 +65,10 @@ export async function uploadConsolidatedTaskReport(taskId: number, content: stri
   };
 }
 
-export async function getConsolidatedTaskReport(taskId: number) {
+export async function getConsolidatedTaskReport(taskId: number, sessionId?: string | null) {
   if (!hasStorageCredentials()) return null;
 
-  const path = reportPath(taskId);
+  const path = reportPath(taskId, sessionId);
   const storage = getStorage();
   const { data, error } = await storage.download(path);
   if (error) {
