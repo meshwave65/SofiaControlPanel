@@ -845,6 +845,38 @@ export async function claimStagedTask(id: number, stagedStatusId: number, progre
   return claimed ?? null;
 }
 
+/**
+ * Requeues only a PROGRESS task that is explicitly waiting for an agent and
+ * has no Manus execution ID. Tasks with children are excluded so a mission
+ * root is never redispatched as if it were a leaf execution unit.
+ */
+export async function requeueProgressTaskWaitingForAgent(
+  id: number,
+  progressStatusId: number,
+  stagedStatusId: number,
+): Promise<boolean> {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+
+  const [requeued] = await database.execute(sql`
+    UPDATE sofia.tasks
+       SET "statusId" = ${stagedStatusId},
+           "updatedAt" = NOW()
+     WHERE id = ${id}
+       AND "statusId" = ${progressStatusId}
+       AND "manusTaskId" IS NULL
+       AND "manusStatus" IN ('waiting_for_available_agent', 'waiting_for_pinned_agent')
+       AND NOT EXISTS (
+         SELECT 1
+           FROM sofia.tasks child
+          WHERE child."parentTaskId" = sofia.tasks.id
+       )
+    RETURNING id
+  `) as any;
+
+  return Boolean(requeued);
+}
+
 export async function updateTaskExecution(id: number, data: {
   manusTaskId?: string;
   manusStatus?: string;
