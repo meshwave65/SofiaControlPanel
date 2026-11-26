@@ -86,3 +86,11 @@
 - O startup `ensure-database.mjs` é somente leitura e exige `SANDBOX_DATABASE_URL` com projectRef canônico. O Render ainda não tem essa variável, então o deploy falha fechado. Não foi usada a URL antiga do projeto `rqvjsjfypuojuaetxkig`.
 - Auditoria read-only de `rqvjsjfypuojuaetxkig` não encontrou agentes, tarefas, mensagens, activityLogs ou contextReports; havia duas projeções de usuários e uma sessão preexistentes. Nenhuma limpeza foi feita nesse projeto.
 - OR-20261126-0005 publicado no GitHub. Teste de Storage real e login com usuário autorizado continuam bloqueados pela conexão de banco canônica ausente e pela falta de identidade com claims.
+
+
+## 2026-11-26 — Storage access contract verified
+- Render `SUPABASE_URL` explicitly configured to the Sandbox API project `detstgxofjnnggxluqtl`; central Auth remains isolated in `CENTRAL_AUTH_SUPABASE_URL` and `VITE_SUPABASE_URL`.
+- `server/controlPanelStorage.ts` already routes consolidated reports through `sandbox-session-storage` with central Bearer token + session ID.
+- Edge Function reviewed: it validates central `app_metadata`, verifies the session via `public.verify_sandbox_session_access`, writes only under `{sessionId}/tasks/{taskId}/consolidated-report.md`, and returns a private signed URL.
+- A rollback-only synthetic SQL test confirmed the matching identity/session is accepted and a different identity is rejected. Bucket `sandbox-session-artifacts` confirmed private. Purge Edge Function recursively removes every object under the session prefix before finalizing DB purge.
+- Real upload/download/delete fixture remains pending until a real authorized central identity and the Render-to-canonical-database connection are available. No Storage objects were created by this test.
