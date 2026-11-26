@@ -628,8 +628,8 @@ export async function inspectTaskAgentEligibility(taskId: number, ownerId: numbe
 
   const [task] = await database.execute(sql`
     SELECT t.id, t."createdBy", t."agentId", t."agentPinned", status.name AS "taskStatus"
-    FROM sofia.tasks t
-    JOIN sofia."taskStatuses" status ON status.id = t."statusId"
+    FROM sandbox.tasks t
+    JOIN sandbox."taskStatuses" status ON status.id = t."statusId"
     WHERE t.id = ${taskId} AND t."createdBy" = ${ownerId}
     LIMIT 1
   `) as any;
@@ -653,13 +653,13 @@ export async function inspectTaskAgentEligibility(taskId: number, ownerId: numbe
       (a."creditsUpdatedAt" >= NOW() - INTERVAL '60 seconds') AS "creditSnapshotFresh",
       NOT EXISTS (
         SELECT 1
-        FROM sofia.tasks active_task
-        JOIN sofia."taskStatuses" active_status ON active_status.id = active_task."statusId"
+        FROM sandbox.tasks active_task
+        JOIN sandbox."taskStatuses" active_status ON active_status.id = active_task."statusId"
         WHERE active_task."agentId" = a.id
           AND active_task.id <> ${taskId}
           AND active_status.name = 'PROGRESS'
       ) AS "hasNoProgressTask"
-    FROM sofia.agents a
+    FROM sandbox.agents a
     WHERE a."ownerId" = ${task.createdBy}
   `) as any[];
 
@@ -757,7 +757,7 @@ export async function claimStagedTaskWithAvailableAgent(
   return database.transaction(async (tx) => {
     const [task] = await tx.execute(sql`
       SELECT id, "createdBy", "agentId", "agentPinned"
-      FROM sofia.tasks
+      FROM sandbox.tasks
       WHERE id = ${taskId} AND "statusId" = ${stagedStatusId}
       FOR UPDATE
     `) as any;
@@ -766,7 +766,7 @@ export async function claimStagedTaskWithAvailableAgent(
     if (task.agentId && task.agentPinned) {
       const [pinned] = await tx.execute(sql`
         SELECT a.id
-        FROM sofia.agents a
+        FROM sandbox.agents a
         WHERE a.id = ${task.agentId}
           AND a."ownerId" = ${task.createdBy}
           AND a.status = 'online'
@@ -777,8 +777,8 @@ export async function claimStagedTaskWithAvailableAgent(
           AND a."creditsUpdatedAt" >= NOW() - INTERVAL '60 seconds'
           AND NOT EXISTS (
             SELECT 1
-            FROM sofia.tasks active_task
-            JOIN sofia."taskStatuses" active_status ON active_status.id = active_task."statusId"
+            FROM sandbox.tasks active_task
+            JOIN sandbox."taskStatuses" active_status ON active_status.id = active_task."statusId"
             WHERE active_task."agentId" = a.id
               AND active_task.id <> ${taskId}
               AND active_status.name = 'PROGRESS'
@@ -787,7 +787,7 @@ export async function claimStagedTaskWithAvailableAgent(
       `) as any;
       if (!pinned) return null;
       const [claimed] = await tx.execute(sql`
-        UPDATE sofia.tasks
+        UPDATE sandbox.tasks
         SET "statusId" = ${progressStatusId}, "updatedAt" = NOW()
         WHERE id = ${taskId} AND "statusId" = ${stagedStatusId}
         RETURNING *
@@ -797,7 +797,7 @@ export async function claimStagedTaskWithAvailableAgent(
 
     const [candidate] = await tx.execute(sql`
       SELECT a.id
-      FROM sofia.agents a
+      FROM sandbox.agents a
       WHERE a."ownerId" = ${task.createdBy}
         AND a.status = 'online'
         AND a."connectionStatus" IN ('configured', 'connected')
@@ -807,8 +807,8 @@ export async function claimStagedTaskWithAvailableAgent(
           AND a."creditsUpdatedAt" >= NOW() - INTERVAL '60 seconds'
         AND NOT EXISTS (
           SELECT 1
-          FROM sofia.tasks active_task
-          JOIN sofia."taskStatuses" active_status ON active_status.id = active_task."statusId"
+          FROM sandbox.tasks active_task
+          JOIN sandbox."taskStatuses" active_status ON active_status.id = active_task."statusId"
           WHERE active_task."agentId" = a.id
             AND active_task.id <> ${taskId}
             AND active_status.name = 'PROGRESS'
@@ -820,7 +820,7 @@ export async function claimStagedTaskWithAvailableAgent(
     if (!candidate) return null;
 
     const [claimed] = await tx.execute(sql`
-      UPDATE sofia.tasks
+      UPDATE sandbox.tasks
       SET "agentId" = ${Number(candidate.id)},
           "statusId" = ${progressStatusId},
           "updatedAt" = NOW()
@@ -1900,7 +1900,7 @@ export async function hasValidatedMissionTR(taskId: number): Promise<boolean> {
       eq(missionDocuments.documentKey, "TR"),
       eq(missionDocumentTypes.typeKey, "TR"),
       sql`${missionDocumentVersions.version} = (
-        SELECT MAX(v2."version") FROM sofia."missionDocumentVersions" v2
+        SELECT MAX(v2."version") FROM sandbox."missionDocumentVersions" v2
         WHERE v2."documentId" = ${missionDocuments.id}
       )`,
       sql`${missionDocumentVersions.state} IN ('VALIDATED', 'ACTIVE', 'REORIENTED')`,
@@ -2401,8 +2401,8 @@ export async function inspectTaskDispatchAuthorization(taskId: number): Promise<
 
   const [relations] = await database.execute(sql`
     SELECT
-      to_regclass('sofia."missionDocuments"') IS NOT NULL AS documents_exist,
-      to_regclass('sofia."missionActionUnits"') IS NOT NULL AS action_units_exist
+      to_regclass('sandbox."missionDocuments"') IS NOT NULL AS documents_exist,
+      to_regclass('sandbox."missionActionUnits"') IS NOT NULL AS action_units_exist
   `) as any;
   if (!relations?.documents_exist) {
     return { authorized: true, requiresActionPlanUnit: false, idempotencyKey: null, reason: null };
@@ -2443,7 +2443,7 @@ export async function inspectTaskDispatchAuthorization(taskId: number): Promise<
     .where(and(
       eq(missionDocuments.id, actionPlanDocument.id),
       sql`${missionDocumentVersions.version} = (
-        SELECT MAX(v2."version") FROM sofia."missionDocumentVersions" v2
+        SELECT MAX(v2."version") FROM sandbox."missionDocumentVersions" v2
         WHERE v2."documentId" = ${missionDocuments.id}
       )`,
     ))
