@@ -103,3 +103,10 @@
 - Supabase Vault contém `sandbox_app_db_password` provisionado para Render; segredo não foi exposto nem versionado.
 - Falta o hostname exato do Session Pooler do projeto `detstgxofjnnggxluqtl` para montar a URL runtime. O deploy permanece fail-closed enquanto `SANDBOX_DATABASE_URL` estiver ausente.
 - OR-20261126-0006 publicado no GitHub e persistido no Supabase. Nenhuma identidade central recebeu claims.
+
+
+## 2026-11-26 — Privilégios estritamente derivados de app_metadata
+- O Sandbox não usa mais email allowlist nem `OWNER_OPEN_ID` para elevar role. `admin` só recebe role administrativa quando `app_metadata.meshwave_user_type='admin'` e o claim também autoriza o ambiente Sandbox.
+- Identidades centrais sem claim não são projetadas em `sandbox.users`, não recebem sessão e recebem estado explícito de acesso negado na UI.
+- `SANDBOX_DATABASE_URL` é a conexão runtime; `SANDBOX_MIGRATION_DATABASE_URL` é separado para operações explícitas de Drizzle. O antigo `DATABASE_URL` não é fallback.
+- OR-20261126-0004 recebeu addenda e versões 2/3 foram persistidas em `missionDocumentVersions`.
