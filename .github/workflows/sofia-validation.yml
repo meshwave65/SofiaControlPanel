@@ -108,3 +108,16 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: psql -h localhost -U postgres -d sofia_migration_test -v ON_ERROR_STOP=1 -f scripts/ci/sandbox-schema-test.sql
+
+      - name: Prepare Supabase extension stubs for Sandbox session test
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d sofia_migration_test -v ON_ERROR_STOP=1 -f scripts/ci/sandbox-session-stubs.sql
+      - name: Apply Sandbox session lifecycle migration
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d sofia_migration_test -v ON_ERROR_STOP=1 -f governance/missions/0033/migrations/002_sandbox_sessions.sql
+      - name: Verify manual close, TTL expiry and isolated purge
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d sofia_migration_test -v ON_ERROR_STOP=1 -f scripts/ci/sandbox-session-test.sql
