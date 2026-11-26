@@ -2,7 +2,7 @@
 ALTER TABLE sandbox.sessions ALTER COLUMN "ownerUserId" DROP NOT NULL;
 
 ALTER TABLE sandbox.sessions
-  DROP CONSTRAINT sessions_ownerUserId_fkey;
+  DROP CONSTRAINT "sessions_ownerUserId_fkey";
 
 ALTER TABLE sandbox.sessions
   ADD CONSTRAINT sessions_ownerUserId_fkey
