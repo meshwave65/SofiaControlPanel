@@ -51,6 +51,7 @@ export async function startHeartbeatSystem() {
   heartbeatInterval = setInterval(async () => {
     try {
       await checkAgentStatus();
+      await recoverProgressTasksWaitingForAgent();
       await dispatchWaitingTasks();
       await reconcileGitHubMissionMirrors();
     } catch (error) {
@@ -154,6 +155,52 @@ async function reconcileGitHubMissionMirrors() {
     }
   } catch (error) {
     console.error("[Heartbeat] Erro ao reconciliar espelhos GitHub:", error);
+  }
+}
+
+/**
+ * A legacy inconsistency can leave a task in PROGRESS even though its
+ * persisted Manus state says it is still waiting for an agent. Such a task
+ * has no external execution ID and can be safely returned to STAGED.
+ * Mission roots with children and dispatch_pending tasks are deliberately
+ * excluded: their external dispatch outcome may be ambiguous.
+ */
+export function isProgressAgentWaitRecoveryCandidate(
+  task: { statusId: number; manusTaskId?: string | null; manusStatus?: string | null },
+  progressStatusId: number,
+): boolean {
+  return task.statusId === progressStatusId
+    && !task.manusTaskId
+    && (task.manusStatus === "waiting_for_available_agent"
+      || task.manusStatus === "waiting_for_pinned_agent");
+}
+
+async function recoverProgressTasksWaitingForAgent() {
+  try {
+    const progressStatusId = await db.getTaskStatusIdByName("PROGRESS");
+    const stagedStatusId = await db.getTaskStatusIdByName("STAGED");
+    const candidates = (await db.getAllTasksGlobal())
+      .filter((task) => isProgressAgentWaitRecoveryCandidate(task, progressStatusId));
+
+    for (const task of candidates) {
+      try {
+        const hasChildren = (await db.getTasksByParentId(task.id)).length > 0;
+        if (hasChildren) continue;
+
+        const requeued = await db.requeueProgressTaskWaitingForAgent(
+          task.id,
+          progressStatusId,
+          stagedStatusId,
+        );
+        if (requeued) {
+          console.log(`[Heartbeat] Tarefa ${task.id} recuperada de PROGRESS para STAGED (aguardava agente, sem execução Manus).`);
+        }
+      } catch (error) {
+        console.warn(`[Heartbeat] Falha ao recuperar tarefa aguardando agente ${task.id}:`, error instanceof Error ? error.message : error);
+      }
+    }
+  } catch (error) {
+    console.error("[Heartbeat] Erro ao recuperar tarefas PROGRESS aguardando agente:", error);
   }
 }
 
