@@ -524,9 +524,9 @@ $function$;
 
 -- The two append-only source triggers permit DELETE only inside the controlled purge transaction.
 CREATE OR REPLACE FUNCTION sandbox.reject_mission_document_version_mutation()
-RETURNS trigger
-LANGUAGE plpgsql
-SET search_path TO 'pg_catalog', 'sandbox'
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SET search_path TO 'pg_catalog', 'sofia'
 AS $function$
 BEGIN
   IF TG_OP = 'DELETE' AND current_setting('sandbox.purge', true) = 'on' THEN
@@ -534,13 +534,13 @@ BEGIN
   END IF;
   RAISE EXCEPTION 'Mission document versions are immutable; create a new version instead';
 END;
-$function$;
+$function$
 
 CREATE OR REPLACE FUNCTION sandbox.validate_mission_action_unit_gate_evidence()
-RETURNS trigger
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path TO 'pg_catalog', 'sandbox'
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'pg_catalog', 'sofia'
 AS $function$
 DECLARE
   unit_row record;
@@ -553,7 +553,8 @@ BEGIN
     RAISE EXCEPTION 'Mission action-unit gate evidence is append-only';
   END IF;
 
-  SELECT * INTO unit_row
+  SELECT *
+    INTO unit_row
     FROM sandbox."missionActionUnits"
    WHERE id = NEW."actionUnitId";
   IF NOT FOUND THEN
@@ -571,25 +572,26 @@ BEGIN
 
   SELECT "createdBy" INTO mission_owner_id
     FROM sandbox.tasks
-   WHERE id = NEW."missionTaskId";
-  IF NOT FOUND OR mission_owner_id IS NULL THEN
-    RAISE EXCEPTION 'Mission task owner not found';
+   WHERE id = NEW."missionTaskId"
+     AND "parentTaskId" IS NULL;
+  IF mission_owner_id IS NULL THEN
+    RAISE EXCEPTION 'Gate evidence must reference a root mission';
   END IF;
 
   IF NEW."actorType" = 'OWNER' AND NEW."actorUserId" IS DISTINCT FROM mission_owner_id THEN
-    RAISE EXCEPTION 'OWNER evidence must be recorded by the mission owner';
+    RAISE EXCEPTION 'Owner-authored gate evidence must be recorded by the mission owner';
   END IF;
 
   RETURN NEW;
 END;
-$function$;
+$function$
 
 -- Copy the non-dispatch governance functions with the schema rebound to Sandbox.
 CREATE OR REPLACE FUNCTION sandbox.enforce_execution_documents_before_staged()
-RETURNS trigger
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path TO 'pg_catalog', 'sandbox'
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'pg_catalog', 'sofia'
 AS $function$
 DECLARE
   staged_status_id integer;
@@ -613,124 +615,96 @@ BEGIN
     IF OLD."statusId" IS DISTINCT FROM progress_status_id
        AND OLD."statusId" IS DISTINCT FROM staged_status_id
        AND NOT (OLD."statusId" IS NOT DISTINCT FROM paused_status_id AND NEW."manusTaskId" IS NOT NULL) THEN
-      RAISE EXCEPTION 'Execution blocked: task must pass through STAGED before PROGRESS';
+      RAISE EXCEPTION 'Execution blocked: PROGRESS requires a STAGED claim or an existing external execution resumed from PAUSED';
     END IF;
+  ELSIF staged_status_id IS NULL OR NEW."statusId" IS DISTINCT FROM staged_status_id THEN
+    RETURN NEW;
+  END IF;
+  IF NEW."parentTaskId" IS NULL THEN
+    mission_id := NEW.id;
+  ELSE
+    WITH RECURSIVE ancestors AS (
+      SELECT id, "parentTaskId", ARRAY[id] AS path
+        FROM sandbox.tasks WHERE id = NEW."parentTaskId"
+      UNION ALL
+      SELECT parent.id, parent."parentTaskId", child.path || parent.id
+        FROM sandbox.tasks parent
+        JOIN ancestors child ON parent.id = child."parentTaskId"
+       WHERE NOT parent.id = ANY(child.path)
+    )
+    SELECT id INTO mission_id FROM ancestors WHERE "parentTaskId" IS NULL LIMIT 1;
+  END IF;
+  IF mission_id IS NULL THEN RAISE EXCEPTION 'Execution blocked: top-level mission could not be resolved for task %', NEW.id; END IF;
+
+  IF NEW.id = mission_id THEN
+    mission_status_id := NEW."statusId";
+  ELSE
+    SELECT "statusId" INTO mission_status_id FROM sandbox.tasks WHERE id = mission_id;
+  END IF;
+  IF mission_status_id IS DISTINCT FROM staged_status_id
+     AND mission_status_id IS DISTINCT FROM progress_status_id THEN
+    RAISE EXCEPTION 'Execution blocked: root mission % must be STAGED or PROGRESS before child tasks can be dispatched', mission_id;
   END IF;
 
-  IF staged_status_id IS NOT NULL AND NEW."statusId" = staged_status_id THEN
-    IF NEW."missionKey" IS NULL OR NEW."missionKey" = '' THEN
-      RETURN NEW;
-    END IF;
+  SELECT version_row.id, version_row.state
+    INTO latest_tr_id, latest_tr_state
+    FROM sandbox."missionDocuments" document_row
+    JOIN sandbox."missionDocumentTypes" type_row ON type_row.id = document_row."documentTypeId"
+    JOIN sandbox."missionDocumentVersions" version_row ON version_row."documentId" = document_row.id
+   WHERE document_row."taskId" = mission_id AND document_row."documentKey" = 'TR' AND type_row."typeKey" = 'TR'
+   ORDER BY version_row.version DESC LIMIT 1;
 
-    SELECT id, status INTO mission_id, mission_status_id
-      FROM sandbox."governanceMissions"
-     WHERE "missionKey" = NEW."missionKey"
-     ORDER BY id DESC LIMIT 1;
+  SELECT version_row.state, version_row."sourceDocumentVersionId"
+    INTO latest_blueprint_state, latest_blueprint_source_id
+    FROM sandbox."missionDocuments" document_row
+    JOIN sandbox."missionDocumentTypes" type_row ON type_row.id = document_row."documentTypeId"
+    JOIN sandbox."missionDocumentVersions" version_row ON version_row."documentId" = document_row.id
+   WHERE document_row."taskId" = mission_id AND document_row."documentKey" = 'BLUEPRINT' AND type_row."typeKey" = 'BLUEPRINT'
+   ORDER BY version_row.version DESC LIMIT 1;
 
-    IF mission_id IS NULL THEN
-      RAISE EXCEPTION 'Execution blocked: governance mission % not found', NEW."missionKey";
-    END IF;
-
-    SELECT id, state INTO latest_tr_id, latest_tr_state
-      FROM sandbox."missionDocumentVersions" v
-      JOIN sandbox."missionDocuments" d ON d.id = v."documentId"
-     WHERE d."taskId" = NEW.id AND d."documentKey" = 'TR'
-     ORDER BY v.version DESC LIMIT 1;
-
-    IF latest_tr_id IS NULL OR latest_tr_state <> 'VALIDATED' THEN
-      RAISE EXCEPTION 'Execution blocked: latest TR must be VALIDATED';
-    END IF;
-
-    SELECT state, "sourceDocumentVersionId" INTO latest_blueprint_state, latest_blueprint_source_id
-      FROM sandbox."missionDocumentVersions" v
-      JOIN sandbox."missionDocuments" d ON d.id = v."documentId"
-     WHERE d."taskId" = NEW.id AND d."documentKey" = 'BLUEPRINT'
-     ORDER BY v.version DESC LIMIT 1;
-
-    IF latest_blueprint_state IS DISTINCT FROM 'READY'
-       OR latest_blueprint_source_id IS DISTINCT FROM latest_tr_id THEN
-      RAISE EXCEPTION 'Execution blocked: READY Blueprint must reference the exact latest VALIDATED TR version';
-    END IF;
+  IF latest_tr_id IS NULL OR latest_tr_state NOT IN ('VALIDATED', 'ACTIVE', 'REORIENTED')
+     OR latest_blueprint_state NOT IN ('READY', 'ACTIVE')
+     OR latest_blueprint_source_id IS DISTINCT FROM latest_tr_id THEN
+    RAISE EXCEPTION 'Execution blocked: mission % requires a validated TR and a READY Blueprint derived from its latest version', mission_id;
   END IF;
-
   RETURN NEW;
 END;
-$function$;
+$function$
 
 CREATE OR REPLACE FUNCTION sandbox.get_mission_parameters(p_mission_key text)
-RETURNS TABLE(parameter_key text, label text, description text, value_type text, validation jsonb, is_required boolean, sort_order integer, options jsonb)
-LANGUAGE sql
-SECURITY DEFINER
-SET search_path TO 'sandbox', 'public', 'pg_temp'
+ RETURNS TABLE(parameter_key text, label text, description text, value_type text, validation jsonb, is_required boolean, sort_order integer, options jsonb)
+ LANGUAGE sql
+ SECURITY DEFINER
+ SET search_path TO 'sofia', 'public', 'pg_temp'
 AS $function$
-SELECT p."parameterKey",p.label,p.description,p."valueType",p.validation,p."isRequired",p."sortOrder",
-       coalesce(jsonb_agg(jsonb_build_object('value',o.value,'label',o.label,'description',o.description,'sort_order',o."sortOrder") ORDER BY o."sortOrder",o.id)
-       FILTER (WHERE o.id IS NOT NULL),'[]'::jsonb)
-FROM sandbox."missionParameters" p
-LEFT JOIN sandbox."missionParameterOptions" o ON o."parameterId"=p.id AND o."isActive"=true
-WHERE p."missionKey"=p_mission_key AND p."isActive"=true
-GROUP BY p.id,p."parameterKey",p.label,p.description,p."valueType",p.validation,p."isRequired",p."sortOrder"
-ORDER BY p."sortOrder",p.id;
-$function$;
+SELECT p."parameterKey",p.label,p.description,p."valueType",p.validation,p."isRequired",p."sortOrder",coalesce(jsonb_agg(jsonb_build_object('value',o.value,'label',o.label,'description',o.description,'sort_order',o."sortOrder") ORDER BY o."sortOrder",o.id) FILTER (WHERE o.id IS NOT NULL),'[]'::jsonb) FROM sandbox."missionParameters" p LEFT JOIN sandbox."missionParameterOptions" o ON o."parameterId"=p.id AND o."isActive"=true WHERE p."missionKey"=p_mission_key AND p."isActive"=true GROUP BY p.id,p."parameterKey",p.label,p.description,p."valueType",p.validation,p."isRequired",p."sortOrder" ORDER BY p."sortOrder",p.id;
+$function$
 
-CREATE OR REPLACE FUNCTION sandbox.validate_mission_parameters(
-  p_mission_key text,
-  p_payload jsonb DEFAULT '{}'::jsonb
-)
-RETURNS jsonb
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path TO 'sandbox', 'public', 'pg_temp'
+CREATE OR REPLACE FUNCTION sandbox.validate_mission_parameters(p_mission_key text, p_payload jsonb DEFAULT '{}'::jsonb)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'sofia', 'public', 'pg_temp'
 AS $function$
-DECLARE
-  v_param record;
-  v_value jsonb;
-  v_errors jsonb := '[]'::jsonb;
+DECLARE v_param record; v_value jsonb; v_errors jsonb:='[]'::jsonb; v_found boolean:=false;
 BEGIN
-  IF p_payload IS NULL OR jsonb_typeof(p_payload) <> 'object' THEN
-    RETURN jsonb_build_object('valid',false,'errors',jsonb_build_array(jsonb_build_object('code','INVALID_PAYLOAD','message','Payload must be a JSON object')));
-  END IF;
-
-  FOR v_param IN
-    SELECT "parameterKey" AS key, "valueType" AS value_type, "isRequired" AS is_required
-      FROM sandbox."missionParameters"
-     WHERE "missionKey" = p_mission_key AND "isActive" = true
-     ORDER BY "sortOrder"
-  LOOP
-    v_value := p_payload -> v_param.key;
-    IF v_value IS NULL OR v_value = 'null'::jsonb THEN
-      IF v_param.is_required THEN
-        v_errors := v_errors || jsonb_build_array(jsonb_build_object('code','REQUIRED','parameter',v_param.key,'message','Required parameter is missing'));
-      END IF;
-      CONTINUE;
-    END IF;
-    IF v_param.value_type = 'enum' AND NOT EXISTS (
-      SELECT 1 FROM sandbox."missionParameters" p
-      JOIN sandbox."missionParameterOptions" o ON o."parameterId" = p.id
-      WHERE p."missionKey" = p_mission_key AND p."parameterKey" = v_param.key
-        AND o.value = trim(both '"' from v_value::text) AND o."isActive" = true
-    ) THEN
-      v_errors := v_errors || jsonb_build_array(jsonb_build_object('code','INVALID_OPTION','parameter',v_param.key,'message','Value is not an active option'));
-    ELSIF v_param.value_type = 'boolean' AND jsonb_typeof(v_value) <> 'boolean' THEN
-      v_errors := v_errors || jsonb_build_array(jsonb_build_object('code','INVALID_TYPE','parameter',v_param.key,'message','Expected boolean'));
-    ELSIF v_param.value_type = 'integer' AND (jsonb_typeof(v_value) <> 'number' OR (v_value::text !~ '^-?[0-9]+$')) THEN
-      v_errors := v_errors || jsonb_build_array(jsonb_build_object('code','INVALID_TYPE','parameter',v_param.key,'message','Expected integer'));
-    ELSIF v_param.value_type = 'decimal' AND jsonb_typeof(v_value) <> 'number' THEN
-      v_errors := v_errors || jsonb_build_array(jsonb_build_object('code','INVALID_TYPE','parameter',v_param.key,'message','Expected number'));
-    ELSIF v_param.value_type IN ('text','datetime') AND jsonb_typeof(v_value) <> 'string' THEN
-      v_errors := v_errors || jsonb_build_array(jsonb_build_object('code','INVALID_TYPE','parameter',v_param.key,'message','Expected string'));
-    END IF;
-  END LOOP;
-
-  RETURN jsonb_build_object('valid',jsonb_array_length(v_errors)=0,'errors',v_errors);
+IF p_payload IS NULL OR jsonb_typeof(p_payload)<>'object' THEN RETURN jsonb_build_object('valid',false,'errors',jsonb_build_array(jsonb_build_object('code','INVALID_PAYLOAD','message','Payload must be a JSON object'))); END IF;
+FOR v_param IN SELECT "parameterKey" AS key,"valueType" AS value_type,"isRequired" AS is_required FROM sandbox."missionParameters" WHERE "missionKey"=p_mission_key AND "isActive"=true ORDER BY "sortOrder" LOOP
+ v_value:=p_payload->v_param.key;
+ IF v_value IS NULL OR v_value='null'::jsonb THEN IF v_param.is_required THEN v_errors:=v_errors||jsonb_build_array(jsonb_build_object('code','REQUIRED','parameter',v_param.key,'message','Required parameter is missing')); END IF; CONTINUE; END IF;
+ IF v_param.value_type='enum' AND NOT EXISTS (SELECT 1 FROM sandbox."missionParameters" p JOIN sandbox."missionParameterOptions" o ON o."parameterId"=p.id WHERE p."missionKey"=p_mission_key AND p."parameterKey"=v_param.key AND o.value=v_value#>>'{}' AND o."isActive"=true) THEN v_errors:=v_errors||jsonb_build_array(jsonb_build_object('code','INVALID_ENUM','parameter',v_param.key,'message','Value is not present in the active catalog')); ELSIF v_param.value_type='boolean' AND jsonb_typeof(v_value)<>'boolean' THEN v_errors:=v_errors||jsonb_build_array(jsonb_build_object('code','INVALID_TYPE','parameter',v_param.key,'message','Boolean value expected')); ELSIF v_param.value_type IN ('decimal','integer') AND jsonb_typeof(v_value)<>'number' THEN v_errors:=v_errors||jsonb_build_array(jsonb_build_object('code','INVALID_TYPE','parameter',v_param.key,'message','Numeric value expected')); END IF;
+END LOOP;
+SELECT true INTO v_found FROM sandbox."missionParameters" WHERE "missionKey"=p_mission_key AND "isActive"=true LIMIT 1;
+IF NOT v_found THEN v_errors:=v_errors||jsonb_build_array(jsonb_build_object('code','UNKNOWN_MISSION','message','Mission parameter catalog not found')); END IF;
+RETURN jsonb_build_object('valid',jsonb_array_length(v_errors)=0,'errors',v_errors,'mission_key',p_mission_key);
 END;
-$function$;
+$function$
 
 CREATE OR REPLACE FUNCTION sandbox.validate_mission_action_unit()
-RETURNS trigger
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path TO 'pg_catalog', 'sandbox'
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'pg_catalog', 'sofia'
 AS $function$
 DECLARE
   mission_owner_id integer;
@@ -758,50 +732,114 @@ BEGIN
        OR OLD."actionPlanContentHash" IS DISTINCT FROM NEW."actionPlanContentHash"
        OR OLD."unitId" IS DISTINCT FROM NEW."unitId"
        OR OLD."unitTitle" IS DISTINCT FROM NEW."unitTitle"
-       OR OLD."idempotencyKey" IS DISTINCT FROM NEW."idempotencyKey" THEN
+       OR OLD."idempotencyKey" IS DISTINCT FROM NEW."idempotencyKey"
+       OR (OLD."operationalTaskId" IS NOT NULL
+         AND OLD."operationalTaskId" IS DISTINCT FROM NEW."operationalTaskId") THEN
       RAISE EXCEPTION 'Action-plan unit identity is immutable';
+    END IF;
+
+    IF OLD."approvalUserId" IS NOT NULL
+       AND (OLD."approvalUserId" IS DISTINCT FROM NEW."approvalUserId"
+         OR OLD."approvedAt" IS DISTINCT FROM NEW."approvedAt") THEN
+      RAISE EXCEPTION 'Action-plan unit approval is immutable';
+    END IF;
+
+    IF OLD.state IS DISTINCT FROM NEW.state THEN
+      IF NOT (
+        (OLD.state = 'REGISTERED' AND NEW.state IN ('AWAITING_APPROVAL', 'BLOCKED', 'CANCELLED'))
+        OR (OLD.state = 'AWAITING_APPROVAL' AND NEW.state IN ('APPROVED', 'BLOCKED', 'CANCELLED'))
+        OR (OLD.state = 'APPROVED' AND NEW.state IN ('READY_FOR_DISPATCH', 'BLOCKED', 'CANCELLED'))
+        OR (OLD.state = 'READY_FOR_DISPATCH' AND NEW.state IN ('DISPATCHED', 'BLOCKED', 'CANCELLED'))
+        OR (OLD.state = 'BLOCKED' AND NEW.state = 'CANCELLED')
+      ) THEN
+        RAISE EXCEPTION 'Invalid action-plan unit state transition: % -> %', OLD.state, NEW.state;
+      END IF;
     END IF;
   END IF;
 
   SELECT "createdBy" INTO mission_owner_id
-    FROM sandbox.tasks WHERE id = NEW."missionTaskId";
-  IF NOT FOUND OR mission_owner_id IS NULL THEN
-    RAISE EXCEPTION 'Mission task owner not found';
+    FROM sandbox.tasks
+   WHERE id = NEW."missionTaskId"
+     AND "parentTaskId" IS NULL;
+  IF mission_owner_id IS NULL THEN
+    RAISE EXCEPTION 'Action-plan unit mission must reference an owned root mission';
   END IF;
 
-  SELECT "taskId" INTO plan_document_id
-    FROM sandbox."missionDocuments"
-   WHERE id = NEW."actionPlanDocumentId";
-  IF plan_document_id IS DISTINCT FROM NEW."missionTaskId" THEN
-    RAISE EXCEPTION 'ACTION_PLAN document must belong to the mission task';
-  END IF;
+  SELECT type_row."typeKey",
+         document_row."taskId",
+         version_row."documentId",
+         version_row."version",
+         version_row."state",
+         version_row."contentHash",
+         version_row."content"
+    INTO plan_type,
+         task_parent_id,
+         plan_document_id,
+         plan_version_number,
+         plan_state,
+         plan_content_hash,
+         plan_content
+    FROM sandbox."missionDocumentVersions" version_row
+    JOIN sandbox."missionDocuments" document_row ON document_row.id = version_row."documentId"
+    JOIN sandbox."missionDocumentTypes" type_row ON type_row.id = document_row."documentTypeId"
+   WHERE version_row.id = NEW."actionPlanVersionId";
 
-  SELECT "documentTypeId" INTO plan_version_number
-    FROM sandbox."missionDocuments" WHERE id = NEW."actionPlanDocumentId";
-  SELECT "documentKey" INTO plan_type
-    FROM sandbox."missionDocuments" WHERE id = NEW."actionPlanDocumentId";
-  IF plan_type <> 'ACTION_PLAN' THEN
-    RAISE EXCEPTION 'Action-plan unit must reference an ACTION_PLAN document';
-  END IF;
-
-  SELECT version, "contentHash", content, state
-    INTO plan_version_number, plan_content_hash, plan_content, plan_state
-    FROM sandbox."missionDocumentVersions"
-   WHERE id = NEW."actionPlanVersionId"
-     AND "documentId" = NEW."actionPlanDocumentId";
-  IF NOT FOUND OR plan_version_number IS DISTINCT FROM NEW."actionPlanVersionNumber"
+  IF plan_type IS DISTINCT FROM 'ACTION_PLAN'
+     OR task_parent_id IS DISTINCT FROM NEW."missionTaskId"
+     OR plan_document_id IS DISTINCT FROM NEW."actionPlanDocumentId"
+     OR plan_version_number IS DISTINCT FROM NEW."actionPlanVersionNumber"
      OR plan_content_hash IS DISTINCT FROM NEW."actionPlanContentHash"
-     OR plan_state NOT IN ('PUBLISHED','VALIDATED') THEN
-    RAISE EXCEPTION 'Action-plan unit must reference an immutable published version';
+     OR plan_state IS DISTINCT FROM 'APPROVED' THEN
+    RAISE EXCEPTION 'Action-plan unit must reference the exact approved ACTION_PLAN version';
   END IF;
 
-  IF NEW."unitId" = '' OR NEW."idempotencyKey" = '' THEN
-    RAISE EXCEPTION 'Action-plan unit identity and idempotency key are required';
+  SELECT MAX(id) INTO latest_plan_version_id
+    FROM sandbox."missionDocumentVersions"
+   WHERE "documentId" = NEW."actionPlanDocumentId";
+  IF latest_plan_version_id IS DISTINCT FROM NEW."actionPlanVersionId" THEN
+    RAISE EXCEPTION 'Action-plan unit cannot reference a stale plan version';
   END IF;
 
+  IF NOT EXISTS (
+    SELECT 1
+      FROM jsonb_array_elements(plan_content::jsonb -> 'tasks') AS plan_task
+     WHERE plan_task ->> 'id' = NEW."unitId"
+       AND plan_task ->> 'title' = NEW."unitTitle"
+  ) THEN
+    RAISE EXCEPTION 'Action-plan unit identity does not match the approved plan content';
+  END IF;
+
+  IF NEW."approvalUserId" IS NOT NULL AND NEW."approvalUserId" <> mission_owner_id THEN
+    RAISE EXCEPTION 'Action-plan unit approval must be recorded by the mission owner';
+  END IF;
+
+  IF NEW."state" IN ('APPROVED', 'READY_FOR_DISPATCH', 'DISPATCHED')
+     AND (NEW."approvalUserId" IS NULL OR NEW."approvedAt" IS NULL) THEN
+    RAISE EXCEPTION 'Action-plan unit state requires explicit human approval';
+  END IF;
+
+  -- Any established operational-task link is validated immediately, even
+  -- while the unit remains APPROVED and the child is safely PAUSED.
+  IF NEW."operationalTaskId" IS NOT NULL THEN
+    SELECT "createdBy", "parentTaskId"
+      INTO task_owner_id, task_parent_id
+      FROM sandbox.tasks
+     WHERE id = NEW."operationalTaskId";
+    IF task_owner_id IS DISTINCT FROM mission_owner_id
+       OR task_parent_id IS DISTINCT FROM NEW."missionTaskId" THEN
+      RAISE EXCEPTION 'Operational task must be a direct child of the same mission owner';
+    END IF;
+  END IF;
+
+  IF NEW."state" IN ('READY_FOR_DISPATCH', 'DISPATCHED')
+     AND NEW."operationalTaskId" IS NULL THEN
+    RAISE EXCEPTION 'Dispatchable action-plan unit requires an operational task';
+  END IF;
+
+  NEW."updatedAt" := now();
   RETURN NEW;
 END;
-$function$;
+$function$
 
 CREATE TRIGGER tasks_require_validated_tr
 BEFORE INSERT OR UPDATE OF "statusId", "agentId" ON sandbox.tasks
