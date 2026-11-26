@@ -92,7 +92,7 @@ CREATE OR REPLACE FUNCTION sandbox.get_mission_parameters(p_mission_key text)
  RETURNS TABLE(parameter_key text, label text, description text, value_type text, validation jsonb, is_required boolean, sort_order integer, options jsonb)
  LANGUAGE sql
  SECURITY DEFINER
- SET search_path TO 'sofia', 'public', 'pg_temp'
+ SET search_path TO 'sandbox', 'public', 'pg_temp'
 AS $function$
 SELECT p."parameterKey",p.label,p.description,p."valueType",p.validation,p."isRequired",p."sortOrder",coalesce(jsonb_agg(jsonb_build_object('value',o.value,'label',o.label,'description',o.description,'sort_order',o."sortOrder") ORDER BY o."sortOrder",o.id) FILTER (WHERE o.id IS NOT NULL),'[]'::jsonb) FROM sandbox."missionParameters" p LEFT JOIN sandbox."missionParameterOptions" o ON o."parameterId"=p.id AND o."isActive"=true WHERE p."missionKey"=p_mission_key AND p."isActive"=true GROUP BY p.id,p."parameterKey",p.label,p.description,p."valueType",p.validation,p."isRequired",p."sortOrder" ORDER BY p."sortOrder",p.id;
 $function$
@@ -102,7 +102,7 @@ CREATE OR REPLACE FUNCTION sandbox.validate_mission_parameters(p_mission_key tex
  RETURNS jsonb
  LANGUAGE plpgsql
  SECURITY DEFINER
- SET search_path TO 'sofia', 'public', 'pg_temp'
+ SET search_path TO 'sandbox', 'public', 'pg_temp'
 AS $function$
 DECLARE v_param record; v_value jsonb; v_errors jsonb:='[]'::jsonb; v_found boolean:=false;
 BEGIN
