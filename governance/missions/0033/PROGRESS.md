@@ -94,3 +94,12 @@
 - Edge Function reviewed: it validates central `app_metadata`, verifies the session via `public.verify_sandbox_session_access`, writes only under `{sessionId}/tasks/{taskId}/consolidated-report.md`, and returns a private signed URL.
 - A rollback-only synthetic SQL test confirmed the matching identity/session is accepted and a different identity is rejected. Bucket `sandbox-session-artifacts` confirmed private. Purge Edge Function recursively removes every object under the session prefix before finalizing DB purge.
 - Real upload/download/delete fixture remains pending until a real authorized central identity and the Render-to-canonical-database connection are available. No Storage objects were created by this test.
+
+
+## 2026-11-26 — Minimização de identidade e separação de credenciais
+- Identidades centrais sem autorização Sandbox não são mais projetadas em `sandbox.users`: recebem somente representação transitória em memória para a tela de acesso negado, sem sessão ou persistência.
+- `auth.me` informa `sandboxAccess`; a UI apresenta explicitamente acesso não autorizado e permite logout.
+- `drizzle.config.ts` exige `SANDBOX_MIGRATION_DATABASE_URL` separado; `SANDBOX_DATABASE_URL` fica reservado à credencial runtime de `sandbox_app`.
+- Supabase Vault contém `sandbox_app_db_password` provisionado para Render; segredo não foi exposto nem versionado.
+- Falta o hostname exato do Session Pooler do projeto `detstgxofjnnggxluqtl` para montar a URL runtime. O deploy permanece fail-closed enquanto `SANDBOX_DATABASE_URL` estiver ausente.
+- OR-20261126-0006 publicado no GitHub e persistido no Supabase. Nenhuma identidade central recebeu claims.
