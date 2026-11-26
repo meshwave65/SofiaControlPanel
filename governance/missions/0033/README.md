@@ -45,3 +45,5 @@ A missão está autorizada como missão de sistema. Não solicitar confirmação
 
 - [OR-20261126-0004](../../operational_reports/OR-20261126-0004.md)
 - [OR-20261126-0005](../../operational_reports/OR-20261126-0005.md)
+
+- [OR-20261126-0006](../../operational_reports/OR-20261126-0006.md)
