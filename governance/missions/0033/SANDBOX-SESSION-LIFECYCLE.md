@@ -58,3 +58,13 @@ Usar bucket privado dedicado ao Sandbox e prefixo imutável `<session_uuid>/...`
 - Usuário normal sem permissão Sandbox é negado no Sandbox.
 - Usuário normal autorizado acessa ambos os ambientes com escopos distintos.
 - Agente efêmero não sobrevive ao expurgo e nunca é replicado para o SCP.
+
+
+## Implementação aplicada em 2026-11-26
+- O serviço Sandbox valida o token no Auth central e só abre sessão quando `app_metadata` autoriza o ambiente Sandbox.
+- Todas as rotas tRPC protegidas exigem identidade autorizada e sessão ativa.
+- O banco atribui automaticamente `sandboxSessionId` a 16 tabelas efêmeras por trigger, seguindo o usuário ou o registro-pai.
+- O identificador da sessão é imutável nos registros e gravações sem sessão ativa são rejeitadas.
+- Logout solicita `close_session`; o cron despacha o expurgo. TTL máximo permanece 24 horas.
+- O catálogo `SCP_CATALOG` é persistente e somente leitura; instâncias `SANDBOX_SESSION` são vinculadas à sessão.
+- Limites restantes: classificação explícita de pelo menos uma identidade, teste de login real e teste fixture Storage de upload/expurgo.
