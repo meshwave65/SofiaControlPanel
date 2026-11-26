@@ -18,7 +18,7 @@ REVOKE ALL ON sandbox.agent_catalog_public FROM PUBLIC, anon, authenticated;
 
 CREATE TABLE sandbox.sessions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  "centralIdentityId" uuid NOT NULL,
+  "centralIdentityId" uuid,
   "ownerUserId" integer NOT NULL REFERENCES sandbox.users(id) ON DELETE RESTRICT,
   status varchar(16) NOT NULL DEFAULT 'ACTIVE'
     CHECK (status IN ('ACTIVE','CLOSING','EXPIRED','PURGING','PURGED')),
@@ -454,7 +454,7 @@ BEGIN
      WHERE id = v_session.id;
 
     PERFORM net.http_post(
-      url := 'https://detstgxofjnnggxluqtl.supabase.co/functions/v1/sandbox-session-purge',
+      url := 'https://rqvjsjfypuojuaetxkig.supabase.co/functions/v1/sandbox-session-purge',
       body := jsonb_build_object('session_id', v_session.id),
       headers := jsonb_build_object(
         'Content-Type', 'application/json',
