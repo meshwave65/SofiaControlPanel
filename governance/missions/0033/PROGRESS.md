@@ -51,3 +51,17 @@
 - Nenhum usuário central foi modificado/classificado por inferência. Deny-by-default preservado.
 - OR-20261126-0002 publicado no GitHub e persistido no Supabase; artifactCount atualizado.
 - Bloqueio funcional identificado: falta integrar no backend SCP o provisionamento mínimo de identidade, sessão e autorização por ambiente. A próxima implementação deve validar claims centrais, projetar usuário, abrir/recuperar sessão e fechar sessão autenticadamente.
+
+
+## 2026-11-26 — Integração backend/UI e isolamento por sessão
+- Criada a integração de identidade do serviço Sandbox com o Auth central `ufylccbdjfzydbwhpmpp`: validação exclusiva por URL/chave centrais e leitura de claims confiáveis em `app_metadata`.
+- Contrato de acesso aplicado no middleware global do Sandbox: `sandbox` permite somente Sandbox; `normal_user/admin` precisam de `meshwave_environments` contendo `sandbox`. Todas as rotas protegidas, inclusive administrativas, exigem sessão ativa.
+- O backend projeta identidade mínima em `sandbox.users` e abre/recupera sessão via `sandbox.ensure_active_session`.
+- Listagem agora inclui os 19 agentes `SCP_CATALOG` sem `ownerId`; catálogo é somente leitura. Agentes novos são `SANDBOX_SESSION` e recebem owner + sessão.
+- Consultas legadas com schema `sofia` no repositório Sandbox foram corrigidas para `sandbox`. Leituras de tarefas, mensagens, logs e missões nas rotas protegidas foram escopadas à sessão.
+- Triggers `sandbox.assign_active_session_scope` instalados em 16 tabelas efêmeras; derivam a sessão do usuário ou do registro-pai, bloqueiam gravações sem sessão ativa e impedem transferência de propriedade da sessão.
+- Logout solicita fechamento autenticado da sessão; cron mantém expurgo de TTL. Rotas públicas de dispatch, heartbeat e escrita de logs externos foram bloqueadas.
+- Render: builds anteriores concluídos; último deploy com fail-fast de DB estava em processamento na atualização deste relatório.
+- Teste transacional sintético de atribuição de sessão em tasks/messages/activityLogs/contextReports passou sem erro e foi revertido; não deixou fixtures. Testes anteriores de fechamento manual/TTL permanecem aprovados.
+- Bloqueios: nenhuma das 83 identidades centrais auditadas tem claims de ambiente; nenhuma conta foi classificada. Teste ponta a ponta com usuário real e fixture Storage ainda pendentes. A missão continua PROGRESS.
+- OR-20261126-0003 publicado no GitHub; persistência Supabase correspondente em andamento.
