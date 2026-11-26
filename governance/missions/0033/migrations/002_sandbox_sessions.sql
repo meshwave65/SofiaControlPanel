@@ -312,7 +312,7 @@ RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path TO 'pg_catalog', 'sandbox'
-AS $function$;
+AS $function$
 BEGIN
   IF NEW."missionKey" IS NOT NULL AND NEW."sandboxSessionId" IS NOT NULL THEN
     UPDATE sandbox."governanceMissions"
@@ -388,7 +388,7 @@ CREATE OR REPLACE FUNCTION sandbox.enforce_session_ttl()
 RETURNS trigger
 LANGUAGE plpgsql
 SET search_path TO 'pg_catalog', 'sandbox'
-AS $function$;
+AS $function$
 BEGIN
   IF NEW."expiresAt" <= NEW."startedAt"
      OR NEW."expiresAt" > NEW."startedAt" + interval '24 hours' THEN
@@ -474,7 +474,7 @@ RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path TO 'pg_catalog', 'sandbox'
-AS $function$;
+AS $function$
 BEGIN
   PERFORM sandbox.dispatch_pending_session_purges();
   RETURN NEW;
@@ -517,7 +517,7 @@ RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path TO 'pg_catalog', 'sandbox'
-AS $function$;
+AS $function$
 BEGIN
   UPDATE sandbox.sessions
      SET status = 'CLOSING',
@@ -888,7 +888,7 @@ RETURNS boolean
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path TO 'pg_catalog', 'sandbox'
-AS $function$;
+AS $function$
 DECLARE
   v_claimed boolean := false;
 BEGIN
@@ -1016,7 +1016,7 @@ RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path TO 'pg_catalog', 'sandbox'
-AS $function$;
+AS $function$
 BEGIN
   UPDATE sandbox.sessions
      SET status = 'PURGED',
