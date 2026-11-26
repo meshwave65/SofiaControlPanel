@@ -454,8 +454,7 @@ BEGIN
      WHERE id = v_session.id;
 
     PERFORM net.http_post(
-      url := 'https://rqvjsjfypuojuaetxkig.supabase.co/functions/v1/sandbox-session-purge'::text,
-      params := '{}'::jsonb,
+      url := 'https://rqvjsjfypuojuaetxkig.supabase.co/functions/v1/sandbox-session-purge',
       body := jsonb_build_object('session_id', v_session.id),
       headers := jsonb_build_object(
         'Content-Type', 'application/json',
