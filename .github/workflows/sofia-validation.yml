@@ -117,10 +117,6 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: psql -h localhost -U postgres -d sofia_migration_test -v ON_ERROR_STOP=1 -f governance/missions/0033/migrations/002_sandbox_sessions.sql
-      - name: Apply pg_net overload fix for deterministic purge dispatch
-        env:
-          PGPASSWORD: postgres
-        run: psql -h localhost -U postgres -d sofia_migration_test -v ON_ERROR_STOP=1 -f governance/missions/0033/migrations/005_pgnet_dispatch_overload_fix.sql
       - name: Verify manual close, TTL expiry and isolated purge
         env:
           PGPASSWORD: postgres
