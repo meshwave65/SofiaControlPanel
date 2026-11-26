@@ -7,7 +7,7 @@ Este repositório contém duas séries diferentes de registros, além de artefat
 | Camada | Fonte de verdade | Local no GitHub | Quantidade atual | O que representa |
 | --- | --- | --- | ---: | --- |
 | Missões operacionais do painel | Supabase `sofia.tasks` | `missions/SCP-TASK-XXXXXX.md` | 54 registros, maior ID 62 | Tarefas/missões operacionais do SofiaControlPanel, incluindo relações pai-filho. O diretório contém 52 arquivos; há diferença de 2 espelhos a reconciliar. |
-| Missões de governança | Supabase `sofia.governanceMissions` + documentação versionada | `governance/missions/<ID>/` | 33 IDs, 0001–0033 | Programas de trabalho, blueprints, gates, checkpoints e continuidade. |
+| Missões de governança | Supabase `sofia.governanceMissions` + documentação versionada | `governance/missions/<ID>/` | 34 IDs, 0001–0034 | Programas de trabalho, blueprints, gates, checkpoints e continuidade. |
 | Snapshots legados de governança | Histórico Git | raiz, `MISSION_*.md` | 47 arquivos | Cópias/status históricos mantidos por compatibilidade e rastreabilidade; não são missões novas. |
 | Artefatos de missão | Git | dentro de `governance/missions/<ID>/` | contagem histórica a reconciliar | Blueprints, progresso, tarefas, checkpoints, evidências e relatórios. Não são missões adicionais. |
 
@@ -62,6 +62,7 @@ A numeração `MISSION_0001`–`MISSION_0033` é uma série documental distinta 
 | 0031 | STAGED — registro presente no Supabase; artefatos no Supabase; pasta GitHub a reconciliar | `governance/missions/0031/` |
 | 0032 | STAGED — registro presente no Supabase; artefatos no Supabase; pasta GitHub a reconciliar | `governance/missions/0032/` |
 | 0033 | PROGRESS — missão de sistema autônoma; TR VALIDATED, Blueprint READY, INVENTORY, OR-0001/0002 e checkpoint | `governance/missions/0033/README.md`, `TR-v1.0.0-VALIDATED.md`, `BLUEPRINT-v1.0.0.md`, `INVENTORY.md`, `TASKS.md`, `PROGRESS.md`, `OR-0001.md`, `OR-0002.md` |
+| 0034 | STAGED — teste de criação externa por IA; TR aguardando validação humana; sem despacho | `governance/missions/0034/README.md`, `ORIGINAL_REQUEST.md`, `TR-v0.1.0-DRAFT.md`, `TASKS.md`, `PROGRESS.md` |
 
 Os registros 0028–0032 foram confirmados no Supabase em 2026-11-25, mas sua presença e integridade no GitHub ainda precisam ser conciliadas. Os arquivos da raiz continuam versionados por compatibilidade histórica; não devem ser apagados nem tratados como novas missões.
 
