@@ -1,5 +1,7 @@
 -- Exclude free-form descriptions from the Sandbox catalog: source descriptions may contain emails/account labels.
-CREATE OR REPLACE VIEW sandbox.agent_catalog_public WITH (security_invoker = true) AS
+DROP VIEW sandbox.agent_catalog_public;
+
+CREATE VIEW sandbox.agent_catalog_public WITH (security_invoker = true) AS
 SELECT
   a."sourceAgentId" AS id,
   a.name,
