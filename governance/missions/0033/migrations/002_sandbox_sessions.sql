@@ -538,7 +538,7 @@ $function$;
 CREATE OR REPLACE FUNCTION sandbox.reject_mission_document_version_mutation()
  RETURNS trigger
  LANGUAGE plpgsql
- SET search_path TO 'pg_catalog', 'sofia'
+ SET search_path TO 'pg_catalog', 'sandbox'
 AS $function$
 BEGIN
   IF TG_OP = 'DELETE' AND current_setting('sandbox.purge', true) = 'on' THEN
@@ -552,7 +552,7 @@ CREATE OR REPLACE FUNCTION sandbox.validate_mission_action_unit_gate_evidence()
  RETURNS trigger
  LANGUAGE plpgsql
  SECURITY DEFINER
- SET search_path TO 'pg_catalog', 'sofia'
+ SET search_path TO 'pg_catalog', 'sandbox'
 AS $function$
 DECLARE
   unit_row record;
@@ -603,7 +603,7 @@ CREATE OR REPLACE FUNCTION sandbox.enforce_execution_documents_before_staged()
  RETURNS trigger
  LANGUAGE plpgsql
  SECURITY DEFINER
- SET search_path TO 'pg_catalog', 'sofia'
+ SET search_path TO 'pg_catalog', 'sandbox'
 AS $function$
 DECLARE
   staged_status_id integer;
@@ -716,7 +716,7 @@ CREATE OR REPLACE FUNCTION sandbox.validate_mission_action_unit()
  RETURNS trigger
  LANGUAGE plpgsql
  SECURITY DEFINER
- SET search_path TO 'pg_catalog', 'sofia'
+ SET search_path TO 'pg_catalog', 'sandbox'
 AS $function$
 DECLARE
   mission_owner_id integer;
