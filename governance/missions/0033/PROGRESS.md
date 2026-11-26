@@ -111,3 +111,10 @@
 - `SANDBOX_DATABASE_URL` é a conexão runtime; `SANDBOX_MIGRATION_DATABASE_URL` é separado para operações explícitas de Drizzle. O antigo `DATABASE_URL` não é fallback.
 - OR-20261126-0004 recebeu addenda e versões 2/3 foram persistidas em `missionDocumentVersions`.
 - Privilégio `admin` no Sandbox agora deriva exclusivamente de `app_metadata.meshwave_user_type='admin'`; elevação por email e configurações legadas de owner/admin foram removidas. `user_metadata` não concede privilégios.
+
+
+## 2026-11-26 — Credencial runtime identificada; hostname pendente
+- O projeto canônico possui o segredo Vault `sandbox_app_db_password`, associado ao role `sandbox_app` (LOGIN/BYPASSRLS e grants verificados). O segredo não foi lido nem exposto.
+- A única informação de conexão ainda ausente é o hostname/porta exatos do Session Pooler no diálogo Connect do projeto `detstgxofjnnggxluqtl`. Não compor hostname por suposição.
+- Connection string esperada no Render: `SANDBOX_DATABASE_URL`, usuário pooler `sandbox_app.detstgxofjnnggxluqtl`, host/porta copiados do Connect e senha referenciada pelo Vault `sandbox_app_db_password`.
+- O deploy permanece fail-closed até essa variável ser configurada. O serviço não deve usar o `DATABASE_URL` herdado do projeto `rqvjsjfypuojuaetxkig`.
