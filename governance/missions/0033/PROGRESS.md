@@ -76,3 +76,13 @@
 - Correção: backend exige `SANDBOX_DATABASE_URL`, valida projectRef `detstgxofjnnggxluqtl`; startup script agora é somente leitura e valida 26 tabelas, 19 agentes, RLS, policies e triggers. Não há mais fallback para `DATABASE_URL` nem DDL no startup.
 - O destino possui role `sandbox_app` com LOGIN/BYPASSRLS e grants de aplicação. Render ainda não tem connection string válida para esse role/projeto; deploy está falhando fechado até configurar a variável. A versão antiga live ainda aponta ao projeto errado, mas sem claims as rotas protegidas negam acesso.
 - OR-20261126-0004 e DDL-STRUCTURAL-AUDIT-20261126.md persistidos no GitHub; persistência Supabase correspondente em andamento. MISSION_0033 permanece PROGRESS.
+
+
+## 2026-11-26 — Storage integrado ao ciclo de sessão
+- O backend deixou de gravar relatórios no bucket legado `sofia-controlpanel-artifacts` em caminho sem sessão.
+- `server/controlPanelStorage.ts` agora chama a Edge Function `sandbox-session-storage` com Bearer central, `sessionId` e `taskId`. Upload/download/delete usam o bucket `sandbox-session-artifacts` e prefixo UUID que o expurgo remove.
+- As rotas de consolidação, leitura de relatório e geração do FOR propagam token e sessão validados pelo middleware.
+- `SUPABASE_URL` do Render foi apontada ao projeto canônico `detstgxofjnnggxluqtl`; `VITE_SUPABASE_URL` permanece no Auth central.
+- O startup `ensure-database.mjs` é somente leitura e exige `SANDBOX_DATABASE_URL` com projectRef canônico. O Render ainda não tem essa variável, então o deploy falha fechado. Não foi usada a URL antiga do projeto `rqvjsjfypuojuaetxkig`.
+- Auditoria read-only de `rqvjsjfypuojuaetxkig` não encontrou agentes, tarefas, mensagens, activityLogs ou contextReports; havia duas projeções de usuários e uma sessão preexistentes. Nenhuma limpeza foi feita nesse projeto.
+- OR-20261126-0005 publicado no GitHub. Teste de Storage real e login com usuário autorizado continuam bloqueados pela conexão de banco canônica ausente e pela falta de identidade com claims.
