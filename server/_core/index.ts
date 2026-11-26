@@ -12,7 +12,7 @@ import { creditMonitoringHandler } from "../handlers/creditMonitoringHandler";
 import publicRouter from "../publicEndpoints";
 import dispatchRouter from "../dispatchEndpoint";
 import { startHeartbeatSystem } from "../heartbeat";
-	
+
 async function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
     const server = net.createServer();
@@ -35,7 +35,8 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 async function startServer() {
   console.log("====================================================");
   console.log("🚀 SOFIA CONTROL PANEL - PRODUCTION STARTING");
-  console.log(`📅 VERSION: Julho 2026 - v1.2`);
+  // Atualizar a versão e o mês/ano deste identificador a cada release do SCP.
+  console.log("📅 VERSION: Novembro 2026 - v1.3");
   console.log(`🌐 NODE_ENV: ${process.env.NODE_ENV}`);
   console.log("====================================================");
   const app = express();
@@ -47,7 +48,7 @@ async function startServer() {
   registerOAuthRoutes(app);
   // Scheduled/Heartbeat endpoints (must be before tRPC)
   app.post("/api/scheduled/creditMonitoring", creditMonitoringHandler);
-  
+
   // Public API for external agents
   app.use("/api/public", publicRouter);
 
