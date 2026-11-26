@@ -32,3 +32,13 @@
 - WP33.7: arquitetura de sessão publicada; federação e expurgo ainda não implementados.
 - WP33.8–33.9: pendentes.
 - Nenhuma migration aplicada. Nenhum dado operacional copiado. Origem inalterada.
+
+
+## 2026-11-26 — Hardening e teste de ciclo de vida
+- Revalidado o destino canônico nos documentos: projeto `detstgxofjnnggxluqtl`, conexão Primary. Projeto `rqvjsjfypuojuaetxkig` permanece fora do escopo e não foi alterado nesta etapa.
+- Estado real do Sandbox: 25 tabelas do núcleo + `sandbox.sessions`; RLS habilitado nas 26 tabelas; zero policies; 19 agentes `SCP_CATALOG` preservados; zero usuários projetados e zero dados operacionais em tarefas/missões/documentos.
+- Edge Functions `sandbox-session-purge` e `sandbox-session-storage` ativas; bucket privado `sandbox-session-artifacts`; cron de manutenção a cada minuto.
+- Aplicada migration `mission_0033_revoke_public_sandbox_function_execute`; removido EXECUTE de PUBLIC das funções no schema sandbox e ajustados default privileges. ACL verificada; grants de `sandbox_app` preservados.
+- Testes sintéticos aprovados: encerramento manual (HTTP 200, PURGED) e expiração TTL (PURGED, motivo TTL). Usuários sintéticos removidos; sessões de teste anonimizadas mantidas para auditoria; catálogo de 19 agentes preservado.
+- OR-20261126-0001 publicado em GitHub e persistido no Supabase como novo documento/versionamento; `artifactCount=8`.
+- Limitações: onboarding central para `sandbox.users` e criação de sessão no backend/UI ainda não implementados; RLS sem policies mantém API fail-closed; teste real de upload/expurgo Storage pendente; diff DDL integral pendente.
