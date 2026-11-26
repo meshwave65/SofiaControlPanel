@@ -42,3 +42,12 @@
 - Testes sintéticos aprovados: encerramento manual (HTTP 200, PURGED) e expiração TTL (PURGED, motivo TTL). Usuários sintéticos removidos; sessões de teste anonimizadas mantidas para auditoria; catálogo de 19 agentes preservado.
 - OR-20261126-0001 publicado em GitHub e persistido no Supabase como novo documento/versionamento; `artifactCount=8`.
 - Limitações: onboarding central para `sandbox.users` e criação de sessão no backend/UI ainda não implementados; RLS sem policies mantém API fail-closed; teste real de upload/expurgo Storage pendente; diff DDL integral pendente.
+
+
+## 2026-11-26 — Auditoria de identidade central
+- Revisado `server/_core/context.ts` e `server/db.ts`: o SCP valida Bearer tokens com Supabase Auth central e mapeia UUID Auth para `openId` na base operacional; autorização atual de admin ainda usa lista de emails/ownerOpenId e não aplica os claims de ambiente propostos.
+- Auditoria agregada de `auth.users`: 83 identidades centrais; nenhuma contém `meshwave_user_type` ou `meshwave_environments` em `raw_app_meta_data`.
+- Sandbox `sandbox.users` permanece vazio. A Edge Function de Storage exige os claims confiáveis em `app_metadata`, portanto nenhum acesso experimental foi liberado.
+- Nenhum usuário central foi modificado/classificado por inferência. Deny-by-default preservado.
+- OR-20261126-0002 publicado no GitHub e persistido no Supabase; artifactCount atualizado.
+- Bloqueio funcional identificado: falta integrar no backend SCP o provisionamento mínimo de identidade, sessão e autorização por ambiente. A próxima implementação deve validar claims centrais, projetar usuário, abrir/recuperar sessão e fechar sessão autenticadamente.
