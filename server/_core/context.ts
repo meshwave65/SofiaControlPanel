@@ -7,11 +7,13 @@ import * as db from "../db";
 import { sdk } from "./sdk";
 import { ENV } from "./env";
 import { isCentralAdmin, isEnvironmentAuthorized } from "./environmentAccess";
+import { ensureSandboxSession } from "../sandboxSession";
 
 export type TrpcContext = {
   req: CreateExpressContextOptions["req"];
   res: CreateExpressContextOptions["res"];
   user: User | null;
+  sandboxSessionId: string | null;
 };
 
 let supabaseAuthClient: ReturnType<typeof createClient> | null = null;
@@ -149,6 +151,7 @@ export async function createContext(
   opts: CreateExpressContextOptions,
 ): Promise<TrpcContext> {
   let user: User | null = null;
+  let sandboxSessionId: string | null = null;
   const rawCorrelationId = opts.req.headers["x-scp-auth-diagnostic"];
   const correlationId =
     typeof rawCorrelationId === "string" && /^[a-zA-Z0-9-]{1,80}$/.test(rawCorrelationId)
@@ -161,6 +164,9 @@ export async function createContext(
       const match = authorization.match(/^Bearer\s+(.+)$/i);
       if (!match) throw new Error("Malformed Authorization header");
       user = await authenticateSupabaseToken(match[1], correlationId);
+      if (user && ENV.appEnvironment === "sandbox") {
+        sandboxSessionId = await ensureSandboxSession(user.id, user.openId);
+      }
     } else {
       const cookies = parseCookieHeader(opts.req.headers.cookie ?? "");
       if (cookies[COOKIE_NAME] && ENV.appEnvironment === "scp") {
@@ -190,5 +196,6 @@ export async function createContext(
     req: opts.req,
     res: opts.res,
     user,
+    sandboxSessionId,
   };
 }
