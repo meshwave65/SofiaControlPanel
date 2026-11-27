@@ -11,6 +11,54 @@ import { ActionPlanSchema } from "./actionPlan";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 let _dbPromise: Promise<ReturnType<typeof drizzle> | null> | null = null;
+let _centralSCPClient: ReturnType<typeof postgres> | null = null;
+
+async function getCentralSCPClient() {
+  if (_centralSCPClient) return _centralSCPClient;
+  const url = process.env.CENTRAL_SCP_DATABASE_URL;
+  if (!url) throw new Error("CENTRAL_SCP_DATABASE_URL não configurada no serviço Sandbox.");
+  const client = postgres(url, { max: 3, prepare: false, connect_timeout: 10 });
+  try {
+    await client`select 1`;
+    _centralSCPClient = client;
+    return client;
+  } catch (error) {
+    await client.end({ timeout: 1 }).catch(() => undefined);
+    throw error;
+  }
+}
+
+async function getCentralSCPAgentCredentials(sourceAgentId: number) {
+  const client = await getCentralSCPClient();
+  const [agent] = await client`
+    SELECT "manusAccount", "manusToken"
+    FROM sofia.agents
+    WHERE id = ${sourceAgentId}
+    LIMIT 1
+  `;
+  if (!agent) return null;
+  const encryptionKey = process.env.CENTRAL_SCP_CREDENTIAL_ENCRYPTION_KEY;
+  if (agent.manusToken && !encryptionKey) {
+    throw new Error("CENTRAL_SCP_CREDENTIAL_ENCRYPTION_KEY não configurada no serviço Sandbox.");
+  }
+  return {
+    manusAccount: agent.manusAccount ?? null,
+    manusToken: agent.manusToken
+      ? decryptCredential(agent.manusToken, encryptionKey)
+      : null,
+  };
+}
+
+async function getAgentCredentialSource(database: Awaited<ReturnType<typeof getDb>>, agentId: number) {
+  if (!database) throw new Error("Database not available");
+  const [source] = await database.execute(sql`
+    SELECT "agentOrigin", "sourceAgentId"
+    FROM sandbox.agents
+    WHERE id = ${agentId}
+    LIMIT 1
+  `) as any;
+  return source ?? null;
+}
 
 export async function getDb() {
   if (_db) return _db;
@@ -199,13 +247,13 @@ export async function getManusCredentialsForAgentForOwner(id: number, ownerId: n
     .limit(1);
 
   if (!agent) return null;
-  if (!agent.manusToken) {
-    return { manusAccount: agent.manusAccount, manusToken: null };
+  const source = await getAgentCredentialSource(database, id);
+  if (source?.agentOrigin === "SCP_CATALOG" && source.sourceAgentId != null) {
+    return getCentralSCPAgentCredentials(Number(source.sourceAgentId));
   }
-
   return {
     manusAccount: agent.manusAccount,
-    manusToken: decryptCredential(agent.manusToken),
+    manusToken: agent.manusToken ? decryptCredential(agent.manusToken) : null,
   };
 }
 
@@ -221,10 +269,34 @@ export async function getManusCredentialsForAgent(id: number) {
     .limit(1);
 
   if (!agent) return null;
+  const source = await getAgentCredentialSource(database, id);
+  if (source?.agentOrigin === "SCP_CATALOG" && source.sourceAgentId != null) {
+    return getCentralSCPAgentCredentials(Number(source.sourceAgentId));
+  }
   return {
     manusAccount: agent.manusAccount,
     manusToken: agent.manusToken ? decryptCredential(agent.manusToken) : null,
   };
+}
+
+/** Checks central credential availability without loading or decrypting the secret. */
+export async function hasManusCredentialsForAgent(id: number) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+  const source = await getAgentCredentialSource(database, id);
+  if (source?.agentOrigin === "SCP_CATALOG" && source.sourceAgentId != null) {
+    const client = await getCentralSCPClient();
+    const [row] = await client`
+      SELECT ("manusToken" IS NOT NULL AND length("manusToken") > 0) AS "hasCredential"
+      FROM sofia.agents
+      WHERE id = ${Number(source.sourceAgentId)}
+      LIMIT 1
+    `;
+    return Boolean(row?.hasCredential);
+  }
+  const [agent] = await database.select({ manusToken: agents.manusToken })
+    .from(agents).where(eq(agents.id, id)).limit(1);
+  return Boolean(agent?.manusToken);
 }
 export async function updateAgentStatus(id: number, status: "online" | "offline" | "idle" | "paused") {
   const db = await getDb();
