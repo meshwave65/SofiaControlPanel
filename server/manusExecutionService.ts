@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import * as db from "./db";
 import { validateMissionBlueprintContent } from "./missionBlueprint";
+import { mirrorMissionToGitHub } from "./githubMissionMirror";
 
 const MANUS_API_BASE = "https://api.manus.ai/v2";
 const REQUEST_TIMEOUT_MS = 30_000;
@@ -252,13 +253,15 @@ function assistantText(message: ManusMessageEvent) {
 type MissionAgentUpdateResult = {
   updatedDocuments: number;
   executionComplete: boolean;
+  completionRequested: boolean;
+  githubSyncComplete: boolean;
 };
 
 const AGENT_WRITABLE_DOCUMENT_TYPES = new Set(["BLUEPRINT", "FR", "OR", "FOR", "CHECKPOINT", "HANDOFF"]);
 const DOCUMENT_STATES = new Set(["DRAFT", "READY", "ACTIVE", "PUBLISHED"]);
 
 async function persistMissionAgentUpdates(task: NonNullable<LocalTask>): Promise<MissionAgentUpdateResult> {
-  if (!task.agentId) return { updatedDocuments: 0, executionComplete: false };
+  if (!task.agentId) return { updatedDocuments: 0, executionComplete: false, completionRequested: false, githubSyncComplete: false };
   const messages = await listManusMessages(task);
   const missionRootId = await db.getMissionRootTaskId(task.id);
   if (missionRootId == null) throw new Error("Não foi possível resolver a missão raiz para persistir os artefatos do agente.");
@@ -413,8 +416,14 @@ async function persistMissionAgentUpdates(task: NonNullable<LocalTask>): Promise
     }
   }
 
+  const mirror = await mirrorMissionToGitHub(task.id);
+  const githubSyncComplete = mirror.status === "synced";
+  if (!githubSyncComplete) {
+    console.warn(`[Manus] Espelhamento GitHub pendente para a missão ${task.id}:`, mirror.error ?? mirror.status);
+  }
+
   if (!completionCandidate || completionCandidate.execution_complete !== true) {
-    return { updatedDocuments, executionComplete: false };
+    return { updatedDocuments, executionComplete: false, completionRequested: false, githubSyncComplete };
   }
 
   const planStepIds = Array.isArray(completionCandidate.plan_step_ids)
@@ -433,7 +442,12 @@ async function persistMissionAgentUpdates(task: NonNullable<LocalTask>): Promise
     && latestByKey.get("BLUEPRINT")?.latestVersion?.state === "READY"
     && ["ACTIVE", "PUBLISHED"].includes(latestByKey.get("FR")?.latestVersion?.state)
     && ["ACTIVE", "PUBLISHED"].includes(latestByKey.get("FOR")?.latestVersion?.state);
-  return { updatedDocuments, executionComplete: allStepsComplete && requiredArtifactsExist };
+  return {
+    updatedDocuments,
+    executionComplete: allStepsComplete && requiredArtifactsExist && githubSyncComplete,
+    completionRequested: true,
+    githubSyncComplete,
+  };
 }
 
 function assistantSignature(message: ManusMessageEvent, text: string) {
@@ -616,7 +630,12 @@ async function syncRunningTask(task: NonNullable<LocalTask>) {
     return { taskId: task.id, manusStatus: "manual_pause_pending", creditsUsed: externalTask.credit_usage ?? null };
   }
 
-  let agentUpdate: MissionAgentUpdateResult = { updatedDocuments: 0, executionComplete: false };
+  let agentUpdate: MissionAgentUpdateResult = {
+    updatedDocuments: 0,
+    executionComplete: false,
+    completionRequested: false,
+    githubSyncComplete: false,
+  };
   try {
     agentUpdate = await persistMissionAgentUpdates(task);
     if (agentUpdate.updatedDocuments > 0) {
@@ -633,8 +652,26 @@ async function syncRunningTask(task: NonNullable<LocalTask>) {
     // Terminal externo sozinho não prova conclusão; também pode indicar esgotamento de créditos.
     if (externalTask.has_running_background_jobs !== false) return null;
 
+    if (agentUpdate.completionRequested && !agentUpdate.githubSyncComplete) {
+      await db.updateTaskExecution(task.id, {
+        manusStatus: "github_sync_pending",
+        creditsUsed: typeof externalTask.credit_usage === "number" ? externalTask.credit_usage : undefined,
+        completedAt: null,
+      });
+      await db.updateTaskStatus(task.id, await db.getTaskStatusIdByName("PAUSED"));
+      return { taskId: task.id, manusStatus: "github_sync_pending", creditsUsed: externalTask.credit_usage ?? null };
+    }
+
     if (agentUpdate.executionComplete) {
       isDone = true;
+    } else if (!agentUpdate.githubSyncComplete) {
+      await db.updateTaskExecution(task.id, {
+        manusStatus: "github_sync_pending",
+        creditsUsed: typeof externalTask.credit_usage === "number" ? externalTask.credit_usage : undefined,
+        completedAt: null,
+      });
+      await db.updateTaskStatus(task.id, await db.getTaskStatusIdByName("PAUSED"));
+      return { taskId: task.id, manusStatus: "github_sync_pending", creditsUsed: externalTask.credit_usage ?? null };
     } else {
       let knownCredits: number | null = null;
       try {
