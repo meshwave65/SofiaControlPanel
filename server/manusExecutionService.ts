@@ -57,7 +57,14 @@ export async function createManusTask(task: NonNullable<LocalTask>, continuation
     : await db.getMissionDocumentsForTask(missionRootId, task.createdBy, false);
   const missionContext = await Promise.all(missionDocs.map(async (document: any) => {
     if (!document.latestVersion) {
-      return { type: document.typeKey, key: document.documentKey, version: null, state: null, content: null };
+      return {
+        type: document.typeKey,
+        key: document.documentKey,
+        version: null,
+        state: null,
+        sourceDocumentVersionId: null,
+        content: null,
+      };
     }
     const stored = await db.getMissionDocumentVersionForTask(
       missionRootId!,
@@ -71,15 +78,30 @@ export async function createManusTask(task: NonNullable<LocalTask>, continuation
       key: document.documentKey,
       version: document.latestVersion.version,
       state: document.latestVersion.state,
+      sourceDocumentVersionId: document.latestVersion.sourceDocumentVersionId ?? null,
       content: stored?.version?.content?.slice(0, 16000) ?? null,
     };
   }));
+  const currentTR = missionContext.find((document: any) => document.type === "TR" && document.key === "TR");
+  const currentBP = missionContext.find((document: any) => document.type === "BLUEPRINT" && document.key === "BLUEPRINT");
+  const currentFR = missionContext.find((document: any) => document.type === "FR" && document.key === "FR");
+  const currentFOR = missionContext.find((document: any) => document.type === "FOR" && document.key === "FOR");
+  const missionInventoryCheck = {
+    missionKind: currentBP ? "CONTINUIDADE" : "NOVA MISSÃO",
+    trValidated: Boolean(currentTR && ["VALIDATED", "ACTIVE", "REORIENTED"].includes(currentTR.state)),
+    frLinkedToCurrentTR: Boolean(currentFR && currentFR.sourceDocumentVersionId === currentTR?.sourceDocumentVersionId),
+    bpLinkedToCurrentTR: currentBP ? currentBP.sourceDocumentVersionId === currentTR?.sourceDocumentVersionId : null,
+    existingORCount: missionContext.filter((document: any) => document.type === "OR").length,
+    forPresent: Boolean(currentFOR),
+    checkpointPresent: missionContext.some((document: any) => document.type === "CHECKPOINT"),
+    handoffCount: missionContext.filter((document: any) => document.type === "HANDOFF").length,
+  };
 
   const workflowInstructions = [
     "PROTOCOLO OBRIGATÓRIO DE MISSÃO SOFIA:",
     "1. Sua primeira ação é conferir o inventário documental recebido, as versões e a vinculação do TR. Registre no checklist se é NOVA MISSÃO ou CONTINUIDADE.",
     "2. Em uma nova missão, não invente BP, OR ou FOR anteriores. O TR aprovado e o FR draft são a base inicial. Prepare o BP a partir do TR e emita o primeiro CHECKPOINT e HANDOFF antes de iniciar as etapas.",
-    "3. O BP é criado pelo agente executor após a delegação. Depois de criado, não altere BP nem TR durante a execução.",
+    "3. O BP é criado pelo agente executor após a delegação. Se já existir BP mas o vínculo de versão com o TR vigente estiver inconsistente, reprepare e versiona o BP antes de executar qualquer etapa. Depois de alinhado ao TR vigente, não altere BP nem TR durante a execução.",
     "4. Execute sequencialmente todas as etapas do BP. Antes de cada etapa, revise TR, BP, FR, FOR e o OR da etapa anterior; confirme o objetivo e os critérios de aceite da etapa atual.",
     "5. Ao concluir cada etapa, produza um OR próprio daquela etapa, atualize o FR com a evolução e os resultados, atualize o FOR com problemas, soluções e aprendizados operacionais, e grave CHECKPOINT e HANDOFF para a próxima etapa.",
     "6. Continue para a etapa seguinte sem aguardar aprovação adicional. Não encerre a missão enquanto houver etapa pendente.",
