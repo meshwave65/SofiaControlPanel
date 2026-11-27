@@ -106,12 +106,13 @@ export class SofiaOrchestrator {
   static async resumeCreditBlockedTasks() {
     const allTasks = await db.getAllTasksGlobal();
     const waiting = allTasks.filter((task) => task.manusStatus === "waiting_credit" && task.agentId);
-    const [agents, progressStatusId] = await Promise.all([
+    const [agents, progressStatusId, stagedStatusId] = await Promise.all([
       db.getAllAgentsGlobal(),
       db.getTaskStatusIdByName(STATUS_PROGRESS),
+      db.getTaskStatusIdByName("STAGED"),
     ]);
     const activeAgentIds = new Set<number>(allTasks
-      .filter((item) => item.statusId === progressStatusId && item.agentId)
+      .filter((item) => [progressStatusId, stagedStatusId].includes(item.statusId) && item.agentId)
       .map((item) => Number(item.agentId)));
     const results: Array<{ taskId: number; action: string; agentId: number }> = [];
     for (const task of waiting) {
@@ -128,7 +129,16 @@ export class SofiaOrchestrator {
         // Preserve the last known balance. Unknown is not treated as positive or exhausted.
         console.warn(`[Orchestrator] Consulta de créditos indisponível para o agente atual ${current.id}; mantendo o último saldo conhecido.`);
       }
-      if (currentCredits !== null && currentCredits > 0 && task.manusTaskId) {
+      const currentCanResume = currentCredits !== null
+        && currentCredits > 0
+        && Boolean(task.manusTaskId)
+        && current.status === "online"
+        && ["configured", "connected"].includes(current.connectionStatus)
+        && current.hasCredential === true
+        && current.centralSourceAvailable !== false
+        && !current.centralBusy
+        && !activeAgentIds.has(current.id);
+      if (currentCanResume) {
         await sendManusMessage(task, "Os créditos foram restaurados. Continue a missão a partir do último checkpoint, sem repetir o trabalho concluído.");
         await db.updateTaskExecution(task.id, { manusStatus: "running", completedAt: null });
         await db.updateTaskStatus(task.id, progressStatusId);
@@ -138,9 +148,10 @@ export class SofiaOrchestrator {
         results.push({ taskId: task.id, action: task.agentPinned ? "resumed_pinned_agent" : "resumed_agent", agentId: current.id });
         continue;
       }
-      if (currentCredits === null || currentCredits > 0) continue;
+      if (currentCredits === null) continue;
 
-      // A exaustão libera a missão para transferência, mesmo quando havia agente fixado.
+      // A exaustão ou indisponibilidade do agente atual libera a missão para transferência,
+      // mesmo quando havia agente fixado.
       const replacements = agents.filter((agent) =>
         agent.id !== current.id
         && agent.ownerId === task.createdBy
@@ -149,6 +160,7 @@ export class SofiaOrchestrator {
         && agent.hasCredential === true
         && agent.centralSourceAvailable !== false
         && !activeAgentIds.has(agent.id)
+        && !agent.centralBusy
       );
       const checkpoint = await getManusCheckpoint(task).catch(() => "");
       let transferred = false;
