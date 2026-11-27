@@ -321,11 +321,10 @@ async function persistMissionAgentUpdates(task: NonNullable<LocalTask>): Promise
         const existing = documents.find((document: any) => document.documentKey === documentKey);
         // BP is created by the assigned agent once. The execution lifecycle never revises BP or TR.
         if (typeKey === "BLUEPRINT" && existing) continue;
-        const state = DOCUMENT_STATES.has(String(item.state || "").toUpperCase())
-          ? String(item.state).toUpperCase()
-          : typeKey === "BLUEPRINT" ? "READY"
-            : typeKey === "OR" || typeKey === "CHECKPOINT" || typeKey === "HANDOFF" ? "PUBLISHED"
-              : "DRAFT";
+        const requestedState = String(item.state || "").toUpperCase();
+        const state = typeKey === "BLUEPRINT" || typeKey === "OR" || typeKey === "CHECKPOINT" || typeKey === "HANDOFF"
+          ? (typeKey === "BLUEPRINT" ? "READY" : "PUBLISHED")
+          : DOCUMENT_STATES.has(requestedState) ? requestedState : "DRAFT";
         const contentHash = createHash("sha256").update(content, "utf8").digest("hex");
         if (existing?.latestVersion) {
           const latest = await db.getMissionDocumentVersionForTask(
