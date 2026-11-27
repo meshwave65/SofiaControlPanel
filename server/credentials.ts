@@ -2,8 +2,7 @@ import crypto from "node:crypto";
 
 const PREFIX = "v1";
 
-function getKey() {
-  const secret = process.env.CREDENTIAL_ENCRYPTION_KEY;
+function getKey(secret = process.env.CREDENTIAL_ENCRYPTION_KEY) {
   if (!secret) throw new Error("CREDENTIAL_ENCRYPTION_KEY is required to store agent credentials");
   return crypto.createHash("sha256").update(secret).digest();
 }
@@ -17,7 +16,7 @@ export function encryptCredential(value?: string | null) {
   return [PREFIX, iv.toString("base64url"), tag.toString("base64url"), ciphertext.toString("base64url")].join(".");
 }
 
-export function decryptCredential(value?: string | null) {
+export function decryptCredential(value?: string | null, encryptionKey?: string) {
   if (!value) return value ?? null;
 
   const [prefix, ivEncoded, tagEncoded, ciphertextEncoded, ...extra] = value.split(".");
@@ -33,7 +32,7 @@ export function decryptCredential(value?: string | null) {
       throw new Error("Invalid encrypted credential parameters");
     }
 
-    const decipher = crypto.createDecipheriv("aes-256-gcm", getKey(), iv);
+    const decipher = crypto.createDecipheriv("aes-256-gcm", getKey(encryptionKey), iv);
     decipher.setAuthTag(tag);
     return Buffer.concat([decipher.update(ciphertext), decipher.final()]).toString("utf8");
   } catch {
