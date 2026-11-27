@@ -133,6 +133,35 @@ ${version.content || ""}
 `;
 }
 
+/** Mirrors mission metadata and every latest document version, then records combined sync state. */
+export async function mirrorMissionToGitHub(taskId: number) {
+  const task = await db.getTaskById(taskId);
+  if (!task) throw new Error(`Missão ${taskId} não encontrada para espelhamento.`);
+  const [taskMirror, documentMirror] = await Promise.all([
+    mirrorTaskToGitHub(task),
+    mirrorMissionDocumentsToGitHub(taskId, task.createdBy),
+  ]);
+  const status = taskMirror.status === "synced" && documentMirror.status === "synced"
+    ? "synced"
+    : taskMirror.status === "not_configured" || documentMirror.status === "not_configured"
+      ? "not_configured"
+      : "failed";
+  const errors = [taskMirror.error, ...documentMirror.errors].filter(Boolean);
+  await db.updateTaskGitHubSync(taskId, {
+    missionKey: taskMirror.missionKey,
+    githubPath: taskMirror.path,
+    githubSha: taskMirror.sha,
+    githubSyncStatus: status,
+    githubSyncError: errors.length ? errors.join("; ").slice(0, 1000) : null,
+  });
+  return {
+    ...taskMirror,
+    status,
+    error: errors.length ? errors.join("; ").slice(0, 1000) : undefined,
+    mirroredDocumentCount: documentMirror.count,
+  };
+}
+
 /** Mirrors the latest version of every mission artifact without copying secrets. */
 export async function mirrorMissionDocumentsToGitHub(taskId: number, ownerId?: number): Promise<MissionDocumentsMirrorResult> {
   if (!ENV.githubPat) {
