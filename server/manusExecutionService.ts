@@ -558,6 +558,15 @@ export async function syncAllAgentCredits() {
   return results;
 }
 
+async function updateTaskStatusAndMirror(taskId: number, statusId: number) {
+  await db.updateTaskStatus(taskId, statusId);
+  try {
+    await mirrorMissionToGitHub(taskId);
+  } catch (error) {
+    console.warn(`[Manus] Não foi possível espelhar a mudança de status da missão ${taskId} no GitHub:`, error instanceof Error ? error.message : error);
+  }
+}
+
 async function syncRunningTask(task: NonNullable<LocalTask>) {
   if (!task.agentId || !task.manusTaskId) return null;
   const credentials = await db.getManusCredentialsForAgent(task.agentId);
@@ -580,7 +589,7 @@ async function syncRunningTask(task: NonNullable<LocalTask>) {
         manusStatus: "running",
         completedAt: null,
       });
-      await db.updateTaskStatus(task.id, progressStatusId);
+      await updateTaskStatusAndMirror(task.id, progressStatusId);
       return { taskId: task.id, manusStatus: "running", creditsUsed: externalTask.credit_usage ?? null };
     }
     if (normalizedStatus === "error") {
@@ -589,7 +598,7 @@ async function syncRunningTask(task: NonNullable<LocalTask>) {
         manusStatus: "error",
         completedAt: new Date(),
       });
-      await db.updateTaskStatus(task.id, failStatusId);
+      await updateTaskStatusAndMirror(task.id, failStatusId);
       return { taskId: task.id, manusStatus: "error", creditsUsed: externalTask.credit_usage ?? null };
     }
     await db.updateTaskExecution(task.id, {
@@ -610,7 +619,7 @@ async function syncRunningTask(task: NonNullable<LocalTask>) {
         creditsUsed: typeof externalTask.credit_usage === "number" ? externalTask.credit_usage : undefined,
         completedAt: null,
       });
-      await db.updateTaskStatus(task.id, pausedStatusId);
+      await updateTaskStatusAndMirror(task.id, pausedStatusId);
       return { taskId: task.id, manusStatus: "stopped", creditsUsed: externalTask.credit_usage ?? null };
     }
     if (normalizedStatus === "error") {
@@ -619,7 +628,7 @@ async function syncRunningTask(task: NonNullable<LocalTask>) {
         manusStatus: "error",
         completedAt: new Date(),
       });
-      await db.updateTaskStatus(task.id, failStatusId);
+      await updateTaskStatusAndMirror(task.id, failStatusId);
       return { taskId: task.id, manusStatus: "error", creditsUsed: externalTask.credit_usage ?? null };
     }
     await db.updateTaskExecution(task.id, {
@@ -658,7 +667,7 @@ async function syncRunningTask(task: NonNullable<LocalTask>) {
         creditsUsed: typeof externalTask.credit_usage === "number" ? externalTask.credit_usage : undefined,
         completedAt: null,
       });
-      await db.updateTaskStatus(task.id, await db.getTaskStatusIdByName("PAUSED"));
+      await updateTaskStatusAndMirror(task.id, await db.getTaskStatusIdByName("PAUSED"));
       return { taskId: task.id, manusStatus: "github_sync_pending", creditsUsed: externalTask.credit_usage ?? null };
     }
 
@@ -670,7 +679,7 @@ async function syncRunningTask(task: NonNullable<LocalTask>) {
         creditsUsed: typeof externalTask.credit_usage === "number" ? externalTask.credit_usage : undefined,
         completedAt: null,
       });
-      await db.updateTaskStatus(task.id, await db.getTaskStatusIdByName("PAUSED"));
+      await updateTaskStatusAndMirror(task.id, await db.getTaskStatusIdByName("PAUSED"));
       return { taskId: task.id, manusStatus: "github_sync_pending", creditsUsed: externalTask.credit_usage ?? null };
     } else {
       let knownCredits: number | null = null;
@@ -688,7 +697,7 @@ async function syncRunningTask(task: NonNullable<LocalTask>) {
           creditsUsed: typeof externalTask.credit_usage === "number" ? externalTask.credit_usage : undefined,
           completedAt: null,
         });
-        await db.updateTaskStatus(task.id, await db.getTaskStatusIdByName("PAUSED"));
+        await updateTaskStatusAndMirror(task.id, await db.getTaskStatusIdByName("PAUSED"));
         return { taskId: task.id, manusStatus: "completion_check_pending", creditsUsed: externalTask.credit_usage ?? null };
       }
 
@@ -704,7 +713,7 @@ async function syncRunningTask(task: NonNullable<LocalTask>) {
           creditsUsed: typeof externalTask.credit_usage === "number" ? externalTask.credit_usage : undefined,
           completedAt: null,
         });
-        await db.updateTaskStatus(task.id, await db.getTaskStatusIdByName("PAUSED"));
+        await updateTaskStatusAndMirror(task.id, await db.getTaskStatusIdByName("PAUSED"));
         return { taskId: task.id, manusStatus: "execution_interrupted", creditsUsed: externalTask.credit_usage ?? null };
       }
     }
@@ -719,7 +728,7 @@ async function syncRunningTask(task: NonNullable<LocalTask>) {
     completedAt: isDone || isFailed ? new Date() : waitingForCredits ? null : undefined,
   });
   if (doneStatusId || failStatusId || pausedStatusId) {
-    await db.updateTaskStatus(task.id, doneStatusId || failStatusId || pausedStatusId!);
+    await updateTaskStatusAndMirror(task.id, doneStatusId || failStatusId || pausedStatusId!);
   }
 
   return { taskId: task.id, manusStatus: waitingForCredits ? "waiting_credit" : normalizedStatus, creditsUsed: externalTask.credit_usage ?? null };
