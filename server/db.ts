@@ -200,7 +200,12 @@ export async function createAgent(data: {
 
 function toPublicAgent(agent: any) {
   const { manusPassword, manusToken, ...safe } = agent;
-  return { ...safe, hasCredential: Boolean(manusPassword || manusToken) };
+  return {
+    ...safe,
+    hasCredential: typeof agent.hasCredential === "boolean"
+      ? agent.hasCredential
+      : Boolean(manusPassword || manusToken),
+  };
 }
 
 /**
