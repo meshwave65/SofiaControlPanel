@@ -1248,24 +1248,50 @@ export const appRouter = router({
             publishedAt: new Date(),
           },
         });
-        try {
-          await persistMissionBlueprint({
-            taskId: input.taskId, ownerId: ctx.user.id, canViewAll: false,
-            title: task.title, trVersionId: validated.id, trVersionNumber: validated.version,
-            trContent: current.version.content,
+        const frContent = [
+          "# FR — Final Report",
+          "",
+          "## Objetivo da missão",
+          `Missão: ${task.title}`,
+          "Objetivo e critérios de resultado conforme o TR aprovado, versão " + validated.version + ".",
+          "",
+          "## Desenvolvimento e evolução",
+          "Relatório iniciado após a aprovação do TR. O agente executor atualizará esta seção conforme a missão evoluir.",
+          "",
+          "## Resultados alcançados",
+          "A apurar e registrar durante a execução, com foco no resultado em relação ao objetivo da missão.",
+          "",
+          "## Conclusão",
+          "Pendente de encerramento da missão.",
+        ].join("\n");
+        const fr = docs.find((document) => document.typeKey === "FR" && document.documentKey === "FR");
+        if (fr) {
+          await db.createMissionDocumentRevision({
+            taskId: input.taskId, documentId: fr.id, ownerId: ctx.user.id, canViewAll: false,
+            version: {
+              content: frContent, state: "DRAFT", authorType: "SOFIA",
+              sourceDocumentVersionId: validated.id,
+              provenance: { origin: "TR_APPROVAL", sourceTRVersion: validated.version },
+              changeSummary: "FR atualizado para refletir a nova versão aprovada do TR",
+            },
           });
-        } catch (error) {
-          throw new TRPCError({
-            code: "PRECONDITION_FAILED",
-            message: "TR validado, mas o Blueprint não foi gerado. A missão permanece PAUSED; tente gerar o Blueprint novamente. " + (error instanceof Error ? error.message : ""),
-            cause: error,
+        } else {
+          await db.createMissionDocumentWithVersion({
+            taskId: input.taskId, ownerId: ctx.user.id, canViewAll: false,
+            typeKey: "FR", documentKey: "FR", title: "FR — " + task.title,
+            version: {
+              content: frContent, state: "DRAFT", authorType: "SOFIA",
+              sourceDocumentVersionId: validated.id,
+              provenance: { origin: "TR_APPROVAL", sourceTRVersion: validated.version },
+              changeSummary: "FR inicial criado após a aprovação do TR",
+            },
           });
         }
         if (!(await db.hasExecutionReadyMissionDocuments(input.taskId))) {
-          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O Blueprint não passou pela verificação de vínculo com a versão vigente do TR." });
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A versão vigente do TR não está validada." });
         }
         await db.updateTaskStatus(input.taskId, stagedStatusId);
-        return { validatedVersion: validated.version, statusId: stagedStatusId };
+        return { validatedVersion: validated.version, frCreatedOrUpdated: true, statusId: stagedStatusId };
       }),
       generateBlueprint: protectedProcedure.input(z.object({ taskId: z.number().int().positive() })).mutation(async ({ input, ctx }) => {
         const task = await db.getTaskById(input.taskId);
