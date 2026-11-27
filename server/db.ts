@@ -470,10 +470,16 @@ export async function createMissionWithInitialDocuments(input: {
   const isSystemMission = input.task.creatorType === "system";
 
   return database.transaction(async (transaction) => {
+    const [pausedStatus] = isSystemMission
+      ? await transaction.select({ id: taskStatuses.id }).from(taskStatuses).where(eq(taskStatuses.name, "PAUSED")).limit(1)
+      : [null];
+    if (isSystemMission && !pausedStatus) throw new Error("PAUSED task status is missing");
+
     const [insertedTask] = await transaction
       .insert(tasks)
       .values({
         ...input.task,
+        statusId: isSystemMission ? pausedStatus!.id : input.task.statusId,
         creatorType: input.task.creatorType ?? "user",
         agentPinned: input.task.agentPinned ?? input.task.agentId !== undefined,
       })
