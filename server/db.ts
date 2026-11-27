@@ -2120,7 +2120,19 @@ export async function hasExecutionReadyMissionDocuments(taskId: number): Promise
     .orderBy(desc(missionDocumentVersions.version))
     .limit(1);
 
-  return Boolean(tr && ["VALIDATED", "ACTIVE", "REORIENTED"].includes(tr.state));
+  if (!tr || !["VALIDATED", "ACTIVE", "REORIENTED"].includes(tr.state)) return false;
+  const [fr] = await database
+    .select({ id: missionDocuments.id })
+    .from(missionDocuments)
+    .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
+    .where(and(
+      eq(missionDocuments.taskId, missionId),
+      eq(missionDocuments.documentKey, "FR"),
+      eq(missionDocumentTypes.typeKey, "FR"),
+      eq(missionDocumentTypes.isActive, true),
+    ))
+    .limit(1);
+  return Boolean(fr);
 }
 
 
