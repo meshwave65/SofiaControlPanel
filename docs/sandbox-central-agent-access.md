@@ -22,4 +22,6 @@ O usuário PostgreSQL precisa apenas de `USAGE` no schema `sofia` e `SELECT` na 
 
 Se a conexão central ou a chave de descriptografia estiver ausente, os agentes SCP_CATALOG não entram na lista de elegíveis. O inventário local continua visível como projeção, mas não é tratado como fonte de credenciais.
 
+O espelhamento dos documentos e das transições da missão também exige `GITHUB_PAT` no serviço Sandbox. Sem esse segredo, o trabalho pode ser persistido no Supabase, mas a missão permanece em `github_sync_pending` e não é marcada como `DONE` até o espelhamento ser concluído.
+
 A lista de elegíveis é atualizada a cada 60 segundos. A reserva de um agente para uma missão continua sendo validada atomicamente no banco do Sandbox.
