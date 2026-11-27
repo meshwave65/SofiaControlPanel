@@ -1057,7 +1057,7 @@ export async function claimStagedTaskWithAvailableAgent(
           JOIN sandbox."taskStatuses" active_status ON active_status.id = active_task."statusId"
           WHERE active_task."agentId" = a.id
             AND active_task.id <> ${taskId}
-            AND active_status.name = 'PROGRESS'
+            AND active_status.name IN ('PROGRESS', 'STAGED')
         )
       ORDER BY a."creditsRemaining"::numeric DESC, a."creditsUpdatedAt" ASC NULLS FIRST, a.id
       FOR UPDATE OF a SKIP LOCKED
