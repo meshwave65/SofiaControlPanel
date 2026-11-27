@@ -231,12 +231,23 @@ export async function getAgentInventorySnapshot() {
       const client = await getCentralSCPClient();
       const centralRows = await client`
         SELECT
-          id, name, description, status::text AS status, version, "manusAccount",
-          "lastHeartbeat", "connectionStatus", "connectionError",
-          "creditsRemaining", "creditsUpdatedAt",
-          ("manusToken" IS NOT NULL AND length("manusToken") > 0) AS "hasCredential"
-        FROM sofia.agents
-        WHERE id = ANY(${client.array(sourceIds, "int4")})
+          a.id, a.name, a.description, a.status::text AS status, a.version, a."manusAccount",
+          a."lastHeartbeat", a."connectionStatus", a."connectionError",
+          a."creditsRemaining", a."creditsUpdatedAt",
+          (a."manusToken" IS NOT NULL AND length(a."manusToken") > 0) AS "hasCredential",
+          COALESCE(occupancy."activeTaskCount", 0)::int AS "activeTaskCount",
+          COALESCE(occupancy."activeTaskIds", ARRAY[]::int[]) AS "activeTaskIds"
+        FROM sofia.agents a
+        LEFT JOIN LATERAL (
+          SELECT
+            COUNT(*)::int AS "activeTaskCount",
+            ARRAY_AGG(t.id ORDER BY t.id) AS "activeTaskIds"
+          FROM sofia.tasks t
+          INNER JOIN sofia."taskStatuses" s ON s.id = t."statusId"
+          WHERE t."agentId" = a.id
+            AND s.name IN ('PROGRESS', 'STAGED')
+        ) occupancy ON TRUE
+        WHERE a.id = ANY(${client.array(sourceIds, "int4")})
       `;
       centralById = new Map(centralRows.map((agent: any) => [Number(agent.id), agent]));
     } catch (error) {
@@ -299,6 +310,9 @@ export async function getAgentInventorySnapshot() {
           connectionError: local.connectionError || central.connectionError,
           creditsRemaining,
           creditsUpdatedAt,
+          centralActiveTaskCount: Number(central.activeTaskCount ?? 0),
+          centralActiveTaskIds: central.activeTaskIds ?? [],
+          centralBusy: Number(central.activeTaskCount ?? 0) > 0,
         } : {}),
         hasCredential: Boolean(central?.hasCredential && process.env.CENTRAL_SCP_CREDENTIAL_ENCRYPTION_KEY),
         centralSourceAvailable: Boolean(central),
