@@ -9,7 +9,7 @@ import { SofiaOrchestrator } from "./sofiaOrchestrator";
 import { TRPCError } from "@trpc/server";
 import { getConsolidatedTaskReport, uploadConsolidatedTaskReport } from "./controlPanelStorage";
 import { resumeManusTask, sendManusMessageAndWait, stopManusTask, syncAgentCredits } from "./manusExecutionService";
-import { mirrorTaskToGitHub } from "./githubMissionMirror";
+import { mirrorMissionToGitHub, mirrorTaskToGitHub } from "./githubMissionMirror";
 import { invokeLLM } from "./_core/llm";
 import { buildSofiaConversation, buildSofiaGeneralConversation, extractTextContent, normalizeOperatorMessage, OPERATOR_MESSAGE_MAX_LENGTH, SOFIA_MESSAGE_TOOLS, SOFIA_GENERAL_MESSAGE_TOOLS } from "./messageService";
 import { validateMissionBlueprintContent } from "./missionBlueprint";
@@ -1297,7 +1297,16 @@ export const appRouter = router({
           throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A versão vigente do TR não está validada." });
         }
         await db.updateTaskStatus(input.taskId, stagedStatusId);
-        return { validatedVersion: validated.version, frCreatedOrUpdated: true, statusId: stagedStatusId };
+        const githubMirror = await mirrorMissionToGitHub(input.taskId);
+        if (githubMirror.status !== "synced") {
+          console.warn(`[TR] Espelhamento GitHub pendente para a missão ${input.taskId}:`, githubMirror.error ?? githubMirror.status);
+        }
+        return {
+          validatedVersion: validated.version,
+          frCreatedOrUpdated: true,
+          statusId: stagedStatusId,
+          githubSyncStatus: githubMirror.status,
+        };
       }),
       generateBlueprint: protectedProcedure.input(z.object({ taskId: z.number().int().positive() })).mutation(async ({ input, ctx }) => {
         const task = await db.getTaskById(input.taskId);
