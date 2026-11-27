@@ -9,7 +9,7 @@ import { SofiaOrchestrator } from "./sofiaOrchestrator";
 import { TRPCError } from "@trpc/server";
 import { getConsolidatedTaskReport, uploadConsolidatedTaskReport } from "./controlPanelStorage";
 import { resumeManusTask, sendManusMessageAndWait, stopManusTask, syncAgentCredits } from "./manusExecutionService";
-import { mirrorMissionToGitHub, mirrorTaskToGitHub } from "./githubMissionMirror";
+import { mirrorMissionToGitHub } from "./githubMissionMirror";
 import { invokeLLM } from "./_core/llm";
 import { buildSofiaConversation, buildSofiaGeneralConversation, extractTextContent, normalizeOperatorMessage, OPERATOR_MESSAGE_MAX_LENGTH, SOFIA_MESSAGE_TOOLS, SOFIA_GENERAL_MESSAGE_TOOLS } from "./messageService";
 import { validateMissionBlueprintContent } from "./missionBlueprint";
@@ -127,19 +127,12 @@ async function createMissionFromGeneralMessage(input: {
   }
 
   try {
-    const mirror = await mirrorTaskToGitHub({
+    const mirror = await mirrorMissionToGitHub(created.id, {
       ...created,
       createdBy: input.operator.id,
       creatorType: "user",
       creatorName: input.operator.name ?? null,
       creatorEmail: input.operator.email ?? null,
-    });
-    await db.updateTaskGitHubSync(created.id, {
-      missionKey: mirror.missionKey,
-      githubPath: mirror.path,
-      githubSha: mirror.sha,
-      githubSyncStatus: mirror.status,
-      githubSyncError: mirror.error ?? null,
     });
     return {
       ...created,
@@ -1452,19 +1445,12 @@ export const appRouter = router({
 
         // GitHub mirroring is deliberately outside the DB transaction and occurs
         // only after the mission + mandatory source documents are safely persisted.
-        const mirror = await mirrorTaskToGitHub({
+        const mirror = await mirrorMissionToGitHub(created.id, {
           ...created,
           createdBy: ctx.user.id,
           creatorType: "user",
           creatorName: ctx.user.name,
           creatorEmail: ctx.user.email,
-        });
-        await db.updateTaskGitHubSync(created.id, {
-          missionKey: mirror.missionKey,
-          githubPath: mirror.path,
-          githubSha: mirror.sha,
-          githubSyncStatus: mirror.status,
-          githubSyncError: mirror.error ?? null,
         });
 
         return {
@@ -1534,17 +1520,7 @@ export const appRouter = router({
         }
         const result = await db.updateTaskStatus(input.id, input.statusId);
         if (task.missionKey) {
-          const mirror = await mirrorTaskToGitHub({
-            ...task,
-            statusId: input.statusId,
-          });
-          await db.updateTaskGitHubSync(input.id, {
-            missionKey: mirror.missionKey,
-            githubPath: mirror.path,
-            githubSha: mirror.sha,
-            githubSyncStatus: mirror.status,
-            githubSyncError: mirror.error ?? null,
-          });
+          await mirrorMissionToGitHub(input.id);
         }
         return result;
       }),
@@ -1581,14 +1557,7 @@ export const appRouter = router({
           await db.updateTaskExecution(task.id, { manusStatus: "stopped", completedAt: null });
           await db.updateTaskStatus(task.id, pausedStatusId);
           if (task.missionKey) {
-            const mirror = await mirrorTaskToGitHub({ ...task, statusId: pausedStatusId });
-            await db.updateTaskGitHubSync(task.id, {
-              missionKey: mirror.missionKey,
-              githubPath: mirror.path,
-              githubSha: mirror.sha,
-              githubSyncStatus: mirror.status,
-              githubSyncError: mirror.error ?? null,
-            });
+            await mirrorMissionToGitHub(task.id);
           }
         } else {
           await db.updateTaskExecution(task.id, { manusStatus: "manual_pause_pending", completedAt: null });
@@ -1649,14 +1618,7 @@ export const appRouter = router({
           await db.updateTaskExecution(task.id, { manusStatus: "running", completedAt: null });
           await db.updateTaskStatus(task.id, progressStatusId);
           if (task.missionKey) {
-            const mirror = await mirrorTaskToGitHub({ ...task, statusId: progressStatusId });
-            await db.updateTaskGitHubSync(task.id, {
-              missionKey: mirror.missionKey,
-              githubPath: mirror.path,
-              githubSha: mirror.sha,
-              githubSyncStatus: mirror.status,
-              githubSyncError: mirror.error ?? null,
-            });
+            await mirrorMissionToGitHub(task.id);
           }
         } else {
           await db.updateTaskExecution(task.id, { manusStatus: "manual_resume_pending", completedAt: null });
