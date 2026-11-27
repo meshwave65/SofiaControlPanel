@@ -151,6 +151,8 @@ export class SofiaOrchestrator {
         && agent.ownerId === task.createdBy
         && agent.status === "online"
         && ["configured", "connected"].includes(agent.connectionStatus)
+        && agent.hasCredential === true
+        && agent.centralSourceAvailable !== false
         && !activeAgentIds.has(agent.id)
       );
       const checkpoint = await getManusCheckpoint(task).catch(() => "");
