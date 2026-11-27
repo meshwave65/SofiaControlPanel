@@ -1,4 +1,5 @@
 import { ENV } from "./_core/env";
+import * as db from "./db";
 
 type MirrorTask = {
   id: number;
@@ -95,6 +96,113 @@ async function githubRequest<T>(url: string, init: RequestInit): Promise<{ respo
     }
   }
   return { response, body };
+}
+
+
+export type MissionDocumentsMirrorResult = {
+  status: "synced" | "not_configured" | "failed";
+  count: number;
+  errors: string[];
+};
+
+function missionDocumentMarkdown(document: any, version: any) {
+  const metadata = [
+    ["documentKey", document.documentKey],
+    ["type", document.typeKey],
+    ["version", version.version],
+    ["state", version.state],
+    ["authorType", version.authorType],
+    ["authorAgentId", version.authorAgentId ?? ""],
+    ["sourceDocumentVersionId", version.sourceDocumentVersionId ?? ""],
+    ["contentHash", version.contentHash ?? ""],
+    ["publishedAt", version.publishedAt ? new Date(version.publishedAt).toISOString() : ""],
+  ];
+  return `# ${markdownValue(document.title)}
+
+> Documento versionado da missão ${document.taskId}. O conteúdo-fonte e o histórico de versões permanecem no Supabase; este arquivo é o espelho versionado no GitHub.
+
+## Metadata
+
+| Campo | Valor |
+| --- | --- |
+${metadata.map(([key, value]) => `| ${markdownValue(key)} | ${markdownValue(value)} |`).join("\n")}
+
+## Content
+
+${version.content || ""}
+`;
+}
+
+/** Mirrors the latest version of every mission artifact without copying secrets. */
+export async function mirrorMissionDocumentsToGitHub(taskId: number, ownerId?: number): Promise<MissionDocumentsMirrorResult> {
+  if (!ENV.githubPat) {
+    return { status: "not_configured", count: 0, errors: ["GITHUB_PAT não configurado no Render."] };
+  }
+  const task = await db.getTaskById(taskId);
+  if (!task) return { status: "failed", count: 0, errors: [`Missão ${taskId} não encontrada.`] };
+  const missionRootId = await db.getMissionRootTaskId(taskId);
+  if (missionRootId == null) return { status: "failed", count: 0, errors: [`Missão raiz não encontrada para ${taskId}.`] };
+  const rootTask = missionRootId === task.id ? task : await db.getTaskById(missionRootId);
+  if (!rootTask) return { status: "failed", count: 0, errors: [`Missão raiz ${missionRootId} não encontrada.`] };
+  const documents = await db.getMissionDocumentsForTask(missionRootId, ownerId ?? rootTask.createdBy, false);
+  const missionKey = missionKeyFor(rootTask);
+  const errors: string[] = [];
+  let count = 0;
+
+  for (const document of documents as any[]) {
+    if (!document.latestVersion) continue;
+    const stored = await db.getMissionDocumentVersionForTask(
+      missionRootId,
+      document.id,
+      document.latestVersion.version,
+      ownerId ?? rootTask.createdBy,
+      false,
+    );
+    if (!stored?.version) continue;
+
+    const safeDocumentKey = String(document.documentKey).replace(/[^A-Za-z0-9_-]/g, "_");
+    const path = `missions/${missionKey}/documents/${safeDocumentKey}.md`;
+    const baseUrl = `https://api.github.com/repos/${encodeURIComponent(ENV.githubOwner)}/${encodeURIComponent(ENV.githubRepo)}/contents/${path.split("/").map(encodeURIComponent).join("/")}`;
+    const markdown = missionDocumentMarkdown(document, stored.version);
+    const content = Buffer.from(markdown, "utf8").toString("base64");
+
+    try {
+      const current = await githubRequest<{ sha?: string; content?: string; encoding?: string }>(
+        `${baseUrl}?ref=${encodeURIComponent(ENV.githubBranch)}`,
+        { method: "GET" },
+      );
+      if (current.response.ok && current.body?.content) {
+        const existing = Buffer.from(current.body.content.replace(/\s/g, ""), "base64").toString("utf8");
+        if (existing === markdown) {
+          count += 1;
+          continue;
+        }
+      } else if (!current.response.ok && current.response.status !== 404) {
+        errors.push(`${safeDocumentKey}: GET GitHub HTTP ${current.response.status}`);
+        continue;
+      }
+
+      const result = await githubRequest<{ content?: { sha?: string }; commit?: { sha?: string } }>(baseUrl, {
+        method: "PUT",
+        body: JSON.stringify({
+          message: `docs(mission): mirror ${missionKey} ${safeDocumentKey} v${stored.version.version}`,
+          content,
+          branch: ENV.githubBranch,
+          ...(current.response.ok && current.body?.sha ? { sha: current.body.sha } : {}),
+        }),
+      });
+      if (!result.response.ok) {
+        const detail = result.body ? JSON.stringify(result.body) : `HTTP ${result.response.status}`;
+        errors.push(`${safeDocumentKey}: ${detail.slice(0, 500)}`);
+        continue;
+      }
+      count += 1;
+    } catch (error) {
+      errors.push(`${safeDocumentKey}: ${error instanceof Error ? error.message : "falha desconhecida"}`);
+    }
+  }
+
+  return { status: errors.length ? "failed" : "synced", count, errors };
 }
 
 export async function mirrorTaskToGitHub(task: MirrorTask): Promise<MirrorResult> {
