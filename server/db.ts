@@ -308,6 +308,14 @@ export async function getAgentInventorySnapshot() {
       const creditsUpdatedAt = useLocalCreditSnapshot ? local.creditsUpdatedAt : central?.creditsUpdatedAt ?? null;
 
       if (central) {
+        // postgres-js expects string/buffer parameters here; normalize timestamps before binding.
+        const lastHeartbeatIso = central.lastHeartbeat
+          ? new Date(central.lastHeartbeat).toISOString()
+          : null;
+        const creditsUpdatedAtIso = creditsUpdatedAt
+          ? new Date(creditsUpdatedAt).toISOString()
+          : null;
+
         // Keep the Sandbox projection synchronized for atomic SQL claims. Never copy credential values.
         await database.execute(sql`
           UPDATE sandbox.agents
@@ -316,11 +324,11 @@ export async function getAgentInventorySnapshot() {
                  status = ${central.status},
                  version = ${central.version},
                  "manusAccount" = ${central.manusAccount},
-                 "lastHeartbeat" = ${central.lastHeartbeat},
+                 "lastHeartbeat" = ${lastHeartbeatIso}::timestamptz,
                  "connectionStatus" = ${central.connectionStatus},
                  "connectionError" = ${local.connectionError || central.connectionError},
                  "creditsRemaining" = ${creditsRemaining}::numeric,
-                 "creditsUpdatedAt" = ${creditsUpdatedAt}
+                 "creditsUpdatedAt" = ${creditsUpdatedAtIso}::timestamptz
            WHERE id = ${local.id}
              AND (
                name IS DISTINCT FROM ${central.name}
@@ -328,11 +336,11 @@ export async function getAgentInventorySnapshot() {
                OR status::text IS DISTINCT FROM ${central.status}
                OR version IS DISTINCT FROM ${central.version}
                OR "manusAccount" IS DISTINCT FROM ${central.manusAccount}
-               OR "lastHeartbeat" IS DISTINCT FROM ${central.lastHeartbeat}
+               OR "lastHeartbeat" IS DISTINCT FROM ${lastHeartbeatIso}::timestamptz
                OR "connectionStatus" IS DISTINCT FROM ${central.connectionStatus}
                OR "connectionError" IS DISTINCT FROM ${local.connectionError || central.connectionError}
                OR "creditsRemaining" IS DISTINCT FROM ${creditsRemaining}::numeric
-               OR "creditsUpdatedAt" IS DISTINCT FROM ${creditsUpdatedAt}
+               OR "creditsUpdatedAt" IS DISTINCT FROM ${creditsUpdatedAtIso}::timestamptz
              )
         `);
       }
