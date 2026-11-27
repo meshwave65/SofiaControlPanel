@@ -387,7 +387,7 @@ export class SofiaOrchestrator {
     }
     // A validação do TR autoriza a delegação; o agente prepara o BP após assumir a missão.
     if (!(await db.hasExecutionReadyMissionDocuments(taskId))) {
-      throw new Error("Execução bloqueada: a missão exige TR validado e Blueprint READY. Subtarefas herdam os documentos da missão principal.");
+      throw new Error("Delegação bloqueada: a missão exige TR vigente validado e FR inicial vinculado à versão aprovada.");
     }
     const progressStatusId = await db.getTaskStatusIdByName(STATUS_PROGRESS);
 
