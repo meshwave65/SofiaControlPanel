@@ -213,13 +213,24 @@ export async function getAgentInventorySnapshot() {
   if (!database) throw new Error("Database not available");
   const localRows = await database.execute(sql`
     SELECT
-      id, "ownerId", name, description, status::text AS status, version,
-      "manusAccount", "lastHeartbeat", "connectionStatus", "connectionError",
-      "creditsRemaining", "creditsUpdatedAt", "createdAt", "updatedAt",
-      "agentOrigin", "sourceAgentId",
-      ("manusToken" IS NOT NULL AND length("manusToken") > 0) AS "localHasCredential"
-    FROM sandbox.agents
-    ORDER BY id
+      a.id, a."ownerId", a.name, a.description, a.status::text AS status, a.version,
+      a."manusAccount", a."lastHeartbeat", a."connectionStatus", a."connectionError",
+      a."creditsRemaining", a."creditsUpdatedAt", a."createdAt", a."updatedAt",
+      a."agentOrigin", a."sourceAgentId",
+      (a."manusToken" IS NOT NULL AND length(a."manusToken") > 0) AS "localHasCredential",
+      COALESCE(local_occupancy."activeTaskCount", 0)::int AS "localActiveTaskCount",
+      COALESCE(local_occupancy."activeTaskIds", ARRAY[]::int[]) AS "localActiveTaskIds"
+    FROM sandbox.agents a
+    LEFT JOIN LATERAL (
+      SELECT
+        COUNT(*)::int AS "activeTaskCount",
+        ARRAY_AGG(t.id ORDER BY t.id) AS "activeTaskIds"
+      FROM sandbox.tasks t
+      INNER JOIN sandbox."taskStatuses" s ON s.id = t."statusId"
+      WHERE t."agentId" = a.id
+        AND s.name IN ('PROGRESS', 'STAGED')
+    ) local_occupancy ON TRUE
+    ORDER BY a.id
   `) as any[];
 
   const sourceIds = localRows
@@ -313,13 +324,33 @@ export async function getAgentInventorySnapshot() {
           centralActiveTaskCount: Number(central.activeTaskCount ?? 0),
           centralActiveTaskIds: central.activeTaskIds ?? [],
           centralBusy: Number(central.activeTaskCount ?? 0) > 0,
-        } : {}),
+          localActiveTaskCount: Number(local.localActiveTaskCount ?? 0),
+          localActiveTaskIds: local.localActiveTaskIds ?? [],
+          isBusy: Number(central.activeTaskCount ?? 0) > 0 || Number(local.localActiveTaskCount ?? 0) > 0,
+        } : {
+          centralActiveTaskCount: 0,
+          centralActiveTaskIds: [],
+          centralBusy: false,
+          localActiveTaskCount: Number(local.localActiveTaskCount ?? 0),
+          localActiveTaskIds: local.localActiveTaskIds ?? [],
+          isBusy: Number(local.localActiveTaskCount ?? 0) > 0,
+        }),
         hasCredential: Boolean(central?.hasCredential && process.env.CENTRAL_SCP_CREDENTIAL_ENCRYPTION_KEY),
         centralSourceAvailable: Boolean(central),
       });
       continue;
     }
-    inventory.push({ ...local, hasCredential: Boolean(local.localHasCredential), centralSourceAvailable: true });
+    inventory.push({
+      ...local,
+      hasCredential: Boolean(local.localHasCredential),
+      centralSourceAvailable: true,
+      centralActiveTaskCount: 0,
+      centralActiveTaskIds: [],
+      centralBusy: false,
+      localActiveTaskCount: Number(local.localActiveTaskCount ?? 0),
+      localActiveTaskIds: local.localActiveTaskIds ?? [],
+      isBusy: Number(local.localActiveTaskCount ?? 0) > 0,
+    });
   }
   return inventory;
 }
