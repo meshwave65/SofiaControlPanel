@@ -1021,7 +1021,8 @@ export async function inspectTaskAgentEligibility(taskId: number, ownerId: numbe
   candidates.sort((left: any, right: any) => {
     if (left.eligible !== right.eligible) return left.eligible ? -1 : 1;
     const creditDelta = Number(right.creditsRemaining ?? 0) - Number(left.creditsRemaining ?? 0);
-    if (creditDelta !== 0) return creditDelta;    const leftUpdated = left.creditsUpdatedAt ? new Date(left.creditsUpdatedAt).getTime() : Number.NEGATIVE_INFINITY;
+    if (creditDelta !== 0) return creditDelta;
+    const leftUpdated = left.creditsUpdatedAt ? new Date(left.creditsUpdatedAt).getTime() : Number.NEGATIVE_INFINITY;
     const rightUpdated = right.creditsUpdatedAt ? new Date(right.creditsUpdatedAt).getTime() : Number.NEGATIVE_INFINITY;
     return leftUpdated - rightUpdated || left.agentId - right.agentId;
   });
@@ -2020,7 +2021,8 @@ export async function reorientMissionTRBeforeExecution(input: {
   taskId: number;
   documentId: number;
   ownerId: number;
-  content: string;}) {
+  content: string;
+}) {
   const database = await getDb();
   if (!database) throw new Error("Database not available");
 
