@@ -2626,163 +2626,16 @@ export async function inspectTaskDispatchAuthorization(taskId: number): Promise<
   idempotencyKey: string | null;
   reason: string | null;
 }> {
-  const database = await getDb();
-  if (!database) throw new Error("Database not available");
-
-  const [relations] = await database.execute(sql`
-    SELECT
-      to_regclass('sandbox."missionDocuments"') IS NOT NULL AS documents_exist,
-      to_regclass('sandbox."missionActionUnits"') IS NOT NULL AS action_units_exist
-  `) as any;
-  if (!relations?.documents_exist) {
-    return { authorized: true, requiresActionPlanUnit: false, idempotencyKey: null, reason: null };
-  }
-
-  const missionId = await resolveMissionRootTaskId(database, taskId);
+  const missionId = await getMissionRootTaskId(taskId);
   if (missionId == null) {
     return { authorized: false, requiresActionPlanUnit: false, idempotencyKey: null, reason: "A missão raiz não pôde ser resolvida." };
   }
-
-  const [actionPlanDocument] = await database
-    .select({ id: missionDocuments.id })
-    .from(missionDocuments)
-    .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
-    .where(and(
-      eq(missionDocuments.taskId, missionId),
-      eq(missionDocuments.documentKey, "ACTION_PLAN"),
-      eq(missionDocumentTypes.typeKey, "ACTION_PLAN"),
-    ))
-    .limit(1);
-
-  if (!actionPlanDocument) {
-    return { authorized: true, requiresActionPlanUnit: false, idempotencyKey: null, reason: null };
-  }
-
-  const [latestPlan] = await database
-    .select({
-      documentId: missionDocuments.id,
-      versionId: missionDocumentVersions.id,
-      version: missionDocumentVersions.version,
-      state: missionDocumentVersions.state,
-      content: missionDocumentVersions.content,
-      contentHash: missionDocumentVersions.contentHash,
-    })
-    .from(missionDocuments)
-    .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
-    .innerJoin(missionDocumentVersions, eq(missionDocumentVersions.documentId, missionDocuments.id))
-    .where(and(
-      eq(missionDocuments.id, actionPlanDocument.id),
-      sql`${missionDocumentVersions.version} = (
-        SELECT MAX(v2."version") FROM sandbox."missionDocumentVersions" v2
-        WHERE v2."documentId" = ${missionDocuments.id}
-      )`,
-    ))
-    .limit(1);
-
-  if (!latestPlan) {
-    return {
-      authorized: false,
-      requiresActionPlanUnit: true,
-      idempotencyKey: null,
-      reason: "O documento ACTION_PLAN existe, mas não possui versão persistida íntegra.",
-    };
-  }
-  if (latestPlan.state !== "APPROVED") {
-    return {
-      authorized: false,
-      requiresActionPlanUnit: true,
-      idempotencyKey: null,
-      reason: "Existe um ACTION_PLAN vigente sem aprovação humana atual; dispatch está bloqueado.",
-    };
-  }
-
-  const actualHash = createHash("sha256").update(latestPlan.content, "utf8").digest("hex");
-  if (!latestPlan.contentHash || actualHash !== latestPlan.contentHash) {
-    return {
-      authorized: false,
-      requiresActionPlanUnit: true,
-      idempotencyKey: null,
-      reason: "A integridade SHA-256 do ACTION_PLAN aprovado não confere.",
-    };
-  }
-  const [operationalTask] = await database
-    .select({ parentTaskId: tasks.parentTaskId })
-    .from(tasks)
-    .where(eq(tasks.id, taskId))
-    .limit(1);
-  if (!operationalTask || operationalTask.parentTaskId !== missionId) {
-    return {
-      authorized: false,
-      requiresActionPlanUnit: true,
-      idempotencyKey: null,
-      reason: "A unidade operacional precisa ser filha direta da missão raiz.",
-    };
-  }
-
-  if (!relations.action_units_exist) {
-    return {
-      authorized: false,
-      requiresActionPlanUnit: true,
-      idempotencyKey: null,
-      reason: "A persistência de identidade/autorização das unidades ainda não está instalada.",
-    };
-  }
-
-  const [unit] = await database
-    .select({
-      unitId: missionActionUnits.unitId,
-      unitTitle: missionActionUnits.unitTitle,
-      idempotencyKey: missionActionUnits.idempotencyKey,
-    })
-    .from(missionActionUnits)
-    .where(and(
-      eq(missionActionUnits.missionTaskId, missionId),
-      eq(missionActionUnits.actionPlanDocumentId, latestPlan.documentId),
-      eq(missionActionUnits.actionPlanVersionId, latestPlan.versionId),
-      eq(missionActionUnits.actionPlanVersionNumber, latestPlan.version),
-      eq(missionActionUnits.actionPlanContentHash, latestPlan.contentHash),
-      eq(missionActionUnits.operationalTaskId, taskId),
-      eq(missionActionUnits.state, "READY_FOR_DISPATCH"),
-      sql`${missionActionUnits.approvalUserId} IS NOT NULL`,
-      sql`${missionActionUnits.approvedAt} IS NOT NULL`,
-    ))
-    .limit(1);
-
-  if (!unit || !unit.idempotencyKey) {
-    return {
-      authorized: false,
-      requiresActionPlanUnit: true,
-      idempotencyKey: null,
-      reason: "A tarefa não possui vínculo aprovado e pronto para dispatch com uma unidade Txx da versão vigente.",
-    };
-  }
-
-  let planTasks: Array<{ id?: string; title?: string }> = [];
-  try {
-    const parsed = JSON.parse(latestPlan.content);
-    planTasks = Array.isArray(parsed.tasks) ? parsed.tasks : [];
-  } catch {
-    return {
-      authorized: false,
-      requiresActionPlanUnit: true,
-      idempotencyKey: null,
-      reason: "O conteúdo do ACTION_PLAN não é JSON válido.",
-    };
-  }
-  if (!planTasks.some((item) => item.id === unit.unitId && item.title === unit.unitTitle)) {
-    return {
-      authorized: false,
-      requiresActionPlanUnit: true,
-      idempotencyKey: null,
-      reason: "A unidade persistida não corresponde ao conteúdo exato do ACTION_PLAN aprovado.",
-    };
-  }
-
+  const authorized = await hasExecutionReadyMissionDocuments(taskId);
   return {
-    authorized: true,
-    requiresActionPlanUnit: true,
-    idempotencyKey: unit.idempotencyKey,
-    reason: null,
+    authorized,
+    requiresActionPlanUnit: false,
+    idempotencyKey: null,
+    reason: authorized ? null : "A delegação exige TR vigente validado e FR inicial vinculado à versão aprovada do TR.",
   };
 }
 
