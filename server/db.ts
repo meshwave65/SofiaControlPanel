@@ -2144,7 +2144,7 @@ export async function hasExecutionReadyMissionDocuments(taskId: number): Promise
   if (missionId == null) return false;
 
   const [tr] = await database
-    .select({ state: missionDocumentVersions.state })
+    .select({ id: missionDocumentVersions.id, state: missionDocumentVersions.state })
     .from(missionDocumentVersions)
     .innerJoin(missionDocuments, eq(missionDocumentVersions.documentId, missionDocuments.id))
     .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
@@ -2158,8 +2158,12 @@ export async function hasExecutionReadyMissionDocuments(taskId: number): Promise
 
   if (!tr || !["VALIDATED", "ACTIVE", "REORIENTED"].includes(tr.state)) return false;
   const [fr] = await database
-    .select({ id: missionDocuments.id })
-    .from(missionDocuments)
+    .select({
+      state: missionDocumentVersions.state,
+      sourceDocumentVersionId: missionDocumentVersions.sourceDocumentVersionId,
+    })
+    .from(missionDocumentVersions)
+    .innerJoin(missionDocuments, eq(missionDocumentVersions.documentId, missionDocuments.id))
     .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
     .where(and(
       eq(missionDocuments.taskId, missionId),
@@ -2167,8 +2171,11 @@ export async function hasExecutionReadyMissionDocuments(taskId: number): Promise
       eq(missionDocumentTypes.typeKey, "FR"),
       eq(missionDocumentTypes.isActive, true),
     ))
+    .orderBy(desc(missionDocumentVersions.version))
     .limit(1);
-  return Boolean(fr);
+  return Boolean(fr
+    && ["DRAFT", "ACTIVE", "PUBLISHED"].includes(fr.state)
+    && fr.sourceDocumentVersionId === tr.id);
 }
 
 
