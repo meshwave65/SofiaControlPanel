@@ -2033,8 +2033,8 @@ export async function hasValidatedMissionTR(taskId: number): Promise<boolean> {
 
 
 /**
- * A task may execute only when its root mission has a validated current TR
- * and a READY/ACTIVE Blueprint derived from that exact TR version.
+ * TR approval authorizes delegation. The assigned agent prepares the BP
+ * after the mission is claimed, so a READY Blueprint is not a dispatch gate.
  */
 export async function hasExecutionReadyMissionDocuments(taskId: number): Promise<boolean> {
   const database = await getDb();
@@ -2043,32 +2043,19 @@ export async function hasExecutionReadyMissionDocuments(taskId: number): Promise
   if (missionId == null) return false;
 
   const [tr] = await database
-    .select({ id: missionDocumentVersions.id, state: missionDocumentVersions.state })
+    .select({ state: missionDocumentVersions.state })
     .from(missionDocumentVersions)
     .innerJoin(missionDocuments, eq(missionDocumentVersions.documentId, missionDocuments.id))
     .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
-    .where(and(eq(missionDocuments.taskId, missionId), eq(missionDocuments.documentKey, "TR"), eq(missionDocumentTypes.typeKey, "TR")))
-    .orderBy(desc(missionDocumentVersions.version))
-    .limit(1);
-  if (!tr || !["VALIDATED", "ACTIVE", "REORIENTED"].includes(tr.state)) return false;
-
-  const [blueprint] = await database
-    .select({
-      state: missionDocumentVersions.state,
-      sourceDocumentVersionId: missionDocumentVersions.sourceDocumentVersionId,
-    })
-    .from(missionDocumentVersions)
-    .innerJoin(missionDocuments, eq(missionDocumentVersions.documentId, missionDocuments.id))
-    .innerJoin(missionDocumentTypes, eq(missionDocuments.documentTypeId, missionDocumentTypes.id))
-    .where(and(eq(missionDocuments.taskId, missionId), eq(missionDocuments.documentKey, "BLUEPRINT"), eq(missionDocumentTypes.typeKey, "BLUEPRINT")))
+    .where(and(
+      eq(missionDocuments.taskId, missionId),
+      eq(missionDocuments.documentKey, "TR"),
+      eq(missionDocumentTypes.typeKey, "TR"),
+    ))
     .orderBy(desc(missionDocumentVersions.version))
     .limit(1);
 
-  return Boolean(
-    blueprint
-    && ["READY", "ACTIVE"].includes(blueprint.state)
-    && blueprint.sourceDocumentVersionId === tr.id
-  );
+  return Boolean(tr && ["VALIDATED", "ACTIVE", "REORIENTED"].includes(tr.state));
 }
 
 
