@@ -39,6 +39,7 @@ export function isGitHubMirrorRetryCandidate(
 
 let heartbeatInterval: NodeJS.Timeout | null = null;
 let creditCheckInterval: NodeJS.Timeout | null = null;
+let agentPoolInterval: NodeJS.Timeout | null = null;
 
 /**
  * Inicia o sistema de heartbeat
@@ -46,6 +47,16 @@ let creditCheckInterval: NodeJS.Timeout | null = null;
  */
 export async function startHeartbeatSystem() {
   console.log("[Heartbeat] Sistema iniciado");
+  void SofiaOrchestrator.refreshAgentEligibilityPool();
+
+  // Atualizar inventário e lista de elegíveis a cada 60 segundos.
+  agentPoolInterval = setInterval(async () => {
+    try {
+      await SofiaOrchestrator.refreshAgentEligibilityPool();
+    } catch (error) {
+      console.error("[Heartbeat] Erro ao atualizar inventário de agentes:", error);
+    }
+  }, 60000);
 
   // Verificar agentes offline a cada 30 segundos
   heartbeatInterval = setInterval(async () => {
@@ -76,6 +87,7 @@ export async function startHeartbeatSystem() {
 export function stopHeartbeatSystem() {
   if (heartbeatInterval) clearInterval(heartbeatInterval);
   if (creditCheckInterval) clearInterval(creditCheckInterval);
+  if (agentPoolInterval) clearInterval(agentPoolInterval);
   console.log("[Heartbeat] Sistema parado");
 }
 
