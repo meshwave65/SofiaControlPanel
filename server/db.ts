@@ -244,7 +244,8 @@ export async function getAgentInventorySnapshot() {
     }
   }
 
-  return localRows.map((local: any) => {
+  const inventory: any[] = [];
+  for (const local of localRows) {
     const central = local.agentOrigin === "SCP_CATALOG" && local.sourceAgentId != null
       ? centralById.get(Number(local.sourceAgentId))
       : null;
@@ -252,7 +253,40 @@ export async function getAgentInventorySnapshot() {
       const localCreditUpdatedAt = local.creditsUpdatedAt ? new Date(local.creditsUpdatedAt).getTime() : Number.NEGATIVE_INFINITY;
       const centralCreditUpdatedAt = central?.creditsUpdatedAt ? new Date(central.creditsUpdatedAt).getTime() : Number.NEGATIVE_INFINITY;
       const useLocalCreditSnapshot = localCreditUpdatedAt > centralCreditUpdatedAt;
-      return {
+      const creditsRemaining = useLocalCreditSnapshot ? local.creditsRemaining : central?.creditsRemaining ?? null;
+      const creditsUpdatedAt = useLocalCreditSnapshot ? local.creditsUpdatedAt : central?.creditsUpdatedAt ?? null;
+
+      if (central) {
+        // Keep the Sandbox projection synchronized for atomic SQL claims. Never copy credential values.
+        await database.execute(sql`
+          UPDATE sandbox.agents
+             SET name = ${central.name},
+                 description = ${central.description},
+                 status = ${central.status},
+                 version = ${central.version},
+                 "manusAccount" = ${central.manusAccount},
+                 "lastHeartbeat" = ${central.lastHeartbeat},
+                 "connectionStatus" = ${central.connectionStatus},
+                 "connectionError" = ${local.connectionError || central.connectionError},
+                 "creditsRemaining" = ${creditsRemaining}::numeric,
+                 "creditsUpdatedAt" = ${creditsUpdatedAt}
+           WHERE id = ${local.id}
+             AND (
+               name IS DISTINCT FROM ${central.name}
+               OR description IS DISTINCT FROM ${central.description}
+               OR status::text IS DISTINCT FROM ${central.status}
+               OR version IS DISTINCT FROM ${central.version}
+               OR "manusAccount" IS DISTINCT FROM ${central.manusAccount}
+               OR "lastHeartbeat" IS DISTINCT FROM ${central.lastHeartbeat}
+               OR "connectionStatus" IS DISTINCT FROM ${central.connectionStatus}
+               OR "connectionError" IS DISTINCT FROM ${local.connectionError || central.connectionError}
+               OR "creditsRemaining" IS DISTINCT FROM ${creditsRemaining}::numeric
+               OR "creditsUpdatedAt" IS DISTINCT FROM ${creditsUpdatedAt}
+             )
+        `);
+      }
+
+      inventory.push({
         ...local,
         ...(central ? {
           name: central.name,
@@ -263,15 +297,17 @@ export async function getAgentInventorySnapshot() {
           lastHeartbeat: central.lastHeartbeat,
           connectionStatus: central.connectionStatus,
           connectionError: local.connectionError || central.connectionError,
-          creditsRemaining: useLocalCreditSnapshot ? local.creditsRemaining : central.creditsRemaining,
-          creditsUpdatedAt: useLocalCreditSnapshot ? local.creditsUpdatedAt : central.creditsUpdatedAt,
+          creditsRemaining,
+          creditsUpdatedAt,
         } : {}),
         hasCredential: Boolean(central?.hasCredential && process.env.CENTRAL_SCP_CREDENTIAL_ENCRYPTION_KEY),
         centralSourceAvailable: Boolean(central),
-      };
+      });
+      continue;
     }
-    return { ...local, hasCredential: Boolean(local.localHasCredential), centralSourceAvailable: true };
-  });
+    inventory.push({ ...local, hasCredential: Boolean(local.localHasCredential), centralSourceAvailable: true });
+  }
+  return inventory;
 }
 
 export async function getAgentsByOwnerId(ownerId: number, canViewAll = false) {
