@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import * as db from "./db";
 
 const MANUS_API_BASE = "https://api.manus.ai/v2";
@@ -48,11 +49,52 @@ export async function createManusTask(task: NonNullable<LocalTask>, continuation
     throw new Error("O agente não possui uma API key Manus configurada.");
   }
 
+  const missionRootId = await db.getMissionRootTaskId(task.id);
+  const missionDocs = missionRootId == null
+    ? []
+    : await db.getMissionDocumentsForTask(missionRootId, task.createdBy, false);
+  const missionContext = await Promise.all(missionDocs.map(async (document: any) => {
+    if (!document.latestVersion) {
+      return { type: document.typeKey, key: document.documentKey, version: null, state: null, content: null };
+    }
+    const stored = await db.getMissionDocumentVersionForTask(
+      missionRootId!,
+      document.id,
+      document.latestVersion.version,
+      task.createdBy,
+      false,
+    );
+    return {
+      type: document.typeKey,
+      key: document.documentKey,
+      version: document.latestVersion.version,
+      state: document.latestVersion.state,
+      content: stored?.version?.content?.slice(0, 16000) ?? null,
+    };
+  }));
+
+  const workflowInstructions = [
+    "PROTOCOLO OBRIGATÓRIO DE MISSÃO SOFIA:",
+    "1. Sua primeira ação é conferir o inventário documental recebido, as versões e a vinculação do TR. Registre no checklist se é NOVA MISSÃO ou CONTINUIDADE.",
+    "2. Em uma nova missão, não invente BP, OR ou FOR anteriores. O TR aprovado e o FR draft são a base inicial. Prepare o BP a partir do TR e emita o primeiro CHECKPOINT e HANDOFF antes de iniciar as etapas.",
+    "3. O BP é criado pelo agente executor após a delegação. Depois de criado, não altere BP nem TR durante a execução.",
+    "4. Execute sequencialmente todas as etapas do BP. Antes de cada etapa, revise TR, BP, FR, FOR e o OR da etapa anterior; confirme o objetivo e os critérios de aceite da etapa atual.",
+    "5. Ao concluir cada etapa, produza um OR próprio daquela etapa, atualize o FR com a evolução e os resultados, atualize o FOR com problemas, soluções e aprendizados operacionais, e grave CHECKPOINT e HANDOFF para a próxima etapa.",
+    "6. Continue para a etapa seguinte sem aguardar aprovação adicional. Não encerre a missão enquanto houver etapa pendente.",
+    "7. FR é informativo: objetivo, desenvolvimento, resultados e conclusão da missão. FOR é operacional: consolida os ORs, problemas, soluções e aprendizados. Não misture essas finalidades.",
+    "8. TR e BP não devem ser revisados pelo fluxo de execução. Atualize os demais artefatos pertinentes.",
+    "9. Após cada etapa, emita um bloco SOFIA_MISSION_UPDATE com JSON válido, sem cercas Markdown, contendo os documentos criados/atualizados. No bloco final, inclua execution_complete=true, plan_step_ids e completed_step_ids somente quando todas as etapas estiverem concluídas.",
+    "10. Cada documento deve conter type (BLUEPRINT, FR, OR, FOR, CHECKPOINT ou HANDOFF), documentKey estável, title, state e content. Use OR-<stepId> como documentKey do OR de cada etapa. Para o BP inicial, use documentKey BLUEPRINT e state READY. Nunca inclua TR ou ORIGINAL_REQUEST na lista de atualizações.",
+    "Formato exato: <SOFIA_MISSION_UPDATE>{\"documents\":[{\"type\":\"BLUEPRINT\",\"documentKey\":\"BLUEPRINT\",\"title\":\"BP — ...\",\"state\":\"READY\",\"content\":\"...\"}],\"current_step_id\":\"S01\",\"plan_step_ids\":[\"S01\"],\"completed_step_ids\":[],\"execution_complete\":false}</SOFIA_MISSION_UPDATE>",
+  ].join("\n");
+
   const prompt = [
     `Missão Sofia #${task.id}: ${task.title}`,
-    task.description ? `\nInstruções:\n${task.description}` : "",
-    continuationContext ? `\nCheckpoint da execução anterior:\n${continuationContext}\nContinue desse ponto sem repetir o trabalho já concluído.` : "",
-    "\nAo concluir, produza um relatório objetivo com resultado, evidências, limitações e próximos passos.",
+    task.description ? `\nSolicitação e escopo:\n${task.description}` : "",
+    "\nINVENTÁRIO DOCUMENTAL VIGENTE (fonte para conferência de versões):\n" + JSON.stringify(missionContext),
+    "\n" + workflowInstructions,
+    continuationContext ? `\nCheckpoint e histórico da execução anterior:\n${continuationContext}\nContinue do ponto registrado, sem repetir trabalho concluído.` : "",
+    "\nAo concluir, deixe os artefatos atualizados e apresente uma síntese objetiva com resultado, evidências, limitações e próximos passos.",
   ].join("\n");
 
   const response = await manusRequest<ManusTaskResponse>(credentials.manusToken, "/task.create", {
