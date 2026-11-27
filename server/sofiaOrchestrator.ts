@@ -1,7 +1,7 @@
 import * as db from "./db";
 import { Task } from "../drizzle/schema";
 import { createManusTask, getManusCheckpoint, sendManusMessage, syncAgentCredits } from "./manusExecutionService";
-import { mirrorTaskToGitHub } from "./githubMissionMirror";
+import { mirrorMissionToGitHub } from "./githubMissionMirror";
 
 /**
  * Sofia Orchestrator v1.0
@@ -15,16 +15,7 @@ const STATUS_DONE = "DONE";
 
 async function syncTaskMirror(taskId: number) {
   try {
-    const task = await db.getTaskById(taskId);
-    if (!task) return;
-    const mirror = await mirrorTaskToGitHub(task);
-    await db.updateTaskGitHubSync(taskId, {
-      missionKey: mirror.missionKey,
-      githubPath: mirror.path,
-      githubSha: mirror.sha,
-      githubSyncStatus: mirror.status,
-      githubSyncError: mirror.error ?? null,
-    });
+    await mirrorMissionToGitHub(taskId);
   } catch (error) {
     console.error(`[Orchestrator] GitHub mirror failed for task ${taskId}:`, error);
   }
