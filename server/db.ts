@@ -249,6 +249,9 @@ export async function getAgentInventorySnapshot() {
       ? centralById.get(Number(local.sourceAgentId))
       : null;
     if (local.agentOrigin === "SCP_CATALOG") {
+      const localCreditUpdatedAt = local.creditsUpdatedAt ? new Date(local.creditsUpdatedAt).getTime() : Number.NEGATIVE_INFINITY;
+      const centralCreditUpdatedAt = central?.creditsUpdatedAt ? new Date(central.creditsUpdatedAt).getTime() : Number.NEGATIVE_INFINITY;
+      const useLocalCreditSnapshot = localCreditUpdatedAt > centralCreditUpdatedAt;
       return {
         ...local,
         ...(central ? {
@@ -259,9 +262,9 @@ export async function getAgentInventorySnapshot() {
           manusAccount: central.manusAccount,
           lastHeartbeat: central.lastHeartbeat,
           connectionStatus: central.connectionStatus,
-          connectionError: central.connectionError,
-          creditsRemaining: central.creditsRemaining,
-          creditsUpdatedAt: central.creditsUpdatedAt,
+          connectionError: local.connectionError || central.connectionError,
+          creditsRemaining: useLocalCreditSnapshot ? local.creditsRemaining : central.creditsRemaining,
+          creditsUpdatedAt: useLocalCreditSnapshot ? local.creditsUpdatedAt : central.creditsUpdatedAt,
         } : {}),
         hasCredential: Boolean(central?.hasCredential),
         centralSourceAvailable: Boolean(central),
