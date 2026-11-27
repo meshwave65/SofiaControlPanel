@@ -31,7 +31,87 @@ async function syncTaskMirror(taskId: number) {
 }
 
 
+type AgentEligibilityPool = {
+  refreshedAt: number;
+  totalAgents: number;
+  eligibleAgentIds: number[];
+};
+
+const AGENT_POOL_REFRESH_MS = 60_000;
+const agentEligibilityPools = new Map<number, AgentEligibilityPool>();
+let agentPoolRefreshPromise: Promise<void> | null = null;
+
 export class SofiaOrchestrator {
+  static async refreshAgentEligibilityPool() {
+    if (agentPoolRefreshPromise) return agentPoolRefreshPromise;
+    agentPoolRefreshPromise = (async () => {
+      const [agents, tasks] = await Promise.all([
+        db.getAllAgentsGlobal(),
+        db.getAllTasksGlobal(),
+      ]);
+      const progressStatusId = await db.getTaskStatusIdByName(STATUS_PROGRESS);
+      const busyAgentIds = new Set<number>(
+        tasks
+          .filter((task: any) => task.statusId === progressStatusId && task.agentId != null)
+          .map((task: any) => Number(task.agentId)),
+      );
+      const byOwner = new Map<number, any[]>();
+      for (const agent of agents as any[]) {
+        const ownerId = Number(agent.ownerId);
+        const ownerAgents = byOwner.get(ownerId) ?? [];
+        ownerAgents.push(agent);
+        byOwner.set(ownerId, ownerAgents);
+      }
+
+      const refreshedAt = Date.now();
+      agentEligibilityPools.clear();
+      for (const [ownerId, ownerAgents] of byOwner) {
+        const eligible = ownerAgents.filter((agent: any) => {
+          const credits = agent.creditsRemaining == null ? null : Number(agent.creditsRemaining);
+          return agent.status === "online"
+            && ["configured", "connected"].includes(agent.connectionStatus)
+            && agent.hasCredential === true
+            && agent.centralSourceAvailable !== false
+            && credits !== null
+            && Number.isFinite(credits)
+            && credits > 0
+            && !busyAgentIds.has(Number(agent.id));
+        });
+        eligible.sort((left: any, right: any) => {
+          const creditDelta = Number(right.creditsRemaining) - Number(left.creditsRemaining);
+          if (creditDelta !== 0) return creditDelta;
+          const leftUpdated = left.creditsUpdatedAt ? new Date(left.creditsUpdatedAt).getTime() : Number.NEGATIVE_INFINITY;
+          const rightUpdated = right.creditsUpdatedAt ? new Date(right.creditsUpdatedAt).getTime() : Number.NEGATIVE_INFINITY;
+          return leftUpdated - rightUpdated || Number(left.id) - Number(right.id);
+        });
+        agentEligibilityPools.set(ownerId, {
+          refreshedAt,
+          totalAgents: ownerAgents.length,
+          eligibleAgentIds: eligible.map((agent: any) => Number(agent.id)),
+        });
+      }
+      console.log(`[AgentPool] Inventário atualizado: ${agents.length} agentes; ${Array.from(agentEligibilityPools.values()).reduce((sum, item) => sum + item.eligibleAgentIds.length, 0)} elegíveis.`);
+    })().finally(() => {
+      agentPoolRefreshPromise = null;
+    });
+    return agentPoolRefreshPromise;
+  }
+
+  static async getEligibleAgentIds(ownerId: number) {
+    const current = agentEligibilityPools.get(ownerId);
+    if (!current || Date.now() - current.refreshedAt >= AGENT_POOL_REFRESH_MS) {
+      await this.refreshAgentEligibilityPool();
+    }
+    return [...(agentEligibilityPools.get(ownerId)?.eligibleAgentIds ?? [])];
+  }
+
+  static markAgentUnavailable(agentId: number | null | undefined) {
+    if (agentId == null) return;
+    for (const pool of agentEligibilityPools.values()) {
+      pool.eligibleAgentIds = pool.eligibleAgentIds.filter((id) => id !== Number(agentId));
+    }
+  }
+
   static async resumeCreditBlockedTasks() {
     const waiting = (await db.getAllTasksGlobal()).filter((task) => task.manusStatus === "waiting_credit" && task.agentId);
     const progressStatusId = await db.getTaskStatusIdByName(STATUS_PROGRESS);
@@ -89,6 +169,8 @@ export class SofiaOrchestrator {
           await createManusTask({ ...task, agentId: replacement.id }, checkpoint);
           await db.updateTaskStatus(task.id, progressStatusId);
           await syncTaskMirror(task.id);
+          this.markAgentUnavailable(current.id);
+          this.markAgentUnavailable(replacement.id);
           results.push({ taskId: task.id, action: "transferred_after_credit_exhaustion", agentId: replacement.id });
           transferred = true;
           break;
@@ -297,31 +379,19 @@ export class SofiaOrchestrator {
     }
     const progressStatusId = await db.getTaskStatusIdByName(STATUS_PROGRESS);
 
-    // Refresh the selected account, or all online configured accounts for automatic assignment.
-    // Cached balances older than one minute are not used to allocate a new mission.
-    const configuredAgents = await db.getAgentsByOwnerId(task.createdBy);
-    const refreshTargets = configuredAgents.filter((agent: any) =>
-      agent.hasCredential
-      && agent.status === "online"
-      && (!task.agentPinned || agent.id === task.agentId)
-      && (!agent.creditsUpdatedAt || Date.now() - new Date(agent.creditsUpdatedAt).getTime() > 60_000)
+    // The pool is refreshed every 60 seconds; each mission uses its current
+    // eligible IDs and the database performs the final atomic availability check.
+    const eligibleAgentIds = await this.getEligibleAgentIds(task.createdBy);
+    const claimedTask = await db.claimStagedTaskWithAvailableAgent(
+      taskId,
+      stagedStatusId,
+      progressStatusId,
+      eligibleAgentIds,
     );
-    await Promise.all(refreshTargets.map(async (agent: any) => {
-      try {
-        await syncAgentCredits(agent.id);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        try {
-          await db.recordAgentCreditSyncError(agent.id, message);
-        } catch (recordError) {
-          console.error(`[Orchestrator] Não foi possível registrar a falha de consulta do agente ${agent.id}:`, recordError);
-        }
-        console.warn(`[Orchestrator] Não foi possível atualizar créditos do agente ${agent.id} antes da alocação:`, message);
-      }
-    }));
-
-    const claimedTask = await db.claimStagedTaskWithAvailableAgent(taskId, stagedStatusId, progressStatusId);
-    if (claimedTask) await syncTaskMirror(taskId);
+    if (claimedTask) {
+      this.markAgentUnavailable(claimedTask.agentId);
+      await syncTaskMirror(taskId);
+    }
 
     if (!claimedTask) {
       // The atomic claim returns null both when no agent is eligible and when
