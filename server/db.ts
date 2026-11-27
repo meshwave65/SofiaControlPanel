@@ -15,8 +15,8 @@ let _centralSCPClient: ReturnType<typeof postgres> | null = null;
 
 async function getCentralSCPClient() {
   if (_centralSCPClient) return _centralSCPClient;
-  const url = process.env.CENTRAL_SCP_DATABASE_URL;
-  if (!url) throw new Error("CENTRAL_SCP_DATABASE_URL não configurada no serviço Sandbox.");
+  const url = process.env.SCP_DATABASE_URL;
+  if (!url) throw new Error("SCP_DATABASE_URL não configurada no serviço Sandbox.");
   const client = postgres(url, { max: 3, prepare: false, connect_timeout: 10 });
   try {
     await client`select 1`;
@@ -165,6 +165,30 @@ export async function getUserByOpenId(openId: string) {
 
   const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
   return result.length > 0 ? result[0] : undefined;
+}
+
+/**
+ * Resolves the canonical account and role from the shared SCP identity database.
+ * Sandbox operational records remain in the local DATABASE_URL database.
+ */
+export async function getCentralSCPUserByOpenId(openId: string) {
+  const client = await getCentralSCPClient();
+  const [user] = await client`
+    SELECT
+      id,
+      "openId",
+      name,
+      email,
+      "loginMethod",
+      role::text AS role,
+      "createdAt",
+      "updatedAt",
+      "lastSignedIn"
+    FROM sofia.users
+    WHERE "openId" = ${openId}
+    LIMIT 1
+  `;
+  return user ?? null;
 }
 
 // ============================================
@@ -997,8 +1021,7 @@ export async function inspectTaskAgentEligibility(taskId: number, ownerId: numbe
   candidates.sort((left: any, right: any) => {
     if (left.eligible !== right.eligible) return left.eligible ? -1 : 1;
     const creditDelta = Number(right.creditsRemaining ?? 0) - Number(left.creditsRemaining ?? 0);
-    if (creditDelta !== 0) return creditDelta;
-    const leftUpdated = left.creditsUpdatedAt ? new Date(left.creditsUpdatedAt).getTime() : Number.NEGATIVE_INFINITY;
+    if (creditDelta !== 0) return creditDelta;    const leftUpdated = left.creditsUpdatedAt ? new Date(left.creditsUpdatedAt).getTime() : Number.NEGATIVE_INFINITY;
     const rightUpdated = right.creditsUpdatedAt ? new Date(right.creditsUpdatedAt).getTime() : Number.NEGATIVE_INFINITY;
     return leftUpdated - rightUpdated || left.agentId - right.agentId;
   });
@@ -1997,8 +2020,7 @@ export async function reorientMissionTRBeforeExecution(input: {
   taskId: number;
   documentId: number;
   ownerId: number;
-  content: string;
-}) {
+  content: string;}) {
   const database = await getDb();
   if (!database) throw new Error("Database not available");
 
