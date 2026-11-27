@@ -248,6 +248,182 @@ function assistantText(message: ManusMessageEvent) {
     .trim();
 }
 
+type MissionAgentUpdateResult = {
+  updatedDocuments: number;
+  executionComplete: boolean;
+};
+
+const AGENT_WRITABLE_DOCUMENT_TYPES = new Set(["BLUEPRINT", "FR", "OR", "FOR", "CHECKPOINT", "HANDOFF"]);
+const DOCUMENT_STATES = new Set(["DRAFT", "READY", "ACTIVE", "PUBLISHED"]);
+
+async function persistMissionAgentUpdates(task: NonNullable<LocalTask>): Promise<MissionAgentUpdateResult> {
+  if (!task.agentId) return { updatedDocuments: 0, executionComplete: false };
+  const messages = await listManusMessages(task);
+  const missionRootId = await db.getMissionRootTaskId(task.id);
+  if (missionRootId == null) throw new Error("Não foi possível resolver a missão raiz para persistir os artefatos do agente.");
+
+  let documents = await db.getMissionDocumentsForTask(missionRootId, task.createdBy, false);
+  const trDocument = documents.find((document: any) => document.typeKey === "TR" && document.documentKey === "TR");
+  if (!trDocument?.latestVersion) throw new Error("TR vigente não encontrado para vincular os artefatos do agente.");
+  const trVersion = await db.getMissionDocumentVersionForTask(
+    missionRootId,
+    trDocument.id,
+    trDocument.latestVersion.version,
+    task.createdBy,
+    false,
+  );
+  if (!trVersion) throw new Error("Conteúdo da versão vigente do TR não está disponível.");
+
+  let updatedDocuments = 0;
+  let completionCandidate: any = null;
+  const orderedMessages = [...messages].reverse();
+
+  for (const message of orderedMessages) {
+    if (message.type !== "assistant_message") continue;
+    const messageText = assistantText(message);
+    if (!messageText) continue;
+    const blocks = [...messageText.matchAll(/<SOFIA_MISSION_UPDATE>([\\s\\S]*?)<\\/SOFIA_MISSION_UPDATE>/g)];
+    for (const block of blocks) {
+      let payload: any;
+      try {
+        payload = JSON.parse(block[1]);
+      } catch (error) {
+        console.warn(`[Manus] Bloco SOFIA_MISSION_UPDATE inválido na missão ${task.id}; ignorado.`);
+        continue;
+      }
+      if (typeof payload.execution_complete === "boolean") completionCandidate = payload;
+      if (!Array.isArray(payload.documents)) continue;
+
+      for (const item of payload.documents) {
+        const typeKey = typeof item?.type === "string" ? item.type.toUpperCase() : "";
+        const documentKey = typeof item?.documentKey === "string" ? item.documentKey.trim() : "";
+        const title = typeof item?.title === "string" && item.title.trim()
+          ? item.title.trim().slice(0, 255)
+          : `${typeKey} — ${task.title}`;
+        const content = typeof item?.content === "string" ? item.content.trim() : "";
+        if (!AGENT_WRITABLE_DOCUMENT_TYPES.has(typeKey) || !documentKey || !content || documentKey.length > 128) continue;
+        if (typeKey === "OR" && !documentKey.startsWith("OR-")) continue;
+        if (typeKey === "BLUEPRINT" && documentKey !== "BLUEPRINT") continue;
+        if (typeKey === "FR" && documentKey !== "FR") continue;
+        if (typeKey === "FOR" && documentKey !== "FOR") continue;
+        if (typeKey === "CHECKPOINT" && documentKey !== "CHECKPOINT") continue;
+        if (content.length > 100_000) continue;
+
+        const existing = documents.find((document: any) => document.documentKey === documentKey);
+        // BP is created by the assigned agent once. The execution lifecycle never revises BP or TR.
+        if (typeKey === "BLUEPRINT" && existing) continue;
+        const state = DOCUMENT_STATES.has(String(item.state || "").toUpperCase())
+          ? String(item.state).toUpperCase()
+          : typeKey === "BLUEPRINT" ? "READY"
+            : typeKey === "OR" || typeKey === "CHECKPOINT" || typeKey === "HANDOFF" ? "PUBLISHED"
+              : "DRAFT";
+        const contentHash = createHash("sha256").update(content, "utf8").digest("hex");
+        if (existing?.latestVersion) {
+          const latest = await db.getMissionDocumentVersionForTask(
+            missionRootId,
+            existing.id,
+            existing.latestVersion.version,
+            task.createdBy,
+            false,
+          );
+          const previousHash = latest?.version?.contentHash
+            || (latest?.version?.content
+              ? createHash("sha256").update(latest.version.content, "utf8").digest("hex")
+              : null);
+          if (previousHash === contentHash) continue;
+        }
+
+        const versionInput = {
+          content,
+          state,
+          authorType: "AGENT" as const,
+          authorAgentId: task.agentId,
+          sourceDocumentVersionId: typeKey === "BLUEPRINT" || typeKey === "FR" ? trVersion.version.id : null,
+          provenance: {
+            origin: "MANUS_AGENT",
+            taskId: task.id,
+            manusTaskId: task.manusTaskId,
+            sourceTRVersion: trDocument.latestVersion.version,
+            stepId: payload.current_step_id ?? null,
+            messageId: message.id ?? null,
+          },
+          changeSummary: typeof item.changeSummary === "string" && item.changeSummary.trim()
+            ? item.changeSummary.trim()
+            : `Atualização de ${typeKey} pelo agente executor`,
+          contentHash,
+          publishedAt: ["READY", "ACTIVE", "PUBLISHED"].includes(state) ? new Date() : null,
+        };
+
+        if (existing) {
+          const createdVersion = await db.createMissionDocumentRevision({
+            taskId: missionRootId,
+            documentId: existing.id,
+            ownerId: task.createdBy,
+            canViewAll: false,
+            version: versionInput,
+          });
+          existing.latestVersion = {
+            id: createdVersion.id,
+            version: createdVersion.version,
+            state: createdVersion.state,
+            authorType: createdVersion.authorType,
+            createdAt: createdVersion.createdAt,
+            publishedAt: createdVersion.publishedAt,
+            sourceDocumentVersionId: createdVersion.sourceDocumentVersionId,
+            changeSummary: createdVersion.changeSummary,
+          };
+        } else {
+          const created = await db.createMissionDocumentWithVersion({
+            taskId: missionRootId,
+            ownerId: task.createdBy,
+            canViewAll: false,
+            typeKey,
+            documentKey,
+            title,
+            version: versionInput,
+          });
+          documents.push({
+            id: created.document.id,
+            taskId: missionRootId,
+            documentKey,
+            title,
+            typeKey,
+            latestVersion: {
+              id: created.version.id,
+              version: created.version.version,
+              state: created.version.state,
+              authorType: created.version.authorType,
+              createdAt: created.version.createdAt,
+              publishedAt: created.version.publishedAt,
+              sourceDocumentVersionId: created.version.sourceDocumentVersionId,
+              changeSummary: created.version.changeSummary,
+            },
+          });
+        }
+        updatedDocuments += 1;
+      }
+    }
+  }
+
+  if (!completionCandidate || completionCandidate.execution_complete !== true) {
+    return { updatedDocuments, executionComplete: false };
+  }
+
+  const planStepIds = Array.isArray(completionCandidate.plan_step_ids)
+    ? completionCandidate.plan_step_ids.map((value: unknown) => String(value))
+    : [];
+  const completedStepIds = Array.isArray(completionCandidate.completed_step_ids)
+    ? completionCandidate.completed_step_ids.map((value: unknown) => String(value))
+    : [];
+  const documentKeys = new Set(documents.map((document: any) => document.documentKey));
+  const allStepsComplete = planStepIds.length > 0
+    && planStepIds.every((stepId: string) => completedStepIds.includes(stepId)
+      && documentKeys.has(`OR-${stepId}`));
+  const requiredArtifactsExist = ["BLUEPRINT", "FR", "FOR", "CHECKPOINT"].every((key) => documentKeys.has(key))
+    && documents.some((document: any) => document.typeKey === "HANDOFF");
+  return { updatedDocuments, executionComplete: allStepsComplete && requiredArtifactsExist };
+}
+
 function assistantSignature(message: ManusMessageEvent, text: string) {
   return message.id ? `id:${message.id}` : `content:${text}`;
 }
