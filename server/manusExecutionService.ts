@@ -282,7 +282,7 @@ async function persistMissionAgentUpdates(task: NonNullable<LocalTask>): Promise
     if (message.type !== "assistant_message") continue;
     const messageText = assistantText(message);
     if (!messageText) continue;
-    const blocks = [...messageText.matchAll(/<SOFIA_MISSION_UPDATE>([\\s\\S]*?)<\\/SOFIA_MISSION_UPDATE>/g)];
+    const blocks = [...messageText.matchAll(/<SOFIA_MISSION_UPDATE>([\s\S]*?)<\/SOFIA_MISSION_UPDATE>/g)];
     for (const block of blocks) {
       let payload: any;
       try {
