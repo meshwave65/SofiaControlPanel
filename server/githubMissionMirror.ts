@@ -249,8 +249,6 @@ export async function mirrorTaskToGitHub(task: MirrorTask): Promise<MirrorResult
   }
 
   const baseUrl = `https://api.github.com/repos/${encodeURIComponent(ENV.githubOwner)}/${encodeURIComponent(ENV.githubRepo)}/contents/${path.split("/").map(encodeURIComponent).join("/")}`;
-  const content = Buffer.from(missionMarkdown(task, missionKey), "utf8").toString("base64");
-
   try {
     const markdown = missionMarkdown(task, missionKey);
     const current = await githubRequest<{ sha?: string; content?: string; encoding?: string }>(`${baseUrl}?ref=${encodeURIComponent(ENV.githubBranch)}`, {
