@@ -349,7 +349,7 @@ async function persistMissionAgentUpdates(task: NonNullable<LocalTask>): Promise
         // BP is immutable during step execution; it may be re-prepared only when its TR link/state is stale.
         if (typeKey === "BLUEPRINT" && existing
           && existing.latestVersion?.sourceDocumentVersionId === trVersion.version.id
-          && existing.latestVersion?.state === "READY") continue;
+          && ["READY", "ACTIVE"].includes(existing.latestVersion?.state)) continue;
         const requestedState = String(item.state || "").toUpperCase();
         const state = typeKey === "BLUEPRINT" || typeKey === "OR" || typeKey === "CHECKPOINT" || typeKey === "HANDOFF"
           ? (typeKey === "BLUEPRINT" ? "READY" : "PUBLISHED")
