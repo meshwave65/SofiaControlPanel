@@ -287,7 +287,7 @@ export async function getAgentInventorySnapshot() {
           WHERE t."agentId" = a.id
             AND s.name IN ('PROGRESS', 'STAGED')
         ) occupancy ON TRUE
-        WHERE a.id = ANY(${client.array(sourceIds, "int4")})
+        WHERE a.id = ANY(${client.array(sourceIds, 23)})
       `;
       centralById = new Map(centralRows.map((agent: any) => [Number(agent.id), agent]));
     } catch (error) {
