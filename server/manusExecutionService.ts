@@ -346,8 +346,10 @@ async function persistMissionAgentUpdates(task: NonNullable<LocalTask>): Promise
         if (content.length > 100_000) continue;
 
         const existing = documents.find((document: any) => document.documentKey === documentKey);
-        // BP is created by the assigned agent once. The execution lifecycle never revises BP or TR.
-        if (typeKey === "BLUEPRINT" && existing) continue;
+        // BP is immutable during step execution; it may be re-prepared only when its TR link/state is stale.
+        if (typeKey === "BLUEPRINT" && existing
+          && existing.latestVersion?.sourceDocumentVersionId === trVersion.version.id
+          && existing.latestVersion?.state === "READY") continue;
         const requestedState = String(item.state || "").toUpperCase();
         const state = typeKey === "BLUEPRINT" || typeKey === "OR" || typeKey === "CHECKPOINT" || typeKey === "HANDOFF"
           ? (typeKey === "BLUEPRINT" ? "READY" : "PUBLISHED")
