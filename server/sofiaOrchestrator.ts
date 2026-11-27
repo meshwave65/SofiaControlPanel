@@ -191,27 +191,10 @@ export class SofiaOrchestrator {
   /**
    * Determina se uma tarefa deve ser fatorada (decomposta).
    */
-  static shouldFactorize(task: any): boolean {
-    // A decomposed task is a leaf in the factorization tree; do not recursively
-    // create another set of structural/operational/strategic dimensions.
-    if (task.parentTaskId != null || !task.description) return false;
-    
-    const descLower = task.description.toLowerCase();
-    const keywords = [
-      "análise detalhada",
-      "várias partes",
-      "múltiplas etapas",
-      "estrutural",
-      "operacional",
-      "estratégico",
-      "completo",
-      "abrangente",
-      "recursivo",
-      "decomposição",
-      "fatoração"
-    ];
-    
-    return keywords.some(kw => descLower.includes(kw));
+  static shouldFactorize(_task: any): boolean {
+    // Mission decomposition is driven by the approved TR and agent-authored BP,
+    // never by description keywords or heuristic dimensions.
+    return false;
   }
 
   /**
@@ -230,7 +213,7 @@ export class SofiaOrchestrator {
    */
   static async factorizeTask(task: any): Promise<number[]> {
     if (!(await db.hasExecutionReadyMissionDocuments(task.id))) {
-      throw new Error("Fatoração bloqueada: a missão principal exige TR validado e Blueprint READY vinculado à versão vigente.");
+      throw new Error("Fatoração bloqueada: a missão principal exige TR validado.");
     }
     if (task.parentTaskId != null) {
       throw new Error("Esta tarefa já é uma subtarefa. A fatoração deve ser feita na missão principal.");
@@ -375,7 +358,7 @@ export class SofiaOrchestrator {
         externalTaskIds: task.manusTaskId ? [task.manusTaskId] : [],
       };
     }
-    // A validação do TR e o Blueprint READY autorizam a delegação. ACTION_PLAN não cria uma segunda aprovação.
+    // A validação do TR autoriza a delegação; o agente prepara o BP após assumir a missão.
     if (!(await db.hasExecutionReadyMissionDocuments(taskId))) {
       throw new Error("Execução bloqueada: a missão exige TR validado e Blueprint READY. Subtarefas herdam os documentos da missão principal.");
     }
