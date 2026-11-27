@@ -86,37 +86,56 @@ async function authenticateSupabaseToken(
     null;
 
   try {
-    await db.upsertUser({
-      openId: identity.id,
-      name: displayName,
-      email: identity.email ?? null,
-      loginMethod: "supabase",
-      lastSignedIn: new Date(),
-    });
-
-    const user = await db.getUserByOpenId(identity.id);
-    if (!user) {
+    // The SCP database is the canonical source for account existence and role.
+    const centralUser = await db.getCentralSCPUserByOpenId(identity.id);
+    if (!centralUser) {
       if (correlationId) {
         console.error("[AuthDiagnostic]", JSON.stringify({
-          stage: "database.user_not_found",
+          stage: "central_scp.user_not_found",
           correlationId,
           timestamp: new Date().toISOString(),
         }));
       }
-      throw new Error(
-        "Authenticated Supabase user could not be loaded from the database"
-      );
+      throw new Error("Authenticated identity is not registered in the central SCP user database");
     }
-    const normalizedEmail = user.email?.trim().toLowerCase();
+
+    // Keep a local Sandbox user row only as an operational FK reference.
+    await db.upsertUser({
+      openId: identity.id,
+      name: centralUser.name ?? displayName,
+      email: centralUser.email ?? identity.email ?? null,
+      loginMethod: centralUser.loginMethod ?? "supabase",
+      lastSignedIn: new Date(),
+    });
+
+    const sandboxUser = await db.getUserByOpenId(identity.id);
+    if (!sandboxUser) {
+      if (correlationId) {
+        console.error("[AuthDiagnostic]", JSON.stringify({
+          stage: "sandbox.user_shadow_not_found",
+          correlationId,
+          timestamp: new Date().toISOString(),
+        }));
+      }
+      throw new Error("Central identity was found but the Sandbox operational user record could not be created");
+    }
+
+    const normalizedEmail = String(centralUser.email ?? identity.email ?? "").trim().toLowerCase();
     const isMasterAdmin = Boolean(normalizedEmail && ENV.masterAdminEmails.includes(normalizedEmail));
+    const centralRole = centralUser.role === "admin" || isMasterAdmin ? "admin" : "user";
     if (correlationId) {
       console.info("[AuthDiagnostic]", JSON.stringify({
-        stage: "database.user_resolved",
+        stage: "central_scp.user_resolved",
         correlationId,
         timestamp: new Date().toISOString(),
       }));
     }
-    return isMasterAdmin ? { ...user, role: "admin" } : user;
+    return {
+      ...sandboxUser,
+      name: centralUser.name ?? sandboxUser.name,
+      email: centralUser.email ?? sandboxUser.email,
+      role: centralRole,
+    };
   } catch (dbError) {
     if (correlationId) {
       console.error("[AuthDiagnostic]", JSON.stringify({
