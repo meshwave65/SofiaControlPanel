@@ -679,7 +679,6 @@ export async function inspectTaskAgentEligibility(taskId: number, ownerId: numbe
     if (!agent.connectionEligible) reasons.push("connection_not_configured_or_connected");
     if (!agent.hasCredential) reasons.push("credential_missing");
     if (!agent.hasPositiveCredits) reasons.push("credits_not_positive");
-    if (!agent.creditSnapshotFresh) reasons.push("credit_snapshot_stale_or_missing");
     if (!agent.hasNoProgressTask) reasons.push("agent_has_progress_task");
 
     const eligible = taskIsStaged
@@ -689,7 +688,6 @@ export async function inspectTaskAgentEligibility(taskId: number, ownerId: numbe
       && Boolean(agent.connectionEligible)
       && Boolean(agent.hasCredential)
       && Boolean(agent.hasPositiveCredits)
-      && Boolean(agent.creditSnapshotFresh)
       && Boolean(agent.hasNoProgressTask);
 
     return {
@@ -734,7 +732,7 @@ export async function inspectTaskAgentEligibility(taskId: number, ownerId: numbe
     candidates,
     interpretationLimits: [
       "Consulta somente leitura, sem FOR UPDATE, SKIP LOCKED, reserva ou alteração de estado.",
-      "Os critérios de elegibilidade espelham o predicado atual de claimStagedTaskWithAvailableAgent.",
+      "A idade do snapshot de créditos é informativa e nunca elimina um agente com saldo positivo conhecido.",
       "O resultado é um snapshot; a elegibilidade pode mudar antes de um claim posterior.",
       "A conexão 'configured' é aceita pelo claim atual, assim como 'connected'.",
       "A ordem de candidatos elegíveis segue créditos decrescentes, snapshot mais antigo e Agent ID.",
@@ -774,7 +772,6 @@ export async function claimStagedTaskWithAvailableAgent(
           AND a."manusToken" IS NOT NULL
           AND a."creditsRemaining" IS NOT NULL
           AND a."creditsRemaining"::numeric > 0
-          AND a."creditsUpdatedAt" >= NOW() - INTERVAL '60 seconds'
           AND NOT EXISTS (
             SELECT 1
             FROM sandbox.tasks active_task
@@ -804,7 +801,6 @@ export async function claimStagedTaskWithAvailableAgent(
         AND a."manusToken" IS NOT NULL
         AND a."creditsRemaining" IS NOT NULL
           AND a."creditsRemaining"::numeric > 0
-          AND a."creditsUpdatedAt" >= NOW() - INTERVAL '60 seconds'
         AND NOT EXISTS (
           SELECT 1
           FROM sandbox.tasks active_task
