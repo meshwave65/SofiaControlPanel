@@ -37,9 +37,9 @@ async function getCentralSCPAgentCredentials(sourceAgentId: number) {
     LIMIT 1
   `;
   if (!agent) return null;
-  const encryptionKey = process.env.CENTRAL_SCP_CREDENTIAL_ENCRYPTION_KEY;
+  const encryptionKey = process.env.CREDENTIAL_ENCRYPTION_KEY;
   if (agent.manusToken && !encryptionKey) {
-    throw new Error("CENTRAL_SCP_CREDENTIAL_ENCRYPTION_KEY não configurada no serviço Sandbox.");
+    throw new Error("CREDENTIAL_ENCRYPTION_KEY não configurada no serviço Sandbox.");
   }
   return {
     manusAccount: agent.manusAccount ?? null,
@@ -364,7 +364,7 @@ export async function getAgentInventorySnapshot() {
           localActiveTaskIds: local.localActiveTaskIds ?? [],
           isBusy: Number(local.localActiveTaskCount ?? 0) > 0,
         }),
-        hasCredential: Boolean(central?.hasCredential && process.env.CENTRAL_SCP_CREDENTIAL_ENCRYPTION_KEY),
+        hasCredential: Boolean(central?.hasCredential && process.env.CREDENTIAL_ENCRYPTION_KEY),
         centralSourceAvailable: Boolean(central),
       });
       continue;
@@ -461,7 +461,7 @@ export async function hasManusCredentialsForAgent(id: number) {
       WHERE id = ${Number(source.sourceAgentId)}
       LIMIT 1
     `;
-    return Boolean(row?.hasCredential && process.env.CENTRAL_SCP_CREDENTIAL_ENCRYPTION_KEY);
+    return Boolean(row?.hasCredential && process.env.CREDENTIAL_ENCRYPTION_KEY);
   }
   const [agent] = await database.select({ manusToken: agents.manusToken })
     .from(agents).where(eq(agents.id, id)).limit(1);
