@@ -83,11 +83,25 @@ export class SofiaOrchestrator {
           const rightUpdated = right.creditsUpdatedAt ? new Date(right.creditsUpdatedAt).getTime() : Number.NEGATIVE_INFINITY;
           return leftUpdated - rightUpdated || Number(left.id) - Number(right.id);
         });
-        const reservedAgentIdsByTask = new Map<number, number>(
-          reservedTasks
-            .filter((task: any) => Number(task.createdBy) === ownerId)
-            .map((task: any) => [Number(task.id), Number(task.agentId)]),
-        );
+        const ownerAgentById = new Map<number, any>(ownerAgents.map((agent: any) => [Number(agent.id), agent]));
+        const reservedAgentIdsByTask = new Map<number, number>();
+        for (const reservedTask of reservedTasks) {
+          if (Number(reservedTask.createdBy) !== ownerId) continue;
+          const reservedAgentId = Number(reservedTask.agentId);
+          const reservedAgent = ownerAgentById.get(reservedAgentId);
+          const credits = reservedAgent?.creditsRemaining == null ? null : Number(reservedAgent.creditsRemaining);
+          const canHonorReservation = Boolean(reservedAgent)
+            && reservedAgent.status === "online"
+            && ["configured", "connected"].includes(reservedAgent.connectionStatus)
+            && reservedAgent.hasCredential === true
+            && reservedAgent.centralSourceAvailable !== false
+            && !reservedAgent.centralBusy
+            && !busyAgentIds.has(reservedAgentId)
+            && credits !== null
+            && Number.isFinite(credits)
+            && credits > 0;
+          if (canHonorReservation) reservedAgentIdsByTask.set(Number(reservedTask.id), reservedAgentId);
+        }
         agentEligibilityPools.set(ownerId, {
           refreshedAt,
           totalAgents: ownerAgents.length,
