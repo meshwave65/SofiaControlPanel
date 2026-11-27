@@ -277,7 +277,6 @@ function assistantText(message: ManusMessageEvent) {
 type MissionAgentUpdateResult = {
   updatedDocuments: number;
   executionComplete: boolean;
-  completionRequested: boolean;
   githubSyncComplete: boolean;
 };
 
@@ -285,7 +284,7 @@ const AGENT_WRITABLE_DOCUMENT_TYPES = new Set(["BLUEPRINT", "FR", "OR", "FOR", "
 const DOCUMENT_STATES = new Set(["DRAFT", "READY", "ACTIVE", "PUBLISHED"]);
 
 async function persistMissionAgentUpdates(task: NonNullable<LocalTask>): Promise<MissionAgentUpdateResult> {
-  if (!task.agentId) return { updatedDocuments: 0, executionComplete: false, completionRequested: false, githubSyncComplete: false };
+  if (!task.agentId) return { updatedDocuments: 0, executionComplete: false, githubSyncComplete: false };
   const messages = await listManusMessages(task);
   const missionRootId = await db.getMissionRootTaskId(task.id);
   if (missionRootId == null) throw new Error("Não foi possível resolver a missão raiz para persistir os artefatos do agente.");
@@ -449,7 +448,7 @@ async function persistMissionAgentUpdates(task: NonNullable<LocalTask>): Promise
   }
 
   if (!completionCandidate || completionCandidate.execution_complete !== true) {
-    return { updatedDocuments, executionComplete: false, completionRequested: false, githubSyncComplete };
+    return { updatedDocuments, executionComplete: false, githubSyncComplete };
   }
 
   const planStepIds = Array.isArray(completionCandidate.plan_step_ids)
@@ -471,7 +470,6 @@ async function persistMissionAgentUpdates(task: NonNullable<LocalTask>): Promise
   return {
     updatedDocuments,
     executionComplete: allStepsComplete && requiredArtifactsExist && githubSyncComplete,
-    completionRequested: true,
     githubSyncComplete,
   };
 }
@@ -668,7 +666,6 @@ async function syncRunningTask(task: NonNullable<LocalTask>) {
   let agentUpdate: MissionAgentUpdateResult = {
     updatedDocuments: 0,
     executionComplete: false,
-    completionRequested: false,
     githubSyncComplete: false,
   };
   try {
