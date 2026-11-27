@@ -456,9 +456,9 @@ export async function createTask(data: {
 
 
 /**
- * Creates a human-origin mission and its immutable source request + initial TR
- * in one database transaction. A failure cannot leave a mission without its
- * mandatory initial documents.
+ * Creates a mission and its immutable source request + initial TR atomically.
+ * System-origin missions receive automatic TR approval and an initial FR draft;
+ * human-origin missions wait for explicit operator approval.
  */
 export async function createMissionWithInitialDocuments(input: {
   task: Parameters<typeof createTask>[0];
@@ -467,6 +467,7 @@ export async function createMissionWithInitialDocuments(input: {
 }) {
   const database = await getDb();
   if (!database) throw new Error("Database not available");
+  const isSystemMission = input.task.creatorType === "system";
 
   return database.transaction(async (transaction) => {
     const [insertedTask] = await transaction
@@ -492,7 +493,7 @@ export async function createMissionWithInitialDocuments(input: {
       typeKey: "ORIGINAL_REQUEST" | "TR",
       documentKey: "ORIGINAL_REQUEST" | "TR",
       title: string,
-      versionInput: MissionDocumentVersionInput,
+      suppliedVersion: MissionDocumentVersionInput,
     ) => {
       const [documentType] = await transaction
         .select()
@@ -500,6 +501,16 @@ export async function createMissionWithInitialDocuments(input: {
         .where(and(eq(missionDocumentTypes.typeKey, typeKey), eq(missionDocumentTypes.isActive, true)))
         .limit(1);
       if (!documentType) throw new Error(`Required mission document type is inactive or missing: ${typeKey}`);
+
+      const versionInput = typeKey === "TR" && isSystemMission
+        ? {
+          ...suppliedVersion,
+          state: "VALIDATED",
+          publishedAt: new Date(),
+          provenance: { ...(suppliedVersion.provenance ?? {}), origin: "SOFIA", action: "automatic_system_tr_approval" },
+          changeSummary: "TR aprovado automaticamente por se tratar de missão criada pelo sistema",
+        }
+        : suppliedVersion;
 
       if (typeKey === "ORIGINAL_REQUEST" && (versionInput.authorType === "AGENT" || versionInput.state !== "PUBLISHED")) {
         throw new Error("The original mission request must be published as a HUMAN or SOFIA source snapshot");
@@ -513,7 +524,7 @@ export async function createMissionWithInitialDocuments(input: {
         .values({ taskId: insertedTask.id, documentTypeId: documentType.id, documentKey, title })
         .returning();
 
-      await transaction.insert(missionDocumentVersions).values({
+      const [version] = await transaction.insert(missionDocumentVersions).values({
         documentId: document.id,
         version: 1,
         state: versionInput.state ?? "DRAFT",
@@ -526,7 +537,8 @@ export async function createMissionWithInitialDocuments(input: {
         changeSummary: versionInput.changeSummary ?? "Initial version",
         contentHash: versionInput.contentHash ?? null,
         publishedAt: versionInput.publishedAt ?? (typeKey === "ORIGINAL_REQUEST" ? new Date() : null),
-      });
+      }).returning();
+      return { document, version };
     };
 
     await persistInitialDocument(
@@ -535,7 +547,54 @@ export async function createMissionWithInitialDocuments(input: {
       "Solicitação original",
       input.originalRequest,
     );
-    await persistInitialDocument("TR", "TR", "TR — " + insertedTask.title, input.tr);
+    const trResult = await persistInitialDocument("TR", "TR", "TR — " + insertedTask.title, input.tr);
+
+    if (isSystemMission) {
+      const [frType] = await transaction.select().from(missionDocumentTypes)
+        .where(and(eq(missionDocumentTypes.typeKey, "FR"), eq(missionDocumentTypes.isActive, true)))
+        .limit(1);
+      if (!frType) throw new Error("Required mission document type is inactive or missing: FR");
+      const frContent = [
+        "# FR — Final Report",
+        "",
+        "## Objetivo da missão",
+        `Missão: ${insertedTask.title}`,
+        "Objetivo e critérios de resultado conforme o TR aprovado, versão 1.",
+        "",
+        "## Desenvolvimento e evolução",
+        "Relatório iniciado automaticamente para missão criada pelo sistema. O agente executor atualizará esta seção durante a execução.",
+        "",
+        "## Resultados alcançados",
+        "A apurar durante a execução.",
+        "",
+        "## Conclusão",
+        "Pendente de encerramento.",
+      ].join("\n");
+      const [frDocument] = await transaction.insert(missionDocuments).values({
+        taskId: insertedTask.id,
+        documentTypeId: frType.id,
+        documentKey: "FR",
+        title: "FR — " + insertedTask.title,
+      }).returning();
+      await transaction.insert(missionDocumentVersions).values({
+        documentId: frDocument.id,
+        version: 1,
+        state: "DRAFT",
+        content: frContent,
+        authorType: "SOFIA",
+        sourceDocumentVersionId: trResult.version.id,
+        provenance: { origin: "SOFIA", action: "automatic_system_fr_creation", sourceTRVersion: 1 },
+        changeSummary: "FR inicial criado após aprovação automática do TR",
+      });
+      const [stagedStatus] = await transaction.select({ id: taskStatuses.id })
+        .from(taskStatuses).where(eq(taskStatuses.name, "STAGED")).limit(1);
+      if (!stagedStatus) throw new Error("STAGED task status is missing");
+      const [stagedTask] = await transaction.update(tasks)
+        .set({ statusId: stagedStatus.id, manusStatus: "awaiting_agent", updatedAt: new Date() })
+        .where(eq(tasks.id, insertedTask.id))
+        .returning();
+      return stagedTask;
+    }
 
     return task;
   });
