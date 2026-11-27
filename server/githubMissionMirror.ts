@@ -133,8 +133,8 @@ ${version.content || ""}
 }
 
 /** Mirrors mission metadata and every latest document version, then records combined sync state. */
-export async function mirrorMissionToGitHub(taskId: number) {
-  const task = await db.getTaskById(taskId);
+export async function mirrorMissionToGitHub(taskId: number, taskOverride?: MirrorTask) {
+  const task = taskOverride ?? await db.getTaskById(taskId);
   if (!task) throw new Error(`Missão ${taskId} não encontrada para espelhamento.`);
   const [taskMirror, documentMirror] = await Promise.all([
     mirrorTaskToGitHub(task),
