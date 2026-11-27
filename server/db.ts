@@ -764,32 +764,27 @@ export async function inspectTaskAgentEligibility(taskId: number, ownerId: numbe
   if (!task) return null;
 
   const observedAt = new Date();
-  const agentsForOwner = await database.execute(sql`
-    SELECT
-      a.id,
-      a.name,
-      a.status,
-      a."connectionStatus",
-      a.version,
-      a."lastHeartbeat",
-      a."creditsRemaining",
-      a."creditsUpdatedAt",
-      (a."manusToken" IS NOT NULL) AS "hasCredential",
-      (a.status = 'online') AS "isOnline",
-      (a."connectionStatus" IN ('configured', 'connected')) AS "connectionEligible",
-      (a."creditsRemaining" IS NOT NULL AND a."creditsRemaining"::numeric > 0) AS "hasPositiveCredits",
-      (a."creditsUpdatedAt" >= NOW() - INTERVAL '60 seconds') AS "creditSnapshotFresh",
-      NOT EXISTS (
-        SELECT 1
-        FROM sandbox.tasks active_task
-        JOIN sandbox."taskStatuses" active_status ON active_status.id = active_task."statusId"
-        WHERE active_task."agentId" = a.id
-          AND active_task.id <> ${taskId}
-          AND active_status.name = 'PROGRESS'
-      ) AS "hasNoProgressTask"
-    FROM sandbox.agents a
-    WHERE a."ownerId" = ${task.createdBy}
-  `) as any[];
+  const progressStatusId = await getTaskStatusIdByName("PROGRESS");
+  const activeTasks = await getAllTasksGlobal();
+  const activeAgentIds = new Set<number>(activeTasks
+    .filter((activeTask: any) => activeTask.id !== taskId
+      && activeTask.statusId === progressStatusId
+      && activeTask.agentId != null)
+    .map((activeTask: any) => Number(activeTask.agentId)));
+  const agentsForOwner = (await getAgentInventorySnapshot())
+    .filter((agent: any) => Number(agent.ownerId) === Number(task.createdBy))
+    .map((agent: any) => {
+      const credits = agent.creditsRemaining == null ? null : Number(agent.creditsRemaining);
+      return {
+        ...agent,
+        isOnline: agent.status === "online",
+        connectionEligible: ["configured", "connected"].includes(agent.connectionStatus),
+        hasPositiveCredits: credits !== null && Number.isFinite(credits) && credits > 0,
+        creditSnapshotFresh: Boolean(agent.creditsUpdatedAt
+          && new Date(agent.creditsUpdatedAt).getTime() >= observedAt.getTime() - 60_000),
+        hasNoProgressTask: !activeAgentIds.has(Number(agent.id)),
+      };
+    });
 
   const taskIsStaged = task.taskStatus === "STAGED";
   const assignmentMode = task.agentPinned
