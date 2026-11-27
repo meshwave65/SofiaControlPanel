@@ -1236,18 +1236,22 @@ export const appRouter = router({
         if (task.parentTaskId != null) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O TR pertence à missão principal; tarefas-filhas não podem alterá-lo." });
         const docs = await db.getMissionDocumentsForTask(input.taskId, ctx.user.id, false);
         const tr = docs.find((document) => document.typeKey === "TR" && document.documentKey === "TR");
-        if (!tr?.latestVersion || tr.latestVersion.state !== "AWAITING_HUMAN_VALIDATION") throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Não existe uma versão do TR aguardando validação." });
+        if (!tr?.latestVersion || !["AWAITING_HUMAN_VALIDATION", "VALIDATED"].includes(tr.latestVersion.state)) {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Não existe uma versão do TR aguardando validação ou já validada para concluir a criação do FR." });
+        }
         const current = await db.getMissionDocumentVersionForTask(input.taskId, tr.id, tr.latestVersion.version, ctx.user.id, false);
         if (!current) throw new TRPCError({ code: "NOT_FOUND", message: "Conteúdo do TR não encontrado." });
-        const validated = await db.createMissionDocumentRevision({
-          taskId: input.taskId, documentId: tr.id, ownerId: ctx.user.id, canViewAll: false,
-          version: {
-            content: current.version.content, state: "VALIDATED", authorType: "HUMAN", authorUserId: ctx.user.id,
-            provenance: { origin: "HUMAN", action: "explicit_tr_validation", validatedVersion: tr.latestVersion.version },
-            changeSummary: "Validação explícita pelo operador da versão " + tr.latestVersion.version,
-            publishedAt: new Date(),
-          },
-        });
+        const validated = tr.latestVersion.state === "VALIDATED"
+          ? current.version
+          : await db.createMissionDocumentRevision({
+            taskId: input.taskId, documentId: tr.id, ownerId: ctx.user.id, canViewAll: false,
+            version: {
+              content: current.version.content, state: "VALIDATED", authorType: "HUMAN", authorUserId: ctx.user.id,
+              provenance: { origin: "HUMAN", action: "explicit_tr_validation", validatedVersion: tr.latestVersion.version },
+              changeSummary: "Validação explícita pelo operador da versão " + tr.latestVersion.version,
+              publishedAt: new Date(),
+            },
+          });
         const frContent = [
           "# FR — Final Report",
           "",
@@ -1265,27 +1269,29 @@ export const appRouter = router({
           "Pendente de encerramento da missão.",
         ].join("\n");
         const fr = docs.find((document) => document.typeKey === "FR" && document.documentKey === "FR");
-        if (fr) {
-          await db.createMissionDocumentRevision({
-            taskId: input.taskId, documentId: fr.id, ownerId: ctx.user.id, canViewAll: false,
-            version: {
-              content: frContent, state: "DRAFT", authorType: "SOFIA",
-              sourceDocumentVersionId: validated.id,
-              provenance: { origin: "TR_APPROVAL", sourceTRVersion: validated.version },
-              changeSummary: "FR atualizado para refletir a nova versão aprovada do TR",
-            },
-          });
-        } else {
-          await db.createMissionDocumentWithVersion({
-            taskId: input.taskId, ownerId: ctx.user.id, canViewAll: false,
-            typeKey: "FR", documentKey: "FR", title: "FR — " + task.title,
-            version: {
-              content: frContent, state: "DRAFT", authorType: "SOFIA",
-              sourceDocumentVersionId: validated.id,
-              provenance: { origin: "TR_APPROVAL", sourceTRVersion: validated.version },
-              changeSummary: "FR inicial criado após a aprovação do TR",
-            },
-          });
+        if (fr?.latestVersion?.sourceDocumentVersionId !== validated.id) {
+          if (fr) {
+            await db.createMissionDocumentRevision({
+              taskId: input.taskId, documentId: fr.id, ownerId: ctx.user.id, canViewAll: false,
+              version: {
+                content: frContent, state: "DRAFT", authorType: "SOFIA",
+                sourceDocumentVersionId: validated.id,
+                provenance: { origin: "TR_APPROVAL", sourceTRVersion: validated.version },
+                changeSummary: "FR atualizado para refletir a nova versão aprovada do TR",
+              },
+            });
+          } else {
+            await db.createMissionDocumentWithVersion({
+              taskId: input.taskId, ownerId: ctx.user.id, canViewAll: false,
+              typeKey: "FR", documentKey: "FR", title: "FR — " + task.title,
+              version: {
+                content: frContent, state: "DRAFT", authorType: "SOFIA",
+                sourceDocumentVersionId: validated.id,
+                provenance: { origin: "TR_APPROVAL", sourceTRVersion: validated.version },
+                changeSummary: "FR inicial criado após a aprovação do TR",
+              },
+            });
+          }
         }
         if (!(await db.hasExecutionReadyMissionDocuments(input.taskId))) {
           throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A versão vigente do TR não está validada." });
