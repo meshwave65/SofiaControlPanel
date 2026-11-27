@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import * as db from "./db";
+import { validateMissionBlueprintContent } from "./missionBlueprint";
 
 const MANUS_API_BASE = "https://api.manus.ai/v2";
 const REQUEST_TIMEOUT_MS = 30_000;
@@ -84,7 +85,7 @@ export async function createManusTask(task: NonNullable<LocalTask>, continuation
     "7. FR é informativo: objetivo, desenvolvimento, resultados e conclusão da missão. FOR é operacional: consolida os ORs, problemas, soluções e aprendizados. Não misture essas finalidades.",
     "8. TR e BP não devem ser revisados pelo fluxo de execução. Atualize os demais artefatos pertinentes.",
     "9. Após cada etapa, emita um bloco SOFIA_MISSION_UPDATE com JSON válido, sem cercas Markdown, contendo os documentos criados/atualizados. No bloco final, inclua execution_complete=true, plan_step_ids e completed_step_ids somente quando todas as etapas estiverem concluídas.",
-    "10. Cada documento deve conter type (BLUEPRINT, FR, OR, FOR, CHECKPOINT ou HANDOFF), documentKey estável, title, state e content. Use OR-<stepId> como documentKey do OR de cada etapa. Para o BP inicial, use documentKey BLUEPRINT e state READY. Nunca inclua TR ou ORIGINAL_REQUEST na lista de atualizações.",
+    "10. Cada documento deve conter type (BLUEPRINT, FR, OR, FOR, CHECKPOINT ou HANDOFF), documentKey estável, title, state e content. Use OR-<stepId> e HANDOFF-<stepId> como documentKeys de cada etapa; CHECKPOINT, FR e FOR usam chaves estáveis. Para o BP inicial, use documentKey BLUEPRINT e state READY. Nunca inclua TR ou ORIGINAL_REQUEST na lista de atualizações.",
     "Formato exato: <SOFIA_MISSION_UPDATE>{\"documents\":[{\"type\":\"BLUEPRINT\",\"documentKey\":\"BLUEPRINT\",\"title\":\"BP — ...\",\"state\":\"READY\",\"content\":\"...\"}],\"current_step_id\":\"S01\",\"plan_step_ids\":[\"S01\"],\"completed_step_ids\":[],\"execution_complete\":false}</SOFIA_MISSION_UPDATE>",
   ].join("\n");
 
@@ -300,7 +301,15 @@ async function persistMissionAgentUpdates(task: NonNullable<LocalTask>): Promise
         const title = typeof item?.title === "string" && item.title.trim()
           ? item.title.trim().slice(0, 255)
           : `${typeKey} — ${task.title}`;
-        const content = typeof item?.content === "string" ? item.content.trim() : "";
+        let content = typeof item?.content === "string" ? item.content.trim() : "";
+        if (typeKey === "BLUEPRINT") {
+          try {
+            content = validateMissionBlueprintContent(content);
+          } catch (error) {
+            console.warn(`[Manus] BP inválido para a missão ${task.id}; não será persistido:`, error instanceof Error ? error.message : error);
+            continue;
+          }
+        }
         if (!AGENT_WRITABLE_DOCUMENT_TYPES.has(typeKey) || !documentKey || !content || documentKey.length > 128) continue;
         if (typeKey === "OR" && !documentKey.startsWith("OR-")) continue;
         if (typeKey === "BLUEPRINT" && documentKey !== "BLUEPRINT") continue;
@@ -418,9 +427,9 @@ async function persistMissionAgentUpdates(task: NonNullable<LocalTask>): Promise
   const documentKeys = new Set(documents.map((document: any) => document.documentKey));
   const allStepsComplete = planStepIds.length > 0
     && planStepIds.every((stepId: string) => completedStepIds.includes(stepId)
-      && documentKeys.has(`OR-${stepId}`));
-  const requiredArtifactsExist = ["BLUEPRINT", "FR", "FOR", "CHECKPOINT"].every((key) => documentKeys.has(key))
-    && documents.some((document: any) => document.typeKey === "HANDOFF");
+      && documentKeys.has(`OR-${stepId}`)
+      && documentKeys.has(`HANDOFF-${stepId}`));
+  const requiredArtifactsExist = ["BLUEPRINT", "FR", "FOR", "CHECKPOINT"].every((key) => documentKeys.has(key));
   return { updatedDocuments, executionComplete: allStepsComplete && requiredArtifactsExist };
 }
 
