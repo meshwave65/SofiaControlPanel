@@ -386,15 +386,28 @@ async function syncRunningTask(task: NonNullable<LocalTask>) {
     return { taskId: task.id, manusStatus: "manual_pause_pending", creditsUsed: externalTask.credit_usage ?? null };
   }
 
-  let isDone = normalizedStatus === "stopped";
+  let isDone = false;
   const isFailed = normalizedStatus === "error";
   let waitingForCredits = false;
-  if (isDone) {
+  if (normalizedStatus === "stopped") {
+    // "stopped" sozinho não prova conclusão: aguarde a confirmação de que não há jobs em background.
+    if (externalTask.has_running_background_jobs !== false) {
+      return null;
+    }
     try {
       const credits = await syncAgentCredits(task.agentId);
       waitingForCredits = credits <= 0;
       isDone = !waitingForCredits;
-    } catch { /* retry on the next heartbeat */ }
+    } catch (error) {
+      // Falha na consulta de créditos não pode transformar uma parada em DONE.
+      await db.updateTaskExecution(task.id, {
+        manusStatus: "completion_check_pending",
+        creditsUsed: typeof externalTask.credit_usage === "number" ? externalTask.credit_usage : undefined,
+        completedAt: null,
+      });
+      console.warn(`[Manus] Conclusão da tarefa ${task.id} aguardando confirmação de créditos:`, error instanceof Error ? error.message : error);
+      return { taskId: task.id, manusStatus: "completion_check_pending", creditsUsed: externalTask.credit_usage ?? null };
+    }
   }
   const doneStatusId = isDone ? await db.getTaskStatusIdByName("DONE") : null;
   const pausedStatusId = waitingForCredits ? await db.getTaskStatusIdByName("PAUSED") : null;
