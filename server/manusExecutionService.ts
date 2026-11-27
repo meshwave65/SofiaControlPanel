@@ -627,10 +627,10 @@ async function syncRunningTask(task: NonNullable<LocalTask>) {
   }
 
   let isDone = false;
-  const isFailed = normalizedStatus === "error";
+  let isFailed = false;
   let waitingForCredits = false;
-  if (normalizedStatus === "stopped") {
-    // "stopped" sozinho não prova conclusão: aguarde a confirmação de que não há jobs em background.
+  if (normalizedStatus === "stopped" || normalizedStatus === "error") {
+    // Terminal externo sozinho não prova conclusão; também pode indicar esgotamento de créditos.
     if (externalTask.has_running_background_jobs !== false) return null;
 
     if (agentUpdate.executionComplete) {
@@ -657,6 +657,8 @@ async function syncRunningTask(task: NonNullable<LocalTask>) {
 
       if (knownCredits <= 0) {
         waitingForCredits = true;
+      } else if (normalizedStatus === "error") {
+        isFailed = true;
       } else {
         // A Manus parou, mas o agente não confirmou que todas as etapas do BP terminaram.
         // Preserva o estado e não classifica a missão como DONE.
