@@ -203,31 +203,87 @@ function toPublicAgent(agent: any) {
   return { ...safe, hasCredential: Boolean(manusPassword || manusToken) };
 }
 
+/**
+ * Sandbox inventory is a projection. For SCP_CATALOG agents, the canonical
+ * operational metadata and credential-presence flag come from the central SCP DB.
+ * Secret values are never copied into the Sandbox database or returned here.
+ */
+export async function getAgentInventorySnapshot() {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+  const localRows = await database.execute(sql`
+    SELECT
+      id, "ownerId", name, description, status::text AS status, version,
+      "manusAccount", "lastHeartbeat", "connectionStatus", "connectionError",
+      "creditsRemaining", "creditsUpdatedAt", "createdAt", "updatedAt",
+      "agentOrigin", "sourceAgentId",
+      ("manusToken" IS NOT NULL AND length("manusToken") > 0) AS "localHasCredential"
+    FROM sandbox.agents
+    ORDER BY id
+  `) as any[];
+
+  const sourceIds = localRows
+    .filter((agent: any) => agent.agentOrigin === "SCP_CATALOG" && agent.sourceAgentId != null)
+    .map((agent: any) => Number(agent.sourceAgentId));
+  let centralById = new Map<number, any>();
+  if (sourceIds.length > 0) {
+    try {
+      const client = await getCentralSCPClient();
+      const centralRows = await client`
+        SELECT
+          id, name, description, status::text AS status, version, "manusAccount",
+          "lastHeartbeat", "connectionStatus", "connectionError",
+          "creditsRemaining", "creditsUpdatedAt",
+          ("manusToken" IS NOT NULL AND length("manusToken") > 0) AS "hasCredential"
+        FROM sofia.agents
+        WHERE id = ANY(${client.array(sourceIds, "int4")})
+      `;
+      centralById = new Map(centralRows.map((agent: any) => [Number(agent.id), agent]));
+    } catch (error) {
+      console.warn("[AgentInventory] Fonte central SCP indisponível; agentes SCP_CATALOG permanecem sem elegibilidade:", error instanceof Error ? error.message : error);
+    }
+  }
+
+  return localRows.map((local: any) => {
+    const central = local.agentOrigin === "SCP_CATALOG" && local.sourceAgentId != null
+      ? centralById.get(Number(local.sourceAgentId))
+      : null;
+    if (local.agentOrigin === "SCP_CATALOG") {
+      return {
+        ...local,
+        ...(central ? {
+          name: central.name,
+          description: central.description,
+          status: central.status,
+          version: central.version,
+          manusAccount: central.manusAccount,
+          lastHeartbeat: central.lastHeartbeat,
+          connectionStatus: central.connectionStatus,
+          connectionError: central.connectionError,
+          creditsRemaining: central.creditsRemaining,
+          creditsUpdatedAt: central.creditsUpdatedAt,
+        } : {}),
+        hasCredential: Boolean(central?.hasCredential),
+        centralSourceAvailable: Boolean(central),
+      };
+    }
+    return { ...local, hasCredential: Boolean(local.localHasCredential), centralSourceAvailable: true };
+  });
+}
+
 export async function getAgentsByOwnerId(ownerId: number, canViewAll = false) {
-  const db = await getDb();
-  if (!db) throw new Error("Banco de dados indisponível. Verifique DATABASE_URL no Render.");
-  const query = db.select().from(agents);
-  const rows = canViewAll
-    ? await query
-    : await query.where(eq(agents.ownerId, ownerId));
-  return rows.map(toPublicAgent);
+  const rows = await getAgentInventorySnapshot();
+  return rows.filter((agent: any) => canViewAll || Number(agent.ownerId) === ownerId);
 }
 export async function getAgentById(id: number) {
-  const db = await getDb();
-  if (!db) return null;
-  const result = await db.select().from(agents).where(eq(agents.id, id)).limit(1);
-  return result.length > 0 ? toPublicAgent(result[0]) : null;
+  const rows = await getAgentInventorySnapshot();
+  return rows.find((agent: any) => Number(agent.id) === id) ?? null;
 }
 
 export async function getAgentByIdForOwner(id: number, ownerId: number, canViewAll = false) {
-  const database = await getDb();
-  if (!database) return null;
-  const result = await database
-    .select()
-    .from(agents)
-    .where(canViewAll ? eq(agents.id, id) : and(eq(agents.id, id), eq(agents.ownerId, ownerId)))
-    .limit(1);
-  return result.length > 0 ? toPublicAgent(result[0]) : null;
+  const agent = await getAgentById(id);
+  if (!agent || (!canViewAll && Number(agent.ownerId) !== ownerId)) return null;
+  return agent;
 }
 
 /**
@@ -1323,10 +1379,9 @@ export async function getAllAgents() {
 }
 
 export async function getAllAgentsGlobal() {
-  const db = await getDb();
-  if (!db) return [];
-
-  return db.select().from(agents);
+  const database = await getDb();
+  if (!database) return [];
+  return getAgentInventorySnapshot();
 }
 
 export async function getAllTasksAdmin() {
