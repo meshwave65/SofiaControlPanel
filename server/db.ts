@@ -876,9 +876,11 @@ export async function claimStagedTaskWithAvailableAgent(
   taskId: number,
   stagedStatusId: number,
   progressStatusId: number,
+  eligibleAgentIds: number[],
 ) {
   const database = await getDb();
   if (!database) throw new Error("Database not available");
+  if (!eligibleAgentIds.length) return null;
 
   return database.transaction(async (tx) => {
     const [task] = await tx.execute(sql`
@@ -897,7 +899,7 @@ export async function claimStagedTaskWithAvailableAgent(
           AND a."ownerId" = ${task.createdBy}
           AND a.status = 'online'
           AND a."connectionStatus" IN ('configured', 'connected')
-          AND a."manusToken" IS NOT NULL
+          AND a.id = ANY(${eligibleAgentIds}::int[])
           AND a."creditsRemaining" IS NOT NULL
           AND a."creditsRemaining"::numeric > 0
           AND NOT EXISTS (
@@ -926,7 +928,7 @@ export async function claimStagedTaskWithAvailableAgent(
       WHERE a."ownerId" = ${task.createdBy}
         AND a.status = 'online'
         AND a."connectionStatus" IN ('configured', 'connected')
-        AND a."manusToken" IS NOT NULL
+        AND a.id = ANY(${eligibleAgentIds}::int[])
         AND a."creditsRemaining" IS NOT NULL
           AND a."creditsRemaining"::numeric > 0
         AND NOT EXISTS (
