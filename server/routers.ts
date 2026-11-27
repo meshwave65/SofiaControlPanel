@@ -762,7 +762,10 @@ export const appRouter = router({
           const canViewAll = ctx.user.role === "admin";
           const documents = await db.getMissionDocumentsForTask(missionRootId, ctx.user.id, canViewAll);
           const existingFOR = documents.find((document) => document.typeKey === "FOR" && document.documentKey === "FOR");
-          if (existingFOR) return { documentId: existingFOR.id, alreadyExists: true };
+          if (existingFOR) {
+            const githubMirror = await mirrorMissionToGitHub(missionRootId);
+            return { documentId: existingFOR.id, alreadyExists: true, githubSyncStatus: githubMirror.status };
+          }
 
           const sourceDocuments = await Promise.all(documents.filter((document) => document.latestVersion).map(async (document) => {
             const latest = await db.getMissionDocumentVersionForTask(
