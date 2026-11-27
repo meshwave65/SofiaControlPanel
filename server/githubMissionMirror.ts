@@ -136,10 +136,17 @@ ${version.content || ""}
 export async function mirrorMissionToGitHub(taskId: number, taskOverride?: MirrorTask) {
   const task = taskOverride ?? await db.getTaskById(taskId);
   if (!task) throw new Error(`Missão ${taskId} não encontrada para espelhamento.`);
-  const [taskMirror, documentMirror] = await Promise.all([
-    mirrorTaskToGitHub(task),
-    mirrorMissionDocumentsToGitHub(taskId, task.createdBy),
-  ]);
+  const taskMirror = await mirrorTaskToGitHub(task);
+  let documentMirror: MissionDocumentsMirrorResult;
+  try {
+    documentMirror = await mirrorMissionDocumentsToGitHub(taskId, task.createdBy);
+  } catch (error) {
+    documentMirror = {
+      status: "failed",
+      count: 0,
+      errors: [error instanceof Error ? error.message : "Falha desconhecida ao espelhar documentos."],
+    };
+  }
   const status = taskMirror.status === "failed" || documentMirror.status === "failed"
     ? "failed"
     : taskMirror.status === "not_configured" || documentMirror.status === "not_configured"
