@@ -464,7 +464,7 @@ async function persistMissionAgentUpdates(task: NonNullable<LocalTask>): Promise
       && documentKeys.has(`HANDOFF-${stepId}`));
   const latestByKey = new Map(documents.map((document: any) => [document.documentKey, document]));
   const requiredArtifactsExist = ["BLUEPRINT", "FR", "FOR", "CHECKPOINT"].every((key) => documentKeys.has(key))
-    && latestByKey.get("BLUEPRINT")?.latestVersion?.state === "READY"
+    && ["READY", "ACTIVE"].includes(latestByKey.get("BLUEPRINT")?.latestVersion?.state)
     && ["ACTIVE", "PUBLISHED"].includes(latestByKey.get("FR")?.latestVersion?.state)
     && ["ACTIVE", "PUBLISHED"].includes(latestByKey.get("FOR")?.latestVersion?.state);
   return {
