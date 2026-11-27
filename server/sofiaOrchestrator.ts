@@ -44,9 +44,14 @@ export class SofiaOrchestrator {
       const agents = await db.getAllAgentsGlobal();
       const current = agents.find((agent) => agent.id === task.agentId);
       if (!current) continue;
-      let currentCredits = 0;
-      try { currentCredits = await syncAgentCredits(current.id); } catch { continue; }
-      if (currentCredits > 0 && task.manusTaskId) {
+      let currentCredits: number | null = current.creditsRemaining == null ? null : Number(current.creditsRemaining);
+      try {
+        currentCredits = await syncAgentCredits(current.id);
+      } catch (error) {
+        // Preserve the last known balance. Unknown is not treated as positive or exhausted.
+        console.warn(`[Orchestrator] Consulta de créditos indisponível para o agente atual ${current.id}; mantendo o último saldo conhecido.`);
+      }
+      if (currentCredits !== null && currentCredits > 0 && task.manusTaskId) {
         await sendManusMessage(task, "Os créditos foram restaurados. Continue a missão a partir do último checkpoint, sem repetir o trabalho concluído.");
         await db.updateTaskExecution(task.id, { manusStatus: "running", completedAt: null });
         await db.updateTaskStatus(task.id, progressStatusId);
@@ -54,19 +59,48 @@ export class SofiaOrchestrator {
         results.push({ taskId: task.id, action: task.agentPinned ? "resumed_pinned_agent" : "resumed_agent", agentId: current.id });
         continue;
       }
-      if (task.agentPinned || currentCredits > 0) continue;
-      const activeAgentIds = new Set((await db.getAllTasksGlobal()).filter((item) => item.statusId === progressStatusId && item.agentId).map((item) => item.agentId));
-      const replacement = agents.find((agent) => agent.id !== current.id && agent.ownerId === task.createdBy && agent.status === "online" && !activeAgentIds.has(agent.id));
-      if (!replacement) continue;
-      let replacementCredits = 0;
-      try { replacementCredits = await syncAgentCredits(replacement.id); } catch { continue; }
-      if (replacementCredits <= 0) continue;
+      if (currentCredits === null || currentCredits > 0) continue;
+
+      // A exaustão libera a missão para transferência, mesmo quando havia agente fixado.
+      const allTasks = await db.getAllTasksGlobal();
+      const activeAgentIds = new Set(allTasks
+        .filter((item) => item.statusId === progressStatusId && item.agentId && item.id !== task.id)
+        .map((item) => item.agentId));
+      const replacements = agents.filter((agent) =>
+        agent.id !== current.id
+        && agent.ownerId === task.createdBy
+        && agent.status === "online"
+        && ["configured", "connected"].includes(agent.connectionStatus)
+        && !activeAgentIds.has(agent.id)
+      );
       const checkpoint = await getManusCheckpoint(task).catch(() => "");
-      await db.reassignTaskAgent(task.id, replacement.id);
-      await createManusTask({ ...task, agentId: replacement.id }, checkpoint);
-      await db.updateTaskStatus(task.id, progressStatusId);
-        await syncTaskMirror(task.id);
-      results.push({ taskId: task.id, action: "transferred_after_credit_exhaustion", agentId: replacement.id });
+      let transferred = false;
+      for (const replacement of replacements) {
+        let replacementCredits: number | null = replacement.creditsRemaining == null ? null : Number(replacement.creditsRemaining);
+        try {
+          replacementCredits = await syncAgentCredits(replacement.id);
+        } catch {
+          // A falha de consulta não apaga um saldo positivo já conhecido.
+        }
+        if (replacementCredits === null || replacementCredits <= 0) continue;
+
+        await db.reassignTaskAgent(task.id, replacement.id);
+        try {
+          await createManusTask({ ...task, agentId: replacement.id }, checkpoint);
+          await db.updateTaskStatus(task.id, progressStatusId);
+          await syncTaskMirror(task.id);
+          results.push({ taskId: task.id, action: "transferred_after_credit_exhaustion", agentId: replacement.id });
+          transferred = true;
+          break;
+        } catch (error) {
+          // Try the next eligible agent; leave the mission paused if none can start it.
+          await db.reassignTaskAgent(task.id, current.id);
+          console.warn(`[Orchestrator] Agente substituto ${replacement.id} não conseguiu assumir a missão ${task.id}:`, error instanceof Error ? error.message : error);
+        }
+      }
+      if (!transferred) {
+        console.warn(`[Orchestrator] Missão ${task.id} permanece aguardando um agente substituto com saldo e credencial disponíveis.`);
+      }
     }
     return results;
   }
@@ -242,6 +276,7 @@ export class SofiaOrchestrator {
    * Inicia a missão local e cria a execução correspondente na API Manus.
    */
   static async startTask(taskId: number, dispatchKey?: string): Promise<any> {
+    void dispatchKey;
     const task = await db.getTaskById(taskId);
     if (!task) return null;
 
