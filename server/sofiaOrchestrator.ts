@@ -26,6 +26,7 @@ type AgentEligibilityPool = {
   refreshedAt: number;
   totalAgents: number;
   eligibleAgentIds: number[];
+  reservedAgentIdsByTask: Map<number, number>;
 };
 
 const AGENT_POOL_REFRESH_MS = 60_000;
@@ -40,12 +41,17 @@ export class SofiaOrchestrator {
         db.getAllAgentsGlobal(),
         db.getAllTasksGlobal(),
       ]);
-      const progressStatusId = await db.getTaskStatusIdByName(STATUS_PROGRESS);
+      const [progressStatusId, stagedStatusId] = await Promise.all([
+        db.getTaskStatusIdByName(STATUS_PROGRESS),
+        db.getTaskStatusIdByName(STATUS_STAGED),
+      ]);
       const busyAgentIds = new Set<number>(
         tasks
           .filter((task: any) => task.statusId === progressStatusId && task.agentId != null)
           .map((task: any) => Number(task.agentId)),
       );
+      const reservedTasks = tasks.filter((task: any) => task.statusId === stagedStatusId && task.agentId != null);
+      const reservedAgentIds = new Set<number>(reservedTasks.map((task: any) => Number(task.agentId)));
       const byOwner = new Map<number, any[]>();
       for (const agent of agents as any[]) {
         const ownerId = Number(agent.ownerId);
@@ -66,7 +72,9 @@ export class SofiaOrchestrator {
             && credits !== null
             && Number.isFinite(credits)
             && credits > 0
-            && !busyAgentIds.has(Number(agent.id));
+            && !busyAgentIds.has(Number(agent.id))
+            && !reservedAgentIds.has(Number(agent.id))
+            && !agent.centralBusy;
         });
         eligible.sort((left: any, right: any) => {
           const creditDelta = Number(right.creditsRemaining) - Number(left.creditsRemaining);
@@ -75,10 +83,16 @@ export class SofiaOrchestrator {
           const rightUpdated = right.creditsUpdatedAt ? new Date(right.creditsUpdatedAt).getTime() : Number.NEGATIVE_INFINITY;
           return leftUpdated - rightUpdated || Number(left.id) - Number(right.id);
         });
+        const reservedAgentIdsByTask = new Map<number, number>(
+          reservedTasks
+            .filter((task: any) => Number(task.createdBy) === ownerId)
+            .map((task: any) => [Number(task.id), Number(task.agentId)]),
+        );
         agentEligibilityPools.set(ownerId, {
           refreshedAt,
           totalAgents: ownerAgents.length,
           eligibleAgentIds: eligible.map((agent: any) => Number(agent.id)),
+          reservedAgentIdsByTask,
         });
       }
       console.log(`[AgentPool] Inventário atualizado: ${agents.length} agentes; ${Array.from(agentEligibilityPools.values()).reduce((sum, item) => sum + item.eligibleAgentIds.length, 0)} elegíveis.`);
@@ -88,12 +102,17 @@ export class SofiaOrchestrator {
     return agentPoolRefreshPromise;
   }
 
-  static async getEligibleAgentIds(ownerId: number) {
+  static async getEligibleAgentIds(ownerId: number, taskId?: number) {
     const current = agentEligibilityPools.get(ownerId);
     if (!current || Date.now() - current.refreshedAt >= AGENT_POOL_REFRESH_MS) {
       await this.refreshAgentEligibilityPool();
     }
-    return [...(agentEligibilityPools.get(ownerId)?.eligibleAgentIds ?? [])];
+    const pool = agentEligibilityPools.get(ownerId);
+    if (!pool) return [];
+    const candidates = [...pool.eligibleAgentIds];
+    const reservedAgentId = taskId == null ? undefined : pool.reservedAgentIdsByTask.get(taskId);
+    if (reservedAgentId != null && !candidates.includes(reservedAgentId)) candidates.push(reservedAgentId);
+    return candidates;
   }
 
   static markAgentUnavailable(agentId: number | null | undefined) {
@@ -374,7 +393,7 @@ export class SofiaOrchestrator {
 
     // The pool is refreshed every 60 seconds; each mission uses its current
     // eligible IDs and the database performs the final atomic availability check.
-    const eligibleAgentIds = await this.getEligibleAgentIds(task.createdBy);
+    const eligibleAgentIds = await this.getEligibleAgentIds(task.createdBy, task.id);
     const claimedTask = await db.claimStagedTaskWithAvailableAgent(
       taskId,
       stagedStatusId,
