@@ -3,7 +3,7 @@ import { notifyOwner } from "./_core/notification";
 import { invokeLLM } from "./_core/llm";
 import { syncAllAgentCredits, syncRunningManusTasks } from "./manusExecutionService";
 import { SofiaOrchestrator } from "./sofiaOrchestrator";
-import { mirrorTaskToGitHub } from "./githubMissionMirror";
+import { mirrorMissionToGitHub } from "./githubMissionMirror";
 
 /**
  * Sistema de Heartbeat e Monitoramento
@@ -152,14 +152,7 @@ async function reconcileGitHubMissionMirrors() {
 
     for (const task of candidates) {
       try {
-        const mirror = await mirrorTaskToGitHub(task);
-        await db.updateTaskGitHubSync(task.id, {
-          missionKey: mirror.missionKey,
-          githubPath: mirror.path,
-          githubSha: mirror.sha,
-          githubSyncStatus: mirror.status,
-          githubSyncError: mirror.error ?? null,
-        });
+        await mirrorMissionToGitHub(task.id);
       } catch (error) {
         console.error(`[Heartbeat] Falha ao reconciliar espelho GitHub da tarefa ${task.id}:`, error);
       }
