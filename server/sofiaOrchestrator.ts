@@ -118,7 +118,7 @@ export class SofiaOrchestrator {
     const results: Array<{ taskId: number; action: string; agentId: number }> = [];
     for (const task of waiting) {
       if (!(await db.hasExecutionReadyMissionDocuments(task.id))) {
-        console.warn(`[Orchestrator] Retomada bloqueada para missão ${task.id}: TR/Blueprint não estão elegíveis.`);
+        console.warn(`[Orchestrator] Retomada bloqueada para missão ${task.id}: TR vigente não está validado.`);
         continue;
       }
       const agents = await db.getAllAgentsGlobal();
