@@ -575,7 +575,74 @@ export const appRouter = router({
           const canViewAll = ctx.user.role === "admin";
           const documents = await db.getMissionDocumentsForTask(missionRootId, ctx.user.id, canViewAll);
           const existingTR = documents.find((document) => document.typeKey === "TR" && document.documentKey === "TR");
-          if (existingTR) return { documentId: existingTR.id, alreadyExists: true, state: existingTR.latestVersion?.state ?? null };
+          if (existingTR) {
+            let latestTR = existingTR.latestVersion;
+            if (mission.creatorType === "system" && latestTR?.state === "AWAITING_HUMAN_VALIDATION") {
+              const current = await db.getMissionDocumentVersionForTask(
+                missionRootId, existingTR.id, latestTR.version, ctx.user.id, canViewAll,
+              );
+              if (!current) throw new TRPCError({ code: "NOT_FOUND", message: "Conteúdo do TR legado não encontrado." });
+              const approved = await db.createMissionDocumentRevision({
+                taskId: missionRootId,
+                documentId: existingTR.id,
+                ownerId: ctx.user.id,
+                canViewAll,
+                version: {
+                  content: current.version.content,
+                  state: "VALIDATED",
+                  authorType: "SOFIA",
+                  provenance: { origin: "SOFIA", action: "automatic_system_tr_approval", legacyBackfill: true },
+                  changeSummary: "TR legado aprovado automaticamente por se tratar de missão criada pelo sistema",
+                  publishedAt: new Date(),
+                },
+              });
+              latestTR = { ...latestTR, id: approved.id, version: approved.version, state: approved.state };
+            }
+            let frCreated = false;
+            if (latestTR && ["VALIDATED", "ACTIVE", "REORIENTED", "CLOSED"].includes(latestTR.state)) {
+              const existingFR = documents.find((document) => document.typeKey === "FR" && document.documentKey === "FR");
+              if (existingFR?.latestVersion?.sourceDocumentVersionId !== latestTR.id) {
+                const currentTRVersion = await db.getMissionDocumentVersionForTask(
+                  missionRootId, existingTR.id, latestTR.version, ctx.user.id, canViewAll,
+                );
+                if (!currentTRVersion) throw new TRPCError({ code: "NOT_FOUND", message: "Versão vigente do TR legado não encontrada." });
+                const frContent = [
+                  "# FR — Final Report", "",
+                  "## Objetivo da missão", `Missão: ${mission.title}`,
+                  "Objetivo e critérios de resultado conforme o TR vigente, versão " + latestTR.version + ".",
+                  "", "## Desenvolvimento e evolução",
+                  "Relatório iniciado durante a reconstrução documental; o agente executor atualizará esta seção.",
+                  "", "## Resultados alcançados", "A apurar durante a execução.",
+                  "", "## Conclusão", "Pendente de encerramento.",
+                ].join("\n");
+                const frVersion = {
+                  content: frContent, state: "DRAFT" as const, authorType: "SOFIA" as const,
+                  sourceDocumentVersionId: currentTRVersion.version.id,
+                  provenance: { origin: "LEGACY_BACKFILL", sourceTRVersion: latestTR.version },
+                  changeSummary: "FR inicial criado a partir do TR legado vigente",
+                };
+                if (existingFR) {
+                  await db.createMissionDocumentRevision({
+                    taskId: missionRootId, documentId: existingFR.id, ownerId: ctx.user.id, canViewAll, version: frVersion,
+                  });
+                } else {
+                  await db.createMissionDocumentWithVersion({
+                    taskId: missionRootId, ownerId: ctx.user.id, canViewAll,
+                    typeKey: "FR", documentKey: "FR", title: "FR — " + mission.title, version: frVersion,
+                  });
+                }
+                frCreated = true;
+              }
+            }
+            const githubMirror = await mirrorMissionToGitHub(missionRootId);
+            return {
+              documentId: existingTR.id,
+              alreadyExists: true,
+              state: latestTR?.state ?? null,
+              frCreated,
+              githubSyncStatus: githubMirror.status,
+            };
+          }
 
           const authorType = mission.creatorType === "system" ? "SOFIA" as const : "HUMAN" as const;
           if (!documents.some((document) => document.typeKey === "ORIGINAL_REQUEST" && document.documentKey === "ORIGINAL_REQUEST")) {
@@ -621,11 +688,13 @@ export const appRouter = router({
             completedAt: mission.completedAt ?? null,
             hasExternalExecution: Boolean(mission.manusTaskId),
           });
-          const trState = mission.manusTaskId
-            ? statusName === "DONE" ? "CLOSED" : "ACTIVE"
-            : statusName === "DONE" ? "CLOSED"
-              : statusName === "PROGRESS" ? "ACTIVE"
-                : ["PAUSED", "STAGED"].includes(statusName) ? "AWAITING_HUMAN_VALIDATION" : "DRAFT";
+          const trState = mission.creatorType === "system"
+            ? statusName === "DONE" ? "CLOSED" : statusName === "PROGRESS" ? "ACTIVE" : "VALIDATED"
+            : mission.manusTaskId
+              ? statusName === "DONE" ? "CLOSED" : "ACTIVE"
+              : statusName === "DONE" ? "CLOSED"
+                : statusName === "PROGRESS" ? "ACTIVE"
+                  : ["PAUSED", "STAGED"].includes(statusName) ? "AWAITING_HUMAN_VALIDATION" : "DRAFT";
           const created = await db.createMissionDocumentWithVersion({
             taskId: missionRootId,
             ownerId: ctx.user.id,
@@ -648,7 +717,31 @@ export const appRouter = router({
               publishedAt: new Date(),
             },
           });
-          return { documentId: created.document.id, alreadyExists: false, state: trState };
+          let frCreated = false;
+          if (["VALIDATED", "ACTIVE", "REORIENTED", "CLOSED"].includes(trState)) {
+            const frContent = [
+              "# FR — Final Report", "",
+              "## Objetivo da missão", `Missão: ${mission.title}`,
+              "Objetivo e critérios de resultado conforme o TR vigente, versão 1.",
+              "", "## Desenvolvimento e evolução",
+              "Relatório iniciado durante a reconstrução documental; o agente executor atualizará esta seção.",
+              "", "## Resultados alcançados", "A apurar durante a execução.",
+              "", "## Conclusão", "Pendente de encerramento.",
+            ].join("\n");
+            await db.createMissionDocumentWithVersion({
+              taskId: missionRootId, ownerId: ctx.user.id, canViewAll,
+              typeKey: "FR", documentKey: "FR", title: "FR — " + mission.title,
+              version: {
+                content: frContent, state: "DRAFT", authorType: "SOFIA",
+                sourceDocumentVersionId: created.version.id,
+                provenance: { origin: "LEGACY_BACKFILL", sourceTRVersion: 1 },
+                changeSummary: "FR inicial criado após reconstrução do TR aprovado",
+              },
+            });
+            frCreated = true;
+          }
+          const githubMirror = await mirrorMissionToGitHub(missionRootId);
+          return { documentId: created.document.id, alreadyExists: false, state: trState, frCreated, githubSyncStatus: githubMirror.status };
         }),
       generateFOR: protectedProcedure.input(z.object({ taskId: z.number().int().positive() }))
         .mutation(async ({ input, ctx }) => {
