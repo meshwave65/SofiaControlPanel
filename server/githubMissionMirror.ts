@@ -60,7 +60,6 @@ function missionMarkdown(task: MirrorTask, missionKey: string) {
 | priorityId | ${task.priorityId} |
 | parentTaskId | ${task.parentTaskId ?? ""} |
 | dueDate | ${dueDate} |
-| mirroredAt | ${new Date().toISOString()} |
 
 ## Description
 
@@ -141,11 +140,11 @@ export async function mirrorMissionToGitHub(taskId: number) {
     mirrorTaskToGitHub(task),
     mirrorMissionDocumentsToGitHub(taskId, task.createdBy),
   ]);
-  const status = taskMirror.status === "synced" && documentMirror.status === "synced"
-    ? "synced"
+  const status = taskMirror.status === "failed" || documentMirror.status === "failed"
+    ? "failed"
     : taskMirror.status === "not_configured" || documentMirror.status === "not_configured"
       ? "not_configured"
-      : "failed";
+      : "synced";
   const errors = [taskMirror.error, ...documentMirror.errors].filter(Boolean);
   await db.updateTaskGitHubSync(taskId, {
     missionKey: taskMirror.missionKey,
