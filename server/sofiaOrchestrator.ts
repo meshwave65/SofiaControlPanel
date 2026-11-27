@@ -113,15 +113,21 @@ export class SofiaOrchestrator {
   }
 
   static async resumeCreditBlockedTasks() {
-    const waiting = (await db.getAllTasksGlobal()).filter((task) => task.manusStatus === "waiting_credit" && task.agentId);
-    const progressStatusId = await db.getTaskStatusIdByName(STATUS_PROGRESS);
+    const allTasks = await db.getAllTasksGlobal();
+    const waiting = allTasks.filter((task) => task.manusStatus === "waiting_credit" && task.agentId);
+    const [agents, progressStatusId] = await Promise.all([
+      db.getAllAgentsGlobal(),
+      db.getTaskStatusIdByName(STATUS_PROGRESS),
+    ]);
+    const activeAgentIds = new Set<number>(allTasks
+      .filter((item) => item.statusId === progressStatusId && item.agentId)
+      .map((item) => Number(item.agentId)));
     const results: Array<{ taskId: number; action: string; agentId: number }> = [];
     for (const task of waiting) {
       if (!(await db.hasExecutionReadyMissionDocuments(task.id))) {
         console.warn(`[Orchestrator] Retomada bloqueada para missão ${task.id}: TR vigente não está validado.`);
         continue;
       }
-      const agents = await db.getAllAgentsGlobal();
       const current = agents.find((agent) => agent.id === task.agentId);
       if (!current) continue;
       let currentCredits: number | null = current.creditsRemaining == null ? null : Number(current.creditsRemaining);
@@ -135,6 +141,8 @@ export class SofiaOrchestrator {
         await sendManusMessage(task, "Os créditos foram restaurados. Continue a missão a partir do último checkpoint, sem repetir o trabalho concluído.");
         await db.updateTaskExecution(task.id, { manusStatus: "running", completedAt: null });
         await db.updateTaskStatus(task.id, progressStatusId);
+        activeAgentIds.add(current.id);
+        this.markAgentUnavailable(current.id);
         await syncTaskMirror(task.id);
         results.push({ taskId: task.id, action: task.agentPinned ? "resumed_pinned_agent" : "resumed_agent", agentId: current.id });
         continue;
@@ -142,10 +150,6 @@ export class SofiaOrchestrator {
       if (currentCredits === null || currentCredits > 0) continue;
 
       // A exaustão libera a missão para transferência, mesmo quando havia agente fixado.
-      const allTasks = await db.getAllTasksGlobal();
-      const activeAgentIds = new Set(allTasks
-        .filter((item) => item.statusId === progressStatusId && item.agentId && item.id !== task.id)
-        .map((item) => item.agentId));
       const replacements = agents.filter((agent) =>
         agent.id !== current.id
         && agent.ownerId === task.createdBy
@@ -171,6 +175,7 @@ export class SofiaOrchestrator {
           await createManusTask({ ...task, agentId: replacement.id }, checkpoint);
           await db.updateTaskStatus(task.id, progressStatusId);
           await syncTaskMirror(task.id);
+          activeAgentIds.add(replacement.id);
           this.markAgentUnavailable(current.id);
           this.markAgentUnavailable(replacement.id);
           results.push({ taskId: task.id, action: "transferred_after_credit_exhaustion", agentId: replacement.id });
