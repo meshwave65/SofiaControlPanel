@@ -882,11 +882,15 @@ export async function inspectTaskAgentEligibility(taskId: number, ownerId: numbe
   if (!task) return null;
 
   const observedAt = new Date();
-  const progressStatusId = await getTaskStatusIdByName("PROGRESS");
+  const [progressStatusId, stagedStatusId] = await Promise.all([
+    getTaskStatusIdByName("PROGRESS"),
+    getTaskStatusIdByName("STAGED"),
+  ]);
+  const activeStatusIds = new Set([progressStatusId, stagedStatusId]);
   const activeTasks = await getAllTasksGlobal();
   const activeAgentIds = new Set<number>(activeTasks
     .filter((activeTask: any) => activeTask.id !== taskId
-      && activeTask.statusId === progressStatusId
+      && activeStatusIds.has(activeTask.statusId)
       && activeTask.agentId != null)
     .map((activeTask: any) => Number(activeTask.agentId)));
   const agentsForOwner = (await getAgentInventorySnapshot())
@@ -900,7 +904,7 @@ export async function inspectTaskAgentEligibility(taskId: number, ownerId: numbe
         hasPositiveCredits: credits !== null && Number.isFinite(credits) && credits > 0,
         creditSnapshotFresh: Boolean(agent.creditsUpdatedAt
           && new Date(agent.creditsUpdatedAt).getTime() >= observedAt.getTime() - 60_000),
-        hasNoProgressTask: !activeAgentIds.has(Number(agent.id)),
+        hasNoProgressTask: !activeAgentIds.has(Number(agent.id)) && !agent.centralBusy,
       };
     });
 
@@ -920,7 +924,7 @@ export async function inspectTaskAgentEligibility(taskId: number, ownerId: numbe
     if (!agent.connectionEligible) reasons.push("connection_not_configured_or_connected");
     if (!agent.hasCredential) reasons.push("credential_missing");
     if (!agent.hasPositiveCredits) reasons.push("credits_not_positive");
-    if (!agent.hasNoProgressTask) reasons.push("agent_has_progress_task");
+    if (!agent.hasNoProgressTask) reasons.push("agent_has_active_or_reserved_task");
 
     const eligible = taskIsStaged
       && assignmentMode !== "PINNED_WITHOUT_AGENT"
@@ -946,6 +950,9 @@ export async function inspectTaskAgentEligibility(taskId: number, ownerId: numbe
       hasPositiveCredits: Boolean(agent.hasPositiveCredits),
       creditSnapshotFresh: Boolean(agent.creditSnapshotFresh),
       hasNoProgressTask: Boolean(agent.hasNoProgressTask),
+      centralActiveTaskCount: agent.centralActiveTaskCount ?? 0,
+      centralActiveTaskIds: agent.centralActiveTaskIds ?? [],
+      centralBusy: Boolean(agent.centralBusy),
       eligible,
       reasons,
     };
@@ -1021,7 +1028,7 @@ export async function claimStagedTaskWithAvailableAgent(
             JOIN sandbox."taskStatuses" active_status ON active_status.id = active_task."statusId"
             WHERE active_task."agentId" = a.id
               AND active_task.id <> ${taskId}
-              AND active_status.name = 'PROGRESS'
+              AND active_status.name IN ('PROGRESS', 'STAGED')
           )
         FOR UPDATE OF a
       `) as any;
