@@ -252,15 +252,24 @@ export async function mirrorTaskToGitHub(task: MirrorTask): Promise<MirrorResult
   const content = Buffer.from(missionMarkdown(task, missionKey), "utf8").toString("base64");
 
   try {
-    const current = await githubRequest<{ sha?: string }>(`${baseUrl}?ref=${encodeURIComponent(ENV.githubBranch)}`, {
+    const markdown = missionMarkdown(task, missionKey);
+    const current = await githubRequest<{ sha?: string; content?: string; encoding?: string }>(`${baseUrl}?ref=${encodeURIComponent(ENV.githubBranch)}`, {
       method: "GET",
     });
+    if (current.response.ok && current.body?.content) {
+      const existing = Buffer.from(current.body.content.replace(/\s/g, ""), "base64").toString("utf8");
+      if (existing === markdown) {
+        return { status: "synced", missionKey, path, sha: current.body.sha };
+      }
+    } else if (!current.response.ok && current.response.status !== 404) {
+      return { status: "failed", missionKey, path, error: `GET GitHub HTTP ${current.response.status}` };
+    }
     const currentSha = current.response.ok ? current.body?.sha : undefined;
     const result = await githubRequest<{ content?: { sha?: string }; commit?: { sha?: string } }>(baseUrl, {
       method: "PUT",
       body: JSON.stringify({
         message: `docs(mission): mirror ${missionKey}`,
-        content,
+        content: Buffer.from(markdown, "utf8").toString("base64"),
         branch: ENV.githubBranch,
         ...(currentSha ? { sha: currentSha } : {}),
       }),
