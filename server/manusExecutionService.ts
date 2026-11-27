@@ -426,7 +426,12 @@ async function syncRunningTask(task: NonNullable<LocalTask>) {
 }
 
 export async function syncRunningManusTasks() {
-  const tasks = (await db.getAllTasksGlobal()).filter((task) => task.manusTaskId && task.manusStatus !== "stopped" && task.manusStatus !== "error");
+  const tasks = (await db.getAllTasksGlobal()).filter((task) =>
+    task.manusTaskId
+    && task.manusStatus !== "stopped"
+    && task.manusStatus !== "error"
+    && task.manusStatus !== "waiting_credit"
+  );
   const results = [];
 
   for (const task of tasks) {
