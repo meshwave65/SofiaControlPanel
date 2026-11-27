@@ -37,11 +37,6 @@ export class SofiaOrchestrator {
     const progressStatusId = await db.getTaskStatusIdByName(STATUS_PROGRESS);
     const results: Array<{ taskId: number; action: string; agentId: number }> = [];
     for (const task of waiting) {
-      const dispatchAuthorization = await db.inspectTaskDispatchAuthorization(task.id);
-      if (!dispatchAuthorization.authorized) {
-        console.warn(`[Orchestrator] Retomada bloqueada para tarefa ${task.id}: ${dispatchAuthorization.reason ?? "unidade ACTION_PLAN sem autorização vigente"}.`);
-        continue;
-      }
       if (!(await db.hasExecutionReadyMissionDocuments(task.id))) {
         console.warn(`[Orchestrator] Retomada bloqueada para missão ${task.id}: TR/Blueprint não estão elegíveis.`);
         continue;
@@ -261,14 +256,7 @@ export class SofiaOrchestrator {
         externalTaskIds: task.manusTaskId ? [task.manusTaskId] : [],
       };
     }
-    const dispatchAuthorization = await db.inspectTaskDispatchAuthorization(taskId);
-    if (!dispatchAuthorization.authorized) {
-      throw new Error("Dispatch bloqueado pela governança da unidade: " + (dispatchAuthorization.reason ?? "autorização não comprovada."));
-    }
-    if (dispatchAuthorization.requiresActionPlanUnit
-      && (!dispatchKey || dispatchKey !== dispatchAuthorization.idempotencyKey)) {
-      throw new Error("Dispatch bloqueado: tarefas vinculadas a ACTION_PLAN só podem ser iniciadas pelo callback interno com a chave de idempotência persistida da unidade aprovada.");
-    }
+    // A validação do TR e o Blueprint READY autorizam a delegação. ACTION_PLAN não cria uma segunda aprovação.
     if (!(await db.hasExecutionReadyMissionDocuments(taskId))) {
       throw new Error("Execução bloqueada: a missão exige TR validado e Blueprint READY. Subtarefas herdam os documentos da missão principal.");
     }
