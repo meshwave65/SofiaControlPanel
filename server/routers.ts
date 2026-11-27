@@ -731,7 +731,7 @@ export const appRouter = router({
             title: "FOR — " + mission.title,
             version: {
               content: forContent,
-              state: "CLOSED",
+              state: "PUBLISHED",
               authorType: "SOFIA",
               provenance: {
                 origin: "MISSION_CLOSURE",
@@ -743,7 +743,8 @@ export const appRouter = router({
               publishedAt: new Date(),
             },
           });
-          return { documentId: created.document.id, alreadyExists: false };
+          const githubMirror = await mirrorMissionToGitHub(missionRootId);
+          return { documentId: created.document.id, alreadyExists: false, githubSyncStatus: githubMirror.status };
         }),
       getVersion: protectedProcedure.input(z.object({ taskId: z.number().int().positive(), documentId: z.number().int().positive(), version: z.number().int().positive() }))
         .query(async ({ input, ctx }) => {
@@ -1208,7 +1209,7 @@ export const appRouter = router({
           throw new TRPCError({ code: "PRECONDITION_FAILED", message: "A regeneração só é permitida enquanto o TR inicial estiver em DRAFT." });
         }
         const content = await generateInitialMissionTR(task.title, task.description);
-        return db.createMissionDocumentRevision({
+        const revision = await db.createMissionDocumentRevision({
           taskId: input.taskId, documentId: tr.id, ownerId: ctx.user.id, canViewAll: false,
           version: {
             content, state: "AWAITING_HUMAN_VALIDATION", authorType: "SOFIA",
@@ -1217,6 +1218,8 @@ export const appRouter = router({
             publishedAt: new Date(),
           },
         });
+        const githubMirror = await mirrorMissionToGitHub(input.taskId);
+        return { ...revision, githubSyncStatus: githubMirror.status };
       }),
       validateTR: protectedProcedure.input(z.object({ taskId: z.number().int().positive() })).mutation(async ({ input, ctx }) => {
         const task = await db.getTaskById(input.taskId);
@@ -1326,7 +1329,8 @@ export const appRouter = router({
           throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Blueprint não está READY ou não referencia a versão vigente do TR." });
         }
         await db.updateTaskStatus(input.taskId, stagedStatusId);
-        return { blueprintVersion: blueprint.version, statusId: stagedStatusId };
+        const githubMirror = await mirrorMissionToGitHub(input.taskId);
+        return { blueprintVersion: blueprint.version, statusId: stagedStatusId, githubSyncStatus: githubMirror.status };
       }),
     }),
 
