@@ -661,26 +661,8 @@ async function syncRunningTask(task: NonNullable<LocalTask>) {
     // Terminal externo sozinho não prova conclusão; também pode indicar esgotamento de créditos.
     if (externalTask.has_running_background_jobs !== false) return null;
 
-    if (agentUpdate.completionRequested && !agentUpdate.githubSyncComplete) {
-      await db.updateTaskExecution(task.id, {
-        manusStatus: "github_sync_pending",
-        creditsUsed: typeof externalTask.credit_usage === "number" ? externalTask.credit_usage : undefined,
-        completedAt: null,
-      });
-      await updateTaskStatusAndMirror(task.id, await db.getTaskStatusIdByName("PAUSED"));
-      return { taskId: task.id, manusStatus: "github_sync_pending", creditsUsed: externalTask.credit_usage ?? null };
-    }
-
     if (agentUpdate.executionComplete) {
       isDone = true;
-    } else if (!agentUpdate.githubSyncComplete) {
-      await db.updateTaskExecution(task.id, {
-        manusStatus: "github_sync_pending",
-        creditsUsed: typeof externalTask.credit_usage === "number" ? externalTask.credit_usage : undefined,
-        completedAt: null,
-      });
-      await updateTaskStatusAndMirror(task.id, await db.getTaskStatusIdByName("PAUSED"));
-      return { taskId: task.id, manusStatus: "github_sync_pending", creditsUsed: externalTask.credit_usage ?? null };
     } else {
       let knownCredits: number | null = null;
       try {
@@ -705,6 +687,14 @@ async function syncRunningTask(task: NonNullable<LocalTask>) {
         waitingForCredits = true;
       } else if (normalizedStatus === "error") {
         isFailed = true;
+      } else if (!agentUpdate.githubSyncComplete) {
+        await db.updateTaskExecution(task.id, {
+          manusStatus: "github_sync_pending",
+          creditsUsed: typeof externalTask.credit_usage === "number" ? externalTask.credit_usage : undefined,
+          completedAt: null,
+        });
+        await updateTaskStatusAndMirror(task.id, await db.getTaskStatusIdByName("PAUSED"));
+        return { taskId: task.id, manusStatus: "github_sync_pending", creditsUsed: externalTask.credit_usage ?? null };
       } else {
         // A Manus parou, mas o agente não confirmou que todas as etapas do BP terminaram.
         // Preserva o estado e não classifica a missão como DONE.
