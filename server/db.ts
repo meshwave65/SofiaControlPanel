@@ -266,7 +266,7 @@ export async function getAgentInventorySnapshot() {
           creditsRemaining: useLocalCreditSnapshot ? local.creditsRemaining : central.creditsRemaining,
           creditsUpdatedAt: useLocalCreditSnapshot ? local.creditsUpdatedAt : central.creditsUpdatedAt,
         } : {}),
-        hasCredential: Boolean(central?.hasCredential),
+        hasCredential: Boolean(central?.hasCredential && process.env.CENTRAL_SCP_CREDENTIAL_ENCRYPTION_KEY),
         centralSourceAvailable: Boolean(central),
       };
     }
@@ -351,7 +351,7 @@ export async function hasManusCredentialsForAgent(id: number) {
       WHERE id = ${Number(source.sourceAgentId)}
       LIMIT 1
     `;
-    return Boolean(row?.hasCredential);
+    return Boolean(row?.hasCredential && process.env.CENTRAL_SCP_CREDENTIAL_ENCRYPTION_KEY);
   }
   const [agent] = await database.select({ manusToken: agents.manusToken })
     .from(agents).where(eq(agents.id, id)).limit(1);
