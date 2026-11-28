@@ -15,13 +15,19 @@ RETURNING id AS fixture_parent_block_id \gset
 INSERT INTO sofia."textBlocks" ("contextId", "ownerId", "taskId", "parentBlockId", "operatorContent", "assistantContent", "responseStatus")
 VALUES (:fixture_context_id, :fixture_user_id, :fixture_task_id, :fixture_parent_block_id, 'Segunda pergunta', 'Segunda resposta', 'replied');
 
-DO $$
+CREATE TEMP TABLE text_block_fixture_ids (parent_id integer NOT NULL);
+INSERT INTO text_block_fixture_ids (parent_id) VALUES (:fixture_parent_block_id);
+
+DO $
+DECLARE
+  parent_id integer;
 BEGIN
+  SELECT parent_id INTO parent_id FROM text_block_fixture_ids;
   BEGIN
-    DELETE FROM sofia."textBlocks" WHERE id = :fixture_parent_block_id;
+    DELETE FROM sofia."textBlocks" WHERE id = parent_id;
     RAISE EXCEPTION 'Parent text block deletion unexpectedly succeeded';
   EXCEPTION
     WHEN foreign_key_violation THEN
       NULL;
   END;
-END $$;
+END $;
