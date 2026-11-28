@@ -1113,6 +1113,42 @@ export async function createTextContext(data: {
   return context;
 }
 
+export async function getOrCreateTextContextForOwner(data: {
+  ownerId: number;
+  taskId?: number | null;
+  contextType?: string;
+}) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+  const taskFilter = data.taskId == null
+    ? isNull(textContexts.taskId)
+    : eq(textContexts.taskId, data.taskId);
+  const [existing] = await database.select().from(textContexts)
+    .where(and(
+      eq(textContexts.ownerId, data.ownerId),
+      eq(textContexts.status, "active"),
+      taskFilter,
+    ))
+    .orderBy(desc(textContexts.updatedAt), desc(textContexts.id))
+    .limit(1);
+  if (existing) return existing;
+  return createTextContext({
+    ownerId: data.ownerId,
+    taskId: data.taskId ?? null,
+    contextType: data.contextType ?? (data.taskId == null ? "conversation" : "mission"),
+  });
+}
+
+export async function getLatestTextBlock(contextId: number, ownerId: number) {
+  const database = await getDb();
+  if (!database) return null;
+  const [block] = await database.select().from(textBlocks)
+    .where(and(eq(textBlocks.contextId, contextId), eq(textBlocks.ownerId, ownerId)))
+    .orderBy(desc(textBlocks.createdAt), desc(textBlocks.id))
+    .limit(1);
+  return block ?? null;
+}
+
 export async function getTextContextByIdForOwner(id: number, ownerId: number) {
   const database = await getDb();
   if (!database) return null;
