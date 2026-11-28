@@ -2,7 +2,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { eq, and, asc, desc, isNull, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { InsertUser, InsertAgent, users, agents, tasks, messages, activityLogs, contextReports, taskStatuses, taskPriorities, messageTypes, activityEventTypes, arcPolicies, arcAssessments, arcEvidence, arcAccessEvents, arcDeviceProfiles, arcConfidenceSnapshots, missionDocumentTypes, missionDocuments, missionDocumentVersions, missionActionUnits } from "../drizzle/schema";
+import { InsertUser, InsertAgent, users, agents, tasks, messages, activityLogs, contextReports, taskStatuses, taskPriorities, messageTypes, activityEventTypes, arcPolicies, arcAssessments, arcEvidence, arcAccessEvents, arcDeviceProfiles, arcConfidenceSnapshots, missionDocumentTypes, missionDocuments, missionDocumentVersions, missionActionUnits, textContexts, textBlocks } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { decryptCredential, encryptCredential } from './credentials';
 import { evaluateArcShadow } from './arcEvaluator';
@@ -1090,6 +1090,113 @@ export async function markMessageAsRead(id: number) {
   if (!db) throw new Error("Database not available");
 
   return db.update(messages).set({ isRead: true }).where(eq(messages.id, id));
+}
+
+// ============================================
+// CONVERSATIONAL TEXT BLOCK HELPERS
+// ============================================
+
+export async function createTextContext(data: {
+  ownerId: number;
+  taskId?: number | null;
+  title?: string | null;
+  contextType?: string;
+}) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+  const [context] = await database.insert(textContexts).values({
+    ownerId: data.ownerId,
+    taskId: data.taskId ?? null,
+    title: data.title ?? null,
+    contextType: data.contextType ?? "conversation",
+  }).returning();
+  return context;
+}
+
+export async function getTextContextByIdForOwner(id: number, ownerId: number) {
+  const database = await getDb();
+  if (!database) return null;
+  const [context] = await database.select().from(textContexts)
+    .where(and(eq(textContexts.id, id), eq(textContexts.ownerId, ownerId)))
+    .limit(1);
+  return context ?? null;
+}
+
+export async function createTextBlock(data: {
+  contextId: number;
+  ownerId: number;
+  taskId?: number | null;
+  parentBlockId?: number | null;
+  operatorContent: string;
+  sourceMetadata?: Record<string, unknown> | null;
+}) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+
+  return database.transaction(async (tx) => {
+    const [context] = await tx.select().from(textContexts)
+      .where(and(eq(textContexts.id, data.contextId), eq(textContexts.ownerId, data.ownerId)))
+      .limit(1);
+    if (!context) throw new Error("Text context not found or access denied.");
+
+    if (data.parentBlockId != null) {
+      const [parent] = await tx.select({ id: textBlocks.id }).from(textBlocks)
+        .where(and(eq(textBlocks.id, data.parentBlockId), eq(textBlocks.ownerId, data.ownerId)))
+        .limit(1);
+      if (!parent) throw new Error("Parent text block not found or access denied.");
+    }
+
+    const [block] = await tx.insert(textBlocks).values({
+      contextId: data.contextId,
+      ownerId: data.ownerId,
+      taskId: data.taskId ?? context.taskId ?? null,
+      parentBlockId: data.parentBlockId ?? null,
+      operatorContent: data.operatorContent,
+      assistantContent: null,
+      responseStatus: "pending",
+      sourceMetadata: data.sourceMetadata ?? null,
+    }).returning();
+
+    await tx.update(textContexts)
+      .set({ updatedAt: new Date() })
+      .where(eq(textContexts.id, data.contextId));
+
+    return block;
+  });
+}
+
+export async function completeTextBlock(data: {
+  id: number;
+  ownerId: number;
+  assistantContent: string;
+  responseStatus: "replied" | "failed";
+  sourceModel?: string | null;
+  sourceAgentId?: number | null;
+}) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not available");
+  const [block] = await database.update(textBlocks).set({
+    assistantContent: data.assistantContent,
+    responseStatus: data.responseStatus,
+    sourceModel: data.sourceModel ?? null,
+    sourceAgentId: data.sourceAgentId ?? null,
+    completedAt: new Date(),
+  }).where(and(
+    eq(textBlocks.id, data.id),
+    eq(textBlocks.ownerId, data.ownerId),
+    eq(textBlocks.responseStatus, "pending"),
+  )).returning();
+  if (!block) throw new Error("Text block not found, already completed, or access denied.");
+  return block;
+}
+
+export async function getTextBlocksByContext(contextId: number, ownerId: number, limit = 200) {
+  const database = await getDb();
+  if (!database) return [];
+  return database.select().from(textBlocks)
+    .where(and(eq(textBlocks.contextId, contextId), eq(textBlocks.ownerId, ownerId)))
+    .orderBy(asc(textBlocks.createdAt), asc(textBlocks.id))
+    .limit(limit);
 }
 
 // ============================================
