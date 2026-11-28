@@ -65,8 +65,16 @@ export default function Messages() {
     enabled: isAuthenticated && selectedTaskId === null,
     refetchInterval: 5000,
   });
+  const generalTextBlocksQuery = trpc.messages.getTextBlocksGeneral.useQuery(undefined, {
+    enabled: isAuthenticated && selectedTaskId === null,
+    refetchInterval: 5000,
+  });
   const utils = trpc.useUtils();
   const taskMessagesQuery = trpc.messages.getByTask.useQuery(
+    { taskId: selectedTaskId ?? 0 },
+    { enabled: isAuthenticated && selectedTaskId !== null, refetchInterval: 5000 },
+  );
+  const taskTextBlocksQuery = trpc.messages.getTextBlocksByTask.useQuery(
     { taskId: selectedTaskId ?? 0 },
     { enabled: isAuthenticated && selectedTaskId !== null, refetchInterval: 5000 },
   );
@@ -74,7 +82,7 @@ export default function Messages() {
   const createMissionMessage = trpc.messages.create.useMutation({
     onSuccess: async (result) => {
       await utils.tasks.list.invalidate();
-      if (selectedTaskId !== null) await taskMessagesQuery.refetch();
+      if (selectedTaskId !== null) await Promise.all([taskMessagesQuery.refetch(), taskTextBlocksQuery.refetch()]);
       setMessageContent("");
       setSelectedParentMessageId(null);
       setAttachments([]);
@@ -84,7 +92,7 @@ export default function Messages() {
   });
   const createGeneralMessage = trpc.messages.createGeneral.useMutation({
     onSuccess: async (result) => {
-      await Promise.all([generalMessagesQuery.refetch(), utils.tasks.list.invalidate()]);
+      await Promise.all([generalMessagesQuery.refetch(), generalTextBlocksQuery.refetch(), utils.tasks.list.invalidate()]);
       setMessageContent("");
       setSelectedParentMessageId(null);
       setAttachments([]);
@@ -100,6 +108,9 @@ export default function Messages() {
   const messages = selectedTaskId === null
     ? generalMessagesQuery.data || []
     : taskMessagesQuery.data || [];
+  const textBlocks = selectedTaskId === null
+    ? generalTextBlocksQuery.data || []
+    : taskTextBlocksQuery.data || [];
   const selectedParentMessage = messages.find((message: any) => message.id === selectedParentMessageId);
 
   const selectedTask = tasks.find((task: any) => task.id === selectedTaskId);
@@ -368,13 +379,37 @@ export default function Messages() {
                     <p className="whitespace-pre-wrap text-sm">{selectedParentMessage.content}</p>
                   </div>
                 ) : null}
-                {messages.length === 0 ? (
+                {textBlocks.length === 0 && messages.length === 0 ? (
                   <div className="flex h-full items-center gap-3 text-sm text-muted-foreground">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border bg-background"><MessageSquare className="h-4 w-4" /></div>
-                    <p>{generalMessagesQuery.isLoading || taskMessagesQuery.isLoading ? "Carregando interações..." : "Ainda não há interações neste contexto."}</p>
+                    <p>{generalMessagesQuery.isLoading || taskMessagesQuery.isLoading || generalTextBlocksQuery.isLoading || taskTextBlocksQuery.isLoading ? "Carregando interações..." : "Ainda não há interações neste contexto."}</p>
+                  </div>
+                ) : textBlocks.length > 0 ? (
+                  <div className="space-y-2">
+                    {textBlocks.map((block: any) => (
+                      <article key={block.id} className="rounded-lg border bg-background p-3">
+                        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-[11px] font-semibold">TEXT BLOCK #{block.id}{user?.role === "admin" ? ` · Conta #${block.ownerId}` : ""}</span>
+                          <span className="text-[10px] text-muted-foreground">
+                            {block.parentBlockId == null ? "Raiz" : `Parent #${block.parentBlockId}`} · {block.responseStatus}
+                          </span>
+                        </div>
+                        <div className="space-y-2">
+                          <div>
+                            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Operador</p>
+                            <p className="whitespace-pre-wrap text-xs leading-5">{block.operatorContent}</p>
+                          </div>
+                          <div className="border-t pt-2">
+                            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">SOFIA</p>
+                            <p className="whitespace-pre-wrap text-xs leading-5">{block.assistantContent || "Resposta pendente."}</p>
+                          </div>
+                        </div>
+                      </article>
+                    ))}
                   </div>
                 ) : (
                   <div className="space-y-2">
+                    <p className="px-1 text-[10px] text-muted-foreground">Histórico legado — mensagens anteriores à migração para text_blocks.</p>
                     {messages.map((message: any) => (
                       <div key={message.id} className={`rounded-lg border p-3 ${message.isAssistant ? "bg-muted/40" : "bg-background"}`}>
                         <div className="mb-1 flex items-center justify-between gap-2">
