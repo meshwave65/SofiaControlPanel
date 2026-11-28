@@ -1707,6 +1707,20 @@ export const appRouter = router({
       ctx.user.role === "admin" ? db.getAllGeneralMessages(500) : db.getMessagesByOwner(ctx.user.id, null, 200)
     ),
 
+    getTextBlocksGeneral: protectedProcedure.query(async ({ ctx }) =>
+      db.getTextBlocksForOwner(ctx.user.id, null, 200)
+    ),
+
+    getTextBlocksByTask: protectedProcedure
+      .input(z.object({ taskId: z.number().int().positive() }))
+      .query(async ({ input, ctx }) => {
+        const task = await db.getTaskById(input.taskId);
+        if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+        }
+        return db.getTextBlocksForOwner(ctx.user.id, input.taskId, 200);
+      }),
+
     createGeneral: protectedProcedure
       .input(z.object({
         parentMessageId: z.number().int().positive().optional(),
