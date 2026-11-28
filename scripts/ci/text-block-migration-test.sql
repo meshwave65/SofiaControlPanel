@@ -1,0 +1,27 @@
+-- Validates 0017 creates one-row interaction blocks and prevents parent deletion.
+INSERT INTO sofia.users DEFAULT VALUES RETURNING id AS fixture_user_id \gset
+INSERT INTO sofia.tasks ("createdBy", title, "statusId")
+VALUES (:fixture_user_id, 'Text block migration fixture', 1)
+RETURNING id AS fixture_task_id \gset
+
+INSERT INTO sofia."textContexts" ("ownerId", "taskId", "contextType")
+VALUES (:fixture_user_id, :fixture_task_id, 'mission')
+RETURNING id AS fixture_context_id \gset
+
+INSERT INTO sofia."textBlocks" ("contextId", "ownerId", "taskId", "operatorContent", "assistantContent", "responseStatus")
+VALUES (:fixture_context_id, :fixture_user_id, :fixture_task_id, 'Pergunta de teste', 'Resposta de teste', 'replied')
+RETURNING id AS fixture_parent_block_id \gset
+
+INSERT INTO sofia."textBlocks" ("contextId", "ownerId", "taskId", "parentBlockId", "operatorContent", "assistantContent", "responseStatus")
+VALUES (:fixture_context_id, :fixture_user_id, :fixture_task_id, :fixture_parent_block_id, 'Segunda pergunta', 'Segunda resposta', 'replied');
+
+DO $$
+BEGIN
+  BEGIN
+    DELETE FROM sofia."textBlocks" WHERE id = :fixture_parent_block_id;
+    RAISE EXCEPTION 'Parent text block deletion unexpectedly succeeded';
+  EXCEPTION
+    WHEN foreign_key_violation THEN
+      NULL;
+  END;
+END $$;
