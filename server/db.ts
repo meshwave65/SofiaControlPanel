@@ -1139,6 +1139,24 @@ export async function getOrCreateTextContextForOwner(data: {
   });
 }
 
+export async function getTextBlocksForOwner(ownerId: number, taskId: number | null, limit = 200) {
+  const database = await getDb();
+  if (!database) return [];
+  const taskFilter = taskId === null
+    ? isNull(textContexts.taskId)
+    : eq(textContexts.taskId, taskId);
+  const [context] = await database.select().from(textContexts)
+    .where(and(
+      eq(textContexts.ownerId, ownerId),
+      eq(textContexts.status, "active"),
+      taskFilter,
+    ))
+    .orderBy(desc(textContexts.updatedAt), desc(textContexts.id))
+    .limit(1);
+  if (!context) return [];
+  return getTextBlocksByContext(context.id, ownerId, limit);
+}
+
 export async function getLatestTextBlock(contextId: number, ownerId: number) {
   const database = await getDb();
   if (!database) return null;
