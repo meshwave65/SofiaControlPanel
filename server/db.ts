@@ -1205,7 +1205,7 @@ export async function completeTextBlock(data: {
   id: number;
   ownerId: number;
   assistantContent: string;
-  responseStatus: "replied" | "failed";
+  responseStatus: "replied" | "pending" | "failed";
   sourceModel?: string | null;
   sourceAgentId?: number | null;
 }) {
