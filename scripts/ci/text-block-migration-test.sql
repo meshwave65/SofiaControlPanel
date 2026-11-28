@@ -30,4 +30,4 @@ BEGIN
     WHEN foreign_key_violation THEN
       NULL;
   END;
-END $;
+END $block$;
