@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feat/sofia-cognitive-control-plane
+      - implementation/audit-001-and-text-block-foundation
   pull_request:
     branches:
       - main
