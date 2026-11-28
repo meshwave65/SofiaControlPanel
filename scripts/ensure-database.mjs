@@ -84,6 +84,14 @@ try {
     sql.unsafe(messageContextMigration),
   );
 
+  const textBlocksMigration = await readFile(
+    new URL("../drizzle/0017_text_blocks.sql", import.meta.url),
+    "utf8",
+  );
+  await runStep("Create conversational text contexts and blocks", () =>
+    sql.unsafe(textBlocksMigration),
+  );
+
   console.log("[Database] Execution columns verified successfully");
   console.log("[Database] Automatic task dispatch trigger verified successfully");
 } catch (error) {
