@@ -1707,6 +1707,20 @@ export const appRouter = router({
       ctx.user.role === "admin" ? db.getAllGeneralMessages(500) : db.getMessagesByOwner(ctx.user.id, null, 200)
     ),
 
+    getTextBlocksGeneral: protectedProcedure.query(async ({ ctx }) =>
+      db.getTextBlocksForOwner(ctx.user.id, null, 200)
+    ),
+
+    getTextBlocksByTask: protectedProcedure
+      .input(z.object({ taskId: z.number().int().positive() }))
+      .query(async ({ input, ctx }) => {
+        const task = await db.getTaskById(input.taskId);
+        if (!task || (task.createdBy !== ctx.user.id && ctx.user.role !== "admin")) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Missão não encontrada ou sem permissão de acesso." });
+        }
+        return db.getTextBlocksForOwner(ctx.user.id, input.taskId, 200);
+      }),
+
     createGeneral: protectedProcedure
       .input(z.object({
         parentMessageId: z.number().int().positive().optional(),
@@ -1730,6 +1744,24 @@ export const appRouter = router({
         }
 
         const content = normalizeOperatorMessage(input.content);
+        const textContext = await db.getOrCreateTextContextForOwner({
+          ownerId: ctx.user.id,
+          taskId: null,
+          contextType: "conversation",
+        });
+        const previousTextBlock = await db.getLatestTextBlock(textContext.id, ctx.user.id);
+        const textBlock = await db.createTextBlock({
+          contextId: textContext.id,
+          ownerId: ctx.user.id,
+          taskId: null,
+          parentBlockId: previousTextBlock?.id ?? null,
+          operatorContent: content,
+          sourceMetadata: {
+            legacyTypeId: input.typeId,
+            legacyParentMessageId: input.parentMessageId ?? null,
+            capture: "message_manager_dual_write",
+          },
+        });
         const message = await db.createMessage({
           taskId: null,
           senderId: ctx.user.id,
@@ -1840,7 +1872,14 @@ export const appRouter = router({
           isAssistant: true,
         });
 
-        return { message, reply, responseStatus, createdMission };
+        await db.completeTextBlock({
+          id: textBlock.id,
+          ownerId: ctx.user.id,
+          assistantContent,
+          responseStatus,
+        });
+
+        return { message, reply, textBlock, responseStatus, createdMission };
       }),
 
     create: protectedProcedure
@@ -1875,6 +1914,24 @@ export const appRouter = router({
         }
 
         const content = normalizeOperatorMessage(input.content);
+        const textContext = await db.getOrCreateTextContextForOwner({
+          ownerId: ctx.user.id,
+          taskId: input.taskId,
+          contextType: "mission",
+        });
+        const previousTextBlock = await db.getLatestTextBlock(textContext.id, ctx.user.id);
+        const textBlock = await db.createTextBlock({
+          contextId: textContext.id,
+          ownerId: ctx.user.id,
+          taskId: input.taskId,
+          parentBlockId: previousTextBlock?.id ?? null,
+          operatorContent: content,
+          sourceMetadata: {
+            legacyTypeId: input.typeId,
+            legacyParentMessageId: input.parentMessageId ?? null,
+            capture: "message_manager_dual_write",
+          },
+        });
         const operatorMessage = await db.createMessage({
           taskId: input.taskId,
           senderId: ctx.user.id,
@@ -2107,7 +2164,14 @@ export const appRouter = router({
           isAssistant: true,
         });
 
-        return { message: operatorMessage, reply: assistantMessage, responseStatus };
+        await db.completeTextBlock({
+          id: textBlock.id,
+          ownerId: ctx.user.id,
+          assistantContent,
+          responseStatus,
+        });
+
+        return { message: operatorMessage, reply: assistantMessage, textBlock, responseStatus };
       }),
 
     getByTask: protectedProcedure

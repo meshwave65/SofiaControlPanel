@@ -24,6 +24,11 @@ const dbMock = vi.hoisted(() => ({
   getOrCreateActivityEventType: vi.fn(),
   createActivityLog: vi.fn(),
   updateTaskGitHubSync: vi.fn(),
+  getOrCreateTextContextForOwner: vi.fn(),
+  getLatestTextBlock: vi.fn(),
+  createTextBlock: vi.fn(),
+  completeTextBlock: vi.fn(),
+  getTextBlocksForOwner: vi.fn(),
 }));
 const invokeLLMMock = vi.hoisted(() => vi.fn());
 const sendManusMessageAndWaitMock = vi.hoisted(() => vi.fn());
@@ -50,6 +55,11 @@ const context = {
 describe("messages.create — persistência e resposta Sofia", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    dbMock.getOrCreateTextContextForOwner.mockResolvedValue({ id: 501, ownerId: 152, taskId: null, status: "active" });
+    dbMock.getLatestTextBlock.mockResolvedValue(null);
+    dbMock.createTextBlock.mockResolvedValue({ id: 900, contextId: 501, ownerId: 152, parentBlockId: null });
+    dbMock.completeTextBlock.mockResolvedValue({ id: 900, responseStatus: "replied" });
+    dbMock.getTextBlocksForOwner.mockResolvedValue([]);
     dbMock.hasExecutionReadyMissionDocuments.mockResolvedValue(true);
     dbMock.getMissionRootTaskId.mockResolvedValue(19);
     dbMock.getTasksByParentId.mockResolvedValue([]);
