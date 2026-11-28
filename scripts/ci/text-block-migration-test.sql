@@ -20,11 +20,11 @@ INSERT INTO text_block_fixture_ids (parent_id) VALUES (:fixture_parent_block_id)
 
 DO $
 DECLARE
-  parent_id integer;
+  v_parent_id integer;
 BEGIN
-  SELECT parent_id INTO parent_id FROM text_block_fixture_ids;
+  SELECT f.parent_id INTO v_parent_id FROM pg_temp.text_block_fixture_ids f;
   BEGIN
-    DELETE FROM sofia."textBlocks" WHERE id = parent_id;
+    DELETE FROM sofia."textBlocks" WHERE id = v_parent_id;
     RAISE EXCEPTION 'Parent text block deletion unexpectedly succeeded';
   EXCEPTION
     WHEN foreign_key_violation THEN
