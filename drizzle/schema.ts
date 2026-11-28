@@ -212,6 +212,88 @@ export type Message = typeof messages.$inferSelect;
 export type InsertMessage = typeof messages.$inferInsert;
 
 // ============================================
+// CONVERSATIONAL TEXT BLOCKS
+// ============================================
+
+export const textContexts = sofia.table(
+  "textContexts",
+  {
+    id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
+    ownerId: integer("ownerId").notNull(),
+    taskId: integer("taskId"),
+    title: varchar("title", { length: 255 }),
+    contextType: varchar("contextType", { length: 32 }).default("conversation").notNull(),
+    status: varchar("status", { length: 24 }).default("active").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+  },
+  (table) => ({
+    ownerIdIdx: index("textContexts_ownerId_idx").on(table.ownerId),
+    taskIdIdx: index("textContexts_taskId_idx").on(table.taskId),
+    ownerIdFk: foreignKey({
+      columns: [table.ownerId],
+      foreignColumns: [users.id],
+    }).onDelete("restrict"),
+    taskIdFk: foreignKey({
+      columns: [table.taskId],
+      foreignColumns: [tasks.id],
+    }).onDelete("set null"),
+  })
+);
+
+export type TextContext = typeof textContexts.$inferSelect;
+export type InsertTextContext = typeof textContexts.$inferInsert;
+
+export const textBlocks = sofia.table(
+  "textBlocks",
+  {
+    id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
+    contextId: integer("contextId").notNull(),
+    ownerId: integer("ownerId").notNull(),
+    taskId: integer("taskId"),
+    parentBlockId: integer("parentBlockId"),
+    operatorContent: text("operatorContent").notNull(),
+    assistantContent: text("assistantContent"),
+    responseStatus: varchar("responseStatus", { length: 24 }).default("pending").notNull(),
+    sourceModel: varchar("sourceModel", { length: 128 }),
+    sourceAgentId: integer("sourceAgentId"),
+    sourceMetadata: jsonb("sourceMetadata"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    completedAt: timestamp("completedAt"),
+  },
+  (table) => ({
+    contextIdIdx: index("textBlocks_contextId_idx").on(table.contextId),
+    ownerIdIdx: index("textBlocks_ownerId_idx").on(table.ownerId),
+    taskIdIdx: index("textBlocks_taskId_idx").on(table.taskId),
+    parentBlockIdIdx: index("textBlocks_parentBlockId_idx").on(table.parentBlockId),
+    createdAtIdx: index("textBlocks_createdAt_idx").on(table.createdAt),
+    contextIdFk: foreignKey({
+      columns: [table.contextId],
+      foreignColumns: [textContexts.id],
+    }).onDelete("restrict"),
+    ownerIdFk: foreignKey({
+      columns: [table.ownerId],
+      foreignColumns: [users.id],
+    }).onDelete("restrict"),
+    taskIdFk: foreignKey({
+      columns: [table.taskId],
+      foreignColumns: [tasks.id],
+    }).onDelete("set null"),
+    parentBlockIdFk: foreignKey({
+      columns: [table.parentBlockId],
+      foreignColumns: [table.id],
+    }).onDelete("restrict"),
+    sourceAgentIdFk: foreignKey({
+      columns: [table.sourceAgentId],
+      foreignColumns: [agents.id],
+    }).onDelete("set null"),
+  })
+);
+
+export type TextBlock = typeof textBlocks.$inferSelect;
+export type InsertTextBlock = typeof textBlocks.$inferInsert;
+
+// ============================================
 // ACTIVITY LOGGING TABLES
 // ============================================
 
