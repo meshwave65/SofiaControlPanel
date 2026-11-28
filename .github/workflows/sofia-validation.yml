@@ -86,6 +86,18 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: psql -h localhost -U postgres -d sofia_migration_test -v ON_ERROR_STOP=1 -f scripts/ci/message-general-context-test.sql
+      - name: Apply migration 0017 for conversational text blocks
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d sofia_migration_test -v ON_ERROR_STOP=1 -f drizzle/0017_text_blocks.sql
+      - name: Verify migration 0017 is idempotent
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d sofia_migration_test -v ON_ERROR_STOP=1 -f drizzle/0017_text_blocks.sql
+      - name: Verify text block interaction and parent retention
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d sofia_migration_test -v ON_ERROR_STOP=1 -f scripts/ci/text-block-migration-test.sql
       - name: Install automatic dispatch trigger in disposable PostgreSQL
         env:
           PGPASSWORD: postgres
